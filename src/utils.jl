@@ -16,10 +16,13 @@ hil(x, k, n) = hil(x^n, k^n)
 Relative exponential function.
 Returns one when x is close to zero
 """
-exprel(x) = ifelse(isapprox(x, 0), one(x / expm1(x)), x / expm1(x))
+function exprel(x)
+    res = x / expm1(x)
+    return ifelse(isapprox(x, zero(x)), one(res), res)
+end
 
 """Logistic function"""
-expit(x) = 1 / (1 + exp(-x))
+expit(x) = inv(one(x) + exp(-x))
 
 """Nernst potential"""
 nernst(xo, xi) = VT * log(xo / xi)
