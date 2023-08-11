@@ -17,7 +17,7 @@ _aj(x) = ifelse(x >= -40, _ajhi(x), _ajlo(x))
 _bj(x) = ifelse(x >= -40, _bjhi(x), _bjlo(x))
 _hlss(x) = expit(-(x + 91) / 6.1)
 
-function make_ina_hh_eqs(inashift = 0)
+function ina_hh_eqs(inashift = 0)
     @parameters tauhl = 600 #ms
     @variables t vm(t) na_m(t) na_h(t) na_j(t) nal_h(t)
     D = Differential(t)
@@ -28,6 +28,7 @@ function make_ina_hh_eqs(inashift = 0)
         D(na_j) ~ _aj(v) * (1 - na_j) + _bj(v)
         D(nal_h) ~ (_hlss(vm) - nal_h) / tauhl
     ]
+    return eqs
 end
 
 _i_na(gna, m, h, j, vm, ena) = gna * m^3 * h * j * (vm - ena)
