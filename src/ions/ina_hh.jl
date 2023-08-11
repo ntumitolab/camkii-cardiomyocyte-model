@@ -17,7 +17,7 @@ _aj(x) = ifelse(x >= -40, _ajhi(x), _ajlo(x))
 _bj(x) = ifelse(x >= -40, _bjhi(x), _bjlo(x))
 _hlss(x) = expit(-(x + 91) / 6.1)
 
-function ina_hh_eqs(inashift = 0)
+function ina_hh_eqs(inashift=0)
     @parameters tauhl = 600 #ms
     @variables t vm(t) na_m(t) na_h(t) na_j(t) nal_h(t)
     D = Differential(t)
