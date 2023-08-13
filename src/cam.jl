@@ -9,42 +9,6 @@ function make_cam_rn(;
     CaMKII=120.0, # Dyad: 120; SL:120*8.293e-4; Cyt:120*8.293e-4
     PP1tot=96.5 # Dyad: 96.5; SL:0.57; Cyt:0.57
 )
-    function kbt(Pb, Pt, Pt2, Pa)
-        T = Pb + Pt + Pt2 + Pa
-        return 0.055 * T + 0.0074 * T^2 + 0.015 * T^3
-    end
-
-    rn = @reaction_network begin
-        @variables Ca(t)
-
-        # CaM: Calmodulin
-        # CaN: Calcineurin
-        # B: buffer
-        (k02 * Ca^2, k20), CaM <--> Ca2CaM
-        (k24 * Ca^2, k42), Ca2CaM <--> Ca4CaM
-        (k02B * Ca^2, k20B), CaMB <--> Ca2CaMB
-        (k24B * Ca^2, k42B), Ca2CaMB <--> Ca4CaMB
-        (k0Bon, k0Boff), CaM + B <--> CaMB
-        (k2Bon, k2Boff), Ca2CaM + B <--> Ca2CaMB
-        (k4Bon, k4Boff), Ca4CaM + B <--> Ca4CaMB
-        (kcanCaon * Ca^2, kcanCaoff), Ca2CaN <--> Ca4CaN
-        (k02can * Ca^2, k20can), CaMCa4CaN <--> Ca2CaMCa4CaN
-        (k24can * Ca^2, k42can), Ca2CaMCa4CaN <--> Ca4CaMCa4CaN
-        (kcanCaM0on, kcanCaM0off), CaM + Ca4CaN <--> CaMCa4CaN
-        (kcanCaM2on, kcanCaM2off), Ca2CaM + Ca4CaN <--> Ca2CaMCa4CaN
-        (kcanCaM4on, kcanCaM4off), Ca4CaM + Ca4CaN <--> Ca4CaMCa4CaN
-        # CaMKII
-        (kib2, kb2i), Ca2CaM + Pi <--> Pb2
-        (kb24 * Ca^2, kb42), Pb2 <--> Pb
-        (kib, kbi), Ca4CaM + Pi <--> Pb
-        kbt(Pb, Pt, Pt2, Pa), Pb --> Pt
-        kpp1 * PP1tot * Pt / (Kmpp1 + CaMKIItot * Pt), Pt => Pb
-        (kt42 * Ca^2, kt24), Pt <--> Pt2
-        (kta, kat), Pt <--> Ca4CaM + Pa
-        (kt2a, kat2), Pt2 <--> Ca2CaM + Pa
-        kpp1 * PP1tot * Pt2 / (Kmpp1 + CaMKIItot * Pt2), Pt2 => Pb2
-        kpp1 * PP1tot * Pa / (Kmpp1 + CaMKIItot * Pa), Pa => Pi
-    end
 
     # Calculate Ca/CaM parameters
     if Mg <= 1
@@ -104,6 +68,43 @@ function make_cam_rn(;
     k20can = k20 / 165
     k24can = k24
     k42can = k20 / 2508
+
+    function kbt(Pb, Pt, Pt2, Pa)
+        T = Pb + Pt + Pt2 + Pa
+        return 0.055 * T + 0.0074 * T^2 + 0.015 * T^3
+    end
+
+    rn = @reaction_network begin
+        @variables Ca(t)
+
+        # CaM: Calmodulin
+        # CaN: Calcineurin
+        # B: buffer
+        (k02 * Ca^2, k20), CaM <--> Ca2CaM
+        (k24 * Ca^2, k42), Ca2CaM <--> Ca4CaM
+        (k02B * Ca^2, k20B), CaMB <--> Ca2CaMB
+        (k24B * Ca^2, k42B), Ca2CaMB <--> Ca4CaMB
+        (k0Bon, k0Boff), CaM + B <--> CaMB
+        (k2Bon, k2Boff), Ca2CaM + B <--> Ca2CaMB
+        (k4Bon, k4Boff), Ca4CaM + B <--> Ca4CaMB
+        (kcanCaon * Ca^2, kcanCaoff), Ca2CaN <--> Ca4CaN
+        (k02can * Ca^2, k20can), CaMCa4CaN <--> Ca2CaMCa4CaN
+        (k24can * Ca^2, k42can), Ca2CaMCa4CaN <--> Ca4CaMCa4CaN
+        (kcanCaM0on, kcanCaM0off), CaM + Ca4CaN <--> CaMCa4CaN
+        (kcanCaM2on, kcanCaM2off), Ca2CaM + Ca4CaN <--> Ca2CaMCa4CaN
+        (kcanCaM4on, kcanCaM4off), Ca4CaM + Ca4CaN <--> Ca4CaMCa4CaN
+        # CaMKII
+        (kib2, kb2i), Ca2CaM + Pi <--> Pb2
+        (kb24 * Ca^2, kb42), Pb2 <--> Pb
+        (kib, kbi), Ca4CaM + Pi <--> Pb
+        kbt(Pb, Pt, Pt2, Pa), Pb --> Pt
+        kpp1 * PP1tot * Pt / (Kmpp1 + CaMKIItot * Pt), Pt => Pb
+        (kt42 * Ca^2, kt24), Pt <--> Pt2
+        (kta, kat), Pt <--> Ca4CaM + Pa
+        (kt2a, kat2), Pt2 <--> Ca2CaM + Pa
+        kpp1 * PP1tot * Pt2 / (Kmpp1 + CaMKIItot * Pt2), Pt2 => Pb2
+        kpp1 * PP1tot * Pa / (Kmpp1 + CaMKIItot * Pa), Pa => Pi
+    end
 
     setdefaults!(rn, [
         :k20 => k20,
@@ -178,8 +179,3 @@ function ca_buf_cam_eq(sys)
 
     return -2 * (CaMKIItot * (-rcnCKtt2 + rcnCKb2b) - (rcn02 + rcn24 + rcn02B + rcn24B + rcnCa4CaN + rcn02CaN + rcn24CaN))
 end
-
-
-cam_rn = make_cam_rn()
-
-ca_buf_cam_eq(cam_rn)
