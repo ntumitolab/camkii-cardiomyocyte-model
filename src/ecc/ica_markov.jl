@@ -72,6 +72,6 @@ function lcc_markov_sys(mode=1)
     end
 
     osys = convert(ODESystem, rn, remove_conserved=true)
-    extsys = extend(osys, ODESystem(rateEqs, name=:rates))
-    return extsys
+    lccsys = extend(osys, ODESystem(rateEqs, name=:rates))
+    return lccsys
 end

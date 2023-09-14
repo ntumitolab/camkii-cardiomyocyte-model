@@ -1,8 +1,7 @@
 using ModelingToolkit
 
-include("ions/ina_hh.jl")
-include("ions/ina_markov.jl")
-include("ions/ica_markov.jl")
+include("ecc/ina_hh.jl")
+include("ecc/ica_markov.jl")
 
 
 function make_ecc_sys(;
