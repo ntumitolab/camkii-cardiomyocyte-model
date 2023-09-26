@@ -2,7 +2,9 @@ using Catalyst
 using DifferentialEquations
 using Plots
 using ModelingToolkit
+using Sundials
 
+Plots.pyplot()
 
 function get_Morotti_equations()
     @variables t
@@ -1593,7 +1595,6 @@ function get_Morotti_equations()
 end
 
 
-
 eq_morotti = get_Morotti_equations()
 
 @named osys = ODESystem(eq_morotti)
@@ -1651,6 +1652,7 @@ phosphatase = 1
 rn_osys = convert(ODESystem, ca_model)
 @named sys = extend(osys, rn_osys)
 
+sys = structural_simplify(sys)
 
 @unpack Na_m, Na_h, Na_j, ICa_HH4, ICa_HH5, ICa_HH6, ICa_HH7, Itos_x, Itos_y, Itof_x, Itof_y, Ikr, IKs, RyR_R, RyR_O, RyR_I, NaBj, NaBsl,
         TnCL, TnCHc, TnCHm, CaM, Myosin_ca, Myosin_mg, SRB, SLLj, SLLsl, SLHj, SLHsl, Csqn, Ca_sr, Naj, Nasl, Nai, Ki, Ca_j, Ca_sl, Cai, Vm,
@@ -1674,6 +1676,8 @@ rn_osys = convert(ODESystem, ca_model)
         k_K2N_on, k_K2N_off, kCaM0_on, kCaM2C_on, kCaM2N_on, kCaM4_on, kCaM0_off, kCaM2C_off, kCaM2N_off, kCaM4_off,
         kCaM0P_on, kCaM2CP_on, kCaM2NP_on, kCaM4P_on, kCaM0P_off, kCaM2CP_off, kCaM2NP_off, kCaM4P_off, k_phosCaM,
         k_dephospho, k_P1_P2, k_P2_P1, CaMKII_T = sys
+
+tspan = (0.0, 10*1e4)
 
 oprob = ODEProblem(sys, [
         Na_m => 1.94e-3, Na_h => 0.981, Na_j => 0.987, ICa_HH4 => 7.02e-6, ICa_HH5 => 1.00068, ICa_HH6 => 2.7e-2,
@@ -1710,7 +1714,7 @@ oprob = ODEProblem(sys, [
         CaM0_CaMK => 1.29e-6, Ca2CaM_C_CaMK => 9.13e-8, Ca2CaM_N_CaMK => 3.74e-9, Ca4CaM_CaMK => 5.92e-10,
         CaM0_CaMKP => 2.36e-7, Ca2CaM_C_CaMKP => 1.13e-7, Ca2CaM_N_CaMKP => 1.54e-9, Ca4CaM_CaMKP => 7.82e-10,
         CaMK => 6.73e-5, CaMKP => 6.57e-7, CaMKP2 => 2.66e-7],
-        (0.0, 10000.0),
+        tspan,
         [k_1C_on => 5e3, k_1C_off => 50e-3, k_2C_on => 10e3, k_2C_off => 10e-3,
         k_1N_on => 100e3, k_1N_off => 2000e-3, k_2N_on => 200e3, k_2N_off => 500e-3,
         k_K1C_on => 44e3, k_K1C_off => 33e-3, k_K2C_on => 44e3, k_K2C_off => 0.8e-3,
@@ -1722,10 +1726,15 @@ oprob = ODEProblem(sys, [
         kCaM0P_off => 1e-3/decay_CaM, kCaM2CP_off => 1e-3/decay_CaM, kCaM2NP_off => 1e-3/decay_CaM, kCaM4P_off => 1e-3/decay_CaM,
         k_phosCaM => 30e-3 * phospho_rate, k_dephospho => 1e-3/6 * phosphatase, k_P1_P2 => 1e-3/60, k_P2_P1 => 1e-3/6*0.25, CaMKII_T => 70e-6])
 
-sol = solve(oprob, CVODE_BDF(), abstol = 1e-10, reltol = 1e-10, tstops = 0:1000:10000)
+using BenchmarkTools
 
-plot(sol, idxs=Cai, linewidth=1.5, title="Calcium Transient", xlabel="Time(s)", ylabel="[Ca2+](M)", label="ISO=0.1", xlim=(0,1050))
+@btime sol = solve(oprob, FBDF(), abstol = 1e-8, reltol = 1e-8, tstops = 0:1000:tspan[end], maxiters=Int(1e8))
+@btime sol = solve(oprob, QNDF(), abstol = 1e-8, reltol = 1e-8, tstops = 0:1000:tspan[end], maxiters=Int(1e8))
 
-plot(sol, idxs=Cai, linewidth=1.5, title="Calcium Transient (Control)", xlabel="Time(s)", ylabel="[Ca2+](M)", label="Rodas5, tol=1e-12", xlim=(0,10.15e3))
+plot(sol, idxs=Cai, title="Calcium Transient", xlabel="Time(s)", ylabel="[Ca2+](M)", label="ISO=0.1", xlim=(0,1050))
 
-plot(sol, idxs=Vm, linewidth=1.5, title="Action Potential (Control)", xlabel="Time(ms)", ylabel="Voltage (mV)",ylim=(-90,60),xlim=(0,10.15e3),label="Rodas5, tol=1e-12")
+plot(sol, idxs=Cai, title="Calcium Transient (Control)", xlabel="Time(s)", ylabel="[Ca2+](M)", label="CVODE, tol=1e-10", xlim=tspan)
+
+plot(sol, idxs=Vm, linewidth=1.5, title="Action Potential (Control)", xlabel="Time(ms)", ylabel="Voltage (mV)",ylim=(-90,60),xlim=tspan,label="CVODE, tol=1e-8", denseplot = false)
+
+png("ap.png")
