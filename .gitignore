@@ -24,7 +24,7 @@ docs/site/
 # Manifest.toml
 
 # VSCode config
-.vscode/
+# .vscode/
 
 # Temporary file
 tmp.jl
