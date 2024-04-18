@@ -4,4 +4,4 @@
 format: jb-book
 root: index
 chapters:
-  - file: plots
+  - file: camkii_catalyst
