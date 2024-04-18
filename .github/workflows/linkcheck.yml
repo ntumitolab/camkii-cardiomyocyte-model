@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 1 * *' # Every month
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - '.github/workflows/linkcheck.yml'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'docs/**'
+  #     - '.github/workflows/linkcheck.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
