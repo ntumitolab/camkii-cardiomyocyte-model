@@ -5,3 +5,4 @@ format: jb-book
 root: index
 chapters:
   - file: camkii_catalyst
+  - file: camkii_calwave
