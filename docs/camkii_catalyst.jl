@@ -141,7 +141,7 @@ function make_camodel(;
     return rn
 end
 
-# ## First sumulation
+# ## First simulation
 rn = make_camodel()
 @unpack Ca = rn
 
