@@ -233,7 +233,7 @@ function make_ca_waves(rn;
     period=1/3,
     endtime=250,
     peakCa = 4e-6,
-    strength = 2,
+    strength = 5,
     )
 
     @unpack Ca, dCaRev = rn
