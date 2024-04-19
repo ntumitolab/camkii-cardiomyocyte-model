@@ -1,3 +1,4 @@
+# # Isolated CaMKII response
 using Catalyst
 using OrdinaryDiffEq
 using ModelingToolkit
