@@ -227,7 +227,6 @@ plot!(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0
 # ## More realistic calcium pulses
 # Exponential growth at the rising phase
 # and exponential decay at the falling phase
-
 function make_ca_waves(rn;
     starttime=100,
     period=1/3,
