@@ -1,3 +1,7 @@
+#===
+# Smooth calcium wave
+===#
+
 using Catalyst
 using DifferentialEquations
 using ModelingToolkit
@@ -16,47 +20,48 @@ function make_camodel(;
     decay_CaM=3,
     phospho_rate=1,
     phosphatase=1,
-    period=1/3,
-    tstart=200.0,
-    tend=300.0
+    period=1 / 3,
+    kwargs...
 )
+
+    @variables t Ca(t)
+    @named osys = ODESystem([Ca ~ ca_wave(t; period, kwargs...)], t)
 
     ##  Two Ca2+ ions bind to C or N-lobe.
     caMon(Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off) = Ca^2 * k_1C_on * k_2C_on / (k_1C_off + k_2C_on * Ca)
     caMoff(Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off) = k_1C_off * k_2C_off / (k_1C_off + k_2C_on * Ca)
-    ca(t) = ca_wave(t; period, tstart, tend)
 
     rn = @reaction_network begin
 
         ##  Two Ca2+ ions bind to C or N-lobe of CaM
-        caMon(ca(t), k_1C_on, k_2C_on, k_1C_off, k_2C_off), CaM0 --> Ca2CaM_C
-        caMoff(ca(t), k_1C_on, k_2C_on, k_1C_off, k_2C_off), CaM0 <-- Ca2CaM_C
-        caMon(ca(t), k_1N_on, k_2N_on, k_1N_off, k_2N_off), CaM0 --> Ca2CaM_N
-        caMoff(ca(t), k_1N_on, k_2N_on, k_1N_off, k_2N_off), CaM0 <-- Ca2CaM_N
-        caMon(ca(t), k_1C_on, k_2C_on, k_1C_off, k_2C_off), Ca2CaM_C --> Ca4CaM
-        caMoff(ca(t), k_1C_on, k_2C_on, k_1C_off, k_2C_off), Ca2CaM_C <-- Ca4CaM
-        caMon(ca(t), k_1N_on, k_2N_on, k_1N_off, k_2N_off), Ca2CaM_N --> Ca4CaM
-        caMoff(ca(t), k_1N_on, k_2N_on, k_1N_off, k_2N_off), Ca2CaM_N <-- Ca4CaM
+        caMon($Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off), CaM0 --> Ca2CaM_C
+        caMoff($Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off), CaM0 <-- Ca2CaM_C
+        caMon($Ca, k_1N_on, k_2N_on, k_1N_off, k_2N_off), CaM0 --> Ca2CaM_N
+        caMoff($Ca, k_1N_on, k_2N_on, k_1N_off, k_2N_off), CaM0 <-- Ca2CaM_N
+        caMon($Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off), Ca2CaM_C --> Ca4CaM
+        caMoff($Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off), Ca2CaM_C <-- Ca4CaM
+        caMon($Ca, k_1N_on, k_2N_on, k_1N_off, k_2N_off), Ca2CaM_N --> Ca4CaM
+        caMoff($Ca, k_1N_on, k_2N_on, k_1N_off, k_2N_off), Ca2CaM_N <-- Ca4CaM
 
         ##  Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII complex
-        caMon(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMK --> Ca2CaM_C_CaMK
-        caMoff(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMK <-- Ca2CaM_C_CaMK
-        caMon(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMK --> Ca2CaM_N_CaMK
-        caMoff(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMK <-- Ca2CaM_N_CaMK
-        caMon(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMK --> Ca4CaM_CaMK
-        caMoff(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMK <-- Ca4CaM_CaMK
-        caMon(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMK --> Ca4CaM_CaMK
-        caMoff(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMK <-- Ca4CaM_CaMK
+        caMon($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMK --> Ca2CaM_C_CaMK
+        caMoff($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMK <-- Ca2CaM_C_CaMK
+        caMon($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMK --> Ca2CaM_N_CaMK
+        caMoff($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMK <-- Ca2CaM_N_CaMK
+        caMon($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMK --> Ca4CaM_CaMK
+        caMoff($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMK <-- Ca4CaM_CaMK
+        caMon($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMK --> Ca4CaM_CaMK
+        caMoff($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMK <-- Ca4CaM_CaMK
 
         ##  Binding of Ca to CaM-CaMKIIP.
-        caMon(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMKP --> Ca2CaM_C_CaMKP
-        caMoff(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMKP <-- Ca2CaM_C_CaMKP
-        caMon(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMKP --> Ca2CaM_N_CaMKP
-        caMoff(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMKP <-- Ca2CaM_N_CaMKP
-        caMon(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMKP --> Ca4CaM_CaMKP
-        caMoff(ca(t), k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMKP <-- Ca4CaM_CaMKP
-        caMon(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMKP --> Ca4CaM_CaMKP
-        caMoff(ca(t), k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMKP <-- Ca4CaM_CaMKP
+        caMon($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMKP --> Ca2CaM_C_CaMKP
+        caMoff($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), CaM0_CaMKP <-- Ca2CaM_C_CaMKP
+        caMon($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMKP --> Ca2CaM_N_CaMKP
+        caMoff($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), CaM0_CaMKP <-- Ca2CaM_N_CaMKP
+        caMon($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMKP --> Ca4CaM_CaMKP
+        caMoff($Ca, k_K1C_on, k_K2C_on, k_K1C_off, k_K2C_off), Ca2CaM_C_CaMKP <-- Ca4CaM_CaMKP
+        caMon($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMKP --> Ca4CaM_CaMKP
+        caMoff($Ca, k_K1N_on, k_K2N_on, k_K1N_off, k_K2N_off), Ca2CaM_N_CaMKP <-- Ca4CaM_CaMKP
 
         ##  Binding of CaM to CaMKII or CaMII-P
         (kCaM0_on, kCaM0_off), CaM0 + CaMK <--> CaM0_CaMK
@@ -138,39 +143,42 @@ function make_camodel(;
         :k_P2_P1 => (1 / 6) * 0.25,
         :CaMKII_T => camkii_total,
     ])
-    return rn
+
+    rn_osys = convert(ODESystem, rn, remove_conserved=true)
+    @named sys = extend(osys, rn_osys)
+    return structural_simplify(sys)
 end
 
 # ## First sumulation
-rn = make_camodel()
+sys = make_camodel()
 
 # Solve the problem
 tspan = (0.0, 400.0)
-oprob = ODEProblem(rn, [], tspan)
-alg = TRBDF2()
-sol = solve(oprob, alg, tstops=200:1/3:300)
+oprob = ODEProblem(sys, [], tspan)
 
-# Calcium
-plot(t-> ca_wave(t), 200, 201, label="Calcium")
+alg = TRBDF2()  ## Rodas5 yields unstable results, so TRBDF2 is used
+sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-9, reltol=1e-9)  ## Lowered tolerance to make the reaction network respond to calcium changes
 
-# Components
-@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2 = rn
+# Calcium waveform
+@unpack Ca = sys
+plot(sol, idxs=Ca, tspan=(200, 205), label="Calcium")
+
+# CaMKII-Cam system
+@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2 = sys
 plot(
     sol,
     idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
     size=(800, 600),
-    tspan=(200, 250)
 )
 
 # Active CaMKII
 plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="3Hz")
-plot!(sol, idxs=Ca * 10, plotdensity=100_000, label="Ca * 10")
+plot!(sol, idxs=Ca * 10, plotdensity=10_000, label="Ca * 10")
 
 # Change frequency to 2Hz
-sol2 = solve(oprob, alg, callback=make_ca_events(step=1 / 2), progress=true)
-
-# Calcium
-plot(t-> ca_wave(t), )
+sys2 = make_camodel(period=1 / 2)
+oprob2 = ODEProblem(sys, [], tspan)
+sol2 = solve(oprob2, alg, tstops=200:1/2:300, abstol=1e-9, reltol=1e-9)
 
 # Components
 plot(
@@ -184,10 +192,12 @@ plot(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_
 plot!(sol2, idxs=Ca * 10, plotdensity=100_000, label="Ca * 10")
 
 # Change frequency to 1Hz
-sol3 = solve(oprob, alg, callback=make_ca_events(step=1), progress=true)
+sys3 = make_camodel(period=1)
+oprob3 = ODEProblem(sys3, [], tspan)
+sol3 = solve(oprob3, alg, tstops=200:1:300, abstol=1e-9, reltol=1e-9)
 
 # Calcium
-plot(sol3, idxs=Ca, tspan=(100, 150))
+plot(sol3, idxs=Ca, tspan=(200, 205))
 
 # Components
 plot(
