@@ -1,12 +1,7 @@
 module CaMKIIModel
-
-export make_b1ar_rn
+using ModelingToolkit
+using ModelingToolkit: t_nounits as t, D_nounits as D
+using NaNMath
 
 include("utils.jl")
-include("bar.jl")
-include("cam.jl")
-include("ecc/ica_markov.jl")
-include("ecc/ina_hh.jl")
-include("ecc/ina_markov.jl")
-
-end # module CaMKIIModel
+end

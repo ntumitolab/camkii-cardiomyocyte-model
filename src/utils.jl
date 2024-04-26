@@ -1,29 +1,71 @@
-# Constants
-const R = 8314      # [J/kmol*K]
-const Frdy = 96485  # [C/mol]
-const Temp = 310    # [K] 310 K (37 C) for BT / 295 K (22 C) for RT
-const FoRT = Frdy / R / Temp
-const VT = inv(FoRT) # Thermal temparature (mV)
-const Qpow = (Temp - 310) / 10 # Temp factor
+#===
+Constants
+===#
 
+# Units
+const second = 1           # second
+const minute = 60second    # minute
+const ms = 1e-3second      # millisecond
+const Hz = inv(second)     # Herz
+const kHz = 1e3Hz          # kilohertz
+const metre = 1            # meter
+const cm = 0.01metre       # centimeter
+const cm² = cm^2           # square centimeter
+const μm = 1E-6metre       # Micrometer
+const mL = cm^3            # milliliter = cubic centimeter
+const Liter = 1e3mL        # liter
+const μL = 1E-6Liter
+const pL = 1E-12Liter
+const mM = 1
+const Molar = 1000mM       # molar (1000 since the SI units is mM)
+const μM = 1E-3mM          # micromolar
+const nM = 1E-6mM          # nanomolar
+const Amp = 1              # ampere
+const mA = 1E-3Amp         # milliampere
+const μA = 1E-6Amp         # micrpampere
+const Volt = 1             # volt
+const mV = 1E-3Volt        # millivolt
+const mS = mA / Volt       # milliseimens
+const T₀ = 310.0           # Default temp (37C)
+const F = 96485.0          # Faraday constant (columb / mol)
+const μF = 1E-6F
+const R = 8.314            # Ideal gas constant
+const VT = R * T₀ / F      # Thermal voltage (@37C), around 26.7 mV
+const iVT = inv(VT)        # Reciprocal of thermal voltage (@37C)
 # Utility functions
 
-"""Hill function"""
-hil(x, k=one(x)) = x / (x + k)
-hil(x, k, n) = hil(x^n, k^n)
+"""
+Regular Hill/MM function
+"""
+hil(x, k = one(x)) = x / (x + k)
+hil(x, k, n) = hil(NaNMath.pow(x, n), NaNMath.pow(k, n))
 
 """
-Relative exponential function.
-Returns one when x is close to zero
+Repressive Hill/MM function
 """
-function exprel(x)
-    res = x / expm1(x)
-    return ifelse(isapprox(x, zero(x)), one(res), res)
-end
+hilr(x, k = one(x)) = hil(k, x)
+hilr(x, k, n) = hil(k, x, n)
 
-"""Logistic function"""
-expit(x) = inv(one(x) + exp(-x))
+"""
+Logistic sigmoid function.
+"""
+expit(x) = hilr(exp(-x))
+
+"""
+    exprel(x, em1 = expm1(x))
+"""
+exprel(x, em1 = expm1(x)) = x / em1
 
 """Nernst potential"""
-nernst(xo, xi) = VT * log(xo / xi)
-nernst(xo, xi, z) = nernst(xo, xi) / z
+nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
+nernst(x_out, x_in, z) = nernst(x_out, x_in) / z
+
+"GHK flux equation"
+ghk(px, x_i, x_o, zvfrt, ezvfrtm1 = expm1(zvfrt), z = 1) = px * z * F * ((ezvfrtm1 + 1) * x_i - x_o) * exprel(zvfrt, ezvfrtm1)
+
+"GHK flux equation from voltage across the membrane"
+function ghkVm(px, vm, x_i, x_o, z = 1)
+    zvfrt = z * vm * iVT
+    em1 = expm1(zvfrt)
+    return ghk(px, x_i, x_o, zvfrt, em1, z)
+end
