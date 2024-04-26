@@ -1,7 +1,6 @@
 #===
 # Smooth calcium wave
 ===#
-
 using Catalyst
 using DifferentialEquations
 using ModelingToolkit
