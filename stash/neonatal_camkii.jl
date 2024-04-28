@@ -19,17 +19,9 @@ function get_Morotti_equations()
     @variables t
     D = Differential(t)
 
-    # CaMDyad / Cyt / SL variables
-    #@variables CaM_dyad(t) Ca2CaM_dyad(t) Ca4CaM_dyad(t) CaMB_dyad(t) Ca2CaMB_dyad(t) Ca4CaMB_dyad(t) Pb2_dyad(t) Pb_dyad(t) Pt_dyad(t) Pt2_dyad(t)
-    #@variables Pa_dyad(t) Ca4CaN_dyad(t) CaMCa4CaN_dyad(t) Ca2CaMCa4CaN_dyad(t) Ca4CaMCa4CaN_dyad(t)
-    @variables CaM_sl(t) Ca2CaM_sl(t) Ca4CaM_sl(t) CaMB_sl(t) Ca2CaMB_sl(t) Ca4CaMB_sl(t) Pb2_sl(t) Pb_sl(t) Pt_sl(t) Pt2_sl(t)
-    @variables Pa_sl(t) Ca4CaN_sl(t) CaMCa4CaN_sl(t) Ca2CaMCa4CaN_sl(t) Ca4CaMCa4CaN_sl(t)
-    @variables CaM_cyt(t) Ca2CaM_cyt(t) Ca4CaM_cyt(t) CaMB_cyt(t) Ca2CaMB_cyt(t) Ca4CaMB_cyt(t) Pb2_cyt(t) Pb_cyt(t) Pt_cyt(t) Pt2_cyt(t)
-    @variables Pa_cyt(t) Ca4CaN_cyt(t) CaMCa4CaN_cyt(t) Ca2CaMCa4CaN_cyt(t) Ca4CaMCa4CaN_cyt(t)
-
     # CaMKII variables
     @variables LCC_PKAp(t) RyR2809p(t) RyR2815p(t) PLBT17p(t) LCC_CKslp(t) #LCC_CKdyadp(t)
-    @variables I1p_PP1(t) Pb_sl(t) Pt_sl(t) Pt2_sl(t) Pa_sl(t) #Pb_dyad(t) Pt_dyad(t) Pt2_dyad(t) Pa_dyad(t)
+    @variables I1p_PP1(t)
 
     #BAR variables
     @variables LR(t) LRG(t) RG(t) b1AR_S464(t) b1AR_S301(t) GsaGTPtot(t) GsaGDP(t) Gsby(t) AC_GsaGTP(t) PDEp(t)
@@ -60,190 +52,6 @@ function get_Morotti_equations()
     Cai_sub_SL = Cai[m]
     Cai_mean = mean(skipmissing(Cai))
 
-
-    ## CamDyad/ CaMSL/ CamCyt
-    ## Parameters
-    Mg = 1      # [mM]
-    K = 135     # [mM]s
-    Btot_dyad = 0
-    CaMKIItot_dyad = 120         # [uM]
-    CaNtot_dyad = 3e-3 / 8.293e-4  # [uM]
-    PP1tot_dyad = 96.5           # [uM]
-
-    ## Parameters for Cyt and SL
-    Btot = 24.2     # [uM]
-    CaMKIItot = 120 * 8.293e-4  # [uM]
-    CaNtot = 3e-3             # [uM]
-    PP1tot = 0.57             # [uM]
-
-    ## Parameters
-    # Ca/CaM parameters
-    if Mg <= 1
-        Kd02 = 0.0025 * (1 + K / 0.94 - Mg / 0.012) * (1 + K / 8.1 + Mg / 0.022)  # [uM^2]
-        Kd24 = 0.128 * (1 + K / 0.64 + Mg / 0.0014) * (1 + K / 13.0 - Mg / 0.153) # [uM^2]
-    else
-        Kd02 = 0.0025 * (1 + K / 0.94 - 1 / 0.012 + (Mg - 1) / 0.060) * (1 + K / 8.1 + 1 / 0.022 + (Mg - 1) / 0.068)   # [uM^2]
-        Kd24 = 0.128 * (1 + K / 0.64 + 1 / 0.0014 + (Mg - 1) / 0.005) * (1 + K / 13.0 - 1 / 0.153 + (Mg - 1) / 0.150)  # [uM^2]
-    end
-    k20 = 10               # [s^-1]
-    k02 = k20 / Kd02         # [uM^-2 s^-1]
-    k42 = 500              # [s^-1]
-    k24 = k42 / Kd24         # [uM^-2 s^-1]
-
-    # CaM buffering (B) parameters
-    k0Boff = 0.0014        # [s^-1]
-    k0Bon = k0Boff / 0.2   # [uM^-1 s^-1] kon = koff/Kd
-    k2Boff = k0Boff / 100    # [s^-1]
-    k2Bon = k0Bon          # [uM^-1 s^-1]
-    k4Boff = k2Boff        # [s^-1]
-    k4Bon = k0Bon          # [uM^-1 s^-1]
-
-    # using thermodynamic constraints
-    k20B = k20 / 100 # [s^-1] thermo constraint on loop 1
-    k02B = k02     # [uM^-2 s^-1]
-    k42B = k42     # [s^-1] thermo constraint on loop 2
-    k24B = k24     # [uM^-2 s^-1]
-
-    # CaMKII parameters
-    # Wi Wa Wt Wp
-    kbi = 2.2      # [s^-1] (Ca4CaM dissocation from Wb)
-    kib = kbi / 33.5e-3 # [uM^-1 s^-1]
-    kib2 = kib
-    kb2i = kib2 * 5
-    kb24 = k24
-    kb42 = k42 * 33.5e-3 / 5
-    kpp1 = 1.72     # [s^-1] (PP1-dep dephosphorylation rates)
-    Kmpp1 = 11.5    # [uM]
-    kta = kbi / 1000  # [s^-1] (Ca4CaM dissociation from Wt)
-    kat = kib       # [uM^-1 s^-1] (Ca4CaM reassociation with Wa)
-    kt42 = k42 * 33.5e-6 / 5
-    kt24 = k24
-    kat2 = kib
-    kt2a = kib * 5
-
-    # CaN parameters
-    kcanCaoff = 1              # [s^-1]
-    kcanCaon = kcanCaoff / 0.5               # [uM^-1 s^-1]
-    kcanCaM4on = 46            # [uM^-1 s^-1]
-    kcanCaM4off = 1.3e-3       # [s^-1]
-    kcanCaM2on = kcanCaM4on
-    kcanCaM2off = 2508 * kcanCaM4off
-    kcanCaM0on = kcanCaM4on
-    kcanCaM0off = 165 * kcanCaM2off
-    k02can = k02
-    k20can = k20 / 165
-    k24can = k24
-    k42can = k20 / 2508
-
-    #=
-    ## Dyad Fluxes
-
-    Ca_Dyad = Ca_j*100
-    # CaM Reaction fluxes
-    B_dyad = Btot_dyad - CaMB_dyad - Ca2CaMB_dyad - Ca4CaMB_dyad
-    rcn02_dyad = k02*Ca_Dyad^2*CaM_dyad - k20*Ca2CaM_dyad
-    rcn24_dyad = k24*Ca_Dyad^2*Ca2CaM_dyad - k42*Ca4CaM_dyad
-    # CaM buffer fluxes
-    rcn02B_dyad = k02B*Ca_Dyad^2*CaMB_dyad - k20B*Ca2CaMB_dyad
-    rcn24B_dyad = k24B*Ca_Dyad^2*Ca2CaMB_dyad - k42B*Ca4CaMB_dyad
-    rcn0B_dyad = k0Bon*CaM_dyad*B_dyad - k0Boff*CaMB_dyad
-    rcn2B_dyad = k2Bon*Ca2CaM_dyad*B_dyad - k2Boff*Ca2CaMB_dyad
-    rcn4B_dyad = k4Bon*Ca4CaM_dyad*B_dyad - k4Boff*Ca4CaMB_dyad
-    # CaN reaction fluxes
-    Ca2CaN_dyad = CaNtot_dyad - Ca4CaN_dyad - CaMCa4CaN_dyad - Ca2CaMCa4CaN_dyad - Ca4CaMCa4CaN_dyad
-    rcnCa4CaN_dyad = kcanCaon*Ca_Dyad^2*Ca2CaN_dyad - kcanCaoff*Ca4CaN_dyad
-    rcn02CaN_dyad = k02can*Ca_Dyad^2*CaMCa4CaN_dyad - k20can*Ca2CaMCa4CaN_dyad
-    rcn24CaN_dyad = k24can*Ca_Dyad^2*Ca2CaMCa4CaN_dyad - k42can*Ca4CaMCa4CaN_dyad
-    rcn0CaN_dyad = kcanCaM0on*CaM_dyad*Ca4CaN_dyad - kcanCaM0off*CaMCa4CaN_dyad
-    rcn2CaN_dyad = kcanCaM2on*Ca2CaM_dyad*Ca4CaN_dyad - kcanCaM2off*Ca2CaMCa4CaN_dyad
-    rcn4CaN_dyad = kcanCaM4on*Ca4CaM_dyad*Ca4CaN_dyad - kcanCaM4off*Ca4CaMCa4CaN_dyad
-    # CaMKII reaction fluxes
-    Pi_dyad = 1 - Pb2_dyad - Pb_dyad - Pt_dyad - Pt2_dyad - Pa_dyad
-    rcnCKib2_dyad = kib2*Ca2CaM_dyad*Pi_dyad - kb2i*Pb2_dyad
-    rcnCKb2b_dyad = kb24*Ca_Dyad^2*Pb2_dyad - kb42*Pb_dyad
-    rcnCKib_dyad = kib*Ca4CaM_dyad*Pi_dyad - kbi*Pb_dyad
-    T_dyad = Pb_dyad + Pt_dyad + Pt2_dyad + Pa_dyad
-    kbt_dyad = 0.055*T_dyad + 0.0074*T_dyad^2 + 0.015*T_dyad^3
-    rcnCKbt_dyad = kbt_dyad*Pb_dyad - kpp1*PP1tot_dyad*Pt_dyad/(Kmpp1+CaMKIItot_dyad*Pt_dyad)
-    rcnCKtt2_dyad = kt42*Pt_dyad - kt24*Ca_Dyad^2*Pt2_dyad
-    rcnCKta_dyad = kta*Pt_dyad - kat*Ca4CaM_dyad*Pa_dyad
-    rcnCKt2a_dyad = kt2a*Pt2_dyad - kat2*Ca2CaM_dyad*Pa_dyad
-    rcnCKt2b2_dyad = kpp1*PP1tot_dyad*Pt2_dyad/(Kmpp1+CaMKIItot_dyad*Pt2_dyad)
-    rcnCKai_dyad = kpp1*PP1tot_dyad*Pa_dyad/(Kmpp1+CaMKIItot_dyad*Pa_dyad)
-    =#
-
-    ## SL Fluxes
-
-    Ca_SL = Cai_sub_SL
-    # CaM Reaction fluxes
-    B_sl = Btot - CaMB_sl - Ca2CaMB_sl - Ca4CaMB_sl
-    rcn02_sl = k02 * Ca_SL^2 * CaM_sl - k20 * Ca2CaM_sl
-    rcn24_sl = k24 * Ca_SL^2 * Ca2CaM_sl - k42 * Ca4CaM_sl
-    # CaM buffer fluxes
-    rcn02B_sl = k02B * Ca_SL^2 * CaMB_sl - k20B * Ca2CaMB_sl
-    rcn24B_sl = k24B * Ca_SL^2 * Ca2CaMB_sl - k42B * Ca4CaMB_sl
-    rcn0B_sl = k0Bon * CaM_sl * B_sl - k0Boff * CaMB_sl
-    rcn2B_sl = k2Bon * Ca2CaM_sl * B_sl - k2Boff * Ca2CaMB_sl
-    rcn4B_sl = k4Bon * Ca4CaM_sl * B_sl - k4Boff * Ca4CaMB_sl
-    # CaN reaction fluxes
-    Ca2CaN_sl = CaNtot - Ca4CaN_sl - CaMCa4CaN_sl - Ca2CaMCa4CaN_sl - Ca4CaMCa4CaN_sl
-    rcnCa4CaN_sl = kcanCaon * Ca_SL^2 * Ca2CaN_sl - kcanCaoff * Ca4CaN_sl
-    rcn02CaN_sl = k02can * Ca_SL^2 * CaMCa4CaN_sl - k20can * Ca2CaMCa4CaN_sl
-    rcn24CaN_sl = k24can * Ca_SL^2 * Ca2CaMCa4CaN_sl - k42can * Ca4CaMCa4CaN_sl
-    rcn0CaN_sl = kcanCaM0on * CaM_sl * Ca4CaN_sl - kcanCaM0off * CaMCa4CaN_sl
-    rcn2CaN_sl = kcanCaM2on * Ca2CaM_sl * Ca4CaN_sl - kcanCaM2off * Ca2CaMCa4CaN_sl
-    rcn4CaN_sl = kcanCaM4on * Ca4CaM_sl * Ca4CaN_sl - kcanCaM4off * Ca4CaMCa4CaN_sl
-    # CaMKII reaction fluxes
-    Pi_sl = 1 - Pb2_sl - Pb_sl - Pt_sl - Pt2_sl - Pa_sl
-    rcnCKib2_sl = kib2 * Ca2CaM_sl * Pi_sl - kb2i * Pb2_sl
-    rcnCKb2b_sl = kb24 * Ca_SL^2 * Pb2_sl - kb42 * Pb_sl
-    rcnCKib_sl = kib * Ca4CaM_sl * Pi_sl - kbi * Pb_sl
-    T_sl = Pb_sl + Pt_sl + Pt2_sl + Pa_sl
-    kbt_sl = 0.055 * T_sl + 0.0074 * T_sl^2 + 0.015 * T_sl^3
-    rcnCKbt_sl = kbt_sl * Pb_sl - kpp1 * PP1tot * Pt_sl / (Kmpp1 + CaMKIItot * Pt_sl)
-    rcnCKtt2_sl = kt42 * Pt_sl - kt24 * Ca_SL^2 * Pt2_sl
-    rcnCKta_sl = kta * Pt_sl - kat * Ca4CaM_sl * Pa_sl
-    rcnCKt2a_sl = kt2a * Pt2_sl - kat2 * Ca2CaM_sl * Pa_sl
-    rcnCKt2b2_sl = kpp1 * PP1tot * Pt2_sl / (Kmpp1 + CaMKIItot * Pt2_sl)
-    rcnCKai_sl = kpp1 * PP1tot * Pa_sl / (Kmpp1 + CaMKIItot * Pa_sl)
-
-    ## Cyt Fluxes
-
-    Ca_Cyt = Cai_mean
-    # CaM Reaction fluxes
-    B_cyt = Btot - CaMB_cyt - Ca2CaMB_cyt - Ca4CaMB_cyt
-    rcn02_cyt = k02 * Ca_Cyt^2 * CaM_cyt - k20 * Ca2CaM_cyt
-    rcn24_cyt = k24 * Ca_Cyt^2 * Ca2CaM_cyt - k42 * Ca4CaM_cyt
-    # CaM buffer fluxes
-    rcn02B_cyt = k02B * Ca_Cyt^2 * CaMB_cyt - k20B * Ca2CaMB_cyt
-    rcn24B_cyt = k24B * Ca_Cyt^2 * Ca2CaMB_cyt - k42B * Ca4CaMB_cyt
-    rcn0B_cyt = k0Bon * CaM_cyt * B_cyt - k0Boff * CaMB_cyt
-    rcn2B_cyt = k2Bon * Ca2CaM_cyt * B_cyt - k2Boff * Ca2CaMB_cyt
-    rcn4B_cyt = k4Bon * Ca4CaM_cyt * B_cyt - k4Boff * Ca4CaMB_cyt
-    # CaN reaction fluxes
-    Ca2CaN_cyt = CaNtot - Ca4CaN_cyt - CaMCa4CaN_cyt - Ca2CaMCa4CaN_cyt - Ca4CaMCa4CaN_cyt
-    rcnCa4CaN_cyt = kcanCaon * Ca_Cyt^2 * Ca2CaN_cyt - kcanCaoff * Ca4CaN_cyt
-    rcn02CaN_cyt = k02can * Ca_Cyt^2 * CaMCa4CaN_cyt - k20can * Ca2CaMCa4CaN_cyt
-    rcn24CaN_cyt = k24can * Ca_Cyt^2 * Ca2CaMCa4CaN_cyt - k42can * Ca4CaMCa4CaN_cyt
-    rcn0CaN_cyt = kcanCaM0on * CaM_cyt * Ca4CaN_cyt - kcanCaM0off * CaMCa4CaN_cyt
-    rcn2CaN_cyt = kcanCaM2on * Ca2CaM_cyt * Ca4CaN_cyt - kcanCaM2off * Ca2CaMCa4CaN_cyt
-    rcn4CaN_cyt = kcanCaM4on * Ca4CaM_cyt * Ca4CaN_cyt - kcanCaM4off * Ca4CaMCa4CaN_cyt
-    # CaMKII reaction fluxes
-    Pi_cyt = 1 - Pb2_cyt - Pb_cyt - Pt_cyt - Pt2_cyt - Pa_cyt
-    rcnCKib2_cyt = kib2 * Ca2CaM_cyt * Pi_cyt - kb2i * Pb2_cyt
-    rcnCKb2b_cyt = kb24 * Ca_Cyt^2 * Pb2_cyt - kb42 * Pb_cyt
-    rcnCKib_cyt = kib * Ca4CaM_cyt * Pi_cyt - kbi * Pb_cyt
-    T_cyt = Pb_cyt + Pt_cyt + Pt2_cyt + Pa_cyt
-    kbt_cyt = 0.055 * T_cyt + 0.0074 * T_cyt^2 + 0.015 * T_cyt^3
-    #rcnCKbt_cyt = Pb_cyt - kpp1*PP1tot*Pt_cyt/(Kmpp1+CaMKIItot*Pt_cyt)
-    rcnCKbt_cyt = kbt_cyt * Pb_cyt - kpp1 * PP1tot * Pt_cyt / (Kmpp1 + CaMKIItot * Pt_cyt)
-    rcnCKtt2_cyt = kt42 * Pt_cyt - kt24 * Ca_Cyt^2 * Pt2_cyt
-    rcnCKta_cyt = kta * Pt_cyt - kat * Ca4CaM_cyt * Pa_cyt
-    rcnCKt2a_cyt = kt2a * Pt2_cyt - kat2 * Ca2CaM_cyt * Pa_cyt
-    rcnCKt2b2_cyt = kpp1 * PP1tot * Pt2_cyt / (Kmpp1 + CaMKIItot * Pt2_cyt)
-    rcnCKai_cyt = kpp1 * PP1tot * Pa_cyt / (Kmpp1 + CaMKIItot * Pa_cyt)
-
-
     ## Ordinary Differential Equations
     Vmyo = 2.1454e-11           # [L]
     Vdyad = 1.7790e-014         # [L]
@@ -251,82 +59,6 @@ function get_Morotti_equations()
     kSLmyo = 8.587e-15          # [L/msec]
     CaMKIItotDyad = 120         # [uM]
     BtotDyad = 1.54 / 8.293e-4    # [uM]
-    #CaMtotDyad = CaM_dyad+Ca2CaM_dyad+Ca4CaM_dyad+CaMB_dyad+Ca2CaMB_dyad+Ca4CaMB_dyad+CaMKIItotDyad*(Pb2_dyad+Pb_dyad+Pt_dyad+Pt2_dyad)+CaMCa4CaN_dyad+Ca2CaMCa4CaN_dyad+Ca4CaMCa4CaN_dyad
-    #Bdyad = BtotDyad - CaMtotDyad                                                  # [uM dyad]
-    #J_cam_dyadSL = 1e-3*(k0Boff*CaM_dyad - k0Bon*Bdyad*CaM_sl)                     # [uM/msec dyad]
-    #J_ca2cam_dyadSL = 1e-3*(k2Boff*Ca2CaM_dyad - k2Bon*Bdyad*Ca2CaM_sl)            # [uM/msec dyad]
-    #J_ca4cam_dyadSL = 1e-3*(k2Boff*Ca4CaM_dyad - k4Bon*Bdyad*Ca4CaM_sl)            # [uM/msec dyad]
-    J_cam_SLmyo = kSLmyo * (CaM_sl - CaM_cyt)                                          # [umol/msec]
-    J_ca2cam_SLmyo = kSLmyo * (Ca2CaM_sl - Ca2CaM_cyt)                                 # [umol/msec]
-    J_ca4cam_SLmyo = kSLmyo * (Ca4CaM_sl - Ca4CaM_cyt)                                 # [umol/msec]
-
-    #=
-    # CaMDyad equations
-    CaMdyad_eqs = [
-        D(CaM_dyad) ~ (1e-3*(-rcn02_dyad - rcn0B_dyad - rcn0CaN_dyad)-J_cam_dyadSL),                                                                      # du[1]
-        D(Ca2CaM_dyad) ~ (1e-3*(rcn02_dyad - rcn24_dyad - rcn2B_dyad - rcn2CaN_dyad + CaMKIItot_dyad.*(-rcnCKib2_dyad + rcnCKt2a_dyad))-J_ca2cam_dyadSL),      # du[2]
-        D(Ca4CaM_dyad) ~ (1e-3*(rcn24_dyad - rcn4B_dyad - rcn4CaN_dyad + CaMKIItot_dyad.*(-rcnCKib_dyad+rcnCKta_dyad))-J_ca4cam_dyadSL),                       # du[3]
-        D(CaMB_dyad) ~ 1e-3*(rcn0B_dyad-rcn02B_dyad),                       # du[4]
-        D(Ca2CaMB_dyad) ~ 1e-3*(rcn02B_dyad + rcn2B_dyad - rcn24B_dyad),    # du[5]
-        D(Ca4CaMB_dyad) ~ 1e-3*(rcn24B_dyad + rcn4B_dyad),                  # du[6]
-        # CaMKII equations
-        D(Pb2_dyad) ~ 1e-3*(rcnCKib2_dyad - rcnCKb2b_dyad + rcnCKt2b2_dyad),     # du[7]
-        D(Pb_dyad) ~ 1e-3*(rcnCKib_dyad + rcnCKb2b_dyad - rcnCKbt_dyad),         # du[8]
-        D(Pt_dyad) ~ 1e-3*(rcnCKbt_dyad-rcnCKta_dyad-rcnCKtt2_dyad),             # du[9]
-        D(Pt2_dyad) ~ 1e-3*(rcnCKtt2_dyad-rcnCKt2a_dyad-rcnCKt2b2_dyad),         # du[10]
-        D(Pa_dyad) ~ 1e-3*(rcnCKta_dyad+rcnCKt2a_dyad-rcnCKai_dyad),             # du[11]
-        # CaN equations
-        D(Ca4CaN_dyad) ~ 1e-3*(rcnCa4CaN_dyad - rcn0CaN_dyad - rcn2CaN_dyad - rcn4CaN_dyad),      # du[12]
-        D(CaMCa4CaN_dyad) ~ 1e-3*(rcn0CaN_dyad - rcn02CaN_dyad),                        # du[13]
-        D(Ca2CaMCa4CaN_dyad) ~ 1e-3*(rcn2CaN_dyad+rcn02CaN_dyad-rcn24CaN_dyad),              # du[14]
-        D(Ca4CaMCa4CaN_dyad) ~ 1e-3*(rcn4CaN_dyad+rcn24CaN_dyad)                       # du[15]
-    ]
-    =#
-    # CaMSL equations
-    CaMSL_eqs = [
-        D(CaM_sl) ~ (1e-3 * (-rcn02_sl - rcn0B_sl - rcn0CaN_sl) - J_cam_SLmyo / VSL), #+ J_cam_dyadSL*Vdyad/VSL                                                                    # du[1]
-        D(Ca2CaM_sl) ~ (1e-3 * (rcn02_sl - rcn24_sl - rcn2B_sl - rcn2CaN_sl + CaMKIItot .* (-rcnCKib2_sl + rcnCKt2a_sl)) - J_ca2cam_SLmyo / VSL), #+ J_ca2cam_dyadSL*Vdyad/VSL       # du[2]
-        D(Ca4CaM_sl) ~ (1e-3 * (rcn24_sl - rcn4B_sl - rcn4CaN_sl + CaMKIItot .* (-rcnCKib_sl + rcnCKta_sl)) - J_ca4cam_SLmyo / VSL),  #+ J_ca4cam_dyadSL*Vdyad/VSL                     # du[3]
-        D(CaMB_sl) ~ 1e-3 * (rcn0B_sl - rcn02B_sl),                     # du[4]
-        D(Ca2CaMB_sl) ~ 1e-3 * (rcn02B_sl + rcn2B_sl - rcn24B_sl),    # du[5]
-        D(Ca4CaMB_sl) ~ 1e-3 * (rcn24B_sl + rcn4B_sl),                # du[6]
-        # CaMKII equations
-        D(Pb2_sl) ~ 1e-3 * (rcnCKib2_sl - rcnCKb2b_sl + rcnCKt2b2_sl),     # du[7]
-        D(Pb_sl) ~ 1e-3 * (rcnCKib_sl + rcnCKb2b_sl - rcnCKbt_sl),         # du[8]
-        D(Pt_sl) ~ 1e-3 * (rcnCKbt_sl - rcnCKta_sl - rcnCKtt2_sl),             # du[9]
-        D(Pt2_sl) ~ 1e-3 * (rcnCKtt2_sl - rcnCKt2a_sl - rcnCKt2b2_sl),         # du[10]
-        D(Pa_sl) ~ 1e-3 * (rcnCKta_sl + rcnCKt2a_sl - rcnCKai_sl),             # du[11]
-        # CaN equations
-        D(Ca4CaN_sl) ~ 1e-3 * (rcnCa4CaN_sl - rcn0CaN_sl - rcn2CaN_sl - rcn4CaN_sl),      # du[12]
-        D(CaMCa4CaN_sl) ~ 1e-3 * (rcn0CaN_sl - rcn02CaN_sl),                        # du[13]
-        D(Ca2CaMCa4CaN_sl) ~ 1e-3 * (rcn2CaN_sl + rcn02CaN_sl - rcn24CaN_sl),              # du[14]
-        D(Ca4CaMCa4CaN_sl) ~ 1e-3 * (rcn4CaN_sl + rcn24CaN_sl)                       # du[15]
-    ]
-    # CaMCyt equations
-    CaMcyt_eqs = [
-        D(CaM_cyt) ~ (1e-3 * (-rcn02_cyt - rcn0B_cyt - rcn0CaN_cyt) + J_cam_SLmyo / Vmyo),                                                                    # du[1]
-        D(Ca2CaM_cyt) ~ (1e-3 * (rcn02_cyt - rcn24_cyt - rcn2B_cyt - rcn2CaN_cyt + CaMKIItot .* (-rcnCKib2_cyt + rcnCKt2a_cyt)) + J_ca2cam_SLmyo / Vmyo),       # du[2]
-        D(Ca4CaM_cyt) ~ (1e-3 * (rcn24_cyt - rcn4B_cyt - rcn4CaN_cyt + CaMKIItot .* (-rcnCKib_cyt + rcnCKta_cyt)) + J_ca4cam_SLmyo / Vmyo),                       # du[3]
-        D(CaMB_cyt) ~ 1e-3 * (rcn0B_cyt - rcn02B_cyt),                      # du[4]
-        D(Ca2CaMB_cyt) ~ 1e-3 * (rcn02B_cyt + rcn2B_cyt - rcn24B_cyt),    # du[5]
-        D(Ca4CaMB_cyt) ~ 1e-3 * (rcn24B_cyt + rcn4B_cyt),                 # du[6]
-        # CaMKII equations
-        D(Pb2_cyt) ~ 1e-3 * (rcnCKib2_cyt - rcnCKb2b_cyt + rcnCKt2b2_cyt),     # du[7]
-        D(Pb_cyt) ~ 1e-3 * (rcnCKib_cyt + rcnCKb2b_cyt - rcnCKbt_cyt),         # du[8]
-        D(Pt_cyt) ~ 1e-3 * (rcnCKbt_cyt - rcnCKta_cyt - rcnCKtt2_cyt),             # du[9]
-        D(Pt2_cyt) ~ 1e-3 * (rcnCKtt2_cyt - rcnCKt2a_cyt - rcnCKt2b2_cyt),         # du[10]
-        D(Pa_cyt) ~ 1e-3 * (rcnCKta_cyt + rcnCKt2a_cyt - rcnCKai_cyt),             # du[11]
-        # CaN equations
-        D(Ca4CaN_cyt) ~ 1e-3 * (rcnCa4CaN_cyt - rcn0CaN_cyt - rcn2CaN_cyt - rcn4CaN_cyt),      # du[12]
-        D(CaMCa4CaN_cyt) ~ 1e-3 * (rcn0CaN_cyt - rcn02CaN_cyt),                        # du[13]
-        D(Ca2CaMCa4CaN_cyt) ~ 1e-3 * (rcn2CaN_cyt + rcn02CaN_cyt - rcn24CaN_cyt),              # du[14]
-        D(Ca4CaMCa4CaN_cyt) ~ 1e-3 * (rcn4CaN_cyt + rcn24CaN_cyt)                       # du[15]
-    ]
-    ## For adjusting Ca buffering in EC coupling model
-    #JCaDyad = 1e-3*(2*CaMKIItot_dyad*(rcnCKtt2_dyad-rcnCKb2b_dyad) - 2*(rcn02_dyad+rcn24_dyad+rcn02B_dyad+rcn24B_dyad+rcnCa4CaN_dyad+rcn02CaN_dyad+rcn24CaN_dyad))   # [uM/msec]
-    #JCaSL = 1e-3*(2*CaMKIItot*(rcnCKtt2_sl-rcnCKb2b_sl) - 2*(rcn02_sl+rcn24_sl+rcn02B_sl+rcn24B_sl+rcnCa4CaN_sl+rcn02CaN_sl+rcn24CaN_sl))   # [uM/msec]
-    #JCaCyt = 1e-3*(2*CaMKIItot*(rcnCKtt2_cyt-rcnCKb2b_cyt) - 2*(rcn02_cyt+rcn24_cyt+rcn02B_cyt+rcn24B_cyt+rcnCa4CaN_cyt+rcn02CaN_cyt+rcn24CaN_cyt))   # [uM/msec]
-
 
     ## CaMKII
     ## RATE CONSTANTS and KM VALUES
@@ -394,7 +126,7 @@ function get_Morotti_equations()
 
     # Variables related to camdyad_ODEfile
     #CaMKIIact_Dyad = CaMKIItotDyad .* (Pb_dyad + Pt_dyad + Pt2_dyad + Pa_dyad)
-    CaMKIIact_SL = CaMKIItotSL .* (Pb_sl + Pt_sl + Pt2_sl + Pa_sl)
+    CaMKIIact_SL = 0 # CaMKIItotSL .* (Pb_sl + Pt_sl + Pt2_sl + Pa_sl)
     PP1_PLB_avail = 1 - I1p_PP1 / PP1_PLBtot + 0.081698
     # CaMKII phosphorylation of Dyadic LCCs
     #LCC_CKdyadn = LCCtotDyad - LCC_CKdyadp
@@ -664,24 +396,6 @@ function get_Morotti_equations()
         D(TnIp) ~ (TnI_phosph - TnI_dephosph)
     ]
 
-
-    ## Iks module (not present in mouse)
-    IKstot = 0.025
-
-    IKs_eqs = [
-        D(KS79) ~ 0,  # ydot(27) not ODE
-        D(KS80) ~ 0,  # ydot(28) not ODE
-        D(KSp) ~ 0  # ydot(29)
-    ]
-
-
-    ## CFTR module (included 04/30/10)
-    ICFTRtot = 0.025
-
-    CFTR_eqs = [
-        D(CFTRp) ~ 0  #CFTRphos - CFTRdephos  # ydot(30)
-    ]
-
     ## Ikur module (included 04/10/12) MOUSE
     PKAII_KURtot = 0.025    # [uM]
     PP1_KURtot = 0.025      # [uM]
@@ -697,7 +411,6 @@ function get_Morotti_equations()
     Ikur_eqs = [
         D(KURp) ~ (KURphos - KURdephos)
     ]
-
 
     ## ECC
 
@@ -919,7 +632,6 @@ function get_Morotti_equations()
     nKsinf = alphan / (alphan + betan)
     nKstau = 750
 
-
     # Na/K pump current
     sigma = 1 / 7 * (exp(Nao / 67300) - 1)
     fNaK = 1 / (1 + 0.1245 * exp(-0.1 * V * F / R / T) + 0.0365 * sigma * exp(-V * F / R / T))
@@ -998,12 +710,10 @@ function get_Morotti_equations()
         D(i_fca) ~ kfca * (fcainf - i_fca) / taufca
     ]
 
-
     # If
     IF_eqs = [
         D(i_y) ~ (yinf - i_y) / tauy
     ]
-
 
     # IKto
     IKto_eqs = [
@@ -1019,12 +729,9 @@ function get_Morotti_equations()
         D(i_Naj) ~ (Najinf - i_Naj) / Natauj / 1000
     ]
 
-
     # RyR
     ryr_eqs = [
         D(i_PO1) ~ kapos * (Cai_sub_SR)^n / ((Cai_sub_SR)^n + KmRyR^n) * PC1 - kaneg * i_PO1,
-        D(i_PO2) ~ 0,
-        D(i_PC2) ~ 0
     ]
 
 
@@ -1043,8 +750,8 @@ function get_Morotti_equations()
     ]
 
 
-    return vcat(eqs, SR_eqs, Na_K_eqs, Ttype_eqs, Ltype_eqs, IF_eqs, IKto_eqs, INa_eqs, ryr_eqs, InKs_eqs, IKr_eqs, CaMSL_eqs, CaMcyt_eqs, #CaMdyad_eqs,
-        CaMKII_eqs, bar_eqs, cAMP_eqs, PKA_eqs, PP1_eqs, PLB_eqs, PLM_eqs, LCC_eqs, RyRp_eqs, TnI_eqs, IKs_eqs, CFTR_eqs, Ikur_eqs)
+    return vcat(eqs, SR_eqs, Na_K_eqs, Ttype_eqs, Ltype_eqs, IF_eqs, IKto_eqs, INa_eqs, ryr_eqs, InKs_eqs, IKr_eqs,
+        CaMKII_eqs, bar_eqs, cAMP_eqs, PKA_eqs, PP1_eqs, PLB_eqs, PLM_eqs, LCC_eqs, RyRp_eqs, TnI_eqs, Ikur_eqs)
 end
 
 eq_morotti = get_Morotti_equations()
@@ -1053,7 +760,7 @@ eq_morotti = get_Morotti_equations()
 
 #@variables t Cai_mean(t)
 @variables t Cai(t)[1:45]
-Cai_mean = mean(skipmissing(Cai))
+Cai_mean = sum(collect(Cai)) / length(Cai)
 
 ##Chemical Reaction of CaMKII Activity (Including OX states)
 ca_model = @reaction_network begin
@@ -1113,17 +820,11 @@ rn_osys = convert(ODESystem, ca_model)
 sys = structural_simplify(sys)
 
 @unpack Cai, i_CaJSR, CaNSR, V, Nai, Ki, i_b, i_g, i_d, i_f, i_fca, i_y, i_r, i_s, i_sslow,
-i_Nam, i_Nah, i_Naj, i_PO1, i_PO2, i_PC2, i_nKs, i_CK1, i_CK2, i_OK, i_IK,                                                  # ecc_ODEfile
-#CaM_dyad, Ca2CaM_dyad, Ca4CaM_dyad, CaMB_dyad, Ca2CaMB_dyad, Ca4CaMB_dyad, Pb2_dyad, Pb_dyad,
-#Pt_dyad, Pt2_dyad, Pa_dyad, Ca4CaN_dyad, CaMCa4CaN_dyad, Ca2CaMCa4CaN_dyad, Ca4CaMCa4CaN_dyad,                              # camdyad_ODEfile
-CaM_sl, Ca2CaM_sl, Ca4CaM_sl, CaMB_sl, Ca2CaMB_sl, Ca4CaMB_sl, Pb2_sl, Pb_sl,
-Pt_sl, Pt2_sl, Pa_sl, Ca4CaN_sl, CaMCa4CaN_sl, Ca2CaMCa4CaN_sl, Ca4CaMCa4CaN_sl,                                            # camsl_ODEfile
-CaM_cyt, Ca2CaM_cyt, Ca4CaM_cyt, CaMB_cyt, Ca2CaMB_cyt, Ca4CaMB_cyt, Pb2_cyt, Pb_cyt,
-Pt_cyt, Pt2_cyt, Pa_cyt, Ca4CaN_cyt, CaMCa4CaN_cyt, Ca2CaMCa4CaN_cyt, Ca4CaMCa4CaN_cyt,                                     # camcyt_ODEfile
+i_Nam, i_Nah, i_Naj, i_PO1, i_nKs, i_CK1, i_CK2, i_OK, i_IK,                                                  # ecc_ODEfile
 LCC_PKAp, RyR2809p, RyR2815p, PLBT17p, LCC_CKslp,                                                                           # camkii_ODEfile LCC_CKdyadp,
 LR, LRG, RG, b1AR_S464, b1AR_S301, GsaGTPtot, GsaGDP, Gsby, AC_GsaGTP, PDEp, cAMPtot, RC_I, RCcAMP_I,
 RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII,                         # bar_ODEfile
-PKACII_PKI, I1p_PP1, I1ptot, PLBp, PLMp, LCCap, LCCbp, RyRp, TnIp, KS79, KS80, KSp, CFTRp, KURp,
+PKACII_PKI, I1p_PP1, I1ptot, PLBp, PLMp, LCCap, LCCbp, RyRp, TnIp, KURp,
 CaMK, CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKP,
 CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, CaMKP, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, k_1C_on, k_1C_off, k_2C_on, k_2C_off,
 k_1N_on, k_1N_off, k_2N_on, k_2N_off, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off,
@@ -1182,22 +883,15 @@ u0 = [Cai[1] => 0.41614, Cai[2] => 0.41922, Cai[3] => 0.42213, Cai[4] => 0.4249,
     i_CaJSR => 631.78097, CaNSR => 683.25031, V => -64.11549, Nai => 14893.80468, Ki => 149877.58869,
     i_b => 0.00731, i_g => 0.38774, i_d => 0.00064, i_f => 0.88702, i_fca => 0.68274, i_y => 0.01484,
     i_r => 0.00967, i_s => 0.89987, i_sslow => 0.11546, i_Nam => 0.05015, i_Nah => 0.06908, i_Naj => 0.04192,
-    i_PO1 => 0.03059, i_PO2 => 0.0, i_PC2 => 0.0, i_nKs => 0.21601, i_CK1 => 0.0018, i_CK2 => 0.01123,
-    i_OK => 0.40171, i_IK => 0.1616, CaM_sl => 0.00949, Ca2CaM_sl => 0.0004, Ca4CaM_sl => 0.0, CaMB_sl => 2.33011,
-    Ca2CaMB_sl => 11.53848, Ca4CaMB_sl => 0.00412,
-    Pb2_sl => 8.0e-5, Pb_sl => 1.0e-5, Pt_sl => 0.0, Pt2_sl => 0.0, Pa_sl => 0.0, Ca4CaN_sl => 0.001,
-    CaMCa4CaN_sl => 0.0, Ca2CaMCa4CaN_sl => 1.0e-5, Ca4CaMCa4CaN_sl => 0.00092, CaM_cyt => 0.00948,
-    Ca2CaM_cyt => 0.00039, Ca4CaM_cyt => 0.0, CaMB_cyt => 0.88086, Ca2CaMB_cyt => 4.44025, Ca4CaMB_cyt => 0.00156,
-    Pb2_cyt => 8.0e-5, Pb_cyt => 1.0e-5, Pt_cyt => 0.0, Pt2_cyt => 0.0, Pa_cyt => 0.0, Ca4CaN_cyt => 0.00129,
-    CaMCa4CaN_cyt => 0.0, Ca2CaMCa4CaN_cyt => 1.0e-5, Ca4CaMCa4CaN_cyt => 0.00035, LCC_PKAp => 16.45439,
+    i_PO1 => 0.03059, i_nKs => 0.21601, i_CK1 => 0.0018, i_CK2 => 0.01123,
+    i_OK => 0.40171, i_IK => 0.1616, LCC_PKAp => 16.45439,
     RyR2809p => 297.35723, RyR2815p => 139.78352, PLBT17p => 2.87361, LCC_CKslp => 0.0,
     LR => 6.0e-5, LRG => 0.00294, RG => 7.0e-5, b1AR_S464 => 0.00047, b1AR_S301 => 0.0011, GsaGTPtot => 0.06028,
     GsaGDP => 0.00066, Gsby => 0.06071, AC_GsaGTP => 0.00814, PDEp => 0.00589, cAMPtot => 3.16099, RC_I => 0.31134,
     RCcAMP_I => 0.28552, RCcAMPcAMP_I => 0.04698, RcAMPcAMP_I => 0.53564, PKACI => 0.38375, PKACI_PKI => 0.15239,
     RC_II => 0.01018, RCcAMP_II => 0.00934, RCcAMPcAMP_II => 0.00154, RcAMPcAMP_II => 0.09691, PKACII => 0.06938,
     PKACII_PKI => 0.02753, I1p_PP1 => 0.19135, I1ptot => 0.19163, PLBp => 98.33936, PLMp => 41.19479, LCCap => 0.01204,
-    LCCbp => 0.01313, RyRp => 0.06399, TnIp => 60.75646, KURp => 0.01794, KS79 => 0.00153, KS80 => 0.00153,
-    KSp => 0.00184, CFTRp => 0.00406,
+    LCCbp => 0.01313, RyRp => 0.06399, TnIp => 60.75646, KURp => 0.01794,
     CaM0 => 2.82e-5 * 1e6, Ca2CaM_C => 1.01e-8 * 1e6, Ca2CaM_N => 1.40e-9 * 1e6, Ca4CaM => 4.78e-13 * 1e6,
     CaM0_CaMK => 1.29e-6 * 1e6, Ca2CaM_C_CaMK => 9.13e-8 * 1e6, Ca2CaM_N_CaMK => 3.74e-9 * 1e6, Ca4CaM_CaMK => 5.92e-10 * 1e6,
     CaM0_CaMKP => 2.36e-7 * 1e6, Ca2CaM_C_CaMKP => 1.13e-7 * 1e6, Ca2CaM_N_CaMKP => 1.54e-9 * 1e6, Ca4CaM_CaMKP => 7.82e-10 * 1e6,
@@ -1217,7 +911,7 @@ ks = [k_1C_on => 5e-3, k_1C_off => 50e-3, k_2C_on => 10e-3, k_2C_off => 10e-3, k
     k_BOX => 2.91e-4, k_PB => 0.00003, k_OXPOX => 0.00003, #k_phosCaM => 30e-3 * phospho_rate
     k_OXB => 2.23e-5, k_POXP => 2.91e-4, k_OXPP => 2.23e-5, tstop => 50e3, ROS => 0]
 
-oprob = ODEProblem(sys, u0, tspan, ks, jac=true)
+oprob = ODEProblem(sys, u0, tspan, ks)
 
 #=
 ## To generate reference figures
@@ -1284,7 +978,7 @@ plot(scatter(x = [0,0.01,0.1,1]),kinase_act*100)
 plot(kinase_act*100, title="CaMKII Activation by ROS", label="Oxidized CaMKII",xlabel="ROS (uM)", ylabel="Maximal Kinase Activity (%)", ylim=(0,100), lw=2)
 =#
 
-@time sol = solve(oprob, TRBDF2(), abstol=1e-9, reltol=1e-9, tstops=0:1000:tspan[end], maxiters=Int(1e8))
+@time sol = solve(oprob, KenCarp4(), abstol=1e-9, reltol=1e-9, tstops=0:1000:tspan[end], maxiters=Int(1e8))
 #FBDF, maxiters=Int(1e8)
 ## colors: orchid, slateblue1, tan1, darkseagreen4, indianred3, navajowhite4
 #steelblue2(blue),goldenrod1(oranyellow),lightcoral(red),lightseagreen,slateblue1(purple),cadetblue4,pink1
