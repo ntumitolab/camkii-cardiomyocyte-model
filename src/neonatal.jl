@@ -1,4 +1,6 @@
-# Neonatal mouse CMC model
+# Model of ECC of rat neonatal ventricular myocyte 2009
+# Korhonen et al. "Model of excitation-contraction coupling of rat neonatal
+# ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
 using ModelingToolkit
 
 # Calcium buffer term
@@ -15,35 +17,41 @@ function beta_cai(Cai;
     return inv(1 + TrpnTotal * KmTrpn / (Cai + KmTrpn)^2 + CmdnTotal * KmCmdn / (Cai + KmCmdn)^2)
 end
 
-function build_neonatal_model(; dx=0.1, rSR_true=6, rSL_true=10.5)
+function build_neonatal_model(;
+    dx=0.1,  # [um]
+    rSR_true=6, # [um]
+    rSL_true=10.5, # [um]
+)
 
     @constants begin
-        Vmyo = 2.1454e-11Liter           # [L]
-        Vdyad = 1.7790e-014Liter         # [L]
-        VSL = 6.6013e-013Liter           # [L]
-        kSLmyo = 8.587e-15Liter / ms       # [L/msec]
-        CaMKIItotDyad = 120μM            # [uM]
-        BtotDyad = 1.54 / 8.293e-4μM     # [uM]
+        Acap = 4 * pi * rSL_true^2 * 1e-8 # cm^2
+        VSR = 0.043 * 1.5 * 1.4 # pl
+        VNSR = 0.9 * VSR # pl
+        VJSR = VSR - VNSR # pl
+        V_sub_SR = 4 / 3 * pi * (rSR_true + dx)^3 / 1000 - 4 / 3 * pi * (rSR_true)^3 / 1000 # pl
+        V_sub_SL = 4 / 3 * pi * rSL_true^3 / 1000 - 4 / 3 * pi * (rSL_true - dx)^3 / 1000 # pl
+        Vmyo = 4 / 3 * pi * rSL_true^3 / 1000 - 4 / 3 * pi * rSR_true^3 / 1000 # pl
+        ACP_VMYO_F = Acap / F * 1e6 / Vmyo
     end
 
     @parameters begin
-        Cao = 1796μM   # [uM]
-        Nao = 154578μM # [uM]
-        Ko = 5366μM    # [uM]
-        Mg = 1mM       # [mM]
-        Ki = 135mM      # [mM]
+        Cao = 1796   # [uM]
+        Nao = 154578 # [uM]
+        Ko = 5366    # [uM]
+        Mg = 1000    # [uM]
+        Ki = 135000  # [uM]
     end
+
+    @variables t
+    D = Differential(t)
 
     # Ca diffusion
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
-    V_sub_SR = 4 / 3 * pi * (rSR_true + dx)^3 / 1000 - 4 / 3 * pi * (rSR_true)^3 / 1000 # pl
-    V_sub_SL = 4 / 3 * pi * rSL_true^3 / 1000 - 4 / 3 * pi * (rSL_true - dx)^3 / 1000 #pl
-    @variables t Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t)
+    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t) TnI_PKAp(t)
     @parameters Dca = 7 # mum^2/ms set to achive correct diff. speed 0.31 mum/ms
-    D = Differential(t)
     eqs = [
         Cai_mean ~ sum(collect(Cai)) / m,
         Cai_sub_SR ~ Cai[1],

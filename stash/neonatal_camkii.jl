@@ -34,24 +34,6 @@ function get_Morotti_equations()
     @variables i_Nam(t) i_Nah(t) i_Naj(t) i_PO1(t) i_PO2(t) i_PC2(t) i_nKs(t) i_CK1(t) i_CK2(t) i_OK(t) i_IK(t)
     #@variables Cai_mean(t)
 
-    ## Neonatal Rat
-    # Cell geometry
-    rSR_true = 6
-    rSL_true = 10.5
-
-    # Ca diffusion grid
-    dx = 0.1
-    rSR = rSR_true + 0.5 * dx
-    rSL = rSL_true - 0.5 * dx
-    j = round(rSR / dx):1:round(rSL / dx) # Spatial index of Cai diffusion
-    # Cai
-    m = length(j)
-    @variables Cai(t)[1:m]
-
-    Cai_sub_SR = Cai[1]
-    Cai_sub_SL = Cai[m]
-    Cai_mean = mean(skipmissing(Cai))
-
     ## Ordinary Differential Equations
     Vmyo = 2.1454e-11           # [L]
     Vdyad = 1.7790e-014         # [L]
@@ -347,11 +329,11 @@ function get_Morotti_equations()
     Km_PP2A_LCC = 3         # [uM]
     PKACII_LCC = (PKACII_LCCtot / PKAIItot) * PKACII
     LCCa = LCCtot - LCCap
-    LCCa_phosph = epsilon * k_PKA_LCC * PKACII_LCC * LCCa / (Km_PKA_LCC + epsilon * LCCa)
-    LCCa_dephosph = epsilon * k_PP2A_LCC * PP2A_LCC * LCCap / (Km_PP2A_LCC + epsilon * LCCap)
+    LCCa_phosph = k_PKA_LCC * PKACII_LCC * LCCa / (Km_PKA_LCC/epsilon + LCCa)
+    LCCa_dephosph = k_PP2A_LCC * PP2A_LCC * LCCap / (Km_PP2A_LCC/epsilon + LCCap)
     LCCb = LCCtot - LCCbp
-    LCCb_phosph = epsilon * k_PKA_LCC * PKACII_LCC * LCCb / (Km_PKA_LCC + epsilon * LCCb)
-    LCCb_dephosph = epsilon * k_PP1_LCC * PP1_LCC * LCCbp / (Km_PP1_LCC + epsilon * LCCbp)
+    LCCb_phosph = k_PKA_LCC * PKACII_LCC * LCCb / (Km_PKA_LCC /epsilon + LCCb)
+    LCCb_dephosph = k_PP1_LCC * PP1_LCC * LCCbp / (Km_PP1_LCC/ epsilon+ LCCbp)
 
     LCC_eqs = [
         D(LCCap) ~ (LCCa_phosph - LCCa_dephosph),
@@ -423,7 +405,7 @@ function get_Morotti_equations()
     IKurtotBA = 0.025           # [uM] - [umol/L cytosol] MOUSE
     PLBtot = plb_val                        # [uM] - Total [PLB] in cytosolic units
     PLBtotBA = plb_val                      # [uM] - [umol/L cytosol]
-
+    106
 
     RyR_CKp = RyR2815p / RyRtot
     PLB_CKp = PLBT17p / PLBtot
