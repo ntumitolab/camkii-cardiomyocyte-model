@@ -4,7 +4,9 @@ using ModelingToolkit
 function get_ca_pde_eqs(;
     dx=0.1,  # [um]
     rSR_true=6, # [um]
-    rSL_true=10.5, # [um])
+    rSL_true=10.5, # [um]
+    V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3) / 1000, # pL
+    V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3) / 1000, # pL
 )
     @variables t
     D = Differential(t)

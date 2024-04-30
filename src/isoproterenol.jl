@@ -2,10 +2,11 @@
 using Catalyst
 using ModelingToolkit
 
-function build_bar_sys(;
+function build_bar_rn(;
     b1ARtot = 0.00528,
     Gstot = 3.83,
     ATP = 5e3,
+    ISO = 0,
     PDEtot = 22.85e-3,
     PKItot = 0.18,
     I1tot = 0.3,
@@ -19,12 +20,11 @@ function build_bar_sys(;
     IKurtot = 0.025,
     PP1_KURtot = 0.025,      # [uM]
     PP1tot = 0.89,
-    remove_conserved=true
+    ACtot = 70.57e-3,        # (uM) total adenylyl cyclase # MOUSE
 )
-    @variables t ISO(t)
     rn = @reaction_network begin
         # Beta adrenergic receptor
-        ($ISO * kf_LR, kr_LR), b1AR <--> LR  # Ligand-receptor
+        (ISO * kf_LR, kr_LR), b1AR <--> LR  # Ligand-receptor
         (kf_LRG, kr_LRG), LR + Gs <--> LRG   # G protein association
         (kf_RG, kr_RG), b1AR + Gs <--> RG    # G protein association
         k_G_act, RG --> b1AR + GsaGTP + Gsby
@@ -75,6 +75,7 @@ function build_bar_sys(;
         mm(KURp, PP1_KURtot * k_pp1_KUR, Km_pp1_KUR/epsilon), KURp => KURn
     end
 
+    # Default parameters
     setdefaults!(rn, [
         :kf_LR => 1,                    # (1/[uM ms]) forward rate for ISO binding to b1AR
         :kr_LR => 0.285,                # (1/ms) reverse rate for ISO binding to b1AR
@@ -140,7 +141,72 @@ function build_bar_sys(;
         :Km_pka_KUR => 21,         # [uM]
         :k_pp1_KUR => 8.52e-3,     # [1/ms]
         :Km_pp1_KUR => 7,          # [uM]
+        :LR => 6.0e-5,
+        :LRG => 0.00294,
+        :RG => 7.0e-5,
+        :b1AR_S464 => 0.00047,
+        :b1AR_S301 => 0.0011,
+        :GsaGDP => 0.00066,
+        :Gsby => 0.06071,
+        :AC_GsaGTP => 0.00814,
+        :PDEp => 0,
+
     ])
 
-    return convert(ODESystem, rn; remove_conserved)
+    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, = rn
+    @unpack AC, AC_GsaGTP, GsaGTP, GsaGDP, Gsby, Gs, cAMP = rn
+    @unpack RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII, PKACII_PKI, PKI = rn
+    @unpack PDEp, PDE, PP1, I1, I1p, I1p_PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp = rn
+
+    # Default initial conditions
+    setdefaults!(rn, [
+        LR => 6.0e-5,
+        LRG => 0.00294,
+        RG => 7.0e-5,
+        b1AR_S464 => 0.00047,
+        b1AR_S301 => 0.0011,
+        b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
+        Gsby => 0.06071,
+        Gs => Gstot - Gsby - LRG - RG,
+        GsaGDP => 0.00066,
+        AC_GsaGTP => 0.00814,
+        GsaGTP => 0.06028 - AC_GsaGTP,
+        AC => ACtot - AC_GsaGTP,
+        cAMP => 1.50399,
+        PDEp => 0.00589,
+        PDE => PDEtot - PDEp,
+        RC_I => 0.31134,
+        RCcAMP_I => 0.28552,
+        RCcAMPcAMP_I => 0.04698,
+        RcAMPcAMP_I => 0.53564,
+        PKACI => 0.38375,
+        PKACI_PKI => 0.15239,
+        RC_II => 0.01018,
+        RCcAMP_II => 0.00934,
+        RCcAMPcAMP_II => 0.00154,
+        RcAMPcAMP_II => 0.09691,
+        PKACII => 0.06938,
+        PKACII_PKI => 0.02753,
+        PKI => PKItot - PKACI_PKI - PKACII_PKI,
+        I1p_PP1 => 0.19135,
+        PP1 => PP1tot - I1p_PP1,
+        I1p => 0.00033,
+        I1 => I1tot - I1p - I1p_PP1,
+        PLBp => 98.33936,
+        PLB => PLBtot - PLBp,
+        PLMp => 41.19479,
+        PLM => PLMtot - PLMp,
+        LCCap => 0.01204,
+        LCCa => LCCtot - LCCap,
+        LCCbp => 0.01313,
+        LCCb => LCCtot - LCCbp,
+        TnIp => 60.75646,
+        TnI => TnItot - TnIp,
+        KURp => 0.01794,
+        KURn => IKurtot - KURp,
+    ])
+
+    return rn
 end
+
+rn = build_bar_sys()
