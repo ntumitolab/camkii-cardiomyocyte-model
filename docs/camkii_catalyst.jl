@@ -337,10 +337,12 @@ tspan = (0.0, 400.0)
 osys = convert(ODESystem, rn, remove_conserved=true)
 oprob_ROS0 = ODEProblem(osys, [ROS=>0.0], tspan)
 oprob_ROS1 = ODEProblem(osys, [ROS=>1.0], tspan)
+oprob_ROS2 = ODEProblem(osys, [ROS=>2.0], tspan)
 alg = TRBDF2()
 
-sol_ROS0 = solve(oprob_ROS0, alg, callback=cawave3hz)
-sol_ROS1 = solve(oprob_ROS1, alg, callback=cawave3hz)
+sol_ROS0 = solve(oprob_ROS0, alg, callback=cawave1hz)
+sol_ROS1 = solve(oprob_ROS1, alg, callback=cawave1hz)
+sol_ROS2 = solve(oprob_ROS2, alg, callback=cawave1hz)
 
 plot(
     sol_ROS0,
@@ -355,8 +357,8 @@ plot(
 )
 
 #---
-plot(sol_ROS0, idxs=[CaM0])
-plot(sol_ROS1, idxs=[CaM0])
+plot(sol_ROS0, idxs=camk2act, label="ROS = 0.0", title="Act. CaMKII (1Hz)")
+plot!(sol_ROS1, idxs=camk2act, label="ROS = 1.0")
+plot!(sol_ROS2, idxs=camk2act, label="ROS = 2.0", ylim=(0.0, 1.0), size=(400, 400))
 
-plot(sol_ROS0, idxs=camk2act, label="ROS = 0.0", title="Act. CaMKII (3Hz)")
-plot!(sol_ROS1, idxs=camk2act, label="ROS = 1.0", title="Act. CaMKII (3Hz)")
+savefig("ROS.png")
