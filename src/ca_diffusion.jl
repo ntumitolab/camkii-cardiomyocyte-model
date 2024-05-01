@@ -15,7 +15,7 @@ function get_ca_pde_eqs(;
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
     @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t) TnI_PKAp(t)
-    @parameters Dca = 7 # mum^2/ms set to achive correct diff. speed 0.31 mum/ms
+    @parameters Dca = 7 # mum^2/ms for correct diffussion speed 0.31 mum/ms
     eqs = [
         Cai_mean ~ sum(collect(Cai)) / m,
         Cai_sub_SR ~ Cai[1],
