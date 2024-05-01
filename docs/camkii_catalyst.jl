@@ -14,7 +14,7 @@ function make_camodel(;
     decay_CaM=3,
     phospho_rate=1,
     phosphatase=1,
-    decay_calcium = 10.0,
+    decay_calcium=10.0,
 )
     ##  Two Ca2+ ions bind to C or N-lobe.
     caMon(Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off) = Ca^2 * k_1C_on * k_2C_on / (k_1C_off + k_2C_on * Ca)
@@ -64,31 +64,43 @@ function make_camodel(;
         (kCaM4P_on, kCaM4P_off), Ca4CaM + CaMKP <--> Ca4CaM_CaMKP
 
         ## Phosphorylation of CaMKII
-        k_phosCaM * (CaMKP + CaMKP2 + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK) --> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP)
+        k_phosCaM * (CaMKP + CaMKP2 + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX) / CaMKII_T, (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK) --> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP)
 
         ## Dephosphorylation
         k_dephospho, CaMKP --> CaMK
         ## Second phosphorylation
         (k_P1_P2, k_P2_P1), CaMKP <--> CaMKP2
+
+        ## Oxidation
+        (ROS * k_OXPOX, k_OXB), Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
+        (ROS * k_POXP, k_OXPP), Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
+        (kCaM4P_on, kCaM4P_off), Ca4CaM + CaMKPOX <--> Ca4CaM_CaMKPOX
+        (kCaM4_on, kCaM4_off), Ca4CaM + CaMKOX <--> Ca4CaM_CaMKOX
+        k_OXPP, CaMKPOX --> CaMKP
+        k_OXB, CaMKOX --> CaMK
     end
 
     setdefaults!(rn, [
         :Ca => carest,
         :CaM0 => cam_total,
-        :Ca2CaM_C => 0.0,
-        :Ca2CaM_N => 0.0,
-        :Ca4CaM => 0.0,
-        :CaM0_CaMK => 0.0,
-        :Ca2CaM_C_CaMK => 0.0,
-        :Ca2CaM_N_CaMK => 0.0,
-        :Ca4CaM_CaMK => 0.0,
-        :CaM0_CaMKP => 0.0,
-        :Ca2CaM_C_CaMKP => 0.0,
-        :Ca2CaM_N_CaMKP => 0.0,
-        :Ca4CaM_CaMKP => 0.0,
+        :Ca2CaM_C => 0,
+        :Ca2CaM_N => 0,
+        :Ca4CaM => 0,
+        :CaM0_CaMK => 0,
+        :Ca2CaM_C_CaMK => 0,
+        :Ca2CaM_N_CaMK => 0,
+        :Ca4CaM_CaMK => 0,
+        :CaM0_CaMKP => 0,
+        :Ca2CaM_C_CaMKP => 0,
+        :Ca2CaM_N_CaMKP => 0,
+        :Ca4CaM_CaMKP => 0,
         :CaMK => camkii_total,
-        :CaMKP => 0.0,
-        :CaMKP2 => 0.0,
+        :CaMKP => 0,
+        :CaMKP2 => 0,
+        :Ca4CaM_CaMKOX => 0,
+        :Ca4CaM_CaMKPOX => 0,
+        :CaMKPOX => 0,
+        :CaMKOX => 0,
         :dCa => decay_calcium,
         :dCaRev => 1.0,
         :fCa => decay_calcium,
@@ -137,23 +149,30 @@ function make_camodel(;
         :k_P1_P2 => 1 / 60,
         :k_P2_P1 => (1 / 6) * 0.25,
         :CaMKII_T => camkii_total,
+
+        ## Oxidation
+        :ROS => 0.0,
+        :k_OXB => 2.23e-2, #s-1
+        :k_OXPOX => 0.00003e3,
+        :k_POXP => 0.291, #uM-1s-1  0.291
+        :k_OXPP => 2.23e-2,
     ])
     return rn
 end
 
 # ## First simulation
 rn = make_camodel()
-@unpack Ca = rn
+@unpack Ca, ROS = rn
 
 # Adding calcium
 # Difference from the original model:
 # Calcium pulses started from 100 sec to 250 sec.
 function make_ca_events(;
     starttime=100,
-    step=1/3,
+    step=1 / 3,
     endtime=250,
-    peakCa = 4e-6
-    )
+    peakCa=4e-6
+)
     affect! = (integrator) -> begin
         t = integrator.t - starttime
         i = t / step
@@ -166,7 +185,8 @@ end
 
 # Solve the problem
 tspan = (0.0, 400.0)
-oprob = ODEProblem(rn, [], tspan)
+osys = convert(ODESystem, rn, remove_conserved=true)
+oprob = ODEProblem(osys, [], tspan)
 alg = TRBDF2()
 sol = solve(oprob, alg, callback=make_ca_events())
 
@@ -174,19 +194,23 @@ sol = solve(oprob, alg, callback=make_ca_events())
 plot(sol, idxs=Ca, tspan=(100, 150))
 
 # Components
-@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2 = rn
+@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaMKOX, CaMKII_T, CaMKPOX = rn
+
+camkiistates= [CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaMKPOX, CaMKOX]
+
 plot(
     sol,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=camkiistates,
     size=(800, 600)
 )
 
+camk2act = sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaMKPOX, CaMKOX]) / CaMKII_T
+
 # Active CaMKII
-plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="3Hz")
-plot!(sol, idxs=Ca*10, plotdensity=100_000, label="Ca * 10")
+plot(sol, idxs=camk2act, label="Act. CaMKII", title="3Hz", ylims=(0.0, 1.0))
 
 # Change frequency to 2Hz
-sol2 = solve(oprob, alg, callback=make_ca_events(step=1/2), progress=true)
+sol2 = solve(oprob, alg, callback=make_ca_events(step=1 / 2))
 
 # Calcium
 plot(sol2, idxs=Ca, tspan=(100, 150))
@@ -194,16 +218,15 @@ plot(sol2, idxs=Ca, tspan=(100, 150))
 # Components
 plot(
     sol2,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=camkiistates,
     size=(800, 600),
 )
 
 # Active CaMKII
-plot(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="2Hz")
-plot!(sol2, idxs=Ca*10, plotdensity=100_000, label="Ca * 10")
+plot(sol2, idxs=camk2act, label="Act. CaMKII", title="2Hz", ylims=(0.0, 1.0))
 
 # Change frequency to 1Hz
-sol3 = solve(oprob, alg, callback=make_ca_events(step=1), progress=true)
+sol3 = solve(oprob, alg, callback=make_ca_events(step=1))
 
 # Calcium
 plot(sol3, idxs=Ca, tspan=(100, 150))
@@ -211,29 +234,28 @@ plot(sol3, idxs=Ca, tspan=(100, 150))
 # Components
 plot(
     sol3,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=camkiistates,
     size=(800, 600),
 )
 
 # Active CaMKII
-plot(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="1Hz")
-plot!(sol3, idxs=Ca*10, plotdensity=100_000, label="Ca * 10")
+plot(sol3, idxs=camk2act, label="Act. CaMKII", title="1Hz", ylims=(0.0, 1.0))
 
 # Frequency-dependent response
-plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), title="Act. CaMKII", label="3Hz")
-plot!(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="2Hz")
-plot!(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="1Hz")
+plot(sol, idxs=camk2act, title="Act. CaMKII", label="3Hz")
+plot!(sol2, idxs=camk2act, label="2Hz")
+plot!(sol3, idxs=camk2act, label="1Hz", ylims=(0.0, 1.0))
 
 # ## More realistic calcium pulses
 # Exponential growth at the rising phase
 # and exponential decay at the falling phase
 function make_ca_waves(rn;
     starttime=100,
-    period=1/3,
+    period=1 / 3,
     endtime=250,
-    peakCa = 4e-6,
-    strength = 5,
-    )
+    peakCa=4e-6,
+    strength=5,
+)
 
     @unpack Ca, dCaRev = rn
     caidx = findfirst(isequal(Ca), states(rn))
@@ -262,20 +284,18 @@ cawave3hz = make_ca_waves(rn)
 sol = solve(oprob, alg, callback=cawave3hz)
 plot(sol, idxs=Ca, tspan=(200, 201))
 
-# Components
-@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2 = rn
 plot(
     sol,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=camkiistates,
     size=(800, 600)
 )
 
 # Active CaMKII
-plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="3Hz")
-plot!(sol, idxs=Ca*10, plotdensity=100_000, label="Ca * 10")
+plot(sol, idxs=camk2act, label="Act. CaMKII", title="3Hz", ylims=(0, 1))
 
 # Change frequency to 2Hz
-sol2 = solve(oprob, alg, callback=make_ca_waves(rn; period=1/2))
+cawave2hz = make_ca_waves(rn; period=1 / 2)
+sol2 = solve(oprob, alg, callback=cawave2hz)
 
 # Calcium
 plot(sol2, idxs=Ca, tspan=(100, 150))
@@ -283,16 +303,16 @@ plot(sol2, idxs=Ca, tspan=(100, 150))
 # Components
 plot(
     sol2,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=camkiistates,
     size=(800, 600),
 )
 
 # Active CaMKII
-plot(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="2Hz")
-plot!(sol2, idxs=Ca*10, plotdensity=100_000, label="Ca * 10")
+plot(sol2, idxs=camk2act, label="Act. CaMKII", title="2Hz", ylims=(0, 1))
 
 # Change frequency to 1Hz
-sol3 = solve(oprob, alg, callback=make_ca_waves(rn; period=1))
+cawave1hz = make_ca_waves(rn; period=1)
+sol3 = solve(oprob, alg, callback=cawave1hz)
 
 # Calcium
 plot(sol3, idxs=Ca, tspan=(100, 150))
@@ -300,15 +320,43 @@ plot(sol3, idxs=Ca, tspan=(100, 150))
 # Components
 plot(
     sol3,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=camkiistates,
     size=(800, 600),
 )
 
 # Active CaMKII
-plot(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="1Hz")
-plot!(sol3, idxs=Ca*10, plotdensity=100_000, label="Ca * 10")
+plot(sol3, idxs=camk2act, label="Act. CaMKII", title="1Hz", ylims=(0, 1))
 
 # Frequency-dependent response
-plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), title="Act. CaMKII", label="3Hz")
-plot!(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="2Hz")
-plot!(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="1Hz")
+plot(sol, idxs=camk2act, title="Act. CaMKII", label="3Hz")
+plot!(sol2, idxs=camk2act, label="2Hz")
+plot!(sol3, idxs=camk2act, label="1Hz", ylims=(0, 1))
+
+# ## Effect of ROS
+tspan = (0.0, 400.0)
+osys = convert(ODESystem, rn, remove_conserved=true)
+oprob_ROS0 = ODEProblem(osys, [ROS=>0.0], tspan)
+oprob_ROS1 = ODEProblem(osys, [ROS=>1.0], tspan)
+alg = TRBDF2()
+
+sol_ROS0 = solve(oprob_ROS0, alg, callback=cawave3hz)
+sol_ROS1 = solve(oprob_ROS1, alg, callback=cawave3hz)
+
+plot(
+    sol_ROS0,
+    idxs=camkiistates,
+    size=(800, 600)
+)
+
+plot(
+    sol_ROS1,
+    idxs=camkiistates,
+    size=(800, 600)
+)
+
+#---
+plot(sol_ROS0, idxs=[CaM0])
+plot(sol_ROS1, idxs=[CaM0])
+
+plot(sol_ROS0, idxs=camk2act, label="ROS = 0.0", title="Act. CaMKII (3Hz)")
+plot!(sol_ROS1, idxs=camk2act, label="ROS = 1.0", title="Act. CaMKII (3Hz)")
