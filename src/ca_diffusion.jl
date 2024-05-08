@@ -2,11 +2,12 @@
 using ModelingToolkit
 
 function get_ca_pde_eqs(;
-    dx=0.1,  # [um]
-    rSR_true=6, # [um]
-    rSL_true=10.5, # [um]
-    V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3) / 1000, # pL
-    V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3) / 1000, # pL
+    dx=0.1μm,
+    rSR_true=6μm,
+    rSL_true=10.5μm,
+    V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3),
+    V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3),
+    TnI_PKAp = 0,
 )
     @variables t
     D = Differential(t)
@@ -14,8 +15,8 @@ function get_ca_pde_eqs(;
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
-    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t) TnI_PKAp(t)
-    @parameters Dca = 7 # mum^2/ms for correct diffussion speed 0.31 mum/ms
+    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t)
+    @parameters Dca = 7μm^2/ms
     eqs = [
         Cai_mean ~ sum(collect(Cai)) / m,
         Cai_sub_SR ~ Cai[1],
