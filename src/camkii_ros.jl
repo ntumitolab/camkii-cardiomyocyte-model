@@ -3,16 +3,16 @@ using ModelingToolkit
 
 "Gnerating assymetric calcium wave"
 function ca_wave(t;
-    sharpness=0.38, assymetry=18, period=1 / 3,
-    ca_r=100e-9, ca_rise=550e-9, tstart=200.0, tend=300.0)
+    sharpness=0.38, assymetry=18, period=1 / 3second,
+    ca_r=100nM, ca_rise=550nM, tstart=200.0second, tend=300.0second)
     x = assymetry * ((t / period) % 1.0)
     return ca_r + (ca_rise * (x * exp(1 - x))^sharpness) * (t >= tstart) * (t <= tend)
 end
 
 "Exponential decay calcium model"
 function ca_decay(;
-    carest=50e-9, # Molar
-    decay_calcium=10.0, # Hz
+    carest=50nM,
+    decay_calcium=10.0Hz,
 )
     @parameters CaResting = carest
     @parameters dCa = decay_calcium
@@ -25,12 +25,13 @@ function ca_decay(;
 end
 
 function build_camkii_rn(Ca;
-    cam_total=30e-6, ## Total calmodulin concentration (Molar)
-    camkii_total=70e-6, ## Total CaMKII concentration (Molar)
+    cam_total=30μM, ## Total calmodulin Concentration
+    camkii_total=70μM, ## Total CaMKII Concentration
     binding_To_PCaMK=0.1,
     decay_CaM=3,
-    phospho_rate=1,
-    phosphatase=1,
+    phospho_rate=1Hz,
+    phosphatase=1Hz,
+    ROS =0.0μM,
 )
 
     caMon(Ca, k_1C_on, k_2C_on, k_1C_off, k_2C_off) = Ca^2 * k_1C_on * k_2C_on / (k_1C_off + k_2C_on * Ca)
@@ -86,8 +87,8 @@ function build_camkii_rn(Ca;
         (k_P1_P2, k_P2_P1), CaMKP <--> CaMKP2
 
         ## Oxidation
-        (ROS * k_OXPOX, k_OXB), Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
-        (ROS * k_POXP, k_OXPP), Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
+        ($ROS * k_OXPOX, k_OXB), Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
+        ($ROS * k_POXP, k_OXPP), Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
         (kCaM4P_on, kCaM4P_off), Ca4CaM + CaMKPOX <--> Ca4CaM_CaMKPOX
         (kCaM4_on, kCaM4_off), Ca4CaM + CaMKOX <--> Ca4CaM_CaMKOX
         k_OXPP, CaMKPOX --> CaMKP
@@ -95,81 +96,75 @@ function build_camkii_rn(Ca;
     end
 
     setdefaults!(rn, [
-        :Ca => carest,
         :CaM0 => cam_total,
-        :Ca2CaM_C => 0,
-        :Ca2CaM_N => 0,
-        :Ca4CaM => 0,
-        :CaM0_CaMK => 0,
-        :Ca2CaM_C_CaMK => 0,
-        :Ca2CaM_N_CaMK => 0,
-        :Ca4CaM_CaMK => 0,
-        :CaM0_CaMKP => 0,
-        :Ca2CaM_C_CaMKP => 0,
-        :Ca2CaM_N_CaMKP => 0,
-        :Ca4CaM_CaMKP => 0,
+        :Ca2CaM_C => 0μM,
+        :Ca2CaM_N => 0μM,
+        :Ca4CaM => 0μM,
+        :CaM0_CaMK => 0μM,
+        :Ca2CaM_C_CaMK => 0μM,
+        :Ca2CaM_N_CaMK => 0μM,
+        :Ca4CaM_CaMK => 0μM,
+        :CaM0_CaMKP => 0μM,
+        :Ca2CaM_C_CaMKP => 0μM,
+        :Ca2CaM_N_CaMKP => 0μM,
+        :Ca4CaM_CaMKP => 0μM,
         :CaMK => camkii_total,
-        :CaMKP => 0,
-        :CaMKP2 => 0,
-        :Ca4CaM_CaMKOX => 0,
-        :Ca4CaM_CaMKPOX => 0,
-        :CaMKPOX => 0,
-        :CaMKOX => 0,
-        :dCa => decay_calcium,
-        :dCaRev => 1.0,
-        :fCa => decay_calcium,
-        :CaResting => carest,
-        :k_1C_on => 5e6, ## 1.2-9.6uM-1s-1
-        :k_1C_off => 50, ## 10-70 s-1
-        :k_2C_on => 10e6, ## 5-25uM-1s-1.
-        :k_2C_off => 10, ## 8.5-10s-1.
+        :CaMKP => 0μM,
+        :CaMKP2 => 0μM,
+        :Ca4CaM_CaMKOX => 0μM,
+        :Ca4CaM_CaMKPOX => 0μM,
+        :CaMKPOX => 0μM,
+        :CaMKOX => 0μM,
+        :k_1C_on => 5e-3/(μM*ms), ## 1.2-9.6uM-1s-1
+        :k_1C_off => 50Hz, ## 10-70 s-1
+        :k_2C_on => 10e-3/(μM*ms), ## 5-25uM-1s-1.
+        :k_2C_off => 10Hz, ## 8.5-10s-1.
 
         ## N-lobe
-        :k_1N_on => 100e6, ## 25-260uM-1s-1
-        :k_1N_off => 2000, ## 1000-4000 s-1
-        :k_2N_on => 200e6, ## 50-300uM-1s-1.
-        :k_2N_off => 500, ## 500->1000.s-1
+        :k_1N_on => 100e-3/(μM*ms), ## 25-260uM-1s-1
+        :k_1N_off => 2000Hz, ## 1000-4000 s-1
+        :k_2N_on => 200e-3/(μM*ms), ## 50-300uM-1s-1.
+        :k_2N_off => 500Hz, ## 500->1000.s-1
 
         ## Ca2+ binding to CaM-CAMKII(K)
         ## C-lobe
-        :k_K1C_on => 44e6,
-        :k_K1C_off => 33,
-        :k_K2C_on => 44e6,
-        :k_K2C_off => 0.8, ## 0.49-4.9s-1
+        :k_K1C_on => 44E-3/(μM*ms),
+        :k_K1C_off => 33Hz,
+        :k_K2C_on => 44e6Hz/Molar,
+        :k_K2C_off => 0.8Hz, ## 0.49-4.9s-1
 
         ## N-lobe
-        :k_K1N_on => 76e6,
-        :k_K1N_off => 300,
-        :k_K2N_on => 76e6,
-        :k_K2N_off => 20, ## 6-60-1
-        :kCaM0_on => 3.8e3,
-        :kCaM2C_on => 0.92e6,
-        :kCaM2N_on => 0.12e6,
-        :kCaM4_on => 30e6,
-        :kCaM0_off => 5.5,
-        :kCaM2C_off => 6.8,
-        :kCaM2N_off => 1.7,
-        :kCaM4_off => 1.5,
-        :kCaM0P_on => 3.8e3 * binding_To_PCaMK,
-        :kCaM2CP_on => 0.92e6 * binding_To_PCaMK,
-        :kCaM2NP_on => 0.12e6 * binding_To_PCaMK,
-        :kCaM4P_on => 30e6 * binding_To_PCaMK,
-        :kCaM0P_off => 1 / decay_CaM,
-        :kCaM2CP_off => 1 / decay_CaM,
-        :kCaM2NP_off => 1 / decay_CaM,
-        :kCaM4P_off => 1 / decay_CaM,
+        :k_K1N_on => 76e6Hz/Molar,
+        :k_K1N_off => 300Hz,
+        :k_K2N_on => 76e6Hz/Molar,
+        :k_K2N_off => 20Hz, ## 6-60-1
+        :kCaM0_on => 3.8e3Hz/Molar,
+        :kCaM2C_on => 0.92e6Hz/Molar,
+        :kCaM2N_on => 0.12e6Hz/Molar,
+        :kCaM4_on => 30e6Hz/Molar,
+        :kCaM0_off => 5.5Hz,
+        :kCaM2C_off => 6.8Hz,
+        :kCaM2N_off => 1.7Hz,
+        :kCaM4_off => 1.5Hz,
+        :kCaM0P_on => 3.8e3Hz/Molar * binding_To_PCaMK,
+        :kCaM2CP_on => 0.92e6Hz/Molar * binding_To_PCaMK,
+        :kCaM2NP_on => 0.12e6Hz/Molar * binding_To_PCaMK,
+        :kCaM4P_on => 30e6Hz/Molar * binding_To_PCaMK,
+        :kCaM0P_off => 1Hz / decay_CaM,
+        :kCaM2CP_off => 1Hz / decay_CaM,
+        :kCaM2NP_off => 1Hz / decay_CaM,
+        :kCaM4P_off => 1Hz / decay_CaM,
         :k_phosCaM => 30 * phospho_rate,
-        :k_dephospho => (1 / 6) * phosphatase,
-        :k_P1_P2 => 1 / 60,
-        :k_P2_P1 => (1 / 6) * 0.25,
+        :k_dephospho => (1 / 6)* phosphatase,
+        :k_P1_P2 => 1 / 60Hz,
+        :k_P2_P1 => (1 / 6) * 0.25Hz,
         :CaMKII_T => camkii_total,
 
-        ## Oxidation
-        :ROS => 0.0,
-        :k_OXB => 2.23e-2, # Hz
-        :k_OXPOX => 0.00003e3,
-        :k_POXP => 0.291, #uM-1s-1  0.291
-        :k_OXPP => 2.23e-2, # Hz
+        ## Oxidation / reduction
+        :k_OXB => 2.23e-2Hz,
+        :k_OXPOX => 0.00003/(μM*ms),
+        :k_POXP => 0.291Hz/μM, #uM-1s-1  0.291
+        :k_OXPP => 2.23e-2Hz, # Hz
     ])
     return rn
 end
