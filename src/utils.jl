@@ -22,15 +22,15 @@ const μM = 1E-3mM          # micromolar
 const nM = 1E-6mM          # nanomolar
 const Amp = 1              # ampere
 const mA = 1E-3Amp         # milliampere
-const μA = 1E-6Amp         # micrpampere
+const μA = 1E-6Amp         # micropampere
 const Volt = 1             # volt
 const mV = 1E-3Volt        # millivolt
 const mS = mA / Volt       # milliseimens
 const T₀ = 310.0           # Default temp (37C)
-const F = 96485.0          # Faraday constant (columb / mol)
-const μF = 1E-6F
-const R = 8.314            # Ideal gas constant
-const VT = R * T₀ / F      # Thermal voltage (@37C), around 26.7 mV
+const Faraday = 96485.0          # Faraday constant (columb / mol)
+const μF = 1E-6Faraday
+const RGAS = 8.314            # Ideal gas constant
+const VT = RGAS * T₀ / Faraday      # Thermal voltage (@37C), around 26.7 mV
 const iVT = inv(VT)        # Reciprocal of thermal voltage (@37C)
 # Utility functions
 
