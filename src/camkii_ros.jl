@@ -1,13 +1,16 @@
 # CaMKII system with ROS activation
 using ModelingToolkit
 
-"Gnerating assymetric calcium wave"
+"Periodic assymetric calcium pulses"
 function ca_wave(t;
     sharpness=0.38, assymetry=18, period=1 / 3second,
     ca_r=100nM, ca_rise=550nM, tstart=200.0second, tend=300.0second)
-    x = assymetry * ((t / period) % 1.0)
+    tau = t / period
+    x = assymetry * (tau - floor(tau))
     return ca_r + (ca_rise * (x * exp(1 - x))^sharpness) * (t >= tstart) * (t <= tend)
 end
+
+@register_symbolic ca_wave(t)
 
 "Exponential decay calcium model"
 function ca_decay(;
