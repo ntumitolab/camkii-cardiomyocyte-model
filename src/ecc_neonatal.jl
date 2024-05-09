@@ -51,7 +51,6 @@ function build_neonatal_ecc_eqs(;
     LCCb_PKAp = 0,  # Fraction of LCC phosphorylated by PKA
 )
     @parameters begin
-
         Ca_o = 1796μM
         Na_o = 154578μM
         K_o = 5366μM
@@ -71,6 +70,7 @@ function build_neonatal_ecc_eqs(;
         Na_i(t)
         K_i(t) = 135000μM
         Cai_sub_SL(t)
+        Cai_sub_SR(t)
         E_Na(t)
         E_K(t)
         E_Ca(t)
