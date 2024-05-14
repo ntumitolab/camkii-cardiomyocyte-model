@@ -3,20 +3,6 @@
 # ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
 using ModelingToolkit
 
-# Calcium buffer term
-function beta_cai(Cai;
-    TnI_PKAp=0,
-    fracTnIpo=0.062698,
-    TrpnTotal=35,
-    CmdnTotal=50,
-    KmCmdn=2.38,
-    KmTrpn0=0.5
-)
-    fPKA_TnI = (1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIpo)) # Max effect +61#
-    KmTrpn = KmTrpn0 / fPKA_TnI
-    return inv(1 + TrpnTotal * KmTrpn / (Cai + KmTrpn)^2 + CmdnTotal * KmCmdn / (Cai + KmCmdn)^2)
-end
-
 function build_neonatal_model(;
     dx=0.1,  # [um]
     rSR_true=6, # [um]
@@ -42,5 +28,4 @@ function build_neonatal_model(;
         Ki = 135000  # [uM]
     end
 
-    cadiffeqs = get_ca_pde_eqs(;dx, rSR_true, rSL_true)
 end
