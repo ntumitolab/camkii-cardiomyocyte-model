@@ -1,34 +1,7 @@
 # CaMKII system with ROS activation
-using ModelingToolkit
 using Catalyst
 
-"Periodic assymetric calcium pulses"
-function ca_wave(t;
-    sharpness=0.38, assymetry=18, period=1 / 3second,
-    ca_r=100nM, ca_rise=550nM, tstart=200.0second, tend=300.0second)
-    tau = t / period
-    x = assymetry * (tau - floor(tau))
-    return ca_r + (ca_rise * (x * exp(1 - x))^sharpness) * (t >= tstart) * (t <= tend)
-end
-
-@register_symbolic ca_wave(t)
-
-"Exponential decay calcium model"
-function ca_decay(;
-    carest=50nM,
-    decay_calcium=10.0Hz,
-)
-    @parameters CaResting = carest
-    @parameters dCa = decay_calcium
-    @parameters dCaRev = 1
-    @variables t Ca(t)
-    D = Differential(t)
-    eq = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]
-    @named osys = ODESystem(eq, t)
-    return osys
-end
-
-function build_camkii_rn(Ca, ROS=0.0μM;
+function get_camkii_rn(Ca, ROS=0.0μM;
     cam_total=30μM, ## Total calmodulin Concentration
     camkii_total=70μM, ## Total CaMKII Concentration
     binding_To_PCaMK=0.1,

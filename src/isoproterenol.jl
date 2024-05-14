@@ -1,8 +1,8 @@
-# Beta adrenergic system
+# Beta adrenergic system activated by isoproterenol
 using Catalyst
 using ModelingToolkit
 
-function build_bar_rn(;
+function get_bar_rn(;
     ATP = 5000μM,
     ISO = 0μM,
     b1ARtot = 0.00528μM,
@@ -155,43 +155,57 @@ function build_bar_rn(;
         RG => 7.0e-5μM,
         b1AR_S464 => 0.00047μM,
         b1AR_S301 => 0.0011μM,
+        # receptor is conserved
         b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
         Gsby => 0.06071μM,
+        # G protein is conserved
         Gs => Gstot - Gsby - LRG - RG,
         GsaGDP => 0.00066μM,
         AC_GsaGTP => 0.00814μM,
         GsaGTP => 0.06028μM - AC_GsaGTP,
+        # adenylate cyclase is conserved
         AC => ACtot - AC_GsaGTP,
         cAMP => 1.50399μM,
         PDEp => 0.00589μM,
+        # PDE is conserved
         PDE => PDEtot - PDEp,
+        # PKACI regulator (R_I) is conserved
         RC_I => 0.31134μM,
         RCcAMP_I => 0.28552μM,
         RCcAMPcAMP_I => 0.04698μM,
         RcAMPcAMP_I => 0.53564μM,
         PKACI => 0.38375μM,
         PKACI_PKI => 0.15239μM,
+        # PKACII regulator (R_II) is conserved
         RC_II => 0.01018μM,
         RCcAMP_II => 0.00934μM,
         RCcAMPcAMP_II => 0.00154μM,
         RcAMPcAMP_II => 0.09691μM,
         PKACII => 0.06938μM,
         PKACII_PKI => 0.02753μM,
+        # Protein kinase inhibitor peptide (PKI) is conserved
         PKI => PKItot - PKACI_PKI - PKACII_PKI,
         I1p_PP1 => 0.19135μM,
+        # Protein phosphatase-1 (PP1) is conserved
         PP1 => PP1tot - I1p_PP1,
         I1p => 0.00033μM,
+        # Inhibitor 1 (I1) is conserved
         I1 => I1tot - I1p - I1p_PP1,
         PLBp => 98.33936μM,
+        # Phospholamban (PLB) is conserved
         PLB => PLBtot - PLBp,
         PLMp => 41.19479μM,
+        # Phospholemman (PLM) is conserved
         PLM => PLMtot - PLMp,
         LCCap => 0.01204μM,
+        # LCC regulatory domain is conserved
         LCCa => LCCtot - LCCap,
         LCCbp => 0.01313μM,
         LCCb => LCCtot - LCCbp,
+        # Troponin I is conserved
         TnIp => 60.75646μM,
         TnI => TnItot - TnIp,
+        # IKur channel is conserved
         KURp => 0.01794μM,
         KURn => IKurtot - KURp,
     ])

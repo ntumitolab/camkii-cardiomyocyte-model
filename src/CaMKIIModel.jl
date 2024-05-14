@@ -1,9 +1,9 @@
 module CaMKIIModel
-using ModelingToolkit
-using NaNMath
-
-export build_neonatal_model
 
 include("utils.jl")
-include("neonatal.jl")
+include("ca_wave.jl")
+include("camkii_ros.jl")
+include("isoproterenol.jl")
+include("istim.jl")
+
 end # module
