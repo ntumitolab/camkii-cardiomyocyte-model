@@ -23,27 +23,37 @@ function get_bar_rn(;
     ACtot = 70.57e-3μM,
 )
     rn = @reaction_network begin
+
         # Beta adrenergic receptor
-        ($ISO * kf_LR, kr_LR), b1AR <--> LR  # Ligand-receptor
-        (kf_LRG, kr_LRG), LR + Gs <--> LRG   # G protein association
-        (kf_RG, kr_RG), b1AR + Gs <--> RG    # G protein association
-        k_G_act, RG --> b1AR + GsaGTP + Gsby
-        k_G_act, LRG --> b1AR + GsaGTP + Gsby
+        # Ligand binding
+        ($ISO * kf_LR, kr_LR), b1AR <--> LR
+        # G protein association (with ligand)
+        (kf_LRG, kr_LRG), LR + Gs <--> LRG
+        # G protein association (without ligand)
+        (kf_RG, kr_RG), b1AR + Gs <--> RG
+        # Release of alpha subunit
+        k_G_act, (RG, LRG) --> b1AR + GsaGTP + Gsby
+        # Inactivation of alpha subunit
         k_G_hyd, GsaGTP --> GsaGDP
+        # alpha subunit joins beta-gamma subunit
         k_G_reassoc, GsaGDP + Gsby --> Gs
+        # Receptor inactivation
         kf_bARK, LR --> b1AR_S464
         kf_bARK, LRG --> b1AR_S464 + Gs
         kr_bARK, b1AR_S464 --> b1AR
+        # PKA-mediated receptor inactivation
         (kf_PKA * PKACI, kr_PKA), b1AR <--> b1AR_S301
         kf_PKA * PKACI, LR --> b1AR_S301
         kf_PKA * PKACI, LRG --> b1AR_S301 + Gs
         kf_PKA * PKACI, RG --> b1AR_S301 + Gs
-        # Adenylyl cyclase
+        # Adenylate cyclase
         (kf_AC_Gsa, kr_AC_Gsa), AC + GsaGTP <--> AC_GsaGTP
         k_G_hyd, AC_GsaGTP --> AC + GsaGDP
         (k_PKA_PDE * PKACII, k_PP_PDE), PDE <--> PDEp
-        mm(ATP, k_AC_Gsa * AC_GsaGTP, Km_AC_Gsa) + mm(ATP, k_AC_basal * AC, Km_AC_basal), 0 --> cAMP
-        mm(cAMP, k_cAMP_PDE * PDE + k_cAMP_PDEp * PDEp, Km_PDE_cAMP), cAMP --> 0
+        mm(ATP, k_AC_Gsa * AC_GsaGTP, Km_AC_Gsa), 0 --> cAMP
+        mm(ATP, k_AC_basal * AC, Km_AC_basal), 0 --> cAMP
+        mm(cAMP, k_cAMP_PDE * PDE, Km_PDE_cAMP), cAMP --> 0
+        mm(cAMP, k_cAMP_PDEp * PDEp, Km_PDE_cAMP), cAMP --> 0
         (kf_RC_cAMP, kr_RC_cAMP), RC_I + cAMP <--> RCcAMP_I
         (kf_RCcAMP_cAMP, kr_RCcAMP_cAMP), RCcAMP_I + cAMP <--> RCcAMPcAMP_I
         (kf_RcAMPcAMP_C, kr_RcAMPcAMP_C), RCcAMPcAMP_I <--> RcAMPcAMP_I + PKACI
@@ -53,7 +63,7 @@ function get_bar_rn(;
         (kf_RcAMPcAMP_C, kr_RcAMPcAMP_C), RCcAMPcAMP_II <--> RcAMPcAMP_II + PKACII
         (kf_PKA_PKI, kr_PKA_PKI), PKACII + PKI <--> PKACII_PKI
 
-        # I-1/PP1/PLB/TnI module
+        # I-1/PP1/PLB/TnI modification
         mm(I1, k_PKA_I1 * PKACI, Km_PKA_I1), I1 => I1p
         mm(I1p, Vmax_PP2A_I1, Km_PP2A_I1), I1p => I1
         (kf_PP1_I1, kr_PP1_I1), I1p + PP1 <--> I1p_PP1
@@ -212,5 +222,3 @@ function get_bar_rn(;
 
     return rn
 end
-
-rn = build_bar_sys()

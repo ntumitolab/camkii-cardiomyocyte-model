@@ -13,13 +13,15 @@ end
 @register_symbolic ca_wave(t)
 
 "Exponential decay calcium model"
-function ca_decay(;
+function ca_decay_sys(;
     carest=50nM,
     decay_calcium=10.0Hz,
 )
-    @parameters CaResting = carest
-    @parameters dCa = decay_calcium
-    @parameters dCaRev = 1
+    @parameters begin
+        CaResting = carest
+        dCa = decay_calcium
+        dCaRev = 1
+    end
     @variables t Ca(t)
     D = Differential(t)
     eq = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]

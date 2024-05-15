@@ -32,7 +32,7 @@ function get_camkii_rn(Ca, ROS=0.0μM;
         (kCaM4_on, kCaM4_off), Ca4CaM + CaMKOX <--> Ca4CaM_CaMKOX
 
         ## Phosphorylation of CaMKII
-        k_phosCaM * (CaMKP + CaMKP2 + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX) / CaMKII_T, (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKOX) --> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, Ca4CaM_CaMKPOX)
+        k_phosCaM * (CaMKP + CaMKP2 + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX) / $camkii_total, (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKOX) --> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, Ca4CaM_CaMKPOX)
 
         ## Second phosphorylation of CaMKII-P
         (k_P1_P2, k_P2_P1), CaMKP <--> CaMKP2
@@ -118,7 +118,6 @@ function get_camkii_rn(Ca, ROS=0.0μM;
         :k_dephospho => (1 / 6)* phosphatase,
         :k_P1_P2 => 1 / 60Hz,
         :k_P2_P1 => (1 / 6) * 0.25Hz,
-        :CaMKII_T => camkii_total,
 
         ## Oxidation / reduction
         :k_OXPOX => 0.03Hz/μM,
