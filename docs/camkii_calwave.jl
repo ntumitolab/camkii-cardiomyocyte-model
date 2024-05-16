@@ -4,7 +4,7 @@
 using Catalyst
 using DifferentialEquations
 using ModelingToolkit
-using Plots
+using CaMKIIModel: get_camkii_rn, μM
 
 function ca_wave(t; sharpness=0.38, assymetry=18, period=1 / 3, ca_r=100e-9, ca_rise=550e-9, tstart=200.0, tend=300.0)
     x = assymetry * ((t / period) % 1.0)
