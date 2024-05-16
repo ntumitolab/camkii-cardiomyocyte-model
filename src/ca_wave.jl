@@ -10,8 +10,6 @@ function ca_wave(t;
     return ca_r + (ca_rise * (x * exp(1 - x))^sharpness) * (t >= tstart) * (t <= tend)
 end
 
-@register_symbolic ca_wave(t)
-
 "Exponential decay calcium model"
 function ca_decay_sys(;
     carest=50nM,
