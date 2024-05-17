@@ -1,9 +1,8 @@
 # # Isolated CaMKII response
 using Catalyst
-using OrdinaryDiffEq
 using ModelingToolkit
+using DifferentialEquations
 using Plots
-using DiffEqCallbacks
 using CaMKIIModel: nM, μM, Hz, get_camkii_rn
 
 # Exponential decay calcium model
