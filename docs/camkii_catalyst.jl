@@ -24,6 +24,12 @@ rn = get_camkii_rn(Ca, ROS)
 ## TODO: Why Ca(t) is eleiminated?
 rnsys = convert(ODESystem, rn, remove_conserved=true)
 
+
+
+@named connsys = ODESystem([osys.Ca ~ rnsys.Ca], t)
+
+@named sys = compose(ODESystem([osys.Ca ~ rnsys.Ca], t, name=:composed), [])
+
 @named odesys = extend(casys, rnsys)
 
 observed(odesys)
