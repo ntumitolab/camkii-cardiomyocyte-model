@@ -1,5 +1,5 @@
 # Stimulation current
-using DiffEqCallbacks
+using DifferentialEquations
 
 function build_stim_events(starttime, endtime, period, duty, strength, sym; baseline=0, proposeddt=0.01)
     rise! = (integrator) -> begin
