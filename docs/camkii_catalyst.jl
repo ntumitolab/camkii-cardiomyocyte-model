@@ -5,33 +5,35 @@ using DifferentialEquations
 using Plots
 using CaMKIIModel: nM, μM, Hz, get_camkii_rn
 
+# ## Setup model
 # Exponential decay calcium model
-@parameters begin
-    CaResting = 50nM
-    dCa = 10.0Hz
-    dCaRev = 1
+function ca_decay_sys(;
+    carest=50nM,
+    decay_calcium=10.0Hz,
+)
+    @parameters begin
+        CaResting = carest
+        dCa = decay_calcium
+        dCaRev = 1
+    end
+    @variables t Ca(t)
+    D = Differential(t)
+    eq = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]
+    @named sys = ODESystem(eq, t)
+    return sys
 end
-@variables t Ca(t)
-D = Differential(t)
-eq = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]
-@named osys = ODESystem(eq, t)
 
-# ## First simulation
+casys = ca_decay_sys()
+
+# CaMKII model
 @parameters ROS=0μM
-rn = get_camkii_rn(Ca, ROS)
+rn = get_camkii_rn(casys.Ca, ROS)
+rnsys = convert(ODESystem, rn, remove_conserved=true) ## Why Ca(t) is eleiminated with remove_conserved?
+@named camkiisys = ODESystem( equations(rnsys), t)    ## Need to recover Ca(t) here.
+sys = extend(casys, camkiisys) |> structural_simplify
 
-## TODO: Why Ca(t) is eleiminated?
-rnsys = convert(ODESystem, rn, remove_conserved=true)
-
-
-
-@named connsys = ODESystem([osys.Ca ~ rnsys.Ca], t)
-
-@named sys = compose(ODESystem([osys.Ca ~ rnsys.Ca], t, name=:composed), [])
-
-@named odesys = extend(casys, rnsys)
-
-observed(odesys)
+tspan = (0.0, 400.0)
+prob = ODEProblem(sys, [], tspan)
 
 # Calcium pulses
 function make_ca_events(;
@@ -49,6 +51,8 @@ function make_ca_events(;
     end
     return PresetTimeCallback(starttime:step:endtime, affect!)
 end
+
+# ## First simulation
 
 # Solve the problem
 tspan = (0.0, 400.0)

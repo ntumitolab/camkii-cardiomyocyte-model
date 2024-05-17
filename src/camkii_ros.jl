@@ -2,6 +2,16 @@
 using Catalyst
 using ModelingToolkit
 
+function add_rate!(rates, v, substrates, products)
+    for s in substrates
+        rates[s] -= v
+    end
+    for p in products
+        rates[p] += v
+    end
+    return rates
+end
+
 function get_camkii_eqs(
     Ca, ROS=0.0μM;
     cam_total=30μM, ## Total calmodulin Concentration
@@ -70,7 +80,7 @@ function get_camkii_eqs(
         k_OXPP = 2.23e-2Hz
     end
 
-    @variables begin
+    sts = @variables begin
         t
         CaM0(t)
         Ca2CaM_C(t) = 0
@@ -97,51 +107,62 @@ function get_camkii_eqs(
     D = Differential(t)
     _konoff(k1on, k1off, k2on, k2off) = (Ca^2 * k1on * k2on / (Ca * k2on + k1off), k1off * k2off / (Ca * k2on + k1off))
 
+    rates = Dict(sts .=> Num(0))  ## Record accumulated rates
+
     ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
     kcon, kcoff = _konoff(k_1C_on, k_1C_off, k_2C_on, k_2C_off)
-    knon, knoff = _konoff(k_1N_on, k_1N_off, k_2CNon, k_2N_off)
+    knon, knoff = _konoff(k_1N_on, k_1N_off, k_2N_on, k_2N_off)
 
-    # Record rates
-    #===
-    rates = Dict(Ca=>Num(0))
-    rates[Ca] += 1
-    rates[Ca] -= dCa
-    ===#
-
-    v_CaM0_to_Ca2CaM_C = kcon * CaM0 - kcoff * Ca2CaM_C
-    v_Ca2CaM_C_to_Ca4CaM = kcon * Ca2CaM_C - kcoff * Ca4CaM
-    v_CaM0_to_Ca2CaM_N = knon * CaM0 - knoff * Ca2CaM_N
-    v_Ca2CaM_N_to_Ca4CaM = knon * Ca2CaM_N - knoff * Ca4CaM
+    add_rate!(rates, kcon * CaM0 - kcoff * Ca2CaM_C, [CaM0], [Ca2CaM_C])
+    add_rate!(rates, kcon * Ca2CaM_C - kcoff * Ca4CaM, [Ca2CaM_C], [Ca4CaM])
+    add_rate!(rates, knon * CaM0 - knoff * Ca2CaM_N, [CaM0], [Ca2CaM_N])
+    add_rate!(rates, knon * Ca2CaM_N - knoff * Ca4CaM, [Ca2CaM_N], [Ca4CaM])
 
     ## Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII(P) complex
     kkcon, kkcoff = _konoff(k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off)
-    kknon, kknoff = _konoff(k_K1N_on, k_K1N_off, k_K2CNon, k_K2N_off)
+    kknon, kknoff = _konoff(k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
 
-    v_CaM0_CaMK_to_Ca2CaM_C_CaMK = kkcon * CaM0_CaMK - kkcoff * Ca2CaM_C_CaMK
-    v_Ca2CaM_C_CaMK_to_Ca4CaM_CaMK = kkcon * Ca2CaM_C_CaMK - kkcoff * Ca4CaM_CaMK
-    v_CaM0_CaMKP_to_Ca2CaM_C_CaMKP = kkcon * CaM0_CaMKP - kkcoff * Ca2CaM_C_CaMKP
-    v_Ca2CaM_C_CaMKP_to_Ca4CaM_CaMKP = kkcon * Ca2CaM_C_CaMKP - kkcoff * Ca4CaM_CaMKP
-    v_CaM0_CaMK_to_Ca2CaM_N_CaMK = kknon * CaM0_CaMK - kknoff * Ca2CaM_N_CaMK
-    v_Ca2CaM_N_CaMK_to_Ca4CaM_CaMK = kknon * Ca2CaM_N_CaMK - kknoff * Ca4CaM_CaMK
-    v_CaM0_CaMKP_to_Ca2CaM_N_CaMKP = kknon * CaM0_CaMKP - kknoff * Ca2CaM_N_CaMKP
-    v_Ca2CaM_N_CaMKP_to_Ca4CaM_CaMKP = kknon * Ca2CaM_N_CaMKP - kknoff * Ca4CaM_CaMKP
+    add_rate!(rates, kkcon * CaM0_CaMK - kkcoff * Ca2CaM_C_CaMK, [CaM0_CaMK], [Ca2CaM_C_CaMK])
+    add_rate!(rates, kkcon * Ca2CaM_C_CaMK - kkcoff * Ca4CaM_CaMK, [Ca2CaM_C_CaMK], [Ca4CaM_CaMK])
+    add_rate!(rates, kkcon * CaM0_CaMKP - kkcoff * Ca2CaM_C_CaMKP, [CaM0_CaMKP], [Ca2CaM_C_CaMKP])
+    add_rate!(rates, kkcon * Ca2CaM_C_CaMKP - kkcoff * Ca4CaM_CaMKP, [Ca2CaM_C_CaMKP], [Ca4CaM_CaMKP])
+    add_rate!(rates, kknon * CaM0_CaMK - kknoff * Ca2CaM_N_CaMK, [CaM0_CaMK], [Ca2CaM_N_CaMK])
+    add_rate!(rates, kknon * Ca2CaM_N_CaMK - kknoff * Ca4CaM_CaMK, [Ca2CaM_N_CaMK], [Ca4CaM_CaMK])
+    add_rate!(rates, kknon * CaM0_CaMKP - kknoff * Ca2CaM_N_CaMKP, [CaM0_CaMKP], [Ca2CaM_N_CaMKP])
+    add_rate!(rates, kknon * Ca2CaM_N_CaMKP - kknoff * Ca4CaM_CaMKP, [Ca2CaM_N_CaMKP], [Ca4CaM_CaMKP])
 
     ## CaM binding to CaMKII / CaMkII-P / CaMkII-POX / CaMkII-OX
-    v_CaM0_CaMK = kCaM0_on * CaM0 * CaMK - kCaM0_off * CaM0_CaMK
-    v_Ca2CaM_C_CaMK = kCaM2C_on * Ca2CaM_C * CaMK - kCaM2C_off * Ca2CaM_C_CaMK
-    v_Ca2CaM_N_CaMK = kCaM2N_on * Ca2CaM_N * CaMK - kCaM2N_off * Ca2CaM_N_CaMK
-    v_Ca4CaM_CaMK = kCaM4_on * Ca4CaM * CaMK - kCaM4_off * Ca4CaM_CaMK
-    v_CaM0_CaMKP = kCaM0P_on * CaM0 * CaMKP - kCaM0P_off * CaM0_CaMKP
-    v_Ca2CaM_C_CaMKP = kCaM2CP_on * Ca2CaM_C * CaMKP - kCaM2CP_off * Ca2CaM_C_CaMKP
-    v_Ca2CaM_N_CaMKP = kCaM2NP_on * Ca2CaM_N * CaMKP - kCaM2NP_off * Ca2CaM_N_CaMKP
-    v_Ca4CaM_CaMKP = kCaM4P_on * Ca4CaM * CaMKP - kCaM4P_off * Ca4CaM_CaMKP
-    v_Ca4CaM_CaMKOX = kCaM4_on * Ca4CaM * CaMKOX - kCaM4_off * Ca4CaM_CaMKOX
-    v_Ca4CaM_CaMKPOX = kCaM4P_on * Ca4CaM * CaMKPOX - kCaM4P_off * Ca4CaM_CaMKPOX
+    add_rate!(rates, kCaM0_on * CaM0 * CaMK - kCaM0_off * CaM0_CaMK, [CaM0, CaMK], [CaM0_CaMK])
+    add_rate!(rates, kCaM2C_on * Ca2CaM_C * CaMK - kCaM2C_off * Ca2CaM_C_CaMK, [Ca2CaM_C, CaMK], [Ca2CaM_C_CaMK])
+    add_rate!(rates, kCaM2N_on * Ca2CaM_N * CaMK - kCaM2N_off * Ca2CaM_N_CaMK, [Ca2CaM_N, CaMK], [Ca2CaM_N_CaMK])
+    add_rate!(rates, kCaM4_on * Ca4CaM * CaMK - kCaM4_off * Ca4CaM_CaMK, [Ca4CaM, CaMK], [Ca4CaM_CaMK])
+    add_rate!(rates, kCaM0P_on * CaM0 * CaMKP - kCaM0P_off * CaM0_CaMKP, [CaM0, CaMKP], [CaM0_CaMKP])
+    add_rate!(rates, kCaM2CP_on * Ca2CaM_C * CaMKP - kCaM2CP_off * Ca2CaM_C_CaMKP, [Ca2CaM_C, CaMKP], [Ca2CaM_C_CaMKP])
+    add_rate!(rates, kCaM2NP_on * Ca2CaM_N * CaMKP - kCaM2NP_off * Ca2CaM_N_CaMKP, [Ca2CaM_N, CaMKP], [Ca2CaM_N_CaMKP])
+    add_rate!(rates, kCaM4P_on * Ca4CaM * CaMKP - kCaM4P_off * Ca4CaM_CaMKP, [Ca4CaM, CaMKP], [Ca4CaM_CaMKP])
+    add_rate!(rates, kCaM4_on * Ca4CaM * CaMKOX - kCaM4_off * Ca4CaM_CaMKOX, [Ca4CaM, CaMKOX], [Ca4CaM_CaMKOX])
+    add_rate!(rates, kCaM4P_on * Ca4CaM * CaMKPOX - kCaM4P_off * Ca4CaM_CaMKPOX, [Ca4CaM, CaMKPOX], [Ca4CaM_CaMKPOX])
 
-    # Phosphorylation of CaMKII
-    kphos = k_phosCaM * CaMKII_act
-    vphos_Ca2CaM_C_CaMK = kphos * Ca2CaM_C_CaMK
-    vphos_Ca2CaM_N_CaMK = kphos * Ca2CaM_N_CaMK
+    ## Phosphorylation of CaMKII
+    ## (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKOX) --> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, Ca4CaM_CaMKPOX)
+    add_rate!(rates, k_phosCaM * Ca2CaM_C_CaMK, [Ca2CaM_C_CaMK], [Ca2CaM_C_CaMKP])
+    add_rate!(rates, k_phosCaM * Ca2CaM_N_CaMK, [Ca2CaM_N_CaMK], [Ca2CaM_N_CaMKP])
+    add_rate!(rates, k_phosCaM * Ca4CaM_CaMK, [Ca4CaM_CaMK], [Ca4CaM_CaMKP])
+    add_rate!(rates, k_phosCaM * Ca4CaM_CaMKOX, [Ca4CaM_CaMKOX], [Ca4CaM_CaMKPOX])
+
+    ## Second phosphorylation of CaMKII-P
+    add_rate!(rates, k_P1_P2 * CaMKP - k_P2_P1 * CaMKP2, [CaMKP], [CaMKP2])
+
+    ## Dephosphorylation of CaMKII-P
+    add_rate!(rates, k_dephospho * CaMKP, [CaMKP], [CaMK])
+    add_rate!(rates, k_dephospho * CaMKPOX, [CaMKPOX], [CaMKOX])
+
+    ## Redox
+    ## Ca4CaM_CaMK(P) <--> Ca4CaM_CaMKOX(P)
+    add_rate!(rates, ROS * k_OXPOX * Ca4CaM_CaMK - k_OXB * Ca4CaM_CaMKOX, [Ca4CaM_CaMK], [Ca4CaM_CaMKOX])
+    add_rate!(rates, ROS * k_POXP * Ca4CaM_CaMKP - k_OXPP * Ca4CaM_CaMKPOX, [Ca4CaM_CaMKP], [Ca4CaM_CaMKPOX])
+    add_rate!(rates, k_OXB * CaMKOX, [CaMKOX], [CaMK])
+    add_rate!(rates, k_OXPP * CaMKPOX, [CaMKPOX], [CaMKP])
 
     eqs = [
         CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
@@ -149,26 +170,31 @@ function get_camkii_eqs(
         CaMKII_act ~ (CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX) / CAMKII_T,
         # D(CaM0)  ## Conserved
         # D(CaMK)  ## Conserved
-        D(Ca2CaM_C) ~ v_CaM0_to_Ca2CaM_C - v_Ca2CaM_C_to_Ca4CaM - v_Ca2CaM_C_CaMK - v_Ca2CaM_C_CaMKP,
-        D(Ca2CaM_N) ~ v_CaM0_to_Ca2CaM_N - v_Ca2CaM_N_to_Ca4CaM - v_Ca2CaM_N_CaMK - v_Ca2CaM_N_CaMKP,
-        D(Ca4CaM) ~ v_Ca2CaM_C_to_Ca4CaM + v_Ca2CaM_N_to_Ca4CaM - v_Ca4CaM_CaMK - v_Ca4CaM_CaMKP - v_Ca4CaM_CaMKOX - v_Ca4CaM_CaMKPOX,
-        D(CaM0_CaMK) ~ -v_CaM0_CaMK_to_Ca2CaM_C_CaMK - v_CaM0_CaMK_to_Ca2CaM_N_CaMK + v_CaM0_CaMK,
-        D(Ca2CaM_C_CaMK) ~ v_CaM0_CaMK_to_Ca2CaM_C_CaMK - v_Ca2CaM_C_CaMK_to_Ca4CaM_CaMK + v_Ca2CaM_C_CaMK - vphos_Ca2CaM_C_CaMK,
-        D(Ca2CaM_N_CaMK) ~ v_CaM0_CaMK_to_Ca2CaM_N_CaMK - v_Ca2CaM_N_CaMK_to_Ca4CaM_CaMK + v_Ca2CaM_N_CaMK - vphos_Ca2CaM_N_CaMK,
-        D(Ca4CaM_CaMK) ~ v_Ca2CaM_C_CaMK_to_Ca4CaM_CaMK + v_Ca2CaM_N_CaMK_to_Ca4CaM_CaMK + v_Ca4CaM_CaMK,
-        D(Ca2CaM_C_CaMKP) ~ v_CaM0_CaMKP_to_Ca2CaM_C_CaMKP - v_Ca2CaM_C_CaMKP_to_Ca4CaM_CaMKP + v_Ca2CaM_C_CaMKP + vphos_Ca2CaM_C_CaMK,
-        D(Ca2CaM_N_CaMKP) ~ v_CaM0_CaMKP_to_Ca2CaM_N_CaMKP - v_Ca2CaM_N_CaMKP_to_Ca4CaM_CaMKP + v_Ca2CaM_N_CaMKP + vphos_Ca2CaM_N_CaMK,
-        D(Ca4CaM_CaMKP) ~ v_Ca2CaM_C_CaMKP_to_Ca4CaM_CaMKP + v_Ca2CaM_N_CaMKP_to_Ca4CaM_CaMKP + v_Ca4CaM_CaMKP,
-        D(CaMKP) ~ -v_CaM0_CaMKP - v_Ca2CaM_C_CaMKP - v_Ca2CaM_N_CaMKP - v_Ca4CaM_CaMKP,
-        D(CaM0_CaMKP) ~ -v_CaM0_CaMKP_to_Ca2CaM_C_CaMKP - v_CaM0_CaMKP_to_Ca2CaM_N_CaMKP + v_CaM0_CaMKP,
-        D(CaMKOX) ~ -v_Ca4CaM_CaMKOX,
-        D(CaMKPOX) ~ -v_Ca4CaM_CaMKPOX,
-        D(Ca4CaM_CaMKOX) ~ v_Ca4CaM_CaMKOX,
-        D(Ca4CaM_CaMKPOX) ~ v_Ca4CaM_CaMKPOX,
+        D(Ca2CaM_C) ~ rates[Ca2CaM_C],
+        D(Ca2CaM_N) ~ rates[Ca2CaM_N],
+        D(Ca4CaM) ~ rates[Ca4CaM],
+        D(CaM0_CaMK) ~ rates[CaM0_CaMK],
+        D(Ca2CaM_C_CaMK) ~ rates[Ca2CaM_C_CaMK],
+        D(Ca2CaM_N_CaMK) ~ rates[Ca2CaM_N_CaMK],
+        D(Ca4CaM_CaMK) ~ rates[Ca4CaM_CaMK],
+        D(Ca2CaM_C_CaMKP) ~ rates[Ca2CaM_C_CaMKP],
+        D(Ca2CaM_N_CaMKP) ~ rates[Ca2CaM_N_CaMKP],
+        D(Ca4CaM_CaMKP) ~ rates[Ca4CaM_CaMKP],
+        D(CaMKP) ~ rates[CaMKP],
+        D(CaMKP2) ~ rates[CaMKP2],
+        D(CaM0_CaMKP) ~ rates[CaM0_CaMKP],
+        D(CaMKOX) ~ rates[CaMKOX],
+        D(CaMKPOX) ~ rates[CaMKPOX],
+        D(Ca4CaM_CaMKOX) ~ rates[Ca4CaM_CaMKOX],
+        D(Ca4CaM_CaMKPOX) ~ rates[Ca4CaM_CaMKPOX],
     ]
 
     return eqs
 end
+
+@variables t Ca(t)
+eqs = get_camkii_eqs(Ca)
+
 
 function get_camkii_rn(Ca, ROS=0.0μM;
     cam_total=30μM, ## Total calmodulin Concentration
