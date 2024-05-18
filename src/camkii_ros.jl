@@ -2,16 +2,6 @@
 using Catalyst
 using ModelingToolkit
 
-function add_rate!(rates, v, substrates, products)
-    for s in substrates
-        rates[s] -= v
-    end
-    for p in products
-        rates[p] += v
-    end
-    return rates
-end
-
 function get_camkii_eqs(
     Ca, ROS=0.0μM;
     cam_total=30μM, ## Total calmodulin Concentration

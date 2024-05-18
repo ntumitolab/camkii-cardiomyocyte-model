@@ -70,3 +70,14 @@ function ghkVm(px, vm, x_i, x_o, z = 1)
     em1 = expm1(zvfrt)
     return ghk(px, x_i, x_o, zvfrt, em1, z)
 end
+
+"Accumulate reaction rates in a reaction network"
+function add_rate!(rates, v, substrates, products)
+    for s in substrates
+        rates[s] -= v
+    end
+    for p in products
+        rates[p] += v
+    end
+    return rates
+end
