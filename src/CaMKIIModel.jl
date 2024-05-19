@@ -1,7 +1,9 @@
 module CaMKIIModel
-using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
-using NaNMath
 
 include("utils.jl")
+include("ca_wave.jl")
+include("camkii_ros.jl")
+include("isoproterenol.jl")
+include("istim.jl")
+
 end # module

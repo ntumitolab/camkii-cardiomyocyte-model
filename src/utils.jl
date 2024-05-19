@@ -22,15 +22,16 @@ const μM = 1E-3mM          # micromolar
 const nM = 1E-6mM          # nanomolar
 const Amp = 1              # ampere
 const mA = 1E-3Amp         # milliampere
-const μA = 1E-6Amp         # micrpampere
+const μA = 1E-6Amp         # micropampere
 const Volt = 1             # volt
 const mV = 1E-3Volt        # millivolt
 const mS = mA / Volt       # milliseimens
+const Farad = Amp * second / Volt
+const μF = 1E-6Farad
 const T₀ = 310.0           # Default temp (37C)
-const F = 96485.0          # Faraday constant (columb / mol)
-const μF = 1E-6F
-const R = 8.314            # Ideal gas constant
-const VT = R * T₀ / F      # Thermal voltage (@37C), around 26.7 mV
+const Faraday = 96485.0    # Faraday constant (columb / mol)
+const RGAS = 8.314            # Ideal gas constant
+const VT = RGAS * T₀ / Faraday      # Thermal voltage (@37C), around 26.7 mV
 const iVT = inv(VT)        # Reciprocal of thermal voltage (@37C)
 # Utility functions
 
@@ -68,4 +69,15 @@ function ghkVm(px, vm, x_i, x_o, z = 1)
     zvfrt = z * vm * iVT
     em1 = expm1(zvfrt)
     return ghk(px, x_i, x_o, zvfrt, em1, z)
+end
+
+"Accumulate reaction rates in a reaction network"
+function add_rate!(rates, v, substrates, products)
+    for s in substrates
+        rates[s] -= v
+    end
+    for p in products
+        rates[p] += v
+    end
+    return rates
 end

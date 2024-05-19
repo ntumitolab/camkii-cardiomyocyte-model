@@ -2,8 +2,11 @@ using Catalyst
 using DifferentialEquations
 using Plots
 using ModelingToolkit
+using Sundials
 using Statistics
+using XLSX
 import NaNMath as nm
+Plots.default(fmt=:png)
 
 function beta_cai(Cai, TnI_PKAp)
     fracTnIpo = 0.062698  # Derived quantity (TnI_PKAp(baseline)/TnItot)
@@ -432,7 +435,7 @@ function get_Morotti_equations()
 
     ## BAR
     # Drug concentrations
-    Ligtot = 0.1               # [uM] - SET LIGAND CONCENTRATION (0 or 0.1)
+    Ligtot = 0.0               # [uM] - SET LIGAND CONCENTRATION (0 or 0.1)
     FSK = 0
     IBMX = 0
     LCCtotBA = 0.025           # [uM] - [umol/L cytosol]
@@ -967,10 +970,10 @@ function get_Morotti_equations()
     push!(eqs, eq_end)
 
     # Istim
-    freq = 3                     # [Hz] - CHANGE DEPENDING ON FREQUENCY (1, <=1, -40) (2, <=2, -35) (3, <=2, -30)
+    freq = 1                     # [Hz] - CHANGE DEPENDING ON FREQUENCY (1, <=1, -40) (2, <=2, -35) (3, <=2, -30)
     cycleLength = 1e3 / freq      # [ms]
 
-    Istim = ifelse(mod(t, cycleLength) <= 2, -30, 0.0)
+    Istim = ifelse(mod(t, cycleLength) <= 1, -40, 0.0)
 
     # Other odes
     SR_eqs = [
@@ -1049,7 +1052,9 @@ end
 
 eq_morotti = get_Morotti_equations()
 
-@mtkbuild osys = ODESystem(eq_morotti)
+@named osys = ODESystem(eq_morotti)
+
+#osys = structural_simplify(osys)
 
 #@variables t Cai_mean(t)
 @variables t Cai(t)[1:45]
@@ -1058,20 +1063,20 @@ Cai_mean = mean(skipmissing(Cai))
 ##Chemical Reaction of CaMKII Activity (Including OX states)
 ca_model = @reaction_network begin
     ##  Two Ca2+ ions bind to C or N-lobe.
-    (k_1C_on * ($Cai_mean)^2 * (t <= tstop) * k_2C_on / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop)), k_1C_off * k_2C_off / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop))), CaM0 <--> Ca2CaM_C
-    (k_1N_on * ($Cai_mean)^2 * (t <= tstop) * k_2N_on / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop)), k_1N_off * k_2N_off / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop))), CaM0 <--> Ca2CaM_N
-    (k_1C_on * ($Cai_mean)^2 * (t <= tstop) * k_2C_on / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop)), k_1C_off * k_2C_off / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop))), Ca2CaM_C <--> Ca4CaM
-    (k_1N_on * ($Cai_mean)^2 * (t <= tstop) * k_2N_on / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop)), k_1N_off * k_2N_off / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop))), Ca2CaM_N <--> Ca4CaM
+    (k_1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2C_on / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1C_off * k_2C_off / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0 <--> Ca2CaM_C
+    (k_1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2N_on / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1N_off * k_2N_off / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0 <--> Ca2CaM_N
+    (k_1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2C_on / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1C_off * k_2C_off / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_C <--> Ca4CaM
+    (k_1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2N_on / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1N_off * k_2N_off / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_N <--> Ca4CaM
     ##  Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII complex.
-    (k_K1C_on * ($Cai_mean)^2 * (t <= tstop) * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop)), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop))), CaM0_CaMK <--> Ca2CaM_C_CaMK
-    (k_K1N_on * ($Cai_mean)^2 * (t <= tstop) * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop)), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop))), CaM0_CaMK <--> Ca2CaM_N_CaMK
-    (k_K1C_on * ($Cai_mean)^2 * (t <= tstop) * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop)), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop))), Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
-    (k_K1N_on * ($Cai_mean)^2 * (t <= tstop) * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop)), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop))), Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
+    (k_K1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMK <--> Ca2CaM_C_CaMK
+    (k_K1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMK <--> Ca2CaM_N_CaMK
+    (k_K1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
+    (k_K1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
     ##  Binding of Ca to CaM-CaMKIIP.
-    (k_K1C_on * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop)) * ($Cai_mean)^2 * (t <= tstop), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop))), CaM0_CaMKP <--> Ca2CaM_C_CaMKP
-    (k_K1N_on * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop)) * ($Cai_mean)^2 * (t <= tstop), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop))), CaM0_CaMKP <--> Ca2CaM_N_CaMKP
-    (k_K1C_on * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop)) * ($Cai_mean)^2 * (t <= tstop), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop))), Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
-    (k_K1N_on * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop)) * ($Cai_mean)^2 * (t <= tstop), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop))), Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
+    (k_K1C_on * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMKP <--> Ca2CaM_C_CaMKP
+    (k_K1N_on * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMKP <--> Ca2CaM_N_CaMKP
+    (k_K1C_on * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
+    (k_K1N_on * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
     ##  Binding of CaM to CaMKII or CaMII-P
     (kCaM0_on, kCaM0_off), CaM0 + CaMK <--> CaM0_CaMK
     (kCaM2C_on, kCaM2C_off), Ca2CaM_C + CaMK <--> Ca2CaM_C_CaMK
@@ -1129,11 +1134,10 @@ CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, CaMKP, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX
 k_1N_on, k_1N_off, k_2N_on, k_2N_off, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off,
 k_K2N_on, k_K2N_off, kCaM0_on, kCaM2C_on, kCaM2N_on, kCaM4_on, kCaM0_off, kCaM2C_off, kCaM2N_off, kCaM4_off,
 kCaM0P_on, kCaM2CP_on, kCaM2NP_on, kCaM4P_on, kCaM0P_off, kCaM2CP_off, kCaM2NP_off, kCaM4P_off, # kbi, kib,
-k_PB, k_OXPOX, k_dephospho, ROS, k_phosCaM, CaMKII_T, k_BOX, k_OXB, k_POXP, k_OXPP, tstop = sys
+k_PB, k_OXPOX, k_dephospho, ROS, k_phosCaM, CaMKII_T, k_BOX, k_OXB, k_POXP, k_OXPP, tstop, tstart = sys
 
 tspan = (0.0, 300e3)
 
-#=
 u0 = [Cai[1] => 0.2556, Cai[2] => 0.25574, Cai[3] => 0.25587, Cai[4] => 0.25599, Cai[5] => 0.25609,
     Cai[6] => 0.25618, Cai[7] => 0.25625, Cai[8] => 0.25631, Cai[9] => 0.25636, Cai[10] => 0.25639,
     Cai[11] => 0.25642, Cai[12] => 0.25643, Cai[13] => 0.25642, Cai[14] => 0.25641, Cai[15] => 0.25639,
@@ -1147,16 +1151,13 @@ u0 = [Cai[1] => 0.2556, Cai[2] => 0.25574, Cai[3] => 0.25587, Cai[4] => 0.25599,
     i_b => 0.00305, i_g => 0.61179, i_d => 0.00033, i_f => 0.99869, i_fca => 0.9911, i_y => 0.07192,
     i_r => 0.00702, i_s => 0.96604, i_sslow => 0.22156, i_Nam => 0.02506, i_Nah => 0.22242, i_Naj => 0.19081,
     i_PO1 => 0.0037, i_PO2 => 0.0, i_PC2 => 0.0, i_nKs => 0.09243, i_CK1 => 0.00188, i_CK2 => 0.00977,
-    i_OK => 0.26081, i_IK => 0.07831, Ca2CaM_sl => 0.00031, Ca4CaM_sl => 0.0, CaM_sl => 0.03744,
-    #Ca2CaM_dyad => 172.7248, Ca4CaM_dyad => 196.89811, CaMB_dyad => 0.0, Ca2CaMB_dyad => 0.0, Ca4CaMB_dyad => 0.0, CaM_dyad => 2.54525,
-    #Pb2_dyad => 0.0058, Pb_dyad => 0.98846, Pt_dyad => 0.00557, Pt2_dyad => 0.0, Pa_dyad => 0.0, Ca4CaN_dyad => 0.0,
-    #CaMCa4CaN_dyad => 0.0, Ca2CaMCa4CaN_dyad => 3.0e-5, Ca4CaMCa4CaN_dyad => 3.61748,
+    i_OK => 0.26081, i_IK => 0.07831, CaM_sl => 0.03744, Ca2CaM_sl => 0.00031, Ca4CaM_sl => 0.0,
     CaMB_sl => 4.20703, Ca2CaMB_sl => 10.08438, Ca4CaMB_sl => 0.00111, Pb2_sl => 6.0e-5, Pb_sl => 0.0, Pt_sl => 0.0,
     Pt2_sl => 0.0, Pa_sl => 0.0, Ca4CaN_sl => 0.00037, CaMCa4CaN_sl => 0.0, Ca2CaMCa4CaN_sl => 0.0,
     Ca4CaMCa4CaN_sl => 0.00141, CaM_cyt => 0.03779, Ca2CaM_cyt => 0.00031, Ca4CaM_cyt => 0.0, CaMB_cyt => 2.5048,
     Ca2CaMB_cyt => 2.789, Ca4CaMB_cyt => 0.00032, Pb2_cyt => 6.0e-5, Pb_cyt => 0.0, Pt_cyt => 0.0, Pt2_cyt => 0.0,
     Pa_cyt => 0.0, Ca4CaN_cyt => 0.00069, CaMCa4CaN_cyt => 0.0, Ca2CaMCa4CaN_cyt => 1.0e-5, Ca4CaMCa4CaN_cyt => 1.0e-5,
-    LCC_PKAp => 16.45439, RyR2809p => 297.35744, RyR2815p => 130.5212, PLBT17p => 1.87769, #LCC_CKdyadp => 25.9081,
+    LCC_PKAp => 16.45439, RyR2809p => 297.35744, RyR2815p => 130.5212, PLBT17p => 1.87769,
     LCC_CKslp => 1.0e-5, LR => 0.0, LRG => 0.0, RG => 0.00048, b1AR_S464 => 0.0, b1AR_S301 => 0.00065,
     GsaGTPtot => 0.00961, GsaGDP => 0.00063, Gsby => 0.01002, AC_GsaGTP => 0.00142, PDEp => 0.00223,
     cAMPtot => 1.02286, RC_I => 0.80424, RCcAMP_I => 0.14186, RCcAMPcAMP_I => 0.00449, RcAMPcAMP_I => 0.22889,
@@ -1164,45 +1165,10 @@ u0 = [Cai[1] => 0.2556, Cai[2] => 0.25574, Cai[3] => 0.25587, Cai[4] => 0.25599,
     RcAMPcAMP_II => 0.0577, PKACII => 0.02159, PKACII_PKI => 0.0361, I1p_PP1 => 0.07292, I1ptot => 0.07301,
     PLBp => 8.49358, PLMp => 5.62885, LCCap => 0.0055, LCCbp => 0.00628, RyRp => 0.02763, TnIp => 4.41392,
     KURp => 0.01095, KS79 => 0.00153, KS80 => 0.00153, KSp => 0.00184, CFTRp => 0.00406,
-    CaM0 => 2.82e-5*1e6, Ca2CaM_C => 1.01e-8*1e6, Ca2CaM_N => 1.40e-9*1e6, Ca4CaM => 4.78e-13*1e6,
-    CaM0_CaMK => 1.29e-6*1e6, Ca2CaM_C_CaMK => 9.13e-8*1e6, Ca2CaM_N_CaMK => 3.74e-9*1e6, Ca4CaM_CaMK => 5.92e-10*1e6,
-    CaM0_CaMKP => 2.36e-7*1e6, Ca2CaM_C_CaMKP => 1.13e-7*1e6, Ca2CaM_N_CaMKP => 1.54e-9*1e6, Ca4CaM_CaMKP => 7.82e-10*1e6,
-    CaMK => 6.73e-5*1e6, CaMKP => 6.57e-7*1e6, Ca4CaM_CaMKOX => 0.0, Ca4CaM_CaMKPOX => 0.0]
-    =#
-
-u0 = [Cai[1] => 0.41614, Cai[2] => 0.41922, Cai[3] => 0.42213, Cai[4] => 0.4249, Cai[5] => 0.42752,
-    Cai[6] => 0.42999, Cai[7] => 0.43234, Cai[8] => 0.43455, Cai[9] => 0.43663, Cai[10] => 0.43859,
-    Cai[11] => 0.44043, Cai[12] => 0.44216, Cai[13] => 0.44377, Cai[14] => 0.44527, Cai[15] => 0.44667,
-    Cai[16] => 0.44796, Cai[17] => 0.44916, Cai[18] => 0.45025, Cai[19] => 0.45125, Cai[20] => 0.45216,
-    Cai[21] => 0.45298, Cai[22] => 0.45371, Cai[23] => 0.45435, Cai[24] => 0.45491, Cai[25] => 0.45539,
-    Cai[26] => 0.45578, Cai[27] => 0.4561, Cai[28] => 0.45634, Cai[29] => 0.45651, Cai[30] => 0.4566,
-    Cai[31] => 0.45662, Cai[32] => 0.45657, Cai[33] => 0.45646, Cai[34] => 0.45627, Cai[35] => 0.45602,
-    Cai[36] => 0.4557, Cai[37] => 0.45531, Cai[38] => 0.45487, Cai[39] => 0.45436, Cai[40] => 0.4538,
-    Cai[41] => 0.45317, Cai[42] => 0.45248, Cai[43] => 0.45174, Cai[44] => 0.45094, Cai[45] => 0.45009,
-    i_CaJSR => 631.78097, CaNSR => 683.25031, V => -64.11549, Nai => 14893.80468, Ki => 149877.58869,
-    i_b => 0.00731, i_g => 0.38774, i_d => 0.00064, i_f => 0.88702, i_fca => 0.68274, i_y => 0.01484,
-    i_r => 0.00967, i_s => 0.89987, i_sslow => 0.11546, i_Nam => 0.05015, i_Nah => 0.06908, i_Naj => 0.04192,
-    i_PO1 => 0.03059, i_PO2 => 0.0, i_PC2 => 0.0, i_nKs => 0.21601, i_CK1 => 0.0018, i_CK2 => 0.01123,
-    i_OK => 0.40171, i_IK => 0.1616, CaM_sl => 0.00949, Ca2CaM_sl => 0.0004, Ca4CaM_sl => 0.0, CaMB_sl => 2.33011,
-    Ca2CaMB_sl => 11.53848, Ca4CaMB_sl => 0.00412,
-    Pb2_sl => 8.0e-5, Pb_sl => 1.0e-5, Pt_sl => 0.0, Pt2_sl => 0.0, Pa_sl => 0.0, Ca4CaN_sl => 0.001,
-    CaMCa4CaN_sl => 0.0, Ca2CaMCa4CaN_sl => 1.0e-5, Ca4CaMCa4CaN_sl => 0.00092, CaM_cyt => 0.00948,
-    Ca2CaM_cyt => 0.00039, Ca4CaM_cyt => 0.0, CaMB_cyt => 0.88086, Ca2CaMB_cyt => 4.44025, Ca4CaMB_cyt => 0.00156,
-    Pb2_cyt => 8.0e-5, Pb_cyt => 1.0e-5, Pt_cyt => 0.0, Pt2_cyt => 0.0, Pa_cyt => 0.0, Ca4CaN_cyt => 0.00129,
-    CaMCa4CaN_cyt => 0.0, Ca2CaMCa4CaN_cyt => 1.0e-5, Ca4CaMCa4CaN_cyt => 0.00035, LCC_PKAp => 16.45439,
-    RyR2809p => 297.35723, RyR2815p => 139.78352, PLBT17p => 2.87361, LCC_CKslp => 0.0,
-    LR => 6.0e-5, LRG => 0.00294, RG => 7.0e-5, b1AR_S464 => 0.00047, b1AR_S301 => 0.0011, GsaGTPtot => 0.06028,
-    GsaGDP => 0.00066, Gsby => 0.06071, AC_GsaGTP => 0.00814, PDEp => 0.00589, cAMPtot => 3.16099, RC_I => 0.31134,
-    RCcAMP_I => 0.28552, RCcAMPcAMP_I => 0.04698, RcAMPcAMP_I => 0.53564, PKACI => 0.38375, PKACI_PKI => 0.15239,
-    RC_II => 0.01018, RCcAMP_II => 0.00934, RCcAMPcAMP_II => 0.00154, RcAMPcAMP_II => 0.09691, PKACII => 0.06938,
-    PKACII_PKI => 0.02753, I1p_PP1 => 0.19135, I1ptot => 0.19163, PLBp => 98.33936, PLMp => 41.19479, LCCap => 0.01204,
-    LCCbp => 0.01313, RyRp => 0.06399, TnIp => 60.75646, KURp => 0.01794, KS79 => 0.00153, KS80 => 0.00153,
-    KSp => 0.00184, CFTRp => 0.00406,
-    CaM0 => 2.82e-5 * 1e6, Ca2CaM_C => 1.01e-8 * 1e6, Ca2CaM_N => 1.40e-9 * 1e6, Ca4CaM => 4.78e-13 * 1e6,
-    CaM0_CaMK => 1.29e-6 * 1e6, Ca2CaM_C_CaMK => 9.13e-8 * 1e6, Ca2CaM_N_CaMK => 3.74e-9 * 1e6, Ca4CaM_CaMK => 5.92e-10 * 1e6,
-    CaM0_CaMKP => 2.36e-7 * 1e6, Ca2CaM_C_CaMKP => 1.13e-7 * 1e6, Ca2CaM_N_CaMKP => 1.54e-9 * 1e6, Ca4CaM_CaMKP => 7.82e-10 * 1e6,
-    CaMK => 6.73e-5 * 1e6, CaMKP => 6.57e-7 * 1e6, Ca4CaM_CaMKOX => 0.0, Ca4CaM_CaMKPOX => 0.0]
-
+    CaM0 => 1000, Ca2CaM_C => 0.0, Ca2CaM_N => 0.0, Ca4CaM => 0.0,
+    CaM0_CaMK => 0.0, Ca2CaM_C_CaMK => 0.0, Ca2CaM_N_CaMK => 0.0, Ca4CaM_CaMK => 0.0,
+    CaM0_CaMKP => 0.0, Ca2CaM_C_CaMKP => 0.0, Ca2CaM_N_CaMKP => 0.0, Ca4CaM_CaMKP => 0.0,
+    CaMK => 0.0, CaMKP => CaMKII_T, Ca4CaM_CaMKOX => 0.0, Ca4CaM_CaMKPOX => 0.0]
 
 
 ks = [k_1C_on => 5e-3, k_1C_off => 50e-3, k_2C_on => 10e-3, k_2C_off => 10e-3, k_1N_on => 100e-3,
@@ -1213,13 +1179,13 @@ ks = [k_1C_on => 5e-3, k_1C_off => 50e-3, k_2C_on => 10e-3, k_2C_off => 10e-3, k
     kCaM0P_on => 3.8e-6 * binding_To_PCaMK, kCaM2CP_on => 0.92e-3 * binding_To_PCaMK,
     kCaM2NP_on => 0.12e-3 * binding_To_PCaMK, kCaM4P_on => 30e-3 * binding_To_PCaMK,
     kCaM0P_off => 1 / decay_CaM, kCaM2CP_off => 1 / decay_CaM, kCaM2NP_off => 1 / decay_CaM,
-    kCaM4P_off => 1 / decay_CaM, k_dephospho => (1 / 6000) * phosphatase, k_phosCaM => 2e-3 * phospho_rate, CaMKII_T => 70,#kbi => 0.0022, kib => 246e-3, k_phosCaM => 30e-3 * phospho_rate, CaMKII_T => 70,
-    k_BOX => 2.91e-4, k_PB => 0.00003, k_OXPOX => 0.00003, #k_phosCaM => 30e-3 * phospho_rate
-    k_OXB => 2.23e-5, k_POXP => 2.91e-4, k_OXPP => 2.23e-5, tstop => 50e3, ROS => 0]
+    kCaM4P_off => 1 / decay_CaM, k_dephospho => (1 / 6000) * phosphatase, k_phosCaM => 2e-3 * phospho_rate, CaMKII_T => 70,
+    k_BOX => 2.91e-4, k_PB => 0.00003, k_OXPOX => 0.00003,
+    k_OXB => 2.23e-5, k_POXP => 2.91e-4, k_OXPP => 2.23e-5, tstop => 260e3, tstart => 130e3, ROS => 0]
 
-oprob = ODEProblem(sys, u0, tspan, ks, jac=true)
+oprob = ODEProblem(sys, u0, tspan, ks)
 
-#=
+
 ## To generate reference figures
 psmap = Dict(k => i for (i, k) in enumerate(parameters(sys)))
 usmap = Dict(k => i for (i, k) in enumerate(states(sys)))
@@ -1237,19 +1203,45 @@ idxP2N = usmap[Ca2CaM_N_CaMKP]
 idxKP = usmap[CaMKP]
 idxK = usmap[CaMK]
 idxK0 = usmap[CaM0_CaMK]
-idxK2C= usmap[Ca2CaM_C_CaMK]
+idxK2C = usmap[Ca2CaM_C_CaMK]
 idxK2N = usmap[Ca2CaM_N_CaMK]
-idxK4 = usmap[Ca4CaM_CaMK]
 
 # Warm up
-sol = solve(oprob, TRBDF2(), abstol = 1e-9, reltol = 1e-9,alg_hints=[:stiff], tstops = 0:1000:tspan[end])
-#idxmulS = psmap[rs.mul_S]
+sol = solve(oprob, TRBDF2(), abstol=1e-9, reltol=1e-9, alg_hints=[:stiff], tstops=0:1000:tspan[end])
 
-kinase_act = map(0.0:0.5:1) do cam0#ros
-    t = 100e3
+
+actK = [Ca4CaM_CaMK, Ca4CaM_CaMKP, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, CaMKP]
+
+plot(sol, idxs=[sum(actK)], linewidth=1.2, xlabel="Time(ms)", ylabel="Concentration(uM)", label="simulation", denseplot=false, c=:steelblue2, title="CaMKII Activity (ISO=0.0/ROS=0/1Hz)", size=(800, 600))
+
+B = values(sol(250e3)[usmap[Ca4CaM_CaMK]])
+P = values(sol(250e3)[usmap[Ca4CaM_CaMKP]])
+OX = values(sol(250e3)[usmap[Ca4CaM_CaMKOX]])
+POX = values(sol(250e3)[usmap[Ca4CaM_CaMKPOX]])
+P0 = values(sol(250e3)[usmap[CaM0_CaMKP]])
+P2C = values(sol(250e3)[usmap[Ca2CaM_C_CaMKP]])
+P2N = values(sol(250e3)[usmap[Ca2CaM_N_CaMKP]])
+KP = values(sol(250e3)[usmap[CaMKP]])
+K = values(sol(250e3)[usmap[CaMK]])
+K0 = values(sol(250e3)[usmap[CaM0_CaMK]])
+K2C = values(sol(250e3)[usmap[Ca2CaM_C_CaMK]])
+K2N = values(sol(250e3)[usmap[Ca2CaM_N_CaMK]])
+
+XLSX.openxlsx("figure fitting.xlsx", mode="rw") do f # if write a new file -> w, write an existing file -> rw
+    sheet = f[2]
+    sheet["A20"] = 1000
+    sheet["B20"] = (P + P0 + P2C + P2N + KP + POX) / (B + OX + P + POX + P0 + P2C + P2N + KP + K0 + K2C + K2N)
+    sheet["C20"] = (P + P0 + P2C + P2N + KP + POX) / (B + OX + P + POX + P0 + P2C + P2N + KP + K0 + K2C + K2N + K)
+end
+
+print((P + P0 + P2C + P2N + KP + POX) / (B + OX + P + POX + P0 + P2C + P2N + KP + K0 + K2C + K2N + K))
+print((P + P0 + P2C + P2N + KP + POX) / (B + OX + P + POX + P0 + P2C + P2N + KP + K0 + K2C + K2N))
+
+kinase_act = map(0.0:0.001:0.002) do cam0#ros
+    t = 330e3
     p = copy(oprob.p)
     p[idxCaM0] = cam0
-    sol = solve(remake(oprob, p=p), TRBDF2(), abstol = 1e-9, reltol = 1e-9,alg_hints=[:stiff], tstops = 0:1000:tspan[end])
+    sol = solve(remake(oprob, p=p), TRBDF2(), abstol=1e-9, reltol=1e-9, alg_hints=[:stiff], tstops=0:1000:tspan[end])
     B = sol(t)[idxB]
     P = sol(t)[idxP]
     OX = sol(t)[idxOX]
@@ -1262,8 +1254,7 @@ kinase_act = map(0.0:0.5:1) do cam0#ros
     K0 = sol(t)[idxK0]
     K2C = sol(t)[idxK2C]
     K2N = sol(t)[idxK2N]
-    K4 = sol(t)[idxK4]
-    (B+P+P0+P2C+P2N+KP) / (B+OX+P+POX+P0+P2C+P2N+KP+K0+K2C+K2N+K4)
+    (B + P + P0 + P2C + P2N + KP + OX + POX) / (B + OX + P + POX + P0 + P2C + P2N + KP + K0 + K2C + K2N)
 end
 
 #print(sol(0)[14])
@@ -1275,16 +1266,14 @@ XLSX.openxlsx("kinase_act.xls", mode="rw") do f # if write a new file -> w, writ
     #XLSX.rename!(sheet, "new_sheet")
 
     # This will add output along A column
-    sheet["G1"] = "(B+P+P0+P2C+P2N+KP) / (B+OX+P+POX+P0+P2C+P2N+KP)#0:0.1:1"
-    sheet["G8", dim=1] = kinase_act
+    #sheet["H1"] = "(B+P+P0+P2C+P2N+KP+OX+POX) / (B+OX+P+POX+P0+P2C+P2N+KP)#0:0.1:1"
+    sheet["H2", dim=1] = kinase_act
 end
 
-plot(scatter(x = [0,0.01,0.1,1]),kinase_act*100)
+plot(scatter(x=[0, 0.01, 0.1, 1]), kinase_act * 100)
 
-plot(kinase_act*100, title="CaMKII Activation by ROS", label="Oxidized CaMKII",xlabel="ROS (uM)", ylabel="Maximal Kinase Activity (%)", ylim=(0,100), lw=2)
-=#
 
-@time sol = solve(oprob, TRBDF2(), abstol=1e-9, reltol=1e-9, tstops=0:1000:tspan[end], maxiters=Int(1e8))
+sol = solve(oprob, TRBDF2(), abstol=1e-9, reltol=1e-9, alg_hints=[:stiff], tstops=0:1000:tspan[end])
 #FBDF, maxiters=Int(1e8)
 ## colors: orchid, slateblue1, tan1, darkseagreen4, indianred3, navajowhite4
 #steelblue2(blue),goldenrod1(oranyellow),lightcoral(red),lightseagreen,slateblue1(purple),cadetblue4,pink1
@@ -1305,8 +1294,8 @@ plot(sol, idxs=[Ca4CaM_CaMK + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca
 
 
 #, linewidth=1
-plot(sol, idxs=[sum(actK)], linewidth=1.1, xlabel="Time(ms)", ylabel="Concentration(uM)", label="250s", denseplot=false, c=:steelblue2, title="CaMKII Activity (ISO=0.1/ROS=0/3Hz)", ylim=(-1, 45), size=(800, 600))
-plot!(sol, idxs=[sum(actK)], linewidth=1.1, xlabel="Time(ms)", ylabel="Concentration(uM)", label="200s", denseplot=false, c=:lightcoral)
-plot!(sol, idxs=[sum(actK)], linewidth=1.1, xlabel="Time(ms)", ylabel="Concentration(uM)", label="150s", denseplot=false, c=:goldenrod1)
-plot!(sol, idxs=[sum(actK)], linewidth=1.1, xlabel="Time(ms)", ylabel="Concentration(uM)", label="100s", denseplot=false, c=:lightseagreen, ylim=(-1, 40))
-plot!(sol, idxs=[sum(actK)], linewidth=1.1, xlabel="Time(ms)", ylabel="Concentration(uM)", label="50s", denseplot=false, c=:slateblue1)
+plot(sol, idxs=[sum(actK)], linewidth=1.2, xlabel="Time(ms)", ylabel="Concentration(uM)", label="250s", denseplot=false, c=:steelblue2, title="CaMKII Activity (ISO=0.0/ROS=0/2Hz)", size=(800, 600))
+plot!(sol, idxs=[sum(actK)], linewidth=1.2, xlabel="Time(ms)", ylabel="Concentration(uM)", label="200s", denseplot=false, c=:lightcoral)
+plot!(sol, idxs=[sum(actK)], linewidth=1.2, xlabel="Time(ms)", ylabel="Concentration(uM)", label="150s", denseplot=false, c=:goldenrod1)
+plot!(sol, idxs=[sum(actK)], linewidth=1.2, xlabel="Time(ms)", ylabel="Concentration(uM)", label="100s", denseplot=false, c=:lightseagreen)
+plot!(sol, idxs=[sum(actK)], linewidth=1.2, xlabel="Time(ms)", ylabel="Concentration(uM)", label="50s", denseplot=false, c=:slateblue1)
