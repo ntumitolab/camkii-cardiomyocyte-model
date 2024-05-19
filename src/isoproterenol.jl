@@ -187,8 +187,7 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM,)
     pkac2 = (PKAII_KURtot / PKAIItot) * PKACII
     add_rate!(rates, k_pka_KUR * pkac2 * hil(KURn, Km_pka_KUR / epsilon) - PP1_KURtot * k_pp1_KUR * hil(KURp, Km_pp1_KUR / epsilon), [KURn], [KURp])
 
-
-    eqs = [
+    conservedeqs = [
         b1AR ~ b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
         Gs ~ Gstot - Gsby - LRG - RG,
         AC ~ ACtot - AC_GsaGTP,
@@ -204,7 +203,8 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM,)
         LCCb ~ LCCtot - LCCbp,
         TnI ~ TnItot - TnIp,
         KURn ~ IKurtot - KURp,
-        ## TODO: rates
     ]
-    return eqs
+
+    odeeqs = [D(x) ~ rates[x] for x in (LR, LRG, RG, GsaGTP, GsaGDP, Gsby, b1AR_S464, b1AR_S301, AC_GsaGTP, PDEp, cAMP, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII, PKACII_PKI, I1p, I1p_PP1, PLBp, PLMp, TnIp, LCCap, LCCbp, KURp)]
+    return [conservedeqs; odeeqs]
 end
