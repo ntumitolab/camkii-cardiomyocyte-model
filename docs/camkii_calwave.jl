@@ -1,17 +1,15 @@
 #===
 # Smooth calcium wave
 ===#
-using Catalyst
 using DifferentialEquations
 using ModelingToolkit
 using Plots
-using CaMKIIModel: get_camkii_rn, μM, nM, second
+using CaMKIIModel: get_camkii_eqs, μM, nM, second
 
 # Reaction network
 @parameters ROS=0μM period=1/3 ca_r=100nM ca_rise=550nM tstart=200.0second tend=300.0second
 @variables t Ca(t)
-rn = get_camkii_rn(Ca, ROS)
-rnsys = convert(ODESystem, rn, remove_conserved=true)
+eqs = get_camkii_eqs(Ca, ROS)
 
 # Periodic assymetric calcium pulses
 function ca_wave(t;
@@ -25,11 +23,8 @@ end
 @register_symbolic ca_wave(t)
 
 caeqs = [Ca ~ ca_wave(t; period, ca_r, ca_rise, tstart, tend)]
-@named casys = ODESystem(caeqs, t)
-
-odesys = extend(casys, rnsys)
-sys = structural_simplify(odesys)
-
+@named sys = ODESystem([eqs; caeqs], t)
+sys = structural_simplify(sys)
 
 # ## First sumulation
 tspan = (0.0, 400.0)
@@ -52,8 +47,8 @@ plot(
 )
 
 # Active CaMKII
-plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="3Hz")
-plot!(sol, idxs=Ca * 10, plotdensity=10_000, label="Ca * 10")
+@unpack CaMKII_act = sys
+plot(sol, idxs=CaMKII_act, label="Act. CaMKII", title="3Hz")
 
 # Change frequency to 2Hz
 oprob2 = remake(oprob, p=[period=>1/2second])
@@ -70,8 +65,7 @@ plot(
 )
 
 # Active CaMKII
-plot(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="2Hz")
-plot!(sol2, idxs=Ca * 10, plotdensity=100_000, label="Ca * 10")
+plot(sol2, idxs=CaMKII_act, label="Act. CaMKII", title="2Hz")
 
 # Change frequency to 1Hz
 oprob3 = remake(oprob, p=[period=>1second])
@@ -88,10 +82,10 @@ plot(
 )
 
 # Active CaMKII
-plot(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="Act. CaMKII", title="1Hz")
-plot!(sol3, idxs=Ca * 10, plotdensity=100_000, label="Ca * 10")
+plot(sol3, idxs=CaMKII_act, label="Act. CaMKII", title="1Hz")
+
 
 # Frequency-dependent response
-plot(sol, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), title="Act. CaMKII", label="3Hz")
-plot!(sol2, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="2Hz")
-plot!(sol3, idxs=sum([CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2]), label="1Hz")
+plot(sol, idxs=CaMKII_act, title="Act. CaMKII", label="3Hz")
+plot!(sol2, idxs=CaMKII_act, label="2Hz")
+plot!(sol3, idxs=CaMKII_act, label="1Hz")
