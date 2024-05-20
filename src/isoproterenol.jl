@@ -133,6 +133,9 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM,)
         LCCbp(t) = 0.01313μM
         KURn(t) ## conserved
         KURp(t) = 0.01794μM
+        # Phosphorylation proportions
+        LCCa_PKAp(t)
+        LCCb_PKAp(t)
     end
 
     D = Differential(t)
@@ -205,6 +208,12 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM,)
         KURn ~ IKurtot - KURp,
     ]
 
+    propeqs = [
+        LCCa_PKAp ~ LCCap/LCCtot,
+        LCCb_PKAp ~ LCCbp/LCCtot,
+    ]
+
     odeeqs = [D(x) ~ rates[x] for x in (LR, LRG, RG, GsaGTP, GsaGDP, Gsby, b1AR_S464, b1AR_S301, AC_GsaGTP, PDEp, cAMP, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII, PKACII_PKI, I1p, I1p_PP1, PLBp, PLMp, TnIp, LCCap, LCCbp, KURp)]
-    return [conservedeqs; odeeqs]
+
+    return [conservedeqs; propeqs; odeeqs]
 end
