@@ -1,6 +1,7 @@
 # # Isolated CaMKII response
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq
+using DiffEqCallbacks
 using Plots
 using CaMKIIModel: nM, μM, Hz, get_camkii_eqs
 

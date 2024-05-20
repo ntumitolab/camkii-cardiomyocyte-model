@@ -1,7 +1,8 @@
 #===
 # Smooth calcium wave
 ===#
-using DifferentialEquations
+using OrdinaryDiffEq
+using DiffEqCallbacks
 using ModelingToolkit
 using Plots
 using CaMKIIModel: get_camkii_eqs, μM, nM, second
