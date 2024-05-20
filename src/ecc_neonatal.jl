@@ -13,7 +13,6 @@ using NaNMath
 
 "Calcium buffered by troponin and calmodulin"
 function beta_cai(Ca; TnI_PKAp=0)
-
     @parameters begin
         TrpnTotal=35μM
         CmdnTotal=50μM
@@ -60,6 +59,73 @@ function get_ca_pde_eqs(;
     return eqs
 end
 
+"Calcium flux scaled by phosphorylated LCC"
+function get_ICa_scalep(LCCb_PKAp=0)
+    @parameters begin
+        ICa_scale = 0.95 # 5.25
+        fracLCCbp0 = 0.250657 # Derived quantity - (LCCbp(baseline)/LCCbtot)
+        fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
+    end
+    a_favail = (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1) # fracLCCbp ISO (x1.56 o.1 ISO)
+    favail = (1 - a_favail) + a_favail * (LCCb_PKAp / fracLCCbp0)  # Test (max x2.52 100# phosph)
+    return ICa_scale * favail
+end
+
+"Na-Ca exchanger"
+function get_ncx_eqs(nai, cai, nao, cao, vm, LCCb_PKAp=0)
+    @parameters begin
+        fNaCa = 1
+        kNaCa = 2.2680e-016 * μA / cm^2 / μM^4
+        dNaCa = 1e-16 / μM^4
+        gamma = 0.5
+    end
+    @variables t INaCa(t)
+    return [
+        INaCa ~ get_ICa_scalep(LCCb_PKAp) * kNaCa * ((exp(iVT * gamma * vm) * nai^3 * cao - exp(iVT * (gamma - 1) * vm) * cai * nao^3 * fNaCa) / (1 + dNaCa * (nao^3 * cai * fNaCa + nai^3 * cao)))
+    ]
+end
+
+"L-type calcium current (LCC)"
+function get_lcc_eqs(cai, cao, vm, LCCb_PKAp=0)
+    @parameters GCaL = 1.3125e-4 * 0.8 * 0.6 / ms
+    @variables begin
+        t
+        ICaL(t)
+        i_d(t)
+        i_f(t)
+        i_fca(t)
+        dinf(t)
+        taud(t)
+        finf(t)
+        tauf(t)
+        fcainf(t)
+    end
+
+    ICa_scalep = get_ICa_scalep(LCCb_PKAp)
+    V = vm * Volt/mV # Convert voltage to mV
+
+    alphad = 1.4 * expit((V + 35) / 13) + 0.25
+    betad = 1.4 * expit(-(V + 5) / 5)
+    gammad = expit((V - 50) / 20)
+    alphafca = hilr(cai, 0.000325mM * 1.5, 8)
+    betafca = 0.1 * expit(-(cai - 0.0005mM) / 0.0001mM)
+    gammafca = 0.2 * expit(-(cai - 0.00075mM) / 0.0008mM)
+    taufca = 10ms
+    kfca = 1 - (fcainf > i_fca) * (V > -60)
+
+    return [
+        ICaL ~ ICa_scalep * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
+        D(i_d) * taud ~ dinf - i_d,
+        D(i_f) * tauf ~ finf - i_f,
+        D(i_fca) * taufca ~ kfca * (fcainf - i_fca),
+        dinf ~ expit((V + 11.1) / 7.2),
+        taud ~ (alphad * betad + gammad) * ms,
+        finf ~ expit(-(V + 23.3) / 5.4),
+        tauf ~ (1125 * exp(-(V + 27)^2 / 240) + 165 * expit((V - 25) / 10) + 120) * ms,
+        fcainf ~ (alphafca + betafca + gammafca + 0.23) / 1.46,
+    ]
+end
+
 function build_neonatal_ecc_eqs(;
     LCCb_PKAp=0,  # Fraction of LCC phosphorylated by PKAPLB_CKp
     PLBT17p=0,
@@ -71,14 +137,6 @@ function build_neonatal_ecc_eqs(;
         K_o = 5366μM
         Mg_i = 1000μM
     end
-
-    # PKA PHOSPHOREGULATION OF LCC AVAILABLILITY (beta subunit phosph)
-    ICa_scale = 0.95 # 5.25
-    fracLCCbp0 = 0.250657 # Derived quantity - (LCCbp(baseline)/LCCbtot)
-    fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
-    a_favail = (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1) # fracLCCbp ISO (x1.56 o.1 ISO)
-    favail = (1 - a_favail) + a_favail * (LCCb_PKAp / fracLCCbp0)  # Test (max x2.52 100# phosph)
-    ICa_scalep = ICa_scale * favail
 
     @variables begin
         t
@@ -94,33 +152,8 @@ function build_neonatal_ecc_eqs(;
 
     D = Differential(t)
 
-    # NCX
-    @parameters begin
-        fNaCa = 1
-        kNaCa = 2.2680e-016 * μA / cm^2 / μM^4
-        dNaCa = 1e-16 / μM^4
-        gamma = 0.5
-    end
-    @variables INaCa(t)
-
-    # LCC
-    @parameters GCaL = 1.3125e-4 * 0.8 * 0.6 / ms
-    @variables ICaL(t) i_d(t) i_f(t) i_fca(t)
-
-    # L-type calcium current (LCC)
-    dinf = expit((vm + 11.1mV) / 7.2mV)
-    alphad = 1.4 * expit((vm + 35mV) / 13mV) + 0.25
-    betad = 1.4 * expit(-(vm + 5mV) / 5mV)
-    gammad = expit((vm - 50mV) / 20mV)
-    taud = (alphad * betad + gammad) * ms
-    finf = expit(-(vm + 23.3mV) / 5.4mV)
-    tauf = (1125 * exp(-(V + 27mV)^2 / 240mV^2) + 165 * expit((vm - 25mV) / 10mV) + 120) * ms
-    alphafca = hilr(Cai_sub_SL, 0.000325 * 1.5, 8)
-    betafca = 0.1 * expit(-(Cai_sub_SL - 0.0005mM) / 0.0001mM)
-    gammafca = 0.2 * expit(-(Cai_sub_SL - 0.00075mM) / 0.0008mM)
-    fcainf = (alphafca + betafca + gammafca + 0.23) / 1.46
-    taufca = 10ms
-    kfca = 1 - (fcainf > i_fca) * (vm > -60mV)
+    ncxeqs = get_ncx_eqs(Na_i, Cai_sub_SL, Na_o, Ca_o, vm, LCCb_PKAp)
+    lcceqs = get_lcc_eqs(Cai_sub_SL, Ca_o, vm, LCCb_PKAp)
 
     # T-Type calcium current (TCC)
     @parameters gCaT = 0.2mS / cm^2
@@ -212,11 +245,6 @@ function build_neonatal_ecc_eqs(;
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
         E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
-        INaCa ~ ICa_scalep * kNaCa * ((exp(iVT * gamma * vm) * Na_i^3 * Ca_o - exp(iVT * (gamma - 1) * vm) * Cai_sub_SL * Na_o^3 * fNaCa) / (1 + dNaCa * (Na_o^3 * Cai_sub_SL * fNaCa + Na_i^3 * Ca_o))),
-        ICaL ~ ICa_scalep * i_d * i_f * i_fca * ghkVm(GCaL, vm, Cai_sub_SL, 0.341 * Ca_o, 2),
-        D(i_d) * taud ~ dinf - i_d,
-        D(i_f) * tauf ~ finf - i_f,
-        D(i_fca) * taufca ~ kfca * (fcainf - i_fca),
         ICaT ~ gCaT * i_b * i_g * (vm - E_Ca + 106.5mV),
         D(i_b) * taub ~ binf - i_b,
         D(i_g) * taug ~ ginf - i_g,
