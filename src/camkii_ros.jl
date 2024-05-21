@@ -1,5 +1,6 @@
 # CaMKII system with ROS activation
 using ModelingToolkit
+using ModelingToolkit: t_nounits as t, D_nounits as D
 
 function get_camkii_eqs(
     Ca, ROS=0.0μM;
@@ -70,7 +71,6 @@ function get_camkii_eqs(
     end
 
     sts = @variables begin
-        t
         CaM0(t)
         Ca2CaM_C(t) = 0
         Ca2CaM_N(t) = 0
@@ -93,7 +93,6 @@ function get_camkii_eqs(
         CaMKII_act(t)
     end
 
-    D = Differential(t)
     _konoff(k1on, k1off, k2on, k2off) = (Ca^2 * k1on * k2on / (Ca * k2on + k1off), k1off * k2off / (Ca * k2on + k1off))
 
     rates = Dict(sts .=> Num(0))  ## Record accumulated rates

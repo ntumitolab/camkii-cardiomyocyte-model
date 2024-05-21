@@ -1,5 +1,6 @@
 # Beta adrenergic system activated by isoproterenol
 using ModelingToolkit
+using ModelingToolkit: t_nounits as t, D_nounits as D
 
 function get_bar_eqs(ATP=5000μM, ISO=0μM,)
     @parameters begin
@@ -88,7 +89,6 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM,)
     end
 
     sts = @variables begin
-        t
         b1AR(t)  ## Conserved
         LR(t) = 6.0e-5μM
         LRG(t) = 0.00294μM
@@ -138,7 +138,6 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM,)
         LCCb_PKAp(t)
     end
 
-    D = Differential(t)
     rates = Dict(sts .=> Num(0))  ## Record accumulated rates
 
     # Beta adrenergic receptor

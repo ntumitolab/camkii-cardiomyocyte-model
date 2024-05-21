@@ -9,6 +9,7 @@
 # ONLY FOR ACADEMIC USE, DO NOT DISTRIBUTE
 #
 using ModelingToolkit
+using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
 
 "Calcium buffered by troponin and calmodulin"
@@ -27,16 +28,15 @@ function beta_cai(Ca; TnI_PKAp=0)
 end
 
 "Calcium diffusion between sarcolemma (SL) and sarcoplasmic reticulum (SR)"
-function get_ca_pde_eqs(;
+function get_ca_pde_sys(;
     dx=0.1μm,
     rSR_true=6μm,
     rSL_true=10.5μm,
     V_sub_SR=4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3),
     V_sub_SL=4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3),
     TnI_PKAp=0,
+    name=:capde
 )
-    @variables t
-    D = Differential(t)
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
@@ -56,7 +56,7 @@ function get_ca_pde_eqs(;
         push!(eqs, eq)
     end
 
-    return eqs
+    return ODESystem(eqs, t; name)
 end
 
 "Calcium flux scaled by phosphorylated LCC"
