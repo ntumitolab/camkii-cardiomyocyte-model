@@ -139,14 +139,17 @@ function get_camkii_eqs(
     add_rate!(rates, k_phosCaM * Ca4CaM_CaMKOX, [Ca4CaM_CaMKOX], [Ca4CaM_CaMKPOX])
 
     ## Second phosphorylation of CaMKII-P
+    ## CaMKP <--> CaMKP2
     add_rate!(rates, k_P1_P2 * CaMKP - k_P2_P1 * CaMKP2, [CaMKP], [CaMKP2])
 
     ## Dephosphorylation of CaMKII-P
+    ## (CaMKP, CaMKPOX) --> (CaMK, CaMKOX)
     add_rate!(rates, k_dephospho * CaMKP, [CaMKP], [CaMK])
     add_rate!(rates, k_dephospho * CaMKPOX, [CaMKPOX], [CaMKOX])
 
     ## Redox
     ## Ca4CaM_CaMK(P) <--> Ca4CaM_CaMKOX(P)
+    ## (CaMKOX, CaMKPOX) --> (CaMK, CaMKP)
     add_rate!(rates, ROS * k_OXPOX * Ca4CaM_CaMK - k_OXB * Ca4CaM_CaMKOX, [Ca4CaM_CaMK], [Ca4CaM_CaMKOX])
     add_rate!(rates, ROS * k_POXP * Ca4CaM_CaMKP - k_OXPP * Ca4CaM_CaMKPOX, [Ca4CaM_CaMKP], [Ca4CaM_CaMKPOX])
     add_rate!(rates, k_OXB * CaMKOX, [CaMKOX], [CaMK])
