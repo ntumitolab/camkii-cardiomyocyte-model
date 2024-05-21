@@ -4,12 +4,13 @@
 using OrdinaryDiffEq
 using DiffEqCallbacks
 using ModelingToolkit
+using ModelingToolkit: t_nounits as t, D_nounits as D
 using Plots
 using CaMKIIModel: get_camkii_eqs, μM, nM, second
 
 # Reaction network
 @parameters ROS=0μM period=1/3 ca_r=100nM ca_rise=550nM tstart=200.0second tend=300.0second
-@variables t Ca(t)
+@variables Ca(t)
 eqs = get_camkii_eqs(Ca, ROS)
 
 # Periodic assymetric calcium pulses
@@ -29,10 +30,10 @@ sys = structural_simplify(sys)
 
 # ## First sumulation
 tspan = (0.0, 400.0)
-oprob = ODEProblem(sys, [], tspan)
+oprob = ODEProblem(sys, [], tspan, jac=true)
 
-alg = TRBDF2()  ## Rodas5 yields unstable results, so TRBDF2 is used
-sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-9, reltol=1e-9)  ## Lowered tolerance to make the reaction network respond to calcium changes
+alg = TRBDF2()
+sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-8, reltol=1e-8)  ## Lowered tolerance to make the reaction network respond to calcium changes
 
 # Calcium waveform
 @unpack Ca = sys
@@ -53,7 +54,7 @@ plot(sol, idxs=CaMKII_act, label="Act. CaMKII", title="3Hz")
 
 # Change frequency to 2Hz
 oprob2 = remake(oprob, p=[period=>1/2second])
-sol2 = solve(oprob2, alg, tstops=200:1/2:300, abstol=1e-9, reltol=1e-9)
+sol2 = solve(oprob2, alg, tstops=200:1/2:300, abstol=1e-8, reltol=1e-8)
 
 # Calcium
 plot(sol2, idxs=Ca, tspan=(200, 205))
@@ -70,7 +71,7 @@ plot(sol2, idxs=CaMKII_act, label="Act. CaMKII", title="2Hz")
 
 # Change frequency to 1Hz
 oprob3 = remake(oprob, p=[period=>1second])
-sol3 = solve(oprob3, alg, tstops=200:1:300, abstol=1e-9, reltol=1e-9)
+sol3 = solve(oprob3, alg, tstops=200:1:300, abstol=1e-8, reltol=1e-8)
 
 # Calcium
 plot(sol3, idxs=Ca, tspan=(200, 205))
@@ -84,7 +85,6 @@ plot(
 
 # Active CaMKII
 plot(sol3, idxs=CaMKII_act, label="Act. CaMKII", title="1Hz")
-
 
 # Frequency-dependent response
 plot(sol, idxs=CaMKII_act, title="Act. CaMKII", label="3Hz")
