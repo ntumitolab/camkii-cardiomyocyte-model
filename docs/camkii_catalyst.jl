@@ -1,5 +1,6 @@
-# # Isolated CaMKII response
+# # Isolated CaMKII response with ROS
 using ModelingToolkit
+using ModelingToolkit: t_nounits as t, D_nounits as D
 using OrdinaryDiffEq
 using DiffEqCallbacks
 using Plots
@@ -24,7 +25,7 @@ end
 
 # CaMKII model
 @parameters ROS=0μM
-@variables t Ca(t)
+@variables Ca(t)
 eqs = get_camkii_eqs(Ca, ROS)
 caeqs = ca_decay_eqs()
 sys = ODESystem([eqs; caeqs], t, name=:sys) |> structural_simplify
