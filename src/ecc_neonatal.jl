@@ -15,11 +15,11 @@ using NaNMath
 "Calcium buffered by troponin and calmodulin"
 function beta_cai(Ca; TnI_PKAp=0)
     @parameters begin
-        TrpnTotal=35μM
-        CmdnTotal=50μM
-        KmCmdn=2.38μM
-        KmTrpn=0.5μM
-        fracTnIp0=0.062698 # Baseline effect
+        TrpnTotal = 35μM
+        CmdnTotal = 50μM
+        KmCmdn = 2.38μM
+        KmTrpn = 0.5μM
+        fracTnIp0 = 0.062698 # Baseline effect
     end
 
     fPKA_TnI = 1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIp0) # Max effect +61%
@@ -72,21 +72,19 @@ function get_ICa_scalep(LCCb_PKAp=0)
 end
 
 "Na-Ca exchanger"
-function get_ncx_eqs(nai, cai, nao, cao, vm, LCCb_PKAp=0)
+function get_ncx_sys(nai, cai, nao, cao, vm, ICa_scale=1; name=:ncxsys)
     @parameters begin
         fNaCa = 1
         kNaCa = 2.2680e-016 * μA / cm^2 / μM^4
         dNaCa = 1e-16 / μM^4
         gamma = 0.5
     end
-    @variables t INaCa(t)
-    return [
-        INaCa ~ get_ICa_scalep(LCCb_PKAp) * kNaCa * ((exp(iVT * gamma * vm) * nai^3 * cao - exp(iVT * (gamma - 1) * vm) * cai * nao^3 * fNaCa) / (1 + dNaCa * (nao^3 * cai * fNaCa + nai^3 * cao)))
-    ]
+    @variables INaCa(t)
+    return ODESystem([INaCa ~ ICa_scale * kNaCa * ((exp(iVT * gamma * vm) * nai^3 * cao - exp(iVT * (gamma - 1) * vm) * cai * nao^3 * fNaCa) / (1 + dNaCa * (nao^3 * cai * fNaCa + nai^3 * cao)))], t; name)
 end
 
 "L-type calcium current (LCC)"
-function get_lcc_eqs(cai, cao, vm, LCCb_PKAp=0)
+function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
     @parameters GCaL = 1.3125e-4 * 0.8 * 0.6 / ms
     @variables begin
         t
@@ -101,8 +99,7 @@ function get_lcc_eqs(cai, cao, vm, LCCb_PKAp=0)
         fcainf(t)
     end
 
-    ICa_scalep = get_ICa_scalep(LCCb_PKAp)
-    V = vm * Volt/mV # Convert voltage to mV
+    V = vm * Volt / mV # Convert voltage to mV
 
     alphad = 1.4 * expit((V + 35) / 13) + 0.25
     betad = 1.4 * expit(-(V + 5) / 5)
@@ -113,8 +110,8 @@ function get_lcc_eqs(cai, cao, vm, LCCb_PKAp=0)
     taufca = 10ms
     kfca = 1 - (fcainf > i_fca) * (V > -60)
 
-    return [
-        ICaL ~ ICa_scalep * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
+    eqs = [
+        ICaL ~ ICa_scale * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
         D(i_d) * taud ~ dinf - i_d,
         D(i_f) * tauf ~ finf - i_f,
         D(i_fca) * taufca ~ kfca * (fcainf - i_fca),
@@ -124,6 +121,89 @@ function get_lcc_eqs(cai, cao, vm, LCCb_PKAp=0)
         tauf ~ (1125 * exp(-(V + 27)^2 / 240) + 165 * expit((V - 25) / 10) + 120) * ms,
         fcainf ~ (alphafca + betafca + gammafca + 0.23) / 1.46,
     ]
+    return ODESystem(eqs, t; name)
+end
+
+"T-type calcium current (TCC)"
+function get_tcc_sys(vm, E_Ca; name=:tccsys)
+    @parameters gCaT = 0.2mS / cm^2
+    @variables begin
+        ICaT(t)
+        i_b(t)
+        i_g(t)
+        binf(t)
+        taub(t)
+        ginf(t)
+        taug(t)
+    end
+
+    V = vm * Volt / mV # Convert voltage to mV
+
+    eqs = [
+        binf ~ expit((V + 37.49098) / 5.40634),
+        taub ~ (0.6 + 5.4 * expit(-(V + 100) * 0.03)) * ms,
+        ginf ~ expit(-(V + 66) / 6)
+        taug ~ (1 + 40 * expit(-(V + 65) * 0.08)) * ms,
+        D(i_b) * taub ~ binf - i_b,
+        D(i_g) * taug ~ ginf - i_g,
+        ICaT ~ gCaT * i_b * i_g * (vm - E_Ca + 106.5mV),
+    ]
+    return ODESystem(eqs, t; name)
+end
+
+"Background current"
+function get_ibg_sys(vm, E_Na, E_Ca; name=:ibgsys)
+    @parameters gCab = 0.0008mS / cm^2
+    @parameters gNab = 0.0026mS / cm^2
+    @variables ICab(t) INab(t)
+    eqs = [
+        ICab ~ gCab * (vm - E_Ca),
+        INab ~ gNab * (vm - E_Na),
+    ]
+    return ODESystem(eqs, t; name)
+end
+
+"Funny current (If)"
+function get_if_sys(vm, E_Na, E_K; name=:ifsys)
+    @parameters gf = 0.021mS / cm^2 fNa = 0.2
+    @variables IfNa(t) IfK(t) If(t) i_y(t) yinf(t) tauy(t)
+    fK = 1 - fNa
+    V = vm * Volt / mV # Convert voltage to mV
+    eqs = [
+        yinf ~ expit(-(V + 78.65) / 6.33),
+        tauy ~ 1/(0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
+        IfNa ~ gf * fNa * i_y * (vm - E_Na),
+        IfK ~ gf * fK * i_y * (vm - E_K),
+        If ~ IfNa + IfK,
+        D(i_y) * tauy ~ yinf - i_y
+    ]
+    return ODESystem(eqs, t; name)
+end
+
+"Fast sodium current (INa)"
+function get_ina_sys(vm, E_Na; name=:inasys)
+    @parameters gNa = 35mS / cm^2
+    @variables INa(t) i_Nam(t) i_Nah(t) i_Naj(t) Naminf(t) Nahinf(t) Najinf(t) Nataum(t) Natauh(t)
+
+    V = vm * Volt / mV # Convert voltage to mV
+    NatauhHI = 0.4537ms * expit((V + 10.66) / 11.1)
+    NatauhLOW = 3.49ms / (0.135 * exp((V + 80) / -6.8) + 3.56 * exp(0.079V) + 3.1e5 * exp(0.35V))
+    NataujHI = 11.63ms * (1 + exp(-0.1*(V + 32))) / exp(-2.535e-7V)
+    NataujLOW = 3.49ms / ((V + 37.78) / (1 + exp(0.311 * (V + 79.23))) * (-127140 * exp(0.2444V) - 3.474e-5 * exp(-0.04391V)) + 0.1212 * exp(-0.01052V) / (1 + exp(-0.1378 * (V + 40.14))))
+
+    eqs = [
+        Naminf ~ expit((V + 45) / 6.5),
+        Nahinf ~ expit(-(V + 76.1) / 6.07),
+        Najinf ~ Nahinf,
+        Nataum ~ 1.36ms / (3.2 * exprel(-0.1 * (V + 47.13)) + 0.08 * exp(-V / 11)),
+        Natauh ~ ifelse(V >= -40, NatauhHI, NatauhLOW),
+        Natauj ~ ifelse(V >= -40, NataujHI, NataujLOW),
+        INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na),
+        D(i_Nam) * Nataum ~ Naminf - i_Nam,
+        D(i_Nah) * Natauh ~ Nahinf - i_Nah,
+        D(i_Naj) * Natauj ~ Najinf - i_Naj,
+    ]
+    return ODESystem(eqs, t; name)
 end
 
 function build_neonatal_ecc_eqs(;
@@ -150,31 +230,6 @@ function build_neonatal_ecc_eqs(;
         vm(t)
     end
 
-    D = Differential(t)
-
-    ncxeqs = get_ncx_eqs(Na_i, Cai_sub_SL, Na_o, Ca_o, vm, LCCb_PKAp)
-    lcceqs = get_lcc_eqs(Cai_sub_SL, Ca_o, vm, LCCb_PKAp)
-
-    # T-Type calcium current (TCC)
-    @parameters gCaT = 0.2mS / cm^2
-    @variables ICaT(t) i_b(t) i_g(t)
-    binf = expit((vm + 37.49098mV) / 5.40634mV)
-    taub = (0.6 + 5.4 * expit(-(vm + 100mV) * 0.03 / mV)) * ms
-    ginf = expit(-(vm + 66mV) / 6mV)
-    taug = (1 + 40 * expit(-(vm + 65mV) * 0.08 / mV)) * ms
-
-    # Background calcium and sodium currents
-    @parameters gCab = 0.0008mS / cm^2
-    @parameters gNab = 0.0026mS / cm^2
-    @variables ICab(t) INab(t)
-
-    # If
-    @parameters gf = 0.021mS / cm^2 fNa = 0.2
-    @variables IfNa(t) IfK(t) If(t) i_y(t)
-    fK = 1 - fNa
-    yinf = expit(-(vm + 78.65mV) / 6.33mV)
-    tauy = expit(-(vm + 75mV) / 28.37mV) / 0.11885 + 0.56236 * exp((vm + 75mV) / 14.19mV)
-
     # IK1
     @parameters gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
     @variables IK1(t)
@@ -191,26 +246,12 @@ function build_neonatal_ecc_eqs(;
     taus = (0.35 * exp(-(((vm + 70mV) / 15mV)^2)) + 0.035) - 26.9ms
     tausslow = (3.7 * exp(-(((vm + 70mV) / 30mV)^2)) + 0.035) + 37.4ms
 
-    # INa
-    @parameters gNa = 35mS / cm^2
-    @variables INa(t) i_Nam(t) i_Nah(t) i_Naj(t)
-    Naminf = expit((vm + 45mV) / 6.5mV)
-    Nahinf = expit(-(vm + 76.1mV) / 6.07mV)
-    Najinf = Nahinf
-    Nataum = 0.00136second / (3.2 * exprel(-0.1/mV *(vm + 47.13mV))+0.08*exp(-vm/11mV))
-    NatauhHI = 0.0004537second * expit(( vm + 10.66mV)/11.1mV)
-    NatauhLOW = 0.00349second /( 0.135 * exp((vm + 80mV) / -6.8mV) + 3.56 * exp(0.079/mV * vm) + 3.1e5 * exp(0.35/mV * vm))
-    Natauh = ifelse(vm >= -40mV, NatauhHI, NatauhLOW)
-    NataujHI = 0.01163second * (1 + exp(-0.1/mV * (vm + 32mV))) / exp(-2.535e-7/mV * vm)
-    NataujLOW = 0.00349second / ((vm + 37.78mV)/mV / (1 + exp(0.311/mV * (vm + 79.23mV))) * (-127140 * exp(0.2444/mV * vm) - 3.474e-5 * exp(-0.04391/mV * vm)) + 0.1212 * exp(-0.01052/mV * vm) / (1 + exp(-0.1378/mV * (vm + 40.14mV))))
-    Natauj = ifelse(vm >= -40mV, NataujHI, NataujLOW)
-
     # RyR
     @parameters begin
         nRyR = 4
-        nu1RyR = 0.01/ms
-        kaposRyR = 3/ms
-        kanegRyR = 0.48/ms
+        nu1RyR = 0.01 / ms
+        kaposRyR = 3 / ms
+        kanegRyR = 0.48 / ms
     end
     @variables Jrel(t) Ca_JSR(t) Cai_sub_SR(t) PO1_RyR(t) PC1_RyR(t) KmRyR(t)
 
@@ -218,13 +259,13 @@ function build_neonatal_ecc_eqs(;
 
     # SERCA and PLB
     @parameters begin
-        VmaxfSR = 0.9996μM/ms
+        VmaxfSR = 0.9996μM / ms
         VmaxrSR = VmaxfSR
         KmfSR = 0.5μM
         KmrSR = 7000 * KmfSR
         HfSR = 2
         HrSR = 1 * Hf
-        kSRleak = 5e-6/ms
+        kSRleak = 5e-6 / ms
         fracPKA_PLBo = 1 - 0.079755
         PLBtot = 106μM
     end
@@ -240,35 +281,23 @@ function build_neonatal_ecc_eqs(;
     fSR = NaNMath.pow(Cai_sub_SR / Kmfp, HfSR)
     rSR = NaNMath.pow(CaNSR / KmrSR, HrSR)
 
-
     eqs = [
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
         E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
-        ICaT ~ gCaT * i_b * i_g * (vm - E_Ca + 106.5mV),
-        D(i_b) * taub ~ binf - i_b,
-        D(i_g) * taug ~ ginf - i_g,
-        ICab ~ gCab * (V - E_Ca),
-        INab ~ gNab * (V - E_Na),
-        IfNa ~ gf * fNa * i_y * (vm - E_Na),
-        IfK ~ gf * fK * i_y * (vm - E_K),
-        If ~ IfNa + IfK,
-        D(i_y) * tauy ~ yinf - i_y,
         IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
         Ito ~ gt * i_r * (0.706 * i_s + 0.294 * i_sslow) * (vm - E_K),
         D(i_r) * taur ~ rinf - i_r,
         D(i_s) * taus ~ sinf - i_s,
         D(i_sslow) * tausslow ~ slowinf - i_sslow,
-        INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na)
-        D(i_Nam) ~ (Naminf - i_Nam) / Nataum,
+        INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na),
+              D(i_Nam) ~ (Naminf - i_Nam) / Nataum,
         D(i_Nah) ~ (Nahinf - i_Nah) / Natauh,
         D(i_Naj) ~ (Najinf - i_Naj) / Natauj,
         Jrel ~ nu1RyR * PO1_RyR * (Ca_JSR - Cai_sub_SR),
         1 ~ PO1_RyR + PC1_RyR,
         D(PO1_RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR, nRyR) * PC1_RyR - kanegRyR * PO1_RyR,
-        Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),
-
-    ]
+        Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),]
 
     return eqs
 end
