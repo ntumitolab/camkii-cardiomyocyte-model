@@ -206,6 +206,109 @@ function get_ina_sys(vm, E_Na; name=:inasys)
     return ODESystem(eqs, t; name)
 end
 
+"Potassium currents"
+function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
+    V = vm * Volt / mV # Convert voltage to mV
+
+    # IK1: time-independent
+    @parameters gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
+    @variables IK1(t)
+    vk1 = vm - E_K - 6.1373mV
+
+    # Ito
+    # Where does this come from? Perhaps here: https://modeldb.science/262081
+    @parameters gt = 0.1mS / cm^2 f_is = 0.706
+    @variables Ito(t) i_r(t) i_s(t) i_sslow(t) sinf(t) rinf(t) slowinf(t) taur(t) taus(t) tausslow(t)
+
+    # IKs (and IKur)
+    @parameters GKs = 0.05mS / cm^2
+    @variables begin
+        IKs(t)
+        i_nKs(t)
+        nKsinf(t)
+        nKstau(t) = 750ms
+    end
+
+    # PKA-dependent phosphoregulation of Ik,slow1 (increases Gkur1)
+    fracIKurp0 = 0.437635       # Derived quantity (IKur_PKAp(baseline)/IKurtot)
+    fracIKurpISO = 0.718207     # Derived quantity (IKur_PKAp(ISO)/IKurtot)
+    a_Kur = (1.20 - 1) / (fracIKurpISO / fracIKurp0 - 1)
+    fracIKuravail = (1 - a_Kur) + a_Kur * (IKur_PKAp / fracIKurp0)  # +20# with 0.1 uM ISO
+    alphan = -1 * 0.00000481333 * (V + 26.5) / expm1(-0.128 * (V + 26.5))
+    betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
+    nKsinf = alphan / (alphan + betan)
+
+    # IKr
+    @parameters begin
+        GKr = 0.06mS / cm^2
+        kf = 0.023761/ms
+        kb = 0.036778/ms
+    end
+
+    @variables begin
+        IKr(t)
+        E_Kr(t)
+        CK0(t)
+        i_CK1(t)
+        i_CK2(t)
+        i_OK(t)
+        i_IK(t)
+    end
+
+    alphaa0 = 0.022348 * exp(0.01176 * V)
+    betaa0 = 0.047002 * exp(-0.0631 * V)
+    alphaa1 = 0.013733 * exp(0.038198 * V)
+    betaa1 = 0.0000689 * exp(-0.04178 * V)
+    alphai_mERG = 0.090821 * exp(0.023391 * V)
+    betai_mERG = 0.006497 * exp(-0.03268 * V)
+
+    eqs = [
+        IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
+        sinf ~ expit((vm + 31.97156mV) / -4.64291mV),
+        rinf ~ expit((vm - 3.55716mV) / 14.61299mV),
+        slowinf ~ sinf,
+        taur ~ inv(45.16 * exp(0.03577 / mV * (vm + 50mV)) + 98.9 * exp(-0.1 / mV * (vm + 38mV))),
+        taus ~ (0.35 * exp(-(((vm + 70mV) / 15mV)^2)) + 0.035) - 26.9ms,
+        tausslow ~ (3.7 * exp(-(((vm + 70mV) / 30mV)^2)) + 0.035) + 37.4ms,
+        Ito ~ gt * i_r * (f_is * i_s + (1-f_is) * i_sslow) * (vm - E_K),
+        D(i_r) * taur ~ rinf - i_r,
+        D(i_s) * taus ~ sinf - i_s,
+        D(i_sslow) * tausslow ~ slowinf - i_sslow,
+        IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
+        nKsinf ~ alphan / (alphan + betan),
+        D(i_nKs) * nKstau ~ nKsinf - i_nKs,
+        E_Kr ~ nerst(0.98 * K_o + 0.02 * Na_o, 0.98 * K_i + 0.02 * Na_i),
+        IKr ~ i_OK * GKr * (vm - E_Kr),
+        CK0 ~ 1 - (i_CK1 + i_CK2 + i_OK + i_IK),
+        D(i_CK1) ~ (alphaa0 * CK0 - betaa0 * i_CK1 + kb * i_CK2 - kf * i_CK1),
+        D(i_CK2) ~ (kf * i_CK1 - kb * i_CK2 + betaa1 * i_OK - alphaa1 * i_CK2),
+        D(i_OK) ~ (alphaa1 * i_CK2 - betaa1 * i_OK + betai_mERG * i_IK - alphai_mERG * i_OK),
+        D(i_IK) ~ (alphai_mERG * i_OK - betai_mERG * i_IK),
+    ]
+    return ODESystem(eqs, t; name)
+end
+
+function get_ryr_sys(Ca, CaJSR; name=:ryrsys)
+    @parameters begin
+        nRyR = 4
+        nu1RyR = 0.01 / ms
+        kaposRyR = 1 / ms
+        kanegRyR = 0.16 / ms
+    end
+    @variables begin
+        i_PO1(t)
+        i_PC1(t)
+        Jrel(t)
+    end
+    KmRyR = (1.35 * 2.6 * expit(-(Ca - 530μM) / 200μM) + 1.5 - 0.9 - 0.3 - 0.05) * μM
+    eqs = [
+        1 ~ i_PO1 + i_PC1,
+        Jrel ~ nu1RyR * i_PO1 * (CaJSR - Ca),
+        D(PO1_RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR, nRyR) * PC1_RyR - kanegRyR * PO1_RyR,
+    ]
+    return ODESystem(eqs, t; name)
+end
+
 function build_neonatal_ecc_eqs(;
     LCCb_PKAp=0,  # Fraction of LCC phosphorylated by PKAPLB_CKp
     PLBT17p=0,
@@ -229,33 +332,6 @@ function build_neonatal_ecc_eqs(;
         E_Ca(t)
         vm(t)
     end
-
-    # IK1
-    @parameters gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
-    @variables IK1(t)
-    vk1 = vm - E_K - 6.1373mV
-
-    # Ito
-    # Where does this come from? Perhaps here: https://modeldb.science/262081
-    @parameters gt = 0.1mS / cm^2
-    @variables Ito(t) i_r(t) i_s(t) i_sslow(t)
-    sinf = expit(-(vm + 31.97156mV) / 4.64291mV)
-    rinf = expit((vm - 3.55716mV) / 14.61299mV)
-    slowinf = sinf
-    taur = inv(45.16 * exp(0.03577 / mV * (vm + 50mV)) + 98.9 * exp(-0.1 / mV * (vm + 38mV)))
-    taus = (0.35 * exp(-(((vm + 70mV) / 15mV)^2)) + 0.035) - 26.9ms
-    tausslow = (3.7 * exp(-(((vm + 70mV) / 30mV)^2)) + 0.035) + 37.4ms
-
-    # RyR
-    @parameters begin
-        nRyR = 4
-        nu1RyR = 0.01 / ms
-        kaposRyR = 3 / ms
-        kanegRyR = 0.48 / ms
-    end
-    @variables Jrel(t) Ca_JSR(t) Cai_sub_SR(t) PO1_RyR(t) PC1_RyR(t) KmRyR(t)
-
-    KmRyR = (1.35 * 2.6 * expit(-(Ca_JSR - 530μM) / 200μM) + 1.5 - 0.9 - 0.3 - 0.05) * μM
 
     # SERCA and PLB
     @parameters begin
@@ -285,19 +361,7 @@ function build_neonatal_ecc_eqs(;
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
         E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
-        IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
-        Ito ~ gt * i_r * (0.706 * i_s + 0.294 * i_sslow) * (vm - E_K),
-        D(i_r) * taur ~ rinf - i_r,
-        D(i_s) * taus ~ sinf - i_s,
-        D(i_sslow) * tausslow ~ slowinf - i_sslow,
-        INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na),
-              D(i_Nam) ~ (Naminf - i_Nam) / Nataum,
-        D(i_Nah) ~ (Nahinf - i_Nah) / Natauh,
-        D(i_Naj) ~ (Najinf - i_Naj) / Natauj,
-        Jrel ~ nu1RyR * PO1_RyR * (Ca_JSR - Cai_sub_SR),
-        1 ~ PO1_RyR + PC1_RyR,
-        D(PO1_RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR, nRyR) * PC1_RyR - kanegRyR * PO1_RyR,
-        Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),]
-
+        Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),
+    ]
     return eqs
 end
