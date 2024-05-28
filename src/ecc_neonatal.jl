@@ -234,9 +234,8 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
     fracIKurpISO = 0.718207     # Derived quantity (IKur_PKAp(ISO)/IKurtot)
     a_Kur = (1.20 - 1) / (fracIKurpISO / fracIKurp0 - 1)
     fracIKuravail = (1 - a_Kur) + a_Kur * (IKur_PKAp / fracIKurp0)  # +20# with 0.1 uM ISO
-    alphan = -1 * 0.00000481333 * (V + 26.5) / expm1(-0.128 * (V + 26.5))
+    alphan = 0.00000481333 * (V + 26.5) / (-expm1(-0.128 * (V + 26.5)))
     betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
-    nKsinf = alphan / (alphan + betan)
 
     # IKr
     @parameters begin
@@ -255,12 +254,12 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
         i_IK(t)
     end
 
-    alphaa0 = 0.022348 * exp(0.01176 * V)
-    betaa0 = 0.047002 * exp(-0.0631 * V)
-    alphaa1 = 0.013733 * exp(0.038198 * V)
-    betaa1 = 0.0000689 * exp(-0.04178 * V)
-    alphai_mERG = 0.090821 * exp(0.023391 * V)
-    betai_mERG = 0.006497 * exp(-0.03268 * V)
+    alphaa0 = 0.022348/ms * exp(0.01176 * V)
+    betaa0 = 0.047002/ms * exp(-0.0631 * V)
+    alphaa1 = 0.013733/ms * exp(0.038198 * V)
+    betaa1 = 0.0000689/ms * exp(-0.04178 * V)
+    alphai_mERG = 0.090821/ms * exp(0.023391 * V)
+    betai_mERG = 0.006497/ms * exp(-0.03268 * V)
 
     eqs = [
         IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
@@ -309,6 +308,37 @@ function get_ryr_sys(Ca, CaJSR; name=:ryrsys)
     return ODESystem(eqs, t; name)
 end
 
+function get_serca_sys(Cai, CaNSR, CaJSR, fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0; name=:sercasys)
+    @parameters begin
+        VmaxfSR = 0.9996μM / ms
+        VmaxrSR = VmaxfSR
+        KmfSR = 0.5μM
+        KmrSR = 7000 * KmfSR
+        HfSR = 2
+        HrSR = 1 * Hf
+        kSRleak = 5e-6 / ms
+        fracPKA_PLBo = 1 - 0.079755
+    end
+
+    @variables Jup(t) Jleak(t) Jtr(t)
+
+    fCKII_PLB = (1 - 0.5 * fracPLB_CKp)  # Max effect: fCKII_PLB=0.5
+    PLB_PKAn = 1 - fracPLBp
+    fPKA_PLB = (PLB_PKAn / fracPKA_PLBo) * (100 - 55.31) / 100 + 55.31 / 100
+    # Select smaller value (resulting in max reduction of Kmf)
+    Kmfp = 2 * Kmf * min(fCKII_PLB, fPKA_PLB)  #fCKII_PLB
+    fSR = NaNMath.pow(Cai / Kmfp, HfSR)
+    rSR = NaNMath.pow(CaNSR / KmrSR, HrSR)
+
+    kleak = (1 / 2 + 5 * RyR_CKp / 2) * kSRleak
+    eqs = [
+        Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),
+        Jleak ~ kleak * (CaNSR - Cai),
+        Jtr ~ (CaNSR - CaJSR) / 200ms
+    ]
+    return ODESystem(eqs, t; name)
+end
+
 function build_neonatal_ecc_eqs(;
     LCCb_PKAp=0,  # Fraction of LCC phosphorylated by PKAPLB_CKp
     PLBT17p=0,
@@ -346,22 +376,10 @@ function build_neonatal_ecc_eqs(;
         PLBtot = 106μM
     end
 
-    @variables Jup(t) Cai_sub_SR(t) CaNSR(t)
-
-    PLB_CKp = PLBT17p / PLBtot
-    fCKII_PLB = (1 - 0.5 * PLB_CKp)  # Max effect: fCKII_PLB=0.5
-    PLB_PKAn = (PLBtot - PLBp) / PLBtot
-    fPKA_PLB = (PLB_PKAn / fracPKA_PLBo) * (100 - 55.31) / 100 + 55.31 / 100
-    # Phosphorylation will decrease KmfSR (increase affinity)
-    Kmfp = KmfSR * min(fCKII_PLB, fPKA_PLB)
-    fSR = NaNMath.pow(Cai_sub_SR / Kmfp, HfSR)
-    rSR = NaNMath.pow(CaNSR / KmrSR, HrSR)
-
     eqs = [
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
         E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
-        Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),
     ]
     return eqs
 end
