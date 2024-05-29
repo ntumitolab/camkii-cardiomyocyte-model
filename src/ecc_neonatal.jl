@@ -171,7 +171,7 @@ function get_if_sys(vm, E_Na, E_K; name=:ifsys)
     V = vm * Volt / mV # Convert voltage to mV
     eqs = [
         yinf ~ expit(-(V + 78.65) / 6.33),
-        tauy ~ 1/(0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
+        tauy ~ 1 / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
         IfNa ~ gf * fNa * i_y * (vm - E_Na),
         IfK ~ gf * fK * i_y * (vm - E_K),
         If ~ IfNa + IfK,
@@ -188,7 +188,7 @@ function get_ina_sys(vm, E_Na; name=:inasys)
     V = vm * Volt / mV # Convert voltage to mV
     NatauhHI = 0.4537ms * expit((V + 10.66) / 11.1)
     NatauhLOW = 3.49ms / (0.135 * exp((V + 80) / -6.8) + 3.56 * exp(0.079V) + 3.1e5 * exp(0.35V))
-    NataujHI = 11.63ms * (1 + exp(-0.1*(V + 32))) / exp(-2.535e-7V)
+    NataujHI = 11.63ms * (1 + exp(-0.1 * (V + 32))) / exp(-2.535e-7V)
     NataujLOW = 3.49ms / ((V + 37.78) / (1 + exp(0.311 * (V + 79.23))) * (-127140 * exp(0.2444V) - 3.474e-5 * exp(-0.04391V)) + 0.1212 * exp(-0.01052V) / (1 + exp(-0.1378 * (V + 40.14))))
 
     eqs = [
@@ -207,7 +207,7 @@ function get_ina_sys(vm, E_Na; name=:inasys)
 end
 
 "Potassium currents"
-function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
+function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     V = vm * Volt / mV # Convert voltage to mV
 
     # IK1: time-independent
@@ -240,8 +240,8 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
     # IKr
     @parameters begin
         GKr = 0.06mS / cm^2
-        kf = 0.023761/ms
-        kb = 0.036778/ms
+        kf = 0.023761 / ms
+        kb = 0.036778 / ms
     end
 
     @variables begin
@@ -254,12 +254,12 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
         i_IK(t)
     end
 
-    alphaa0 = 0.022348/ms * exp(0.01176 * V)
-    betaa0 = 0.047002/ms * exp(-0.0631 * V)
-    alphaa1 = 0.013733/ms * exp(0.038198 * V)
-    betaa1 = 0.0000689/ms * exp(-0.04178 * V)
-    alphai_mERG = 0.090821/ms * exp(0.023391 * V)
-    betai_mERG = 0.006497/ms * exp(-0.03268 * V)
+    alphaa0 = 0.022348 / ms * exp(0.01176 * V)
+    betaa0 = 0.047002 / ms * exp(-0.0631 * V)
+    alphaa1 = 0.013733 / ms * exp(0.038198 * V)
+    betaa1 = 0.0000689 / ms * exp(-0.04178 * V)
+    alphai_mERG = 0.090821 / ms * exp(0.023391 * V)
+    betai_mERG = 0.006497 / ms * exp(-0.03268 * V)
 
     eqs = [
         IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
@@ -269,7 +269,7 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o,IKur_PKAp=0; name=:iksys)
         taur ~ inv(45.16 * exp(0.03577 / mV * (vm + 50mV)) + 98.9 * exp(-0.1 / mV * (vm + 38mV))),
         taus ~ (0.35 * exp(-(((vm + 70mV) / 15mV)^2)) + 0.035) - 26.9ms,
         tausslow ~ (3.7 * exp(-(((vm + 70mV) / 30mV)^2)) + 0.035) + 37.4ms,
-        Ito ~ gt * i_r * (f_is * i_s + (1-f_is) * i_sslow) * (vm - E_K),
+        Ito ~ gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
         D(i_r) * taur ~ rinf - i_r,
         D(i_s) * taus ~ sinf - i_s,
         D(i_sslow) * tausslow ~ slowinf - i_sslow,
@@ -339,11 +339,11 @@ function get_serca_sys(Cai, CaNSR, CaJSR, fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0; 
     return ODESystem(eqs, t; name)
 end
 
-function build_neonatal_ecc_eqs(;
+function build_neonatal_ecc_sys(;
     LCCb_PKAp=0,  # Fraction of LCC phosphorylated by PKAPLB_CKp
     PLBT17p=0,
     PLBp=0,
-)
+    name=:neonataleccsys)
     @parameters begin
         Ca_o = 1796μM
         Na_o = 154578μM
