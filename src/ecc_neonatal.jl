@@ -13,15 +13,14 @@ using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
 
 "Calcium buffered by troponin and calmodulin"
-function beta_cai(Ca; TnI_PKAp=0)
-    @parameters begin
-        TrpnTotal = 35μM
-        CmdnTotal = 50μM
-        KmCmdn = 2.38μM
-        KmTrpn = 0.5μM
-        fracTnIp0 = 0.062698 # Baseline effect
-    end
-
+function beta_cai(Ca;
+    TnI_PKAp=0,
+    TrpnTotal = 35μM,
+    CmdnTotal = 50μM,
+    KmCmdn = 2.38μM,
+    KmTrpn = 0.5μM,
+    fracTnIp0 = 0.062698 # Baseline effect
+)
     fPKA_TnI = 1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIp0) # Max effect +61%
     KmTrpnNew = KmTrpn / fPKA_TnI
     return inv(1 + TrpnTotal * KmTrpnNew / (Ca + KmTrpnNew)^2 + CmdnTotal * KmCmdn / (Ca + KmCmdn)^2)
@@ -29,34 +28,46 @@ end
 
 "Calcium diffusion between sarcolemma (SL) and sarcoplasmic reticulum (SR)"
 function get_ca_pde_sys(;
+    Cai_sub_SR_default=0.2556μM,
+    Cai_sub_SL_default=0.25151μM,
     dx=0.1μm,
     rSR_true=6μm,
     rSL_true=10.5μm,
-    V_sub_SR=4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3),
-    V_sub_SL=4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3),
     TnI_PKAp=0,
-    name=:capde
+    name=:capdesys
 )
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
     @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t)
-    @parameters Dca = 7μm^2 / ms
+    @parameters begin
+        Dca = 7μm^2 / ms
+        V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3)
+        V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3)
+        TrpnTotal = 35μM
+        CmdnTotal = 50μM
+        KmCmdn = 2.38μM
+        KmTrpn = 0.5μM
+        fracTnIp0 = 0.062698 # Baseline effect
+    end
     eqs = [
         Cai_mean ~ sum(collect(Cai)) / m,
         Cai_sub_SR ~ Cai[1],
         Cai_sub_SL ~ Cai[m],
-        D(Cai[1]) ~ (Dca / (j[1] * dx^2) * ((1 + j[1]) * Cai[2] - 2 * j[1] * Cai[1] + (j[1] - 1) * Cai[1]) + JCa_SR / V_sub_SR) * beta_cai(Cai[1]; TnI_PKAp),
-        D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL / V_sub_SL) * beta_cai(Cai[m]; TnI_PKAp),
+        D(Cai[1]) ~ (Dca / (j[1] * dx^2) * ((1 + j[1]) * Cai[2] - 2 * j[1] * Cai[1] + (j[1] - 1) * Cai[1]) + JCa_SR / V_sub_SR) * beta_cai(Cai[1]; TnI_PKAp, TrpnTotal, CmdnTotal, KmCmdn, KmTrpn, fracTnIp0),
+        D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL / V_sub_SL) * beta_cai(Cai[m]; TnI_PKAp, TrpnTotal, CmdnTotal, KmCmdn, KmTrpn, fracTnIp0),
     ]
 
+    defaults = [Cai[1] => Cai_sub_SR_default, Cai[m] => Cai_sub_SL_default]
+
     for i in 2:m-1
-        eq = D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]; TnI_PKAp)
+        eq = D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]; TnI_PKAp, TrpnTotal, CmdnTotal, KmCmdn, KmTrpn, fracTnIp0)
         push!(eqs, eq)
+        push!(defaults, Cai[i] => (Cai_sub_SR_default + Cai_sub_SL_default)/2)
     end
 
-    return ODESystem(eqs, t; name)
+    return ODESystem(eqs, t; name, defaults)
 end
 
 "Calcium flux scaled by phosphorylated LCC"
@@ -87,11 +98,10 @@ end
 function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
     @parameters GCaL = 1.3125e-4 * 0.8 * 0.6 / ms
     @variables begin
-        t
         ICaL(t)
-        i_d(t)
-        i_f(t)
-        i_fca(t)
+        i_d(t) = 0.00033
+        i_f(t) = 0.99869
+        i_fca(t) = 0.9911
         dinf(t)
         taud(t)
         finf(t)
@@ -129,8 +139,8 @@ function get_tcc_sys(vm, E_Ca; name=:tccsys)
     @parameters gCaT = 0.2mS / cm^2
     @variables begin
         ICaT(t)
-        i_b(t)
-        i_g(t)
+        i_b(t) = 0.00305
+        i_g(t) = 0.61179
         binf(t)
         taub(t)
         ginf(t)
@@ -166,7 +176,7 @@ end
 "Funny current (If)"
 function get_if_sys(vm, E_Na, E_K; name=:ifsys)
     @parameters gf = 0.021mS / cm^2 fNa = 0.2
-    @variables IfNa(t) IfK(t) If(t) i_y(t) yinf(t) tauy(t)
+    @variables IfNa(t) IfK(t) If(t) yinf(t) tauy(t) i_y(t) = 0.07192
     fK = 1 - fNa
     V = vm * Volt / mV # Convert voltage to mV
     eqs = [
@@ -183,7 +193,17 @@ end
 "Fast sodium current (INa)"
 function get_ina_sys(vm, E_Na; name=:inasys)
     @parameters gNa = 35mS / cm^2
-    @variables INa(t) i_Nam(t) i_Nah(t) i_Naj(t) Naminf(t) Nahinf(t) Najinf(t) Nataum(t) Natauh(t)
+    @variables begin
+        INa(t)
+        Naminf(t)
+        Nahinf(t)
+        Najinf(t)
+        Nataum(t)
+        Natauh(t)
+        i_Nam(t) = 0.0250
+        i_Nah(t) = 0.22242
+        i_Naj(t) = 0.19081
+    end
 
     V = vm * Volt / mV # Convert voltage to mV
     NatauhHI = 0.4537ms * expit((V + 10.66) / 11.1)
@@ -215,16 +235,26 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     @variables IK1(t)
     vk1 = vm - E_K - 6.1373mV
 
-    # Ito
-    # Where does this come from? Perhaps here: https://modeldb.science/262081
+    # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
     @parameters gt = 0.1mS / cm^2 f_is = 0.706
-    @variables Ito(t) i_r(t) i_s(t) i_sslow(t) sinf(t) rinf(t) slowinf(t) taur(t) taus(t) tausslow(t)
+    @variables begin
+        Ito(t)
+        i_r(t) = 0.00702
+        i_s(t) = 0.9660
+        i_sslow(t) = 0.22156
+        sinf(t)
+        rinf(t)
+        slowinf(t)
+        taur(t)
+        taus(t)
+        tausslow(t)
+    end
 
     # IKs (and IKur)
     @parameters GKs = 0.05mS / cm^2
     @variables begin
         IKs(t)
-        i_nKs(t)
+        i_nKs(t) = 0.09243
         nKsinf(t)
         nKstau(t) = 750ms
     end
@@ -248,10 +278,10 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         IKr(t)
         E_Kr(t)
         CK0(t)
-        i_CK1(t)
-        i_CK2(t)
-        i_OK(t)
-        i_IK(t)
+        i_CK1(t) = 0.00188
+        i_CK2(t) = 0.00977
+        i_OK(t) = 0.26081
+        i_IK(t) = 0.07831
     end
 
     alphaa0 = 0.022348 / ms * exp(0.01176 * V)
@@ -295,7 +325,7 @@ function get_ryr_sys(Ca, CaJSR; name=:ryrsys)
         kanegRyR = 0.16 / ms
     end
     @variables begin
-        i_PO1(t)
+        i_PO1(t) = 0.0037
         i_PC1(t)
         Jrel(t)
     end
@@ -349,37 +379,28 @@ function build_neonatal_ecc_sys(;
         Na_o = 154578μM
         K_o = 5366μM
         Mg_i = 1000μM
+        ROS = 0μM
     end
 
     @variables begin
-        t
-        Na_i(t)
-        K_i(t) = 135000μM
-        Cai_sub_SL(t)
-        Cai_sub_SR(t)
+        Na_i(t) = 13838.37602μM
+        K_i(t) = 150952.75035μM
+        CaNSR(t) = 619.09843μM
+        CaJSR(t) = 613.87556μM
+        vm(t) = -68.79268mV
         E_Na(t)
         E_K(t)
         E_Ca(t)
-        vm(t)
     end
 
-    # SERCA and PLB
-    @parameters begin
-        VmaxfSR = 0.9996μM / ms
-        VmaxrSR = VmaxfSR
-        KmfSR = 0.5μM
-        KmrSR = 7000 * KmfSR
-        HfSR = 2
-        HrSR = 1 * Hf
-        kSRleak = 5e-6 / ms
-        fracPKA_PLBo = 1 - 0.079755
-        PLBtot = 106μM
-    end
+    capdesys = get_ca_pde_sys()
+    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
+    camkiisys = get_camkii_eqs(Cai_mean, ROS)
 
     eqs = [
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
         E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
     ]
-    return eqs
+    return ODESystem(eqs, t; name)
 end
