@@ -369,17 +369,15 @@ function get_serca_sys(Cai, CaNSR, CaJSR, fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0; 
     return ODESystem(eqs, t; name)
 end
 
-function build_neonatal_ecc_sys(;
-    LCCb_PKAp=0,  # Fraction of LCC phosphorylated by PKAPLB_CKp
-    PLBT17p=0,
-    PLBp=0,
-    name=:neonataleccsys)
+function build_neonatal_ecc_sys(;name=:neonataleccsys)
     @parameters begin
         Ca_o = 1796μM
         Na_o = 154578μM
         K_o = 5366μM
         Mg_i = 1000μM
         ROS = 0μM
+        ISO = 0μM
+        ATP = 5000μM
     end
 
     @variables begin
@@ -396,6 +394,9 @@ function build_neonatal_ecc_sys(;
     capdesys = get_ca_pde_sys()
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_eqs(Cai_mean, ROS)
+    barsys = get_bar_sys(ATP, ISO)
+    @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp = barsys
+    ICa_scale = get_ICa_scalep
 
     eqs = [
         E_Na ~ nernst(Na_o, Na_i),

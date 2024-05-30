@@ -136,6 +136,8 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM)
         # Phosphorylation proportions
         LCCa_PKAp(t)
         LCCb_PKAp(t)
+        fracPLBp(t)
+        TnI_PKAp(t)
     end
 
     rates = Dict(sts .=> Num(0))  ## Record accumulated rates
@@ -210,9 +212,12 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM)
     propeqs = [
         LCCa_PKAp ~ LCCap/LCCtot,
         LCCb_PKAp ~ LCCbp/LCCtot,
+        fracPLBp ~ PLBp/PLBtot,
+        TnI_PKAp ~ TnIp/TnItot
     ]
 
-    odeeqs = [D(x) ~ rates[x] for x in (LR, LRG, RG, GsaGTP, GsaGDP, Gsby, b1AR_S464, b1AR_S301, AC_GsaGTP, PDEp, cAMP, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII, PKACII_PKI, I1p, I1p_PP1, PLBp, PLMp, TnIp, LCCap, LCCbp, KURp)]
+    sts = (LR, LRG, RG, GsaGTP, GsaGDP, Gsby, b1AR_S464, b1AR_S301, AC_GsaGTP, PDEp, cAMP, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII, PKACII_PKI, I1p, I1p_PP1, PLBp, PLMp, TnIp, LCCap, LCCbp, KURp)
+    odeeqs = [D(x) ~ rates[x] for x in sts]
 
     return [conservedeqs; propeqs; odeeqs]
 end
