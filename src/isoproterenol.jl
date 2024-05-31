@@ -138,6 +138,7 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM)
         LCCb_PKAp(t)
         fracPLBp(t)
         TnI_PKAp(t)
+        IKUR_PKAp(t)
     end
 
     rates = Dict(sts .=> Num(0))  ## Record accumulated rates
@@ -146,8 +147,8 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM)
     add_rate!(rates, ISO * kf_LR * b1AR - kr_LR * LR, [b1AR], [LR])
     add_rate!(rates, kf_LRG * LR * Gs - kr_LRG * LRG, [LR, Gs], [LRG])
     add_rate!(rates, kf_RG * b1AR * Gs - kr_RG * RG, [b1AR, Gs], [RG])
-    add_rate!(rates, RG*k_G_act, [RG], [b1AR, GsaGTP, Gsby])
-    add_rate!(rates, LRG*k_G_act, [LRG], [b1AR, GsaGTP, Gsby])
+    add_rate!(rates, RG * k_G_act, [RG], [b1AR, GsaGTP, Gsby])
+    add_rate!(rates, LRG * k_G_act, [LRG], [b1AR, GsaGTP, Gsby])
     add_rate!(rates, k_G_hyd * GsaGTP, [GsaGTP], [GsaGDP])
     add_rate!(rates, k_G_reassoc * GsaGDP * Gsby, [GsaGDP, Gsby], [Gs])
     # Receptor inactivation
@@ -170,22 +171,22 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM)
     add_rate!(rates, kf_RC_cAMP * RC_I * cAMP - kr_RC_cAMP * RCcAMP_I, [RC_I, cAMP], [RCcAMP_I])
     add_rate!(rates, kf_RCcAMP_cAMP * RCcAMP_I * cAMP - kr_RCcAMP_cAMP * RCcAMPcAMP_I, [RCcAMP_I, cAMP], [RCcAMPcAMP_I])
     add_rate!(rates, kf_RcAMPcAMP_C * RCcAMPcAMP_I - kr_RcAMPcAMP_C * RcAMPcAMP_I * PKACI, [RCcAMPcAMP_I], [RcAMPcAMP_I, PKACI])
-    add_rate!(rates, kf_PKA_PKI*PKACI* PKI - kr_PKA_PKI * PKACI_PKI, [PKACI, PKI], [PKACI_PKI])
+    add_rate!(rates, kf_PKA_PKI * PKACI * PKI - kr_PKA_PKI * PKACI_PKI, [PKACI, PKI], [PKACI_PKI])
     add_rate!(rates, kf_RC_cAMP * RC_II * cAMP - kr_RC_cAMP * RCcAMP_II, [RC_II, cAMP], [RCcAMP_II])
     add_rate!(rates, kf_RCcAMP_cAMP * RCcAMP_II * cAMP - kr_RCcAMP_cAMP * RCcAMPcAMP_II, [RCcAMP_II, cAMP], [RCcAMPcAMP_II])
     add_rate!(rates, kf_RcAMPcAMP_C * RCcAMPcAMP_II - kr_RcAMPcAMP_C * RcAMPcAMP_II * PKACII, [RCcAMPcAMP_II], [RcAMPcAMP_II, PKACII])
-    add_rate!(rates, kf_PKA_PKII*PKACII* PKI - kr_PKA_PKI * PKACII_PKI, [PKACII, PKI], [PKACII_PKI])
+    add_rate!(rates, kf_PKA_PKI * PKACII * PKI - kr_PKA_PKI * PKACII_PKI, [PKACII, PKI], [PKACII_PKI])
 
     # PKA modifications
     add_rate!(rates, k_PKA_I1 * PKACI * hil(I1, Km_PKA_I1) - Vmax_PP2A_I1 * hil(I1p, Km_PP2A_I1), [I1], [I1p])
     add_rate!(rates, kf_PP1_I1 * I1p * PP1 - kr_PP1_I1 * I1p_PP1, [I1p, PP1], [I1p_PP1])
     add_rate!(rates, k_PKA_PLB * PKACI * hil(PLB, Km_PKA_PLB) - k_PP1_PLB * PP1 * hil(PLBp, Km_PP1_PLB), [PLB], [PLBp])
-    add_rate!(rates, k_PKA_PLM * PKACI * hil(PLM, Km_PKA_PLM) - k_PP1_PLM * PP1 * hil(PLMp, Km_PKA_PLM), [PLM], [PLMp])
+    add_rate!(rates, k_PKA_PLM * PKACI * hil(PLM, Km_PKA_PLM) - k_PP1_PLM * PP1 * hil(PLMp, Km_PP1_PLM), [PLM], [PLMp])
     add_rate!(rates, k_PKA_TnI * PKACI * hil(TnI, Km_PKA_TnI) - k_PP2A_TnI * PP2A_TnI * hil(TnIp, Km_PP2A_TnI), [TnI], [TnIp])
 
     pkac2 = (PKACII_LCCtot / PKAIItot) * PKACII
     kmlcc = Km_PKA_LCC / epsilon
-    add_rate!(rates, k_PKA_LCC * pkac2 * hil(LCCa, kmlcc) - k_PP2A_LCC * PP2A_LCC * hil(LCCap, Km_PP2A_LCC / epsilon), [LCCa] ,[LCCap])
+    add_rate!(rates, k_PKA_LCC * pkac2 * hil(LCCa, kmlcc) - k_PP2A_LCC * PP2A_LCC * hil(LCCap, Km_PP2A_LCC / epsilon), [LCCa], [LCCap])
     add_rate!(rates, k_PKA_LCC * pkac2 * hil(LCCb, kmlcc) - k_PP1_LCC * PP1_LCC * hil(LCCbp, Km_PP1_LCC / epsilon), [LCCb], [LCCbp])
 
     pkac2 = (PKAII_KURtot / PKAIItot) * PKACII
@@ -209,17 +210,18 @@ function get_bar_eqs(ATP=5000μM, ISO=0μM)
         KURn ~ IKurtot - KURp,
     ]
 
-    propeqs = [
-        LCCa_PKAp ~ LCCap/LCCtot,
-        LCCb_PKAp ~ LCCbp/LCCtot,
-        fracPLBp ~ PLBp/PLBtot,
-        TnI_PKAp ~ TnIp/TnItot
+   fraceqs = [
+        LCCa_PKAp ~ LCCap / LCCtot,
+        LCCb_PKAp ~ LCCbp / LCCtot,
+        fracPLBp ~ PLBp / PLBtot,
+        TnI_PKAp ~ TnIp / TnItot,
+        IKUR_PKAp ~ KURp / IKurtot
     ]
 
     sts = (LR, LRG, RG, GsaGTP, GsaGDP, Gsby, b1AR_S464, b1AR_S301, AC_GsaGTP, PDEp, cAMP, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII, PKACII_PKI, I1p, I1p_PP1, PLBp, PLMp, TnIp, LCCap, LCCbp, KURp)
     odeeqs = [D(x) ~ rates[x] for x in sts]
 
-    return [conservedeqs; propeqs; odeeqs]
+    return [conservedeqs; fraceqs; odeeqs]
 end
 
 function get_bar_sys(ATP=5000μM, ISO=0μM; name=:barsys)

@@ -15,11 +15,11 @@ using NaNMath
 "Calcium buffered by troponin and calmodulin"
 function beta_cai(Ca;
     TnI_PKAp=0,
-    TrpnTotal = 35μM,
-    CmdnTotal = 50μM,
-    KmCmdn = 2.38μM,
-    KmTrpn = 0.5μM,
-    fracTnIp0 = 0.062698 # Baseline effect
+    TrpnTotal=35μM,
+    CmdnTotal=50μM,
+    KmCmdn=2.38μM,
+    KmTrpn=0.5μM,
+    fracTnIp0=0.062698 # Baseline effect
 )
     fPKA_TnI = 1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIp0) # Max effect +61%
     KmTrpnNew = KmTrpn / fPKA_TnI
@@ -64,7 +64,7 @@ function get_ca_pde_sys(;
     for i in 2:m-1
         eq = D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]; TnI_PKAp, TrpnTotal, CmdnTotal, KmCmdn, KmTrpn, fracTnIp0)
         push!(eqs, eq)
-        push!(defaults, Cai[i] => (Cai_sub_SR_default + Cai_sub_SL_default)/2)
+        push!(defaults, Cai[i] => (Cai_sub_SR_default + Cai_sub_SL_default) / 2)
     end
 
     return ODESystem(eqs, t; name, defaults)
@@ -91,12 +91,16 @@ function get_ncx_sys(nai, cai, nao, cao, vm, ICa_scale=1; name=:ncxsys)
         gamma = 0.5
     end
     @variables INaCa(t)
-    return ODESystem([INaCa ~ ICa_scale * kNaCa * ((exp(iVT * gamma * vm) * nai^3 * cao - exp(iVT * (gamma - 1) * vm) * cai * nao^3 * fNaCa) / (1 + dNaCa * (nao^3 * cai * fNaCa + nai^3 * cao)))], t; name)
+    eqs = INaCa ~ ICa_scale * kNaCa * ((exp(iVT * gamma * vm) * nai^3 * cao - exp(iVT * (gamma - 1) * vm) * cai * nao^3 * fNaCa) / (1 + dNaCa * (nao^3 * cai * fNaCa + nai^3 * cao)))
+    return ODESystem(eqs, t; name)
 end
 
 "L-type calcium current (LCC)"
 function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
-    @parameters GCaL = 1.3125e-4 * 0.8 * 0.6 / ms
+    @parameters begin
+        GCaL = 1.3125e-4 * 0.8 * 0.6 / ms
+        taufca = 10ms
+    end
     @variables begin
         ICaL(t)
         i_d(t) = 0.00033
@@ -117,7 +121,6 @@ function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
     alphafca = hilr(cai, 0.000325mM * 1.5, 8)
     betafca = 0.1 * expit(-(cai - 0.0005mM) / 0.0001mM)
     gammafca = 0.2 * expit(-(cai - 0.00075mM) / 0.0008mM)
-    taufca = 10ms
     kfca = 1 - (fcainf > i_fca) * (V > -60)
 
     eqs = [
@@ -152,7 +155,7 @@ function get_tcc_sys(vm, E_Ca; name=:tccsys)
     eqs = [
         binf ~ expit((V + 37.49098) / 5.40634),
         taub ~ (0.6 + 5.4 * expit(-(V + 100) * 0.03)) * ms,
-        ginf ~ expit(-(V + 66) / 6)
+        ginf ~ expit(-(V + 66) / 6),
         taug ~ (1 + 40 * expit(-(V + 65) * 0.08)) * ms,
         D(i_b) * taub ~ binf - i_b,
         D(i_g) * taug ~ ginf - i_g,
@@ -200,6 +203,7 @@ function get_ina_sys(vm, E_Na; name=:inasys)
         Najinf(t)
         Nataum(t)
         Natauh(t)
+        Natauj(t)
         i_Nam(t) = 0.0250
         i_Nah(t) = 0.22242
         i_Naj(t) = 0.19081
@@ -251,12 +255,11 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     end
 
     # IKs (and IKur)
-    @parameters GKs = 0.05mS / cm^2
+    @parameters GKs = 0.05mS / cm^2 nKstau = 750ms
     @variables begin
         IKs(t)
         i_nKs(t) = 0.09243
         nKsinf(t)
-        nKstau(t) = 750ms
     end
 
     # PKA-dependent phosphoregulation of Ik,slow1 (increases Gkur1)
@@ -306,7 +309,7 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
         nKsinf ~ alphan / (alphan + betan),
         D(i_nKs) * nKstau ~ nKsinf - i_nKs,
-        E_Kr ~ nerst(0.98 * K_o + 0.02 * Na_o, 0.98 * K_i + 0.02 * Na_i),
+        E_Kr ~ nernst(0.98 * K_o + 0.02 * Na_o, 0.98 * K_i + 0.02 * Na_i),
         IKr ~ i_OK * GKr * (vm - E_Kr),
         CK0 ~ 1 - (i_CK1 + i_CK2 + i_OK + i_IK),
         D(i_CK1) ~ (alphaa0 * CK0 - betaa0 * i_CK1 + kb * i_CK2 - kf * i_CK1),
@@ -325,15 +328,15 @@ function get_ryr_sys(Ca, CaJSR; name=:ryrsys)
         kanegRyR = 0.16 / ms
     end
     @variables begin
-        i_PO1(t) = 0.0037
-        i_PC1(t)
+        PO1RyR(t) = 0.0037
+        PC1RyR(t)
         Jrel(t)
     end
     KmRyR = (1.35 * 2.6 * expit(-(Ca - 530μM) / 200μM) + 1.5 - 0.9 - 0.3 - 0.05) * μM
     eqs = [
-        1 ~ i_PO1 + i_PC1,
-        Jrel ~ nu1RyR * i_PO1 * (CaJSR - Ca),
-        D(PO1_RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR, nRyR) * PC1_RyR - kanegRyR * PO1_RyR,
+        1 ~ PO1RyR + PC1RyR,
+        Jrel ~ nu1RyR * PO1RyR * (CaJSR - Ca),
+        D(PO1RyR) ~ kaposRyR * hil(Ca, KmRyR, nRyR) * PC1RyR - kanegRyR * PO1RyR,
     ]
     return ODESystem(eqs, t; name)
 end
@@ -345,31 +348,55 @@ function get_serca_sys(Cai, CaNSR, CaJSR, fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0; 
         KmfSR = 0.5μM
         KmrSR = 7000 * KmfSR
         HfSR = 2
-        HrSR = 1 * Hf
+        HrSR = 1 * HfSR
         kSRleak = 5e-6 / ms
         fracPKA_PLBo = 1 - 0.079755
+        ktrCaSR = 1 / 200ms
+        csqntot = 24750μM
+        Kmcsqn = 800μM
     end
 
-    @variables Jup(t) Jleak(t) Jtr(t)
+    @variables Jup(t) Jleak(t) Jtr(t) betaSR(t)
 
     fCKII_PLB = (1 - 0.5 * fracPLB_CKp)  # Max effect: fCKII_PLB=0.5
     PLB_PKAn = 1 - fracPLBp
     fPKA_PLB = (PLB_PKAn / fracPKA_PLBo) * (100 - 55.31) / 100 + 55.31 / 100
     # Select smaller value (resulting in max reduction of Kmf)
-    Kmfp = 2 * Kmf * min(fCKII_PLB, fPKA_PLB)  #fCKII_PLB
+    Kmfp = 2 * KmfSR * min(fCKII_PLB, fPKA_PLB)  #fCKII_PLB
     fSR = NaNMath.pow(Cai / Kmfp, HfSR)
     rSR = NaNMath.pow(CaNSR / KmrSR, HrSR)
-
     kleak = (1 / 2 + 5 * RyR_CKp / 2) * kSRleak
+
     eqs = [
         Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),
         Jleak ~ kleak * (CaNSR - Cai),
-        Jtr ~ (CaNSR - CaJSR) / 200ms
+        Jtr ~ ktrCaSR * (CaNSR - CaJSR),
+        betaSR ~ inv(1 + csqntot * Kmcsqn / (CaJSR + Kmcsqn)^2)
     ]
     return ODESystem(eqs, t; name)
 end
 
-function build_neonatal_ecc_sys(;name=:neonataleccsys)
+function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
+    @parameters begin
+        INaKmax = 2.7μA / cm^2
+        KmNaiNaK = 18600μM
+        nNaK = 3.2
+        KmKoNaK = 1500μM
+    end
+
+    @variables INaK(t)
+    sigma = 1 / 7 * expm1(Nao / 67300μM)
+    fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365sigma * exp(-vm * iVT))
+    fKo = hil(Ko, KmKoNaK)
+    fNai = hil(Nai, KmNaiNaK, nNaK)
+    eqs = INaK ~ INaKmax * fNaK * fKo * fNai
+    return ODESystem(eqs, t; name)
+end
+
+function build_neonatal_ecc_sys(;
+    rSR_true=6μm,
+    rSL_true=10.5μm,
+    name=:neonataleccsys)
     @parameters begin
         Ca_o = 1796μM
         Na_o = 154578μM
@@ -378,6 +405,13 @@ function build_neonatal_ecc_sys(;name=:neonataleccsys)
         ROS = 0μM
         ISO = 0μM
         ATP = 5000μM
+        Cm = 1μF / cm^2
+        Acap = 4π * rSL_true^2
+        VSR = 0.043 * 1.5 * 1.4pL
+        VNSR = 0.9 * VSR
+        VJSR = VSR - VNSR
+        Vmyo = 4 // 3 * π * (rSL_true^3 - rSR_true^3)
+        ACAP_VMYO_F = Acap * Cm / Faraday / Vmyo
     end
 
     @variables begin
@@ -389,19 +423,53 @@ function build_neonatal_ecc_sys(;name=:neonataleccsys)
         E_Na(t)
         E_K(t)
         E_Ca(t)
+        Istim(t)
     end
 
-    capdesys = get_ca_pde_sys()
-    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
-    camkiisys = get_camkii_eqs(Cai_mean, ROS)
     barsys = get_bar_sys(ATP, ISO)
-    @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp = barsys
-    ICa_scale = get_ICa_scalep
+    @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
+    capdesys = get_ca_pde_sys(; TnI_PKAp, rSR_true, rSL_true)
+    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean, JCa_SL, JCa_SR = capdesys
+    camkiisys = get_camkii_sys(Cai_mean, ROS)
+    ICa_scale = get_ICa_scalep(LCCb_PKAp)
+    ncxsys = get_ncx_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, ICa_scale)
+    @unpack INaCa = ncxsys
+    lccsys = get_lcc_sys(Cai_sub_SL, Ca_o, vm, ICa_scale)
+    @unpack ICaL = lccsys
+    tccsys = get_tcc_sys(vm, E_Ca)
+    @unpack ICaT = tccsys
+    ibgsys = get_ibg_sys(vm, E_Na, E_Ca)
+    @unpack ICab, INab = ibgsys
+    ifsys = get_if_sys(vm, E_Na, E_K)
+    @unpack IfNa, IfK, If = ifsys
+    inasys = get_ina_sys(vm, E_Na)
+    @unpack INa = inasys
+    iksys = get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKUR_PKAp)
+    @unpack IK1, Ito, IKs, IKr = iksys
+    ryrsys = get_ryr_sys(Cai_sub_SR, CaJSR)
+    @unpack Jrel = ryrsys
+    sercasys = get_serca_sys(Cai_sub_SR, CaNSR, CaJSR, fracPLBp)
+    @unpack Jup, Jleak, Jtr, betaSR = sercasys
+    naksys = get_nak_sys(vm, Na_i, Na_o, K_o)
+    @unpack INaK = naksys
 
     eqs = [
+        Istim ~ 0,
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
         E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
+        JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_VMYO_F * Vmyo,
+        JCa_SR ~ Jleak - Jup + Jrel,
+        D(CaJSR) * VJSR ~ betaSR * (-Jrel + Jtr),
+        D(CaNSR) * VNSR ~ Jup - Jleak - Jtr,
+        D(vm) * Cm ~ INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim,
+        D(Na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_VMYO_F,
+        D(K_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_VMYO_F
     ]
-    return ODESystem(eqs, t; name)
+    sys = ODESystem(eqs, t; name)
+
+    for s2 in (barsys, capdesys, camkiisys, ncxsys, lccsys, tccsys, ibgsys, ifsys, inasys, iksys, ryrsys, sercasys, naksys)
+        sys = extend(s2, sys; name)
+    end
+    return sys
 end
