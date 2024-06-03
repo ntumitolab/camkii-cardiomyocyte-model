@@ -9,7 +9,6 @@
 # ONLY FOR ACADEMIC USE, DO NOT DISTRIBUTE
 #
 using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
 
 "Calcium buffered by troponin and calmodulin"
@@ -40,7 +39,7 @@ function get_ca_pde_sys(;
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
-    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t)
+    @variables t Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t)
     @parameters begin
         Dca = 7μm^2 / ms
         V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3)
@@ -51,6 +50,8 @@ function get_ca_pde_sys(;
         KmTrpn = 0.5μM
         fracTnIp0 = 0.062698 # Baseline effect
     end
+    D = Differential(t)
+
     eqs = [
         Cai_mean ~ sum(collect(Cai)) / m,
         Cai_sub_SR ~ Cai[1],
@@ -90,7 +91,7 @@ function get_ncx_sys(nai, cai, nao, cao, vm, ICa_scale=1; name=:ncxsys)
         dNaCa = 1e-16 / μM^4
         gamma = 0.5
     end
-    @variables INaCa(t)
+    @variables t INaCa(t)
     eqs = INaCa ~ ICa_scale * kNaCa * ((exp(iVT * gamma * vm) * nai^3 * cao - exp(iVT * (gamma - 1) * vm) * cai * nao^3 * fNaCa) / (1 + dNaCa * (nao^3 * cai * fNaCa + nai^3 * cao)))
     return ODESystem(eqs, t; name)
 end
@@ -102,6 +103,7 @@ function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
         taufca = 10ms
     end
     @variables begin
+        t
         ICaL(t)
         i_d(t) = 0.00033
         i_f(t) = 0.99869
@@ -112,6 +114,7 @@ function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
         tauf(t)
         fcainf(t)
     end
+    D = Differential(t)
 
     V = vm * Volt / mV # Convert voltage to mV
 
@@ -141,6 +144,7 @@ end
 function get_tcc_sys(vm, E_Ca; name=:tccsys)
     @parameters gCaT = 0.2mS / cm^2
     @variables begin
+        t
         ICaT(t)
         i_b(t) = 0.00305
         i_g(t) = 0.61179
@@ -149,7 +153,7 @@ function get_tcc_sys(vm, E_Ca; name=:tccsys)
         ginf(t)
         taug(t)
     end
-
+    D = Differential(t)
     V = vm * Volt / mV # Convert voltage to mV
 
     eqs = [
@@ -168,7 +172,7 @@ end
 function get_ibg_sys(vm, E_Na, E_Ca; name=:ibgsys)
     @parameters gCab = 0.0008mS / cm^2
     @parameters gNab = 0.0026mS / cm^2
-    @variables ICab(t) INab(t)
+    @variables t ICab(t) INab(t)
     eqs = [
         ICab ~ gCab * (vm - E_Ca),
         INab ~ gNab * (vm - E_Na),
@@ -179,7 +183,8 @@ end
 "Funny current (If)"
 function get_if_sys(vm, E_Na, E_K; name=:ifsys)
     @parameters gf = 0.021mS / cm^2 fNa = 0.2
-    @variables IfNa(t) IfK(t) If(t) yinf(t) tauy(t) i_y(t) = 0.07192
+    @variables t IfNa(t) IfK(t) If(t) yinf(t) tauy(t) i_y(t) = 0.07192
+    D = Differential(t)
     fK = 1 - fNa
     V = vm * Volt / mV # Convert voltage to mV
     eqs = [
@@ -197,6 +202,7 @@ end
 function get_ina_sys(vm, E_Na; name=:inasys)
     @parameters gNa = 35mS / cm^2
     @variables begin
+        t
         INa(t)
         Naminf(t)
         Nahinf(t)
@@ -208,7 +214,7 @@ function get_ina_sys(vm, E_Na; name=:inasys)
         i_Nah(t) = 0.22242
         i_Naj(t) = 0.19081
     end
-
+    D = Differential(t)
     V = vm * Volt / mV # Convert voltage to mV
     NatauhHI = 0.4537ms * expit((V + 10.66) / 11.1)
     NatauhLOW = 3.49ms / (0.135 * exp((V + 80) / -6.8) + 3.56 * exp(0.079V) + 3.1e5 * exp(0.35V))
@@ -233,15 +239,14 @@ end
 "Potassium currents"
 function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     V = vm * Volt / mV # Convert voltage to mV
-
     # IK1: time-independent
     @parameters gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
-    @variables IK1(t)
     vk1 = vm - E_K - 6.1373mV
-
     # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
     @parameters gt = 0.1mS / cm^2 f_is = 0.706
     @variables begin
+        t
+        IK1(t)
         Ito(t)
         i_r(t) = 0.00702
         i_s(t) = 0.9660
@@ -287,6 +292,7 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         i_IK(t) = 0.07831
     end
 
+    D = Differential(t)
     alphaa0 = 0.022348 / ms * exp(0.01176 * V)
     betaa0 = 0.047002 / ms * exp(-0.0631 * V)
     alphaa1 = 0.013733 / ms * exp(0.038198 * V)
@@ -328,10 +334,12 @@ function get_ryr_sys(Ca, CaJSR; name=:ryrsys)
         kanegRyR = 0.16 / ms
     end
     @variables begin
+        t
         PO1RyR(t) = 0.0037
         PC1RyR(t)
         Jrel(t)
     end
+    D = Differential(t)
     KmRyR = (1.35 * 2.6 * expit(-(Ca - 530μM) / 200μM) + 1.5 - 0.9 - 0.3 - 0.05) * μM
     eqs = [
         1 ~ PO1RyR + PC1RyR,
@@ -356,7 +364,7 @@ function get_serca_sys(Cai, CaNSR, CaJSR, fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0; 
         Kmcsqn = 800μM
     end
 
-    @variables Jup(t) Jleak(t) Jtr(t) betaSR(t)
+    @variables t Jup(t) Jleak(t) Jtr(t) betaSR(t)
 
     fCKII_PLB = (1 - 0.5 * fracPLB_CKp)  # Max effect: fCKII_PLB=0.5
     PLB_PKAn = 1 - fracPLBp
@@ -384,7 +392,7 @@ function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
         KmKoNaK = 1500μM
     end
 
-    @variables INaK(t)
+    @variables t INaK(t)
     sigma = 1 / 7 * expm1(Nao / 67300μM)
     fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365sigma * exp(-vm * iVT))
     fKo = hil(Ko, KmKoNaK)
@@ -393,10 +401,7 @@ function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
     return ODESystem(eqs, t; name)
 end
 
-function build_neonatal_ecc_sys(;
-    rSR_true=6μm,
-    rSL_true=10.5μm,
-    name=:neonataleccsys)
+function build_neonatal_ecc_sys(;rSR_true=6μm, rSL_true=10.5μm, name=:neonataleccsys)
     @parameters begin
         Ca_o = 1796μM
         Na_o = 154578μM
@@ -415,6 +420,7 @@ function build_neonatal_ecc_sys(;
     end
 
     @variables begin
+        t
         Na_i(t) = 13838.37602μM
         K_i(t) = 150952.75035μM
         CaNSR(t) = 619.09843μM
@@ -425,6 +431,7 @@ function build_neonatal_ecc_sys(;
         E_Ca(t)
         Istim(t)
     end
+    D = Differential(t)
 
     barsys = get_bar_sys(ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
