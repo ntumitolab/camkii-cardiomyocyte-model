@@ -184,35 +184,24 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; remove_conserved=true)
         LCCbp => 0.01313μM,
         KURp => 0.01794μM,
     ])
-    return convert(ODESystem, rn; remove_conserved)
+
+    # Phosphorylation proportions
+    @variables begin
+        t
+        LCCa_PKAp(t)
+        LCCb_PKAp(t)
+        fracPLBp(t)
+        TnI_PKAp(t)
+        IKUR_PKAp(t)
+    end
+
+    obseqs = [
+        LCCa_PKAp ~ LCCap / LCCtot,
+        LCCb_PKAp ~ LCCbp / LCCtot,
+        fracPLBp ~ PLBp / PLBtot,
+        TnI_PKAp ~ TnIp / TnItot,
+        IKUR_PKAp ~ KURp / IKurtot
+    ]
+
+    return convert(ODESystem, rn; remove_conserved, observed=obseqs)
 end
-
-sys = get_bar_sys()
-
-# Phosphorylation proportions
-@variables begin
-    t
-    LCCa_PKAp(t)
-    LCCb_PKAp(t)
-    fracPLBp(t)
-    TnI_PKAp(t)
-    IKUR_PKAp(t)
-end
-
-@unpack LCCap, LCCbp, PLBp, TnIp, KURp, LCCtot, PLBtot, TnItot, IKurtot = sys
-
-parameters(sys)
-
-fraceqs = [
-    LCCa_PKAp ~ LCCap / LCCtot,
-    LCCb_PKAp ~ LCCbp / LCCtot,
-    fracPLBp ~ PLBp / PLBtot,
-    TnI_PKAp ~ TnIp / TnItot,
-    IKUR_PKAp ~ KURp / IKurtot
-]
-
-odesys = extend(sys, ODESystem(fraceqs, t, name=:sys))
-
-states(odesys)
-
-structural_simplify(odesys)
