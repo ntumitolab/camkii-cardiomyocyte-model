@@ -14,6 +14,7 @@ end
 function ca_decay_sys(;
     carest=50nM,
     decay_calcium=10.0Hz,
+    name = :cadesys
 )
     @parameters begin
         CaResting = carest
@@ -23,6 +24,5 @@ function ca_decay_sys(;
     @variables t Ca(t)
     D = Differential(t)
     eq = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]
-    @named osys = ODESystem(eq, t)
-    return osys
+    return ODESystem(eq, t; name)
 end
