@@ -1,16 +1,16 @@
 # # Isolated CaMKII response with ROS
 using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
 using OrdinaryDiffEq
 using DiffEqCallbacks
 using Plots
-using CaMKIIModel: nM, μM, Hz, get_camkii_eqs
+using CaMKIIModel: nM, μM, Hz, get_camkii_sys
 
 # ## Setup model
 # Exponential decay calcium model
-function ca_decay_eqs(;
+function ca_decay_sys(;
     carest=50nM,
     decay_calcium=10.0Hz,
+    name=:cadsys
 )
     @parameters begin
         CaResting = carest
@@ -20,16 +20,17 @@ function ca_decay_eqs(;
     @variables t Ca(t)
     D = Differential(t)
     eqs = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]
-    return eqs
+    return ODESystem(eqs, t; name)
 end
 
 # CaMKII model
 @parameters ROS=0μM
-@variables Ca(t)
-eqs = get_camkii_eqs(Ca, ROS)
-caeqs = ca_decay_eqs()
-sys = ODESystem([eqs; caeqs], t, name=:sys) |> structural_simplify
-
+@variables t Ca(t)
+sys = get_camkii_sys(Ca, ROS)
+casys = ca_decay_sys()
+sys = extend(sys, casys) |> structural_simplify
+unknowns(sys)
+# ---
 tspan = (0.0, 400.0)
 prob = ODEProblem(sys, [Ca => sys.CaResting], tspan)
 
