@@ -4,14 +4,13 @@
 using OrdinaryDiffEq
 using DiffEqCallbacks
 using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
 using Plots
-using CaMKIIModel: get_camkii_eqs, μM, nM, second
+using CaMKIIModel: get_camkii_sys, μM, nM, second
 
 # Reaction network
 @parameters ROS=0μM period=1/3 ca_r=100nM ca_rise=550nM tstart=200.0second tend=300.0second
-@variables Ca(t)
-eqs = get_camkii_eqs(Ca, ROS)
+@variables t Ca(t)
+ksys = get_camkii_sys(Ca, ROS)
 
 # Periodic assymetric calcium pulses
 function ca_wave(t;
@@ -24,16 +23,15 @@ end
 
 @register_symbolic ca_wave(t)
 
-caeqs = [Ca ~ ca_wave(t; period, ca_r, ca_rise, tstart, tend)]
-@named sys = ODESystem([eqs; caeqs], t)
-sys = structural_simplify(sys)
+@named casys = ODESystem([Ca ~ ca_wave(t; period, ca_r, ca_rise, tstart, tend)], t)
+sys = structural_simplify(extend(ksys, casys))
 
-# ## First sumulation
+# ## First simulation
 tspan = (0.0, 400.0)
 oprob = ODEProblem(sys, [], tspan, jac=true)
 
 alg = TRBDF2()
-sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-8, reltol=1e-8)  ## Lowered tolerance to make the reaction network respond to calcium changes
+@time sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-8, reltol=1e-8)  ## Lowered tolerance to make the reaction network respond to calcium changes
 
 # Calcium waveform
 @unpack Ca = sys
@@ -49,7 +47,8 @@ plot(
 )
 
 # Active CaMKII
-@unpack CaMKII_act = sys
+@unpack CAMKII_T = sys
+CaMKII_act = 1 - CaMK/CAMKII_T
 plot(sol, idxs=CaMKII_act, label="Act. CaMKII", title="3Hz")
 
 # Change frequency to 2Hz

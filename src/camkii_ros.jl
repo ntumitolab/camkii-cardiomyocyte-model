@@ -3,17 +3,19 @@ using ModelingToolkit
 using Catalyst
 
 function get_camkii_sys(
-    Ca, ROS=0.0μM;
+    Ca=0.0μM, ROS=0.0μM;
     cam_total=30μM,     ## Total calmodulin Concentration
     camkii_total=70μM, ## Total CaMKII Concentration
     binding_To_PCaMK=0.1,
     decay_CaM=3,
     phospho_rate=1Hz,
     phosphatase=1Hz,
-    remove_conserved=true
+    remove_conserved=true,
+    name=:camkiisys
 )
     rn = @reaction_network begin
         @parameters CAM_T = $cam_total CAMKII_T = $camkii_total
+        @variables CaMKII_act(t)
         ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
         (mm($Ca * k_2C_on, $Ca * k_1C_on, k_1C_off), mmr($Ca * k_2C_on, k_2C_off, k_1C_off)), (CaM0, Ca2CaM_C) <--> (Ca2CaM_C, Ca4CaM)
         (mm($Ca * k_2N_on, $Ca * k_1N_on, k_1N_off), mmr($Ca * k_2N_on, k_2N_off, k_1N_off)), (CaM0, Ca2CaM_N) <--> (Ca2CaM_N, Ca4CaM)
@@ -115,5 +117,9 @@ function get_camkii_sys(
         :CaMKPOX => 0,
         :CaMKOX => 0,
     ])
-    return convert(ODESystem, rn; remove_conserved)
+    @variables t CaMKII_act(t)
+    @unpack CAMKII_T, CaMK = rn
+    return convert(ODESystem, rn; remove_conserved, observed=[CaMKII_act~1-(CaMK/CAMKII_T)])
 end
+
+sys = get_camkii_sys()
