@@ -62,7 +62,7 @@ nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
 nernst(x_out, x_in, z) = nernst(x_out, x_in) / z
 
 "GHK flux equation"
-ghk(px, x_i, x_o, zvfrt, ezvfrtm1 = expm1(zvfrt), z = 1) = px * z * F * ((ezvfrtm1 + 1) * x_i - x_o) * exprel(zvfrt, ezvfrtm1)
+ghk(px, x_i, x_o, zvfrt, ezvfrtm1 = expm1(zvfrt), z = 1) = px * z * Faraday * ((ezvfrtm1 + 1) * x_i - x_o) * exprel(zvfrt, ezvfrtm1)
 
 "GHK flux equation from voltage across the membrane"
 function ghkVm(px, vm, x_i, x_o, z = 1)
