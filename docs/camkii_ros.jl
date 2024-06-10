@@ -32,7 +32,7 @@ sys = extend(sys, casys) |> structural_simplify
 unknowns(sys)
 # ---
 tspan = (0.0, 400.0)
-prob = ODEProblem(sys, [Ca => sys.CaResting], tspan)
+prob = ODEProblem(sys, [Ca => sys.CaResting], tspan, jac=true)
 
 # Calcium pulses
 function make_ca_events(;

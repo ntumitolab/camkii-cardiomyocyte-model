@@ -31,7 +31,7 @@ tspan = (0.0, 400.0)
 oprob = ODEProblem(sys, [], tspan, jac=true)
 
 alg = TRBDF2()
-sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-8, reltol=1e-8)  ## Lowered tolerance to make the reaction network respond to calcium changes
+@time sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-8, reltol=1e-8)  ## Lowered tolerance to make the reaction network respond to calcium changes
 
 # Calcium waveform
 @unpack Ca = sys
@@ -42,8 +42,17 @@ plot(sol, idxs=Ca, tspan=(200, 205), label="Calcium")
 
 plot(
     sol,
-    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    idxs=[CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP],
     size=(800, 600),
+    legend=:left
+)
+
+#---
+plot(
+    sol,
+    idxs=[CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2],
+    size=(800, 600),
+    legend=:left
 )
 
 # Active CaMKII
