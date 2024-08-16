@@ -3,14 +3,26 @@ using Catalyst
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
-function get_bar_sys(ATP=5000μM, ISO=0μM; remove_conserved=true)
+function get_bar_sys(;
+    ATP=5000μM,
+    ISO=0μM,
+    b1ARtot=0.00528μM,
+    Gstot=3.83μM,
+    PDEtot = 22.85e-3μM,
+    PKItot = 0.18μM,
+    I1tot = 0.3μM,
+    PLBtot = 106μM,
+    PLMtot = 48μM,
+    TnItot = 70μM,
+    LCCtot = 0.025μM,
+    IKurtot = 0.025μM,
+    PP1tot = 0.89μM,
+    RItot = 1.18μM,
+    RIItot = 0.118μM,
+    ACtot = 70.57e-3μM,
+    remove_conserved=true,
+)
     rn = @reaction_network begin
-
-        @observables begin
-            Xtot ~ X + XY
-            Ytot ~ Y + XY
-        end
-
         # Beta adrenergic receptor and G protein
         ($ISO * kf_LR, kr_LR), b1AR <--> LR
         (kf_LRG, kr_LRG), LR + Gs <--> LRG
@@ -54,7 +66,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; remove_conserved=true)
         mm(LCCap, k_PP2A_LCC * PP2A_LCC, Km_PP2A_LCC / epsilon), LCCap => LCCa
         mm(LCCb, k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII, Km_PKA_LCC / epsilon), LCCb => LCCbp
         mm(LCCbp, k_PP1_LCC * PP1_LCC, Km_PP1_LCC / epsilon), LCCbp => LCCb
-        mm(KURn, k_pka_KUR*(PKAII_KURtot / PKAIItot) * PKACII, Km_pka_KUR / epsilon), KURn => KURp
+        mm(KURn, k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII, Km_pka_KUR / epsilon), KURn => KURp
         mm(KURp, PP1_KURtot * k_pp1_KUR, Km_pp1_KUR / epsilon), KURp => KURn
     end
 
@@ -125,27 +137,13 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; remove_conserved=true)
         :Km_pp1_KUR => 7μM          # [uM]
     ])
 
-    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, Gs, Gsby, GsaGTP, GsaGDP, AC, AC_GsaGTP, PDE, PDEp, cAMP, RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKI, PKACI_PKI, PKACII_PKI, PKACII, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, I1, I1p, I1p_PP1, PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp, b1ARtot, Gstot, PDEtot, PKItot, I1tot, PLBtot, PLMtot, TnItot, LCCtot, PKACII_LCCtot, PKAIItot, PKAII_KURtot, IKurtot, PP1_KURtot, PP1tot, RItot, RIItot, ACtot = rn
+    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, Gs, Gsby, GsaGTP, GsaGDP, AC, AC_GsaGTP, PDE, PDEp, cAMP, RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKI, PKACI_PKI, PKACII_PKI, PKACII, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, I1, I1p, I1p_PP1, PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp, PKACII_LCCtot, PKAIItot, PKAII_KURtot, PP1_KURtot = rn
 
     setdefaults!(rn, [
-        b1ARtot => 0.00528μM,
-        Gstot => 3.83μM,
-        PDEtot => 22.85e-3μM,
-        PKItot => 0.18μM,
-        I1tot => 0.3μM,
-        PLBtot => 106μM,
-        PLMtot => 48μM,
-        TnItot => 70μM,
-        LCCtot => 0.025μM,
         PKACII_LCCtot => 0.025μM,
         PKAIItot => 0.059μM,
         PKAII_KURtot => 0.025μM,
-        IKurtot => 0.025μM,
         PP1_KURtot => 0.025μM,
-        PP1tot => 0.89μM,
-        RItot => 1.18μM,
-        RIItot => 0.118μM,
-        ACtot => 70.57e-3μM,
         b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
         LR => 6.0e-5μM,
         LRG => 0.00294μM,
