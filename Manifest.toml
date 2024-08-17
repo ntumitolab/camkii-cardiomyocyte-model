@@ -180,10 +180,10 @@ uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.0+2"
 
 [[deps.Catalyst]]
-deps = ["Combinatorics", "DataStructures", "DiffEqBase", "DocStringExtensions", "DynamicPolynomials", "DynamicQuantities", "Graphs", "JumpProcesses", "LaTeXStrings", "Latexify", "LinearAlgebra", "MacroTools", "ModelingToolkit", "Parameters", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "Symbolics", "Unitful"]
-git-tree-sha1 = "f73b046356cdb2bfdeadff4c13172b6cdfc64071"
+deps = ["Combinatorics", "DataStructures", "DiffEqBase", "DocStringExtensions", "DynamicPolynomials", "DynamicQuantities", "Graphs", "JumpProcesses", "LaTeXStrings", "Latexify", "LinearAlgebra", "MacroTools", "ModelingToolkit", "Parameters", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SymbolicUtils", "Symbolics", "Unitful"]
+git-tree-sha1 = "f7b8abc6ff4822973ff7ae1e8c1b90f0a6454077"
 uuid = "479239e8-5488-4da2-87a7-35f2df7eef83"
-version = "14.3.1"
+version = "14.3.2"
 
     [deps.Catalyst.extensions]
     CatalystBifurcationKitExtension = "BifurcationKit"
@@ -1519,9 +1519,9 @@ version = "0.2.4"
 
 [[deps.PreallocationTools]]
 deps = ["Adapt", "ArrayInterface", "ForwardDiff"]
-git-tree-sha1 = "d7f3f63331c7c8c81245b4ee2815b7d496365833"
+git-tree-sha1 = "6c62ce45f268f3f958821a1e5192cf91c75ae89c"
 uuid = "d236fae5-4411-538c-8e31-a6e3d9e00b46"
-version = "0.4.23"
+version = "0.4.24"
 
     [deps.PreallocationTools.extensions]
     PreallocationToolsReverseDiffExt = "ReverseDiff"
