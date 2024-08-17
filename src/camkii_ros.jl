@@ -1,8 +1,10 @@
 # CaMKII system with ROS activation
+using Catalyst
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
-function get_camkii_sys(Ca=0μM, ROS=0μM;
+function get_camkii_sys(;
+    Ca=0μM, ROS=0μM,
     cam_total=30μM,     ## Total calmodulin Concentration
     camkii_total=70μM,  ## Total CaMKII Concentration
     binding_To_PCaMK=0.1,
