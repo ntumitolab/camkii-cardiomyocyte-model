@@ -108,11 +108,11 @@ function get_bar_sys(;
         :kr_RcAMPcAMP_C => 1 / ms,                  # rate constant for PKA R:cAMPcAMP unbinding to C
         :kr_PKA_PKI => 0.2Hz,                       # reverse rate for PKA inhibition by PKI
         :epsilon => 10,                             # AKAP-mediated scaling factor
-        :k_PKA_I1 => 60Hz,                    # rate constant for I-1 phosphorylation by type 1 PKA
+        :k_PKA_I1 => 60Hz,                          # rate constant for I-1 phosphorylation by type 1 PKA
         :Km_PKA_I1 => 1.0μM,                        # Km for I-1 phosphorylation by type 1 PKA
-        :Vmax_PP2A_I1 => 14Hz,              # Vmax for I-1 dephosphorylation by PP2A
+        :Vmax_PP2A_I1 => 14Hz,                      # Vmax for I-1 dephosphorylation by PP2A
         :Km_PP2A_I1 => 1.0μM,                       # Km for I-1 dephosphorylation by PP2A
-        :kr_PP1_I1 => 1.0Hz,                  # Ki for PP1 inhibition by I-1
+        :kr_PP1_I1 => 1.0Hz,                        # Ki for PP1 inhibition by I-1
         :kf_PP1_I1 => 1μM,                          # kf for PP1 inhibition by I-1
         :k_PKA_PLB => 54Hz,
         :Km_PKA_PLB => 21μM,
@@ -145,7 +145,7 @@ function get_bar_sys(;
         :PP1_KURtot => 0.025μM,
     ])
 
-    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, Gs, Gsby, GsaGTP, GsaGDP, AC, AC_GsaGTP, PDE, PDEp, cAMP, RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKI, PKACI_PKI, PKACII_PKI, PKACII, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, I1, I1p, I1p_PP1, PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp, PKACII_LCCtot, PKAIItot, PKAII_KURtot, PP1_KURtot = rn
+    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, Gs, Gsby, GsaGTP, GsaGDP, AC, AC_GsaGTP, PDE, PDEp, cAMP, RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKI, PKACI_PKI, PKACII_PKI, PKACII, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, I1, I1p, I1p_PP1, PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp = rn
 
     setdefaults!(rn, [
         b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
