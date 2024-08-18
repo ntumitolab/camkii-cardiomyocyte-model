@@ -11,7 +11,7 @@ function get_camkii_sys(;
     decay_CaM=3,
     phospho_rate=1Hz,
     phosphatase=1Hz
-    )
+)
 
     rn = @reaction_network begin
         @parameters CAM_T = $cam_total CAMKII_T = $camkii_total
