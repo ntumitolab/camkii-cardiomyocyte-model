@@ -1,6 +1,6 @@
 module CaMKIIModel
 
-export get_camkii_sys, get_bar_sys
+export get_camkii_sys, get_bar_sys, build_neonatal_ecc_sys
 
 include("utils.jl")
 include("camkii_ros.jl")

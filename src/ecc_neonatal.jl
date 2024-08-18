@@ -396,7 +396,8 @@ end
 function build_neonatal_ecc_sys(;
     rSR_true=6μm,
     rSL_true=10.5μm,
-    name=:neonataleccsys)
+    name=:neonataleccsys
+)
     @parameters begin
         Ca_o = 1796μM
         Na_o = 154578μM
@@ -426,11 +427,11 @@ function build_neonatal_ecc_sys(;
         Istim(t)
     end
 
-    barsys = get_bar_sys(ATP, ISO)
+    barsys = get_bar_sys(; ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
     capdesys = get_ca_pde_sys(; TnI_PKAp, rSR_true, rSL_true)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean, JCa_SL, JCa_SR = capdesys
-    camkiisys = get_camkii_sys(Cai_mean, ROS)
+    camkiisys = get_camkii_sys(; ROS, Ca=Cai_mean)
     ICa_scale = get_ICa_scalep(LCCb_PKAp)
     ncxsys = get_ncx_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, ICa_scale)
     @unpack INaCa = ncxsys

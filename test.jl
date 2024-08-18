@@ -1,5 +1,3 @@
-using CaMKIIModel: μM, ms, Hz, get_bar_sys, get_camkii_sys
-using Catalyst
+using CaMKIIModel: build_neonatal_ecc_sys
 
-get_bar_sys()
-get_camkii_sys()
+build_neonatal_ecc_sys()
