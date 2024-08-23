@@ -11,11 +11,6 @@ function get_bar_sys(;
     PDEtot=22.85e-3μM,
     PKItot=0.18μM,
     I1tot=0.3μM,
-    PLBtot=106μM,
-    PLMtot=48μM,
-    TnItot=70μM,
-    LCCtot=0.025μM,
-    IKurtot=0.025μM,
     PP1tot=0.89μM,
     RItot=1.18μM,
     RIItot=0.118μM,
@@ -72,9 +67,24 @@ function get_bar_sys(;
         mm(LCCbp, k_PP1_LCC * PP1_LCC, Km_PP1_LCC / epsilon), LCCbp => LCCb
         mm(KURn, k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII, Km_pka_KUR / epsilon), KURn => KURp
         mm(KURp, PP1_KURtot * k_pp1_KUR, Km_pp1_KUR / epsilon), KURp => KURn
-    end
+
+        @parameters LCCtot PLBtot PLMtot TnItot IKurtot
+        @observables begin
+            LCCa_PKAp ~ LCCap / LCCtot
+            LCCb_PKAp ~ LCCbp / LCCtot
+            fracPLBp ~ PLBp / PLBtot
+            fracBLMp ~ PLMp / PLMtot
+            TnI_PKAp ~ TnIp / TnItot
+            IKUR_PKAp ~ KURp / IKurtot
+        end
+    end  # @reaction_network
 
     setdefaults!(rn, [
+        :LCCtot => 0.025μM,
+        :PLBtot => 106μM,
+        :PLMtot => 48μM,
+        :TnItot => 70μM,
+        :IKurtot => 0.025μM,
         :kf_LR => 1 / (μM * ms),                    # forward rate for ISO binding to b1AR
         :kr_LR => 285Hz,                            # reverse rate for ISO binding to b1AR
         :kf_LRG => 1 / (μM * ms),                   # forward rate for ISO:b1AR association with Gs
@@ -145,7 +155,7 @@ function get_bar_sys(;
         :PP1_KURtot => 0.025μM,
     ])
 
-    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, Gs, Gsby, GsaGTP, GsaGDP, AC, AC_GsaGTP, PDE, PDEp, cAMP, RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKI, PKACI_PKI, PKACII_PKI, PKACII, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, I1, I1p, I1p_PP1, PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp = rn
+    @unpack b1AR, LR, LRG, RG, b1AR_S464, b1AR_S301, Gs, Gsby, GsaGTP, GsaGDP, AC, AC_GsaGTP, PDE, PDEp, cAMP, RC_I, RCcAMP_I, RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKI, PKACI_PKI, PKACII_PKI, PKACII, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, I1, I1p, I1p_PP1, PP1, PLB, PLBp, PLM, PLMp, LCCa, LCCap, LCCb, LCCbp, TnI, TnIp, KURn, KURp, LCCtot, PLBtot, PLMtot, TnItot, IKurtot = rn
 
     setdefaults!(rn, [
         b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,

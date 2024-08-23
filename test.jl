@@ -1,3 +1,3 @@
-using CaMKIIModel: build_neonatal_ecc_sys
+using CaMKIIModel
 
 build_neonatal_ecc_sys()
