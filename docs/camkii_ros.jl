@@ -1,7 +1,6 @@
 # # Isolated CaMKII response with ROS
 using ModelingToolkit
-using OrdinaryDiffEq
-using DiffEqCallbacks
+using DifferentialEquations
 using Plots
 using CaMKIIModel: nM, μM, Hz, get_camkii_sys
 

@@ -1,7 +1,3 @@
-#===
-Constants
-===#
-
 # Units
 const second = 1           # second
 const minute = 60second    # minute
