@@ -46,6 +46,8 @@ function get_camkii_sys(;
         (k_POXP * $ROS, k_OXPP), Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
         k_OXB, CaMKOX --> CaMK
         k_OXPP, CaMKPOX --> CaMKP
+
+        @observables CaMKAct ~ (1 - CaMK / CAMKII_T)
     end  # @reaction_network
 
     setdefaults!(rn, [
@@ -66,7 +68,7 @@ function get_camkii_sys(;
         :k_K1C_on => 44Hz / μM,
         :k_K1C_off => 33Hz,
         :k_K2C_on => 44Hz / μM,
-        :k_K2C_off => 0.8Hz, ## 0.49-4.9s-1
+        :k_K2C_off => 0.8Hz, ## 0.49-4.9Hz
         ## N-lobe
         :k_K1N_on => 76Hz / μM,
         :k_K1N_off => 300Hz,

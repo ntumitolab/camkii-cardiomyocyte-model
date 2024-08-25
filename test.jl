@@ -1,3 +1,6 @@
 using CaMKIIModel
+using ModelingToolkit
 
-build_neonatal_ecc_sys()
+sys = build_neonatal_ecc_sys()
+
+unknowns(sys)
