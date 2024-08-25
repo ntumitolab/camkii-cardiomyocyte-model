@@ -10,7 +10,9 @@ function get_camkii_sys(;
     binding_To_PCaMK=0.1,
     decay_CaM=3,
     phospho_rate=1Hz,
-    phosphatase=1Hz
+    phosphatase=1Hz,
+    remove_conserved=true,
+    remove_conserved_warn = false,
 )
 
     rn = @reaction_network begin
@@ -121,5 +123,5 @@ function get_camkii_sys(;
         :CaMKOX => 0,
     ])
 
-    return rn
+    return convert(ODESystem, rn; remove_conserved, remove_conserved_warn)
 end

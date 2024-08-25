@@ -20,6 +20,7 @@ function get_bar_sys(;
     PKAII_KURtot=0.025μM,
     PP1_KURtot=0.025μM,
     remove_conserved=true,
+    remove_conserved_warn = false,
 )
     rn = @reaction_network begin
         # Beta adrenergic receptor and G protein
@@ -204,5 +205,5 @@ function get_bar_sys(;
         KURp => 0.01794μM,
     ])
 
-    return rn
+    return convert(ODESystem, rn; remove_conserved, remove_conserved_warn)
 end
