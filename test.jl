@@ -1,4 +1,3 @@
-using CaMKIIModel
-using ModelingToolkit
+a = collect(1:10)
 
-sys = build_neonatal_ecc_sys()
+[x for x in a if x ∉ (7, 8)]

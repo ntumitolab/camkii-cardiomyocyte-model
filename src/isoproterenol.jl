@@ -1,5 +1,4 @@
 # Beta adrenergic system activated by isoproterenol
-using Catalyst
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 

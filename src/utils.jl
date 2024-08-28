@@ -66,3 +66,22 @@ function ghkVm(px, vm, x_i, x_o, z=1)
     em1 = expm1(zvfrt)
     return ghk(px, x_i, x_o, zvfrt, em1, z)
 end
+
+"Accumulate chemical reaction rates into a look-up table"
+function add_raw_rate!(lut, rate, substrates, products)
+    for s in substrates
+        lut[s] -= rate
+    end
+
+    for p in products
+        lut[p] += rate
+    end
+
+    return lut
+end
+
+"Accumulate chemical reaction rates with law of mass action into a look-up table"
+function add_rate!(lut, kf, substrates, kb, products)
+    rate = prod(substrates; init=kf) - prod(products; init=kb)
+    return add_raw_rate!(lut, rate, substrates, products)
+end
