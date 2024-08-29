@@ -19,12 +19,13 @@ jobs:
   linkcheck:
     env:
       DIR: 'docs'
+      UV_SYSTEM_PYTHON: 1
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+        uses: actions/checkout@v4
       - name: Setup Julia
-        uses: julia-actions/setup-julia@f2258781c657ad9b4b88072c5eeaf9ec8c370874 # v2
+        uses: julia-actions/setup-julia@v2
       - name: Convert literate notebooks to ipynb files
         shell: julia --color=yes {0}
         working-directory: ${{ env.DIR }}
@@ -41,23 +42,13 @@ jobs:
             end
           end
       - name: Setup Python
-        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5
+        uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: '3.x'
-      - name: Cache python venv
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
-        if: ${{ contains(runner.name, 'GitHub Actions') }}
-        id: cache-venv
-        with:
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
-          path: .venv
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Install Python dependencies
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install -r requirements.txt
-          echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
-          echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+        run: uv pip install -r requirements.txt
       - name: Build website
         run: jupyter-book build ${DIR} --builder linkcheck
