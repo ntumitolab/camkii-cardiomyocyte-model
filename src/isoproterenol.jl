@@ -5,7 +5,8 @@ using ModelingToolkit: t_nounits as t, D_nounits as D
 function get_bar_sys(;
     ATP=5000μM,
     ISO=0μM,
-    name=:bar_sys
+    name=:bar_sys,
+    simplify=false
 )
 
     @parameters begin
@@ -94,24 +95,17 @@ function get_bar_sys(;
     end
 
     sts = @variables begin
-        b1AR(t)  ## Conserved
         LR(t) = 6.0e-5μM
         LRG(t) = 0.00294μM
         RG(t) = 7.0e-5μM
-        Gs(t)   ## Conserved
         GsaGTP(t) = 0.05214μM
         GsaGDP(t) = 0.00066μM
-        Gsby(t) = 0.06071μM
         b1AR_S464(t) = 0.00047μM
         b1AR_S301(t) = 0.0011μM
-        AC(t) ## Conserved
         AC_GsaGTP(t) = 0.00814μM
-        PDE(t) ## Conserved
         PDEp(t) = 0.00589μM
         cAMP(t) = 1.50399μ
-        RC_I(t) ## Conserved
         RCcAMP_I(t) = 0.28552μM
-        RC_II(t) ## Conserved
         RCcAMP_II(t) = 0.00934μM
         RCcAMPcAMP_I(t) = 0.04698μM
         RCcAMPcAMP_II(t) = 0.00154μM
@@ -119,22 +113,61 @@ function get_bar_sys(;
         PKACI(t) = 0.38375μM
         PKACII(t) = 0.06938μM
         RcAMPcAMP_II(t) = 0.09691μM
-        I1(t)  ## Conserved
+        PKACI_PKI(t)
+        PKACII_PKI(t)
         I1p(t) = 0.00033μM
-        PP1(t) ## Conserved
         I1p_PP1(t) = 0.19135μM
-        PLB(t) ## Conserved
         PLBp(t)
-        PLM(t)
         PLMp(t)
-        TnI(t)
         TnIp(t)
-        LCCa(t)
         LCCap(t)
-        LCCb(t)
         LCCbp(t)
-        KURn(t)
         KURp(t)
+    end
+
+    conservedvars = @variables begin
+        b1AR(t)
+        Gs(t)
+        Gsby(t)
+        AC(t)
+        PDE(t)
+        RC_I(t)
+        RC_II(t)
+        PKI(t)
+        I1(t)
+        PP1(t)
+        PLB(t)
+        PLM(t)
+        TnI(t)
+        LCCa(t)
+        LCCb(t)
+        KURn(t)
+    end
+
+    conservedeqs = [
+        b1ARtot ~ b1AR + LR + LRG + RG + b1AR_S464 + b1AR_S301,
+        Gstot ~ LRG + RG + Gs + GsaGDP + GsaGTP + AC_GsaGTP,
+        # Gstot ~ LRG + RG + Gs + Gsby,
+        Gsby ~ GsaGDP + GsaGTP + AC_GsaGTP,
+        ACtot ~ AC + AC_GsaGTP,
+        PDEtot ~ PDE + PDEp,
+        RC_I ~ ,
+        RC_II ~ ,
+        PKItot ~ PKI + PKACI_PKI+ PKACII_PKI,
+        I1tot ~ I1 + I1p + I1p_PP1,
+        PP1tot ~ PP1 + I1p_PP1,
+        PLBtot ~ PLB + PLBp,
+        PLMtot ~ PLM + PLMp,
+        TnItot ~ TnI + TnIp,
+        LCCtot ~ LCCa + LCCap,
+        LCCtot ~ LCCb + LCCbp,
+        IKurtot ~ KURn + KURp
+    ]
+
+    rates = merge(Dict(sts .=> t - t), Dict(conservedvars .=> t - t))
+
+    # Observables
+    @variables begin
         LCCa_PKAp(t)
         LCCb_PKAp(t)
         fracPLBp(t)
@@ -143,7 +176,14 @@ function get_bar_sys(;
         IKUR_PKAp(t)
     end
 
-    rates = Dict(sts .=> t - t)
+    obseqs = [
+        LCCa_PKAp ~ LCCap / LCCtot,
+        LCCb_PKAp ~ LCCbp / LCCtot,
+        fracPLBp ~ PLBp / PLBtot,
+        fracBLMp ~ PLMp / PLMtot,
+        TnI_PKAp ~ TnIp / TnItot,
+        IKUR_PKAp ~ KURp / IKurtot,
+    ]
 
     # G-protein receptor
     add_rate!(rates, ISO * kf_LR, [b1AR], kr_LR, [LR]) # b1AR <--> LR
@@ -192,18 +232,15 @@ function get_bar_sys(;
     v = k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII * hil(KURn * epsilon, Km_pka_KUR) - PP1_KURtot * k_pp1_KUR * hil(KURp * epsilon, Km_pp1_KUR)
     add_raw_rate!(rates, v, [KURn], [KURp])
 
-    obseqs = [
-        b1ARtot ~ b1AR + LR + LRG + RG + b1AR_S464 + b1AR_S301, # bar conservation
-        Gs ~ Gstot - Gsby - LRG - RG,  # Gsby conservation
-        ACtot ~ AC + AC_GsaGTP, # AC conservation
-        PDEtot ~ PDE + PDEp,
-        LCCa_PKAp ~ LCCap / LCCtot,
-        LCCb_PKAp ~ LCCbp / LCCtot,
-        fracPLBp ~ PLBp / PLBtot,
-        fracBLMp ~ PLMp / PLMtot,
-        TnI_PKAp ~ TnIp / TnItot,
-        IKUR_PKAp ~ KURp / IKurtot,
-    ]
+    rateeqs = [D(s) ~ rates[s] for s in sts]
+
+    sys = ODESystem([rateeqs; conservedeqs; obseqs], t; name)
+
+    if simplify
+        sys = structural_simplify(sys)
+    end
+
+    return sys
 
     setdefaults!(rn, [
         b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
