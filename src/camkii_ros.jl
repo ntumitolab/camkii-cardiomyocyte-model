@@ -1,7 +1,4 @@
 # CaMKII system with ROS activation
-using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
-
 function get_camkii_sys(;
     Ca=0μM, ROS=0μM,
     binding_To_PCaMK=0.1,

@@ -1,4 +1,4 @@
-using DifferentialEquations
+using DiffEqCallbacks
 
 function build_stim_callbacks(starttime, endtime, period, duty, strength, sym; baseline=0, proposeddt=0.01)
     rise! = (integrator) -> begin

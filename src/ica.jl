@@ -1,7 +1,4 @@
 # Calcium currents
-using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
-
 "Calcium flux scaled by phosphorylated LCC"
 function get_ICa_scalep(LCCb_PKAp=0)
     @parameters begin

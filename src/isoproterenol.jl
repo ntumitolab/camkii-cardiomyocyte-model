@@ -8,21 +8,20 @@ function get_bar_sys(;
     name=:bar_sys,
     simplify=false
 )
-
     @parameters begin
-        b1ARtot=0.00528μM
-        Gstot=3.83μM
-        PDEtot=22.85e-3μM
-        PKItot=0.18μM
-        I1tot=0.3μM
-        PP1tot=0.89μM
-        RItot=1.18μM
-        RIItot=0.118μM
-        ACtot=70.57e-3μM
-        PKACII_LCCtot=0.025μM
-        PKAIItot=0.059μM
-        PKAII_KURtot=0.025μM
-        PP1_KURtot=0.025μM
+        b1ARtot = 0.00528μM
+        Gstot = 3.83μM
+        PDEtot = 22.85e-3μM
+        PKItot = 0.18μM
+        I1tot = 0.3μM
+        PP1tot = 0.89μM
+        RItot = 1.18μM
+        RIItot = 0.118μM
+        ACtot = 70.57e-3μM
+        PKACII_LCCtot = 0.025μM
+        PKAIItot = 0.059μM
+        PKAII_KURtot = 0.025μM
+        PP1_KURtot = 0.025μM
         LCCtot = 0.025μM
         PLBtot = 106μM
         PLMtot = 48μM
@@ -113,16 +112,16 @@ function get_bar_sys(;
         PKACI(t) = 0.38375μM
         PKACII(t) = 0.06938μM
         RcAMPcAMP_II(t) = 0.09691μM
-        PKACI_PKI(t)
-        PKACII_PKI(t)
+        PKACI_PKI(t) = 0.15239μM
+        PKACII_PKI(t) = 0.02753μM
         I1p(t) = 0.00033μM
         I1p_PP1(t) = 0.19135μM
-        PLBp(t)
-        PLMp(t)
-        TnIp(t)
-        LCCap(t)
-        LCCbp(t)
-        KURp(t)
+        PLBp(t) = 98.33936μM
+        PLMp(t) = 41.19479μM
+        TnIp(t) = 60.75646μM
+        LCCap(t) = 0.01204μM
+        LCCbp(t) = 0.01313μM
+        KURp(t) = 0.01794μM
     end
 
     conservedvars = @variables begin
@@ -147,12 +146,11 @@ function get_bar_sys(;
     conservedeqs = [
         b1ARtot ~ b1AR + LR + LRG + RG + b1AR_S464 + b1AR_S301,
         Gstot ~ LRG + RG + Gs + GsaGDP + GsaGTP + AC_GsaGTP,
-        # Gstot ~ LRG + RG + Gs + Gsby,
-        Gsby ~ GsaGDP + GsaGTP + AC_GsaGTP,
+        Gstot ~ LRG + RG + Gs + Gsby,
         ACtot ~ AC + AC_GsaGTP,
         PDEtot ~ PDE + PDEp,
-        RC_I ~ ,
-        RC_II ~ ,
+        RC_I ~ RItot,
+        RC_II ~ RIItot,
         PKItot ~ PKI + PKACI_PKI+ PKACII_PKI,
         I1tot ~ I1 + I1p + I1p_PP1,
         PP1tot ~ PP1 + I1p_PP1,
@@ -161,7 +159,7 @@ function get_bar_sys(;
         TnItot ~ TnI + TnIp,
         LCCtot ~ LCCa + LCCap,
         LCCtot ~ LCCb + LCCbp,
-        IKurtot ~ KURn + KURp
+        IKurtot ~ KURn + KURp,
     ]
 
     rates = merge(Dict(sts .=> t - t), Dict(conservedvars .=> t - t))
@@ -199,7 +197,7 @@ function get_bar_sys(;
     # PKA-mediated receptor inactivation
     add_rate!(rates, kf_PKA * PKACI, [b1AR], kr_PKA, [b1AR_S301]) # b1AR <--> b1AR_S301
     add_rate!(rates, kf_PKA * PKACI, [LR], 0, [b1AR_S301]) # LR --> b1AR_S301
-    add_rate!(rates, kf_PKA * PKACI, [LRG], 0, [b1AR_S301]) # LRG --> b1AR_S301 + Gs
+    add_rate!(rates, kf_PKA * PKACI, [LRG], 0, [b1AR_S301, Gs]) # LRG --> b1AR_S301 + Gs
     # Adenylate cyclase and PDE
     add_rate!(rates, kf_AC_Gsa, [AC, GsaGTP], kr_AC_Gsa, [AC_GsaGTP]) # AC + GsaGTP <--> AC_GsaGTP
     add_rate!(rates, k_G_hyd, [AC_GsaGTP], 0, [AC, GsaGDP]) # AC_GsaGTP --> AC + GsaGDP
@@ -221,7 +219,7 @@ function get_bar_sys(;
     add_rate!(rates, kf_PP1_I1, [I1p, PP1], kr_PP1_I1, [I1p_PP1]) # I1p + PP1 <--> I1p_PP1
     v = k_PKA_PLB * PKACI * hil(PLB, Km_PKA_PLB) - k_PP1_PLB * PP1 * hil(PLBp, Km_PP1_PLB)
     add_raw_rate!(rates, v, [PLB], [PLBp]) # PLB <=> PLBp
-    v = k_PKA_PLM * PKACI * hil(PLM, Km_PKA_PLM) - k_PP1_PLM * PP1 * hil(PLMp, Km_PKA_PLM)
+    v = k_PKA_PLM * PKACI * hil(PLM, Km_PKA_PLM) - k_PP1_PLM * PP1 * hil(PLMp, Km_PP1_PLM)
     add_raw_rate!(rates, v, [PLM], [PLMp]) # PLM <=> PLMp
     v = k_PKA_TnI * PKACI * hil(TnI, Km_PKA_TnI) - k_PP2A_TnI * PP2A_TnI * hil(TnIp, Km_PP2A_TnI)
     add_raw_rate!(rates, v, [TnI], [TnIp]) # TnI <=> TnIp
@@ -239,55 +237,5 @@ function get_bar_sys(;
     if simplify
         sys = structural_simplify(sys)
     end
-
     return sys
-
-    setdefaults!(rn, [
-        b1AR => b1ARtot - LR - LRG - RG - b1AR_S464 - b1AR_S301,
-        LR => 6.0e-5μM,
-        LRG => 0.00294μM,
-        RG => 7.0e-5μM,
-        b1AR_S464 => 0.00047μM,
-        b1AR_S301 => 0.0011μM,
-        Gs => Gstot - Gsby - LRG - RG,
-        GsaGTP => 0.06028μM - 0.00814μM,
-        GsaGDP => 0.00066μM,
-        Gsby => 0.06071μM,
-        AC => ACtot - AC_GsaGTP,
-        AC_GsaGTP => 0.00814μM,
-        PDE => PDEtot - PDEp,
-        PDEp => 0.00589μM,
-        cAMP => 1.50399μM,
-        RC_I => RItot - RCcAMP_I - RCcAMPcAMP_I - RcAMPcAMP_I,
-        RCcAMP_I => 0.28552μM,
-        RCcAMPcAMP_I => 0.04698μM,
-        RcAMPcAMP_I => 0.53564μM,
-        PKACI => 0.38375μM,
-        PKI => PKItot - PKACI_PKI - PKACII_PKI,
-        PKACI_PKI => 0.15239μM,
-        RC_II => RIItot - RCcAMP_II - RCcAMPcAMP_II - RcAMPcAMP_II,
-        RCcAMP_II => 0.00934μM,
-        RCcAMPcAMP_II => 0.00154μM,
-        RcAMPcAMP_II => 0.09691μM,
-        PKACII => 0.06938μM,
-        PKACII_PKI => 0.02753μM,
-        I1 => I1tot - I1p - I1p_PP1,
-        PP1 => PP1tot - I1p_PP1,
-        I1p => 0.00033μM,
-        I1p_PP1 => 0.19135μM,
-        PLB => PLBtot - PLBp,
-        PLBp => 98.33936μM,
-        PLM => PLMtot - PLMp,
-        PLMp => 41.19479μM,
-        LCCa => LCCtot - LCCap,
-        LCCb => LCCtot - LCCbp,
-        TnI => TnItot - TnIp,
-        KURn => IKurtot - KURp,
-        TnIp => 60.75646μM,
-        LCCap => 0.01204μM,
-        LCCbp => 0.01313μM,
-        KURp => 0.01794μM,
-    ])
-
-    return convert(ODESystem, rn; remove_conserved, remove_conserved_warn)
 end
