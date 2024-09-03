@@ -108,10 +108,8 @@ function get_bar_sys(;
         RCcAMP_II(t) = 0.00934μM
         RCcAMPcAMP_I(t) = 0.04698μM
         RCcAMPcAMP_II(t) = 0.00154μM
-        RcAMPcAMP_I(t) = 0.53564μM
         PKACI(t) = 0.38375μM
         PKACII(t) = 0.06938μM
-        RcAMPcAMP_II(t) = 0.09691μM
         PKACI_PKI(t) = 0.15239μM
         PKACII_PKI(t) = 0.02753μM
         I1p(t) = 0.00033μM
@@ -132,6 +130,8 @@ function get_bar_sys(;
         PDE(t)
         RC_I(t)
         RC_II(t)
+        RcAMPcAMP_I(t)
+        RcAMPcAMP_II(t)
         PKI(t)
         I1(t)
         PP1(t)
@@ -151,6 +151,8 @@ function get_bar_sys(;
         PDEtot ~ PDE + PDEp,
         RC_I ~ RItot,
         RC_II ~ RIItot,
+        RcAMPcAMP_I ~ PKACI + PKACI_PKI,
+        RcAMPcAMP_II ~ PKACII + PKACII_PKI,
         PKItot ~ PKI + PKACI_PKI+ PKACII_PKI,
         I1tot ~ I1 + I1p + I1p_PP1,
         PP1tot ~ PP1 + I1p_PP1,
