@@ -21,13 +21,15 @@ function get_ca_pde_sys(;
     rSR_true=6μm,
     rSL_true=10.5μm,
     TnI_PKAp=0,
+    JCa_SR=0,
+    JCa_SL=0,
     name=:capdesys
 )
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
-    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t) JCa_SR(t) JCa_SL(t)
+    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t)
     @parameters begin
         Dca = 7μm^2 / ms
         V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3)

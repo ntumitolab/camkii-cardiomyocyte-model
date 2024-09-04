@@ -13,7 +13,10 @@ end
 
 "Funny current (If)"
 function get_if_sys(vm, E_Na, E_K; name=:ifsys)
-    @parameters gf = 0.021mS / cm^2 fNa = 0.2
+    @parameters begin
+        gf = 0.021mS / cm^2
+        fNa = 0.2
+    end
     @variables IfNa(t) IfK(t) If(t) yinf(t) tauy(t) i_y(t) = 0.07192
     fK = 1 - fNa
     V = vm * Volt / mV # Convert voltage to mV
@@ -23,7 +26,7 @@ function get_if_sys(vm, E_Na, E_K; name=:ifsys)
         IfNa ~ gf * fNa * i_y * (vm - E_Na),
         IfK ~ gf * fK * i_y * (vm - E_K),
         If ~ IfNa + IfK,
-        D(i_y) * tauy ~ yinf - i_y
+        D(i_y) ~ (yinf - i_y)/tauy
     ]
     return ODESystem(eqs, t; name)
 end

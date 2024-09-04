@@ -9,14 +9,14 @@
 function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
     @parameters begin
         INaKmax = 2.7μA / cm^2
-        KmNaiNaK = 18600μM
+        KmNaiNaK = 18.6mM
         nNaK = 3.2
-        KmKoNaK = 1500μM
+        KmKoNaK = 1.5mM
     end
 
     @variables INaK(t)
-    sigma = 1 / 7 * expm1(Nao / 67300μM)
-    fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365sigma * exp(-vm * iVT))
+    sigma = 1 / 7 * expm1(Nao / 67.300mM)
+    fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365 * sigma * exp(-vm * iVT))
     fKo = hil(Ko, KmKoNaK)
     fNai = hil(Nai, KmNaiNaK, nNaK)
     eqs = INaK ~ INaKmax * fNaK * fKo * fNai
@@ -24,10 +24,10 @@ function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
 end
 
 function build_neonatal_ecc_sys(;
-    simplify=true,
     rSR_true=6μm,
     rSL_true=10.5μm,
-    name=:neonataleccsys
+    name=:neonataleccsys,
+    simplify=true,
 )
     @parameters begin
         Ca_o = 1796μM
@@ -56,12 +56,14 @@ function build_neonatal_ecc_sys(;
         E_Na(t)
         E_K(t)
         E_Ca(t)
+        JCa_SL(t)
+        JCa_SR(t)
     end
 
     barsys = get_bar_sys(; ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
     capdesys = get_ca_pde_sys(; TnI_PKAp, rSR_true, rSL_true)
-    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean, JCa_SL, JCa_SR = capdesys
+    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean,  = capdesys
     camkiisys = get_camkii_sys(; ROS, Ca=Cai_mean)
     ICa_scale = get_ICa_scalep(LCCb_PKAp)
     ncxsys = get_ncx_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, ICa_scale)

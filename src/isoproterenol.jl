@@ -103,7 +103,7 @@ function get_bar_sys(;
         b1AR_S301(t) = 0.0011μM
         AC_GsaGTP(t) = 0.00814μM
         PDEp(t) = 0.00589μM
-        cAMP(t) = 1.50399μ
+        cAMP(t) = 1.50399μM
         RCcAMP_I(t) = 0.28552μM
         RCcAMP_II(t) = 0.00934μM
         RCcAMPcAMP_I(t) = 0.04698μM
@@ -191,11 +191,11 @@ function get_bar_sys(;
     add_rate!(rates, kf_RG, [b1AR, Gs], kr_RG, [RG]) # b1AR + Gs <--> RG
     add_rate!(rates, k_G_act, [RG], 0, [b1AR, GsaGTP, Gsby]) # (RG, LRG) --> b1AR + GsaGTP + Gsby
     add_rate!(rates, k_G_act, [LRG], 0, [b1AR, GsaGTP, Gsby])
-    add_rate!(rate, k_G_hyd, [GsaGTP], 0, [GsaGDP])  # GsaGTP --> GsaGDP
-    add_rate!(rate, k_G_reassoc, [GsaGDP, Gsby], 0, [Gs]) # GsaGDP + Gsby --> Gs
+    add_rate!(rates, k_G_hyd, [GsaGTP], 0, [GsaGDP])  # GsaGTP --> GsaGDP
+    add_rate!(rates, k_G_reassoc, [GsaGDP, Gsby], 0, [Gs]) # GsaGDP + Gsby --> Gs
     # Ligand-mediated inactivation
-    add_rate!(rate, kf_bARK, [LR], kr_bARK, [b1AR_S464]) # LR <--> b1AR_S464
-    add_rate!(rate, kf_bARK, [LRG], 0, [b1AR_S464, Gs]) # LRG --> b1AR_S464 + Gs
+    add_rate!(rates, kf_bARK, [LR], kr_bARK, [b1AR_S464]) # LR <--> b1AR_S464
+    add_rate!(rates, kf_bARK, [LRG], 0, [b1AR_S464, Gs]) # LRG --> b1AR_S464 + Gs
     # PKA-mediated receptor inactivation
     add_rate!(rates, kf_PKA * PKACI, [b1AR], kr_PKA, [b1AR_S301]) # b1AR <--> b1AR_S301
     add_rate!(rates, kf_PKA * PKACI, [LR], 0, [b1AR_S301]) # LR --> b1AR_S301

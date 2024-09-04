@@ -29,9 +29,9 @@ function get_ina_sys(vm, E_Na; name=:inasys)
         Natauh ~ ifelse(V >= -40, NatauhHI, NatauhLOW),
         Natauj ~ ifelse(V >= -40, NataujHI, NataujLOW),
         INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na),
-        D(i_Nam) * Nataum ~ Naminf - i_Nam,
-        D(i_Nah) * Natauh ~ Nahinf - i_Nah,
-        D(i_Naj) * Natauj ~ Najinf - i_Naj,
+        D(i_Nam) ~ (Naminf - i_Nam)/Nataum,
+        D(i_Nah) ~ (Nahinf - i_Nah)/Natauh,
+        D(i_Naj) ~ (Najinf - i_Naj)/Natauj,
     ]
     return ODESystem(eqs, t; name)
 end

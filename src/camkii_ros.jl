@@ -5,7 +5,8 @@ function get_camkii_sys(;
     decay_CaM=3,
     phospho_rate=1Hz,
     phosphatase=1Hz,
-    name=:camkii_sys
+    name=:camkii_sys,
+    simplify=false
 )
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
@@ -79,12 +80,24 @@ function get_camkii_sys(;
         CaMKP2(t) = 0
         CaMKPOX(t) = 0
         CaMKOX(t) = 0
-        CaM0(t) ## Conserved
-        CaMK(t) ## Conserved
-        CaMKAct(t) ## Observable
+
     end
 
-    rates = Dict(sts .=> t - t)
+    conservedvars = @variables begin
+        CaM0(t)
+        CaMK(t)
+    end
+
+    conservedeqs = [
+        CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
+        CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
+    ]
+
+    rates = merge(Dict(sts .=> t - t), Dict(conservedvars .=> t - t))
+
+    # Observables
+    @variables CaMKAct(t)
+    obseqs = [CaMKAct ~ (1 - CaMK / CAMKII_T)]
 
     "Ca binding/unbinding reaction rates"
     function _ca_cam(ca, k1on, k1off, k2on, k2off)
@@ -143,13 +156,10 @@ function get_camkii_sys(;
     add_rate!(rates, k_OXB, [CaMKOX], 0, [CaMK])
     add_rate!(rates, k_OXPP, [CaMKPOX], 0, [CaMKP])
 
-    eqs = [
-        CaMKAct ~ (1 - CaMK / CAMKII_T),
-        CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
-        CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
-    ]
-
-    rateeqs = [D(s) ~ rates[s] for s in sts if s ∉ (CaMKAct, CAMKII_T, CAM_T)]
-
-    return ODESystem([eqs; rateeqs], t; name)
+    rateeqs = [D(s) ~ rates[s] for s in sts]
+    sys = ODESystem([rateeqs; conservedeqs; obseqs], t; name)
+    if simplify
+        sys = structural_simplify(sys)
+    end
+    return sys
 end

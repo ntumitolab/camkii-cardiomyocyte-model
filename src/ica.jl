@@ -54,9 +54,9 @@ function get_lcc_sys(cai, cao, vm, ICa_scale=1; name=:lccsys)
 
     eqs = [
         ICaL ~ ICa_scale * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
-        D(i_d) * taud ~ dinf - i_d,
-        D(i_f) * tauf ~ finf - i_f,
-        D(i_fca) * taufca ~ kfca * (fcainf - i_fca),
+        D(i_d) ~ (dinf - i_d) /taud,
+        D(i_f) ~ (finf - i_f) /tauf,
+        D(i_fca) ~ kfca/taufca * (fcainf - i_fca),
         dinf ~ expit((V + 11.1) / 7.2),
         taud ~ (alphad * betad + gammad) * ms,
         finf ~ expit(-(V + 23.3) / 5.4),
@@ -86,8 +86,8 @@ function get_tcc_sys(vm, E_Ca; name=:tccsys)
         taub ~ (0.6 + 5.4 * expit(-(V + 100) * 0.03)) * ms,
         ginf ~ expit(-(V + 66) / 6),
         taug ~ (1 + 40 * expit(-(V + 65) * 0.08)) * ms,
-        D(i_b) * taub ~ binf - i_b,
-        D(i_g) * taug ~ ginf - i_g,
+        D(i_b) ~ (binf - i_b)/taub,
+        D(i_g) ~ (ginf - i_g)/taug,
         ICaT ~ gCaT * i_b * i_g * (vm - E_Ca + 106.5mV),
     ]
     return ODESystem(eqs, t; name)

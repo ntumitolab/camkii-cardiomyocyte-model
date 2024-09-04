@@ -28,7 +28,6 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     @variables begin
         IKs(t)
         i_nKs(t) = 0.09243
-        nKsinf(t)
     end
 
     # PKA-dependent phosphoregulation of Ik,slow1 (increases Gkur1)
@@ -72,12 +71,11 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         taus ~ (0.35 * exp(-(((vm + 70mV) / 15mV)^2)) + 0.035) - 26.9ms,
         tausslow ~ (3.7 * exp(-(((vm + 70mV) / 30mV)^2)) + 0.035) + 37.4ms,
         Ito ~ gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
-        D(i_r) * taur ~ rinf - i_r,
-        D(i_s) * taus ~ sinf - i_s,
-        D(i_sslow) * tausslow ~ slowinf - i_sslow,
+        D(i_r) ~ (rinf - i_r)/taur,
+        D(i_s) ~ (sinf - i_s)/taus,
+        D(i_sslow) ~ (slowinf - i_sslow)/tausslow,
         IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
-        nKsinf ~ alphan / (alphan + betan),
-        D(i_nKs) * nKstau ~ nKsinf - i_nKs,
+        D(i_nKs) ~ (alphan / (alphan + betan) - i_nKs)/nKstau,
         E_Kr ~ nernst(0.98 * K_o + 0.02 * Na_o, 0.98 * K_i + 0.02 * Na_i),
         IKr ~ i_OK * GKr * (vm - E_Kr),
         CK0 ~ 1 - (i_CK1 + i_CK2 + i_OK + i_IK),
