@@ -12,6 +12,7 @@ function get_ICa_scalep(LCCb_PKAp=0)
 end
 
 "Na-Ca exchanger"
+# TODO: too much, might be unit problem
 function get_ncx_sys(nai, cai, nao, cao, vm, ICa_scale=1; name=:ncxsys)
     @parameters begin
         fNaCa = 1

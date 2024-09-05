@@ -62,7 +62,7 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     alphai_mERG = 0.090821 / ms * exp(0.023391 * V)
     betai_mERG = 0.006497 / ms * exp(-0.03268 * V)
 
-    rc0c1 = alphaa0 * CK0 - betaa0 * i_CK
+    rc0c1 = alphaa0 * CK0 - betaa0 * i_CK1
     rc1c2 = kf * i_CK1 - kb * i_CK2
     rc2o = alphaa1 * i_CK2 - betaa1 * i_OK
     roi = alphai_mERG * i_OK - betai_mERG * i_IK

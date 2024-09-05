@@ -6,16 +6,13 @@ using Plots
 
 sys = build_neonatal_ecc_sys(simplify=true)
 
-unknowns(sys)
-observed(sys)
-
 tend = float(1)
 prob = ODEProblem(sys, [], tend)
 
 # Unstable
 sol = solve(prob, TRBDF2())
 
-sol(sol.t[end], idxs=sys.CK0)
+plot(sol, idxs=sys.INaCa)
 
 @unpack CK0, i_CK1, i_CK2, i_OK, i_IK, vm = sys
 

@@ -95,7 +95,7 @@ function build_neonatal_ecc_sys(;
         JCa_SR ~ Jleak - Jup + Jrel,
         D(CaJSR) * VJSR ~ betaSR * (-Jrel + Jtr),
         D(CaNSR) * VNSR ~ Jup - Jleak - Jtr,
-        D(vm) * Cm ~ INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim,
+        D(vm) ~ (INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim)/(-Cm),
         D(Na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_VMYO_F,
         D(K_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_VMYO_F
     ]
