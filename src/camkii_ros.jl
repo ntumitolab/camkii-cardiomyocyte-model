@@ -80,7 +80,6 @@ function get_camkii_sys(;
         CaMKP2(t) = 0
         CaMKPOX(t) = 0
         CaMKOX(t) = 0
-
     end
 
     conservedvars = @variables begin

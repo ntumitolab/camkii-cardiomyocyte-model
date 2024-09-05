@@ -62,6 +62,11 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     alphai_mERG = 0.090821 / ms * exp(0.023391 * V)
     betai_mERG = 0.006497 / ms * exp(-0.03268 * V)
 
+    rc0c1 = alphaa0 * CK0 - betaa0 * i_CK
+    rc1c2 = kf * i_CK1 - kb * i_CK2
+    rc2o = alphaa1 * i_CK2 - betaa1 * i_OK
+    roi = alphai_mERG * i_OK - betai_mERG * i_IK
+
     eqs = [
         IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
         sinf ~ expit((vm + 31.97156mV) / -4.64291mV),
@@ -77,12 +82,12 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
         D(i_nKs) ~ (alphan / (alphan + betan) - i_nKs)/nKstau,
         E_Kr ~ nernst(0.98 * K_o + 0.02 * Na_o, 0.98 * K_i + 0.02 * Na_i),
-        IKr ~ i_OK * GKr * (vm - E_Kr),
-        CK0 ~ 1 - (i_CK1 + i_CK2 + i_OK + i_IK),
-        D(i_CK1) ~ (alphaa0 * CK0 - betaa0 * i_CK1 + kb * i_CK2 - kf * i_CK1),
-        D(i_CK2) ~ (kf * i_CK1 - kb * i_CK2 + betaa1 * i_OK - alphaa1 * i_CK2),
-        D(i_OK) ~ (alphaa1 * i_CK2 - betaa1 * i_OK + betai_mERG * i_IK - alphai_mERG * i_OK),
-        D(i_IK) ~ (alphai_mERG * i_OK - betai_mERG * i_IK),
+        IKr ~ GKr * i_OK * (vm - E_Kr),
+        1 ~ CK0 + i_CK1 + i_CK2 + i_OK + i_IK,
+        D(i_CK1) ~ rc0c1 - rc1c2,
+        D(i_CK2) ~ rc1c2 - rc2o,
+        D(i_OK) ~ rc2o - roi,
+        D(i_IK) ~ roi,
     ]
     return ODESystem(eqs, t; name)
 end

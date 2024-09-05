@@ -4,21 +4,28 @@ using OrdinaryDiffEq
 using BenchmarkTools
 using Plots
 
-sys = build_neonatal_ecc_sys()
+sys = build_neonatal_ecc_sys(simplify=true)
 
-tend = float(1000)
+unknowns(sys)
+observed(sys)
+
+tend = float(1)
 prob = ODEProblem(sys, [], tend)
 
 # Unstable
-sol = solve(prob, TRBDF2(), maxiters=1E8, abstol=1e-7, reltol=1e-7)
+sol = solve(prob, TRBDF2())
 
-@unpack CK0, i_CK1, i_CK2, i_OK, i_IK = sys
-plot(sol, idxs=[])
+sol(sol.t[end], idxs=sys.CK0)
+
+@unpack CK0, i_CK1, i_CK2, i_OK, i_IK, vm = sys
+
+plot(sol, idxs=[CK0, i_CK1, i_CK2, i_OK, i_IK])
+plot(sol, idxs=vm*1000)
 
 sol[i_CK2]
 
 for s in unknowns(sys)
-    println(s)
+    println(s, " => ", sol(sol.t[end], idxs=s))
 end
 
 for eq in equations(sys)

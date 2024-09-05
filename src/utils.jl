@@ -72,11 +72,9 @@ function add_raw_rate!(lut, rate, substrates, products)
     for s in substrates
         lut[s] -= rate
     end
-
     for p in products
         lut[p] += rate
     end
-
     return lut
 end
 
