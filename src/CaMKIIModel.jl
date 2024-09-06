@@ -14,7 +14,6 @@ include("capde.jl")
 include("ica.jl")
 include("ik.jl")
 include("ina.jl")
-include("ibg.jl")
 include("er.jl")
 include("ecc_neonatal.jl")
 

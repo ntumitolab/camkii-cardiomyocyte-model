@@ -36,7 +36,7 @@ function build_neonatal_ecc_sys(;
         Mg_i = 1000μM
         ROS = 0μM
         ISO = 0μM
-        ATP = 5000μM
+        ATP = 5mM
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
         VSR = 0.043 * 1.5 * 1.4pL
@@ -53,9 +53,6 @@ function build_neonatal_ecc_sys(;
         CaNSR(t) = 619.09843μM
         CaJSR(t) = 613.87556μM
         vm(t) = -68.79268mV
-        E_Na(t)
-        E_K(t)
-        E_Ca(t)
         JCa_SL(t)
         JCa_SR(t)
     end
@@ -63,23 +60,14 @@ function build_neonatal_ecc_sys(;
     barsys = get_bar_sys(; ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
     capdesys = get_ca_pde_sys(; TnI_PKAp, rSR_true, rSL_true)
-    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean,  = capdesys
+    @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_sys(; ROS, Ca=Cai_mean)
-    ICa_scale = get_ICa_scalep(LCCb_PKAp)
-    ncxsys = get_ncx_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, ICa_scale)
-    @unpack INaCa = ncxsys
-    lccsys = get_lcc_sys(Cai_sub_SL, Ca_o, vm, ICa_scale)
-    @unpack ICaL = lccsys
-    tccsys = get_tcc_sys(vm, E_Ca)
-    @unpack ICaT = tccsys
-    ibgsys = get_ibg_sys(vm, E_Na, E_Ca)
-    @unpack ICab, INab = ibgsys
-    ifsys = get_if_sys(vm, E_Na, E_K)
-    @unpack IfNa, IfK, If = ifsys
-    inasys = get_ina_sys(vm, E_Na)
-    @unpack INa = inasys
+    icasys = get_ica_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, vm, LCCb_PKAp)
+    @unpack INaCa, ICaL, ICaT = icasys
+    inasys = get_ina_sys(Na_i, Na_o, vm)
+    @unpack INa, INab = inasys
     iksys = get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKUR_PKAp)
-    @unpack IK1, Ito, IKs, IKr = iksys
+    @unpack IK1, Ito, IKs, IKr, IfNa, IfK, If = iksys
     ryrsys = get_ryr_sys(Cai_sub_SR, CaJSR)
     @unpack Jrel = ryrsys
     sercasys = get_serca_sys(Cai_sub_SR, CaNSR, CaJSR, fracPLBp)
@@ -90,7 +78,6 @@ function build_neonatal_ecc_sys(;
     eqs = [
         E_Na ~ nernst(Na_o, Na_i),
         E_K ~ nernst(K_o, K_i),
-        E_Ca ~ nernst(Ca_o, Cai_sub_SL, 2),
         JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_VMYO_F * Vmyo,
         JCa_SR ~ Jleak - Jup + Jrel,
         D(CaJSR) * VJSR ~ betaSR * (-Jrel + Jtr),

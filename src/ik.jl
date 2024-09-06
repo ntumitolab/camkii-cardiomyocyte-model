@@ -1,16 +1,27 @@
-# Potassium currents
 "Potassium currents"
-function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
-    V = vm * Volt / mV # Convert voltage to mV
+function get_ik_sys(K_i, K_o, Na_i, Na_o, vm, IKur_PKAp=0; name=:iksys)
+    @parameters begin
+        # IK1: time-independent
+        gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
+        # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
+        gt = 0.1mS / cm^2
+        f_is = 0.706
+        # IKs (and IKur)
+        GKs = 0.05mS / cm^2
+        nKstau = 750ms
+        # IKr
+        GKr = 0.06mS / cm^2
+        kf = 0.023761 / ms
+        kb = 0.036778 / ms
+        # Hyperpolarization activated current (Funny current, If)
+        gf = 0.021mS / cm^2
+        fNa = 0.2
+    end
 
-    # IK1: time-independent
-    @parameters gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
-    @variables IK1(t)
-    vk1 = vm - E_K - 6.1373mV
-
-    # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
-    @parameters gt = 0.1mS / cm^2 f_is = 0.706
     @variables begin
+        E_Na(t)
+        E_K(t)
+        IK1(t)
         Ito(t)
         i_r(t) = 0.00702
         i_s(t) = 0.9660
@@ -21,14 +32,25 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         taur(t)
         taus(t)
         tausslow(t)
-    end
-
-    # IKs (and IKur)
-    @parameters GKs = 0.05mS / cm^2 nKstau = 750ms
-    @variables begin
         IKs(t)
         i_nKs(t) = 0.09243
+        IKr(t)
+        E_Kr(t)
+        CK0(t)
+        i_CK1(t) = 0.00188
+        i_CK2(t) = 0.00977
+        i_OK(t) = 0.26081
+        i_IK(t) = 0.07831
+        IfNa(t)
+        IfK(t)
+        If(t)
+        yinf(t)
+        tauy(t)
+        i_y(t) = 0.07192
     end
+
+    V = vm * Volt / mV # Convert voltage to mV
+    vk1 = vm - E_K - 6.1373mV
 
     # PKA-dependent phosphoregulation of Ik,slow1 (increases Gkur1)
     fracIKurp0 = 0.437635       # Derived quantity (IKur_PKAp(baseline)/IKurtot)
@@ -39,22 +61,6 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
 
     # IKr
-    @parameters begin
-        GKr = 0.06mS / cm^2
-        kf = 0.023761 / ms
-        kb = 0.036778 / ms
-    end
-
-    @variables begin
-        IKr(t)
-        E_Kr(t)
-        CK0(t)
-        i_CK1(t) = 0.00188
-        i_CK2(t) = 0.00977
-        i_OK(t) = 0.26081
-        i_IK(t) = 0.07831
-    end
-
     alphaa0 = 0.022348 / ms * exp(0.01176 * V)
     betaa0 = 0.047002 / ms * exp(-0.0631 * V)
     alphaa1 = 0.013733 / ms * exp(0.038198 * V)
@@ -67,7 +73,11 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
     rc2o = alphaa1 * i_CK2 - betaa1 * i_OK
     roi = alphai_mERG * i_OK - betai_mERG * i_IK
 
-    eqs = [
+    fK = 1 - fNa
+
+    return ODESystem([
+        E_Na ~ nernst(Na_o, Na_i),
+        E_K ~ nernst(K_o, K_i),
         IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
         sinf ~ expit((vm + 31.97156mV) / -4.64291mV),
         rinf ~ expit((vm - 3.55716mV) / 14.61299mV),
@@ -88,6 +98,12 @@ function get_ik_eqs(vm, E_K, K_i, K_o, Na_i, Na_o, IKur_PKAp=0; name=:iksys)
         D(i_CK2) ~ rc1c2 - rc2o,
         D(i_OK) ~ rc2o - roi,
         D(i_IK) ~ roi,
-    ]
-    return ODESystem(eqs, t; name)
+        yinf ~ expit(-(V + 78.65) / 6.33),
+        tauy ~ 1 / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
+        IfNa ~ gf * fNa * i_y * (vm - E_Na),
+        IfK ~ gf * fK * i_y * (vm - E_K),
+        If ~ IfNa + IfK,
+        D(i_y) ~ (yinf - i_y)/tauy
+    ], t; name)
 end
+ # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
