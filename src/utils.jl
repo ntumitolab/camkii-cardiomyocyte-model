@@ -2,7 +2,7 @@
 const second = 1           # second
 const minute = 60second    # minute
 const ms = second//1000    # millisecond
-const Hz = inv(second)     # Herz
+const Hz = 1 // second     # Herz
 const kHz = 1000Hz         # kilohertz
 const metre = 1            # meter
 const cm = metre//100      # centimeter
