@@ -2,19 +2,19 @@
 function get_ik_sys(K_i, K_o, Na_i, Na_o, vm, IKur_PKAp=0; name=:iksys)
     @parameters begin
         # IK1: time-independent
-        gK1 = 0.0515mS / cm^2 * hil(K_o, 210μM)
+        gK1 = 0.0515mSμF * hil(K_o, 210μM)
         # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
-        gt = 0.1mS / cm^2
+        gt = 0.1mSμF
         f_is = 0.706
         # IKs (and IKur)
-        GKs = 0.05mS / cm^2
+        GKs = 0.05mSμF
         nKstau = 750ms
         # IKr
-        GKr = 0.06mS / cm^2
+        GKr = 0.06mSμF
         kf = 0.023761 / ms
         kb = 0.036778 / ms
         # Hyperpolarization activated current (Funny current, If)
-        gf = 0.021mS / cm^2
+        gf = 0.021mSμF
         fNa = 0.2
     end
 

@@ -29,7 +29,8 @@ const Faraday = 96485           # Faraday constant (columb / mol)
 const RGAS = 8314//1000         # Ideal gas constant (J/K⋅mol)
 const VT = RGAS * T₀ // Faraday # Thermal voltage (@37C), about 26.7 mV
 const iVT = inv(VT)             # Reciprocal of thermal voltage
-# Utility functions
+const μAμF = μA // μF           # Common unit for current density, normalized by capacitance
+const mSμF = ms // μF           # Common unit for conductance, normalized by capacitance
 
 """
 Regular Hill/MM function

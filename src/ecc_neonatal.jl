@@ -8,7 +8,7 @@
 
 function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
     @parameters begin
-        INaKmax = 2.7μA / cm^2
+        INaKmax = 2.7μAμF
         KmNaiNaK = 18.6mM
         nNaK = 3.2
         KmKoNaK = 1.5mM
@@ -37,7 +37,7 @@ function build_neonatal_ecc_sys(;
         ROS = 0μM
         ISO = 0μM
         ATP = 5mM
-        Cm = 1μF / cm^2
+        Cm = 1μF // cm^2
         Acap = 4π * rSL_true^2
         VSR = 0.043 * 1.5 * 1.4pL
         VNSR = 0.9 * VSR
@@ -82,7 +82,8 @@ function build_neonatal_ecc_sys(;
         JCa_SR ~ Jleak - Jup + Jrel,
         D(CaJSR) * VJSR ~ betaSR * (-Jrel + Jtr),
         D(CaNSR) * VNSR ~ Jup - Jleak - Jtr,
-        D(vm) ~ (INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim)/(-Cm),
+        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Current alreadt normalized by capacitance
+        # TODO: fix ACAP_VMYO_F
         D(Na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_VMYO_F,
         D(K_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_VMYO_F
     ]

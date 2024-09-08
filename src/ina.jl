@@ -1,8 +1,8 @@
 "Fast sodium current (INa) and background sodium current"
 function get_ina_sys(nai, nao, vm; name=:inasys)
     @parameters begin
-        gNa = 35mS / cm^2
-        gNab = 0.0026mS / cm^2
+        gNa = 35mSμF
+        gNab = 0.0026mSμF
     end
     @variables begin
         INa(t)
