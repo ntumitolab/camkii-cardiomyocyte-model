@@ -26,9 +26,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        uses: actions/checkout@v4
       - name: Setup Julia
-        uses: julia-actions/setup-julia@v2
         uses: julia-actions/setup-julia@v2
         with:
           version: '1'
@@ -39,7 +37,6 @@ jobs:
       # Authenticate with a custom GitHub APP
       # https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#authenticating-with-github-app-generated-tokens
       - name: Generate token for PR
-        uses: tibdex/github-app-token@v2
         uses: tibdex/github-app-token@v2
         id: generate-token
         with:
