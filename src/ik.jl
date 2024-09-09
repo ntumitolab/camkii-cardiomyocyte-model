@@ -1,5 +1,5 @@
 "Potassium currents"
-function get_ik_sys(K_i, K_o, Na_i, Na_o, vm, IKur_PKAp=0; name=:iksys)
+function get_ik_sys(K_i, K_o, Na_i, Na_o, vm; IKur_PKAp=0, name=:iksys)
     @parameters begin
         # IK1: time-independent
         gK1 = 0.0515mSμF * hil(K_o, 210μM)

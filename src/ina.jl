@@ -19,7 +19,7 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
         E_Na(t)
     end
 
-    V = vm * Volt / mV # Convert voltage to mV
+    V = vm * Volt // mV # Convert voltage to mV
     NatauhHI = 0.4537ms * expit((V + 10.66) / 11.1)
     NatauhLOW = 3.49ms / (0.135 * exp((V + 80) / -6.8) + 3.56 * exp(0.079V) + 3.1e5 * exp(0.35V))
     NataujHI = 11.63ms * (1 + exp(-0.1 * (V + 32))) / exp(-2.535e-7V)
@@ -37,6 +37,6 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
         D(i_Nah) ~ (Nahinf - i_Nah)/Natauh,
         D(i_Naj) ~ (Najinf - i_Naj)/Natauj,
         E_Na ~ nernst(nao, nai),
-        Nab ~ gNab * (vm - E_Na),
+        INab ~ gNab * (vm - E_Na),
     ], t; name)
 end

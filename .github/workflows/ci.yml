@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NBCONVERT_JOBS: '4'
+  NBCONVERT_JOBS: '2'
   LITERATE_PROC: '4'
   ALLOWERRORS: 'false'
   CACHE_NUM: '1'
