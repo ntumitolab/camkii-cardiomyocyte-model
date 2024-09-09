@@ -1,5 +1,5 @@
 "Potassium currents"
-function get_ik_sys(K_i, K_o, Na_i, Na_o, vm; IKur_PKAp=0, name=:iksys)
+function get_ik_sys(K_i, K_o, Na_i, Na_o, vm; IKUR_PKAp=0, name=:iksys)
     @parameters begin
         # IK1: time-independent
         gK1 = 0.0515mSμF * hil(K_o, 210μM)
@@ -56,7 +56,7 @@ function get_ik_sys(K_i, K_o, Na_i, Na_o, vm; IKur_PKAp=0, name=:iksys)
     fracIKurp0 = 0.437635       # Derived quantity (IKur_PKAp(baseline)/IKurtot)
     fracIKurpISO = 0.718207     # Derived quantity (IKur_PKAp(ISO)/IKurtot)
     a_Kur = (1.20 - 1) / (fracIKurpISO / fracIKurp0 - 1)
-    fracIKuravail = (1 - a_Kur) + a_Kur * (IKur_PKAp / fracIKurp0)  # +20# with 0.1 uM ISO
+    fracIKuravail = (1 - a_Kur) + a_Kur * (IKUR_PKAp / fracIKurp0)  # +20# with 0.1 uM ISO
     alphan = 0.00000481333 * (V + 26.5) / (-expm1(-0.128 * (V + 26.5)))
     betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
 
