@@ -1,9 +1,8 @@
 # LCC Markov model based on Mahajan et al. (2008)
-
 using Catalyst
 using ModelingToolkit
 
-function lcc_markov_sys(mode=1)
+function lcc_markov_sys(;mode=1)
 
     @variables t v(t) (k(t))[1:6] (kp(t))[1:6] (s(t))[1:2] (sp(t))[1:2] α(t) β(t) Ca(t)
 
@@ -22,7 +21,7 @@ function lcc_markov_sys(mode=1)
 
     # Tranisition Rates (20 rates)
     @parameters r1 = 0.3                            # [1/ms] - Opening rate
-    @parameters r2 = ifelse(mode == 1, 3, 3 / 8)        # [1/ms] - closing rate
+    @parameters r2 = ifelse(mode == 1, 3, 3 / 8)    # [1/ms] - closing rate
     @parameters s1p = 0.00195                       # [ms] - Inactivation rate
     @parameters k1p = 0.00413                       # [ms] - Inactivation rate
     @parameters k2 = 0.0001                         # [ms] - Inactivation rate

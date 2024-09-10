@@ -2,15 +2,15 @@
 # Smooth calcium wave
 ===#
 using OrdinaryDiffEq
-using DiffEqCallbacks
 using ModelingToolkit
 using Plots
 using CaMKIIModel: get_camkii_sys, μM, nM, second
 
 # Reaction network
 @parameters ROS=0μM period=1/3 ca_r=100nM ca_rise=550nM tstart=200.0second tend=300.0second
-@variables t Ca(t)
-sys = get_camkii_sys(Ca, ROS)
+@independent_variables t
+@variables Ca(t)
+sys = get_camkii_sys(;Ca, ROS)
 
 # Periodic assymetric calcium pulses
 function ca_wave(t;
@@ -28,7 +28,7 @@ sys = extend(sys, casys) |> structural_simplify
 
 # ## First sumulation
 tspan = (0.0, 400.0)
-oprob = ODEProblem(sys, [], tspan, jac=true)
+oprob = ODEProblem(sys, [], tspan)
 
 alg = TRBDF2()
 @time sol = solve(oprob, alg, tstops=200:1/3:300, abstol=1e-8, reltol=1e-8)  ## Lowered tolerance to make the reaction network respond to calcium changes
@@ -56,8 +56,8 @@ plot(
 )
 
 # Active CaMKII
-@unpack CaMKII_act = sys
-plot(sol, idxs=CaMKII_act, label="Act. CaMKII", title="3Hz")
+@unpack CaMKAct = sys
+plot(sol, idxs=CaMKAct, label="Act. CaMKII", title="3Hz")
 
 # Change frequency to 2Hz
 oprob2 = remake(oprob, p=[period=>1/2second])
@@ -74,7 +74,7 @@ plot(
 )
 
 # Active CaMKII
-plot(sol2, idxs=CaMKII_act, label="Act. CaMKII", title="2Hz")
+plot(sol2, idxs=CaMKAct, label="Act. CaMKII", title="2Hz")
 
 # Change frequency to 1Hz
 oprob3 = remake(oprob, p=[period=>1second])
@@ -91,9 +91,9 @@ plot(
 )
 
 # Active CaMKII
-plot(sol3, idxs=CaMKII_act, label="Act. CaMKII", title="1Hz")
+plot(sol3, idxs=CaMKAct, label="Act. CaMKII", title="1Hz")
 
 # Frequency-dependent response
-plot(sol, idxs=CaMKII_act, title="Act. CaMKII", label="3Hz")
-plot!(sol2, idxs=CaMKII_act, label="2Hz")
-plot!(sol3, idxs=CaMKII_act, label="1Hz")
+plot(sol, idxs=CaMKAct, title="Act. CaMKII", label="3Hz")
+plot!(sol2, idxs=CaMKAct, label="2Hz")
+plot!(sol3, idxs=CaMKAct, label="1Hz")
