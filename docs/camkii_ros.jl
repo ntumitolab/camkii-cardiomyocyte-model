@@ -1,6 +1,7 @@
 # # Isolated CaMKII response with ROS
+using OrdinaryDiffEq
+using DiffEqCallbacks
 using ModelingToolkit
-using DifferentialEquations
 using Plots
 using CaMKIIModel: nM, μM, Hz, get_camkii_sys
 
@@ -16,7 +17,8 @@ function ca_decay_sys(;
         dCa = decay_calcium
         dCaRev = 1
     end
-    @variables t Ca(t)
+    @independent_variables t
+    @variables Ca(t)
     D = Differential(t)
     eqs = [D(Ca) ~ -dCa * dCaRev * (Ca - CaResting * dCaRev)]
     return ODESystem(eqs, t; name)
@@ -24,14 +26,16 @@ end
 
 # CaMKII model
 @parameters ROS=0μM
-@variables t Ca(t)
-sys = get_camkii_sys(Ca, ROS)
+@independent_variables t
+@variables Ca(t)
 casys = ca_decay_sys()
-sys = extend(sys, casys) |> structural_simplify
+sys = get_camkii_sys(;Ca, ROS)
+sys = extend(casys, sys)
+sys = structural_simplify(sys)
 unknowns(sys)
 # ---
 tspan = (0.0, 400.0)
-prob = ODEProblem(sys, [Ca => sys.CaResting], tspan, jac=true)
+prob = ODEProblem(sys, [Ca => sys.CaResting], tspan)
 
 # Calcium pulses
 function make_ca_events(;
@@ -61,14 +65,14 @@ sol = solve(prob, alg, callback=make_ca_events())
 plot(sol, idxs=Ca, tspan=(200, 300))
 
 # Components
-@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaMKOX, CaMKII_act, CaMKPOX = sys
+@unpack CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaMKOX, CaMKAct, CaMKPOX = sys
 
 camkiistates= [CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMK, CaMKP, CaMKP2, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, CaMKPOX, CaMKOX]
 
 plot(sol, idxs=camkiistates, size=(800, 600))
 
 # Active CaMKII
-plot(sol, idxs=CaMKII_act, label="Act. CaMKII", title="3Hz", ylims=(0.0, 1.0))
+plot(sol, idxs=CaMKAct, label="Act. CaMKII", title="3Hz", ylims=(0.0, 1.0))
 
 # Change frequency to 2Hz
 sol2 = solve(prob, alg, callback=make_ca_events(step=1 / 2))
@@ -80,7 +84,7 @@ plot(sol2, idxs=Ca, tspan=(200, 300))
 plot(sol2,idxs=camkiistates, size=(800, 600), legends=:topleft)
 
 # Active CaMKII
-plot(sol2, idxs=CaMKII_act, label="Act. CaMKII", title="2Hz", ylims=(0.0, 1.0))
+plot(sol2, idxs=CaMKAct, label="Act. CaMKII", title="2Hz", ylims=(0.0, 1.0))
 
 # Change frequency to 1Hz
 @time sol3 = solve(prob, TRBDF2(), callback=make_ca_events(step=1))
@@ -92,12 +96,12 @@ plot(sol3, idxs=Ca, tspan=(200, 300))
 plot(sol3, idxs=camkiistates, size=(800, 600), legend=:topleft)
 
 # Active CaMKII
-plot(sol3, idxs=CaMKII_act, label="Act. CaMKII", title="1Hz", ylims=(0.0, 1.0))
+plot(sol3, idxs=CaMKAct, label="Act. CaMKII", title="1Hz", ylims=(0.0, 1.0))
 
 # Frequency-dependent response
-plot(sol, idxs=CaMKII_act, title="Act. CaMKII", label="3Hz")
-plot!(sol2, idxs=CaMKII_act, label="2Hz")
-plot!(sol3, idxs=CaMKII_act, label="1Hz", ylims=(0.0, 1.0))
+plot(sol, idxs=CaMKAct, title="Act. CaMKII", label="3Hz")
+plot!(sol2, idxs=CaMKAct, label="2Hz")
+plot!(sol3, idxs=CaMKAct, label="1Hz", ylims=(0.0, 1.0))
 
 # ## More realistic calcium pulses
 # Exponential growth at the rising phase
@@ -141,7 +145,7 @@ plot(sol, idxs=Ca, tspan=(200, 201))
 plot(sol, idxs=camkiistates, size=(800, 600), legend=:topleft)
 
 # Active CaMKII
-plot(sol, idxs=CaMKII_act, label="Act. CaMKII", title="3Hz", ylims=(0, 1))
+plot(sol, idxs=CaMKAct, label="Act. CaMKII", title="3Hz", ylims=(0, 1))
 
 # Change frequency to 2Hz
 cawave2hz = make_ca_waves(sys; period=1 / 2)
@@ -154,7 +158,7 @@ plot(sol2, idxs=Ca, tspan=(200, 201))
 plot(sol2, idxs=camkiistates, size=(800, 600), legend=:topleft)
 
 # Active CaMKII
-plot(sol2, idxs=CaMKII_act, label="Act. CaMKII", title="2Hz", ylims=(0, 1))
+plot(sol2, idxs=CaMKAct, label="Act. CaMKII", title="2Hz", ylims=(0, 1))
 
 # Change frequency to 1Hz
 cawave1hz = make_ca_waves(sys; period=1)
@@ -167,12 +171,12 @@ plot(sol3, idxs=Ca, tspan=(200, 202))
 plot(sol3,idxs=camkiistates, size=(800, 600),legend=:topleft)
 
 # Active CaMKII
-plot(sol3, idxs=CaMKII_act, label="Act. CaMKII", title="1Hz", ylims=(0, 1))
+plot(sol3, idxs=CaMKAct, label="Act. CaMKII", title="1Hz", ylims=(0, 1))
 
 # Frequency-dependent response
-plot(sol, idxs=CaMKII_act, title="Act. CaMKII", label="3Hz")
-plot!(sol2, idxs=CaMKII_act, label="2Hz")
-plot!(sol3, idxs=CaMKII_act, label="1Hz", ylims=(0, 1))
+plot(sol, idxs=CaMKAct, title="Act. CaMKII", label="3Hz")
+plot!(sol2, idxs=CaMKAct, label="2Hz")
+plot!(sol3, idxs=CaMKAct, label="1Hz", ylims=(0, 1))
 
 # ## Effect of ROS
 oprob_ROS0 = remake(prob, p=[ROS=>0.0])
@@ -188,6 +192,6 @@ plot(sol_ROS0, idxs=camkiistates, size=(800, 600),legend=:topleft)
 plot(sol_ROS1, idxs=camkiistates, size=(800, 600),legend=:topleft)
 
 #---
-plot(sol_ROS0, idxs=CaMKII_act, label="ROS = 0.0μM", title="Act. CaMKII (1Hz)")
-plot!(sol_ROS1, idxs=CaMKII_act, label="ROS = 1.0μM")
-plot!(sol_ROS2, idxs=CaMKII_act, label="ROS = 2.0μM", ylim=(0.0, 1.0), size=(600, 600))
+plot(sol_ROS0, idxs=CaMKAct, label="ROS = 0.0μM", title="Act. CaMKII (1Hz)")
+plot!(sol_ROS1, idxs=CaMKAct, label="ROS = 1.0μM")
+plot!(sol_ROS2, idxs=CaMKAct, label="ROS = 2.0μM", ylim=(0.0, 1.0), size=(600, 600))
