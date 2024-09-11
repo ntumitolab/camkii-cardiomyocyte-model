@@ -13,7 +13,7 @@ sol = solve(prob, Rodas5P())
 
 sol[sys.ICaL]
 
-plot(sol, idxs=sys.vm)
+plot(sol, idxs=sys.PO1RyR)
 
 for (k, v) in zip(unknowns(sys), sol[end])
     println(k, " => ", v)
