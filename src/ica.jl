@@ -46,13 +46,13 @@ function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF // cm
     a = nai^3 * cao
     b = nao^3 * cai * fNaCa
     # L-type calcium channel (LCC)
-    V = vm * Volt / mV # Convert voltage to mV
+    V = vm / mV # Convert voltage to mV
     alphad = 1.4 * expit((V + 35) / 13) + 0.25
     betad = 1.4 * expit(-(V + 5) / 5)
     gammad = expit((V - 50) / 20)
-    alphafca = hilr(cai, 0.000325mM * 1.5, 8)
-    betafca = 0.1 * expit(-(cai - 0.0005mM) / 0.0001mM)
-    gammafca = 0.2 * expit(-(cai - 0.00075mM) / 0.0008mM)
+    alphafca = hilr(cai, 0.4875μM, 8)
+    betafca = 0.1 * expit(-(cai - 0.5μM) / 0.1μM)
+    gammafca = 0.2 * expit(-(cai - 0.75μM) / 0.8μM)
     kfca = 1 - (fcainf > i_fca) * (V > -60)
 
     return ODESystem([
