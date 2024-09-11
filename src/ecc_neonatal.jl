@@ -38,11 +38,8 @@ function build_neonatal_ecc_sys(;
         ATP = 5mM
         Cm = 1μF // cm^2
         Acap = 4π * rSL_true^2
-        VSR = 0.043 * 1.5 * 1.4pL
-        VNSR = 0.9 * VSR
-        VJSR = VSR - VNSR
         Vmyo = 4 // 3 * π * (rSL_true^3 - rSR_true^3)
-        ACAP_VMYO_F = Acap * Cm // Faraday // Vmyo
+        ACAP_VMYO_F = Acap * Cm / Faraday / Vmyo
         Istim = 0
     end
 
