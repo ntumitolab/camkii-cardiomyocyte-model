@@ -5,7 +5,6 @@
 # PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT:
 # Korhonen et al. "Model of excitation-contraction coupling of rat neonatal
 # ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
-
 function get_nak_sys(vm, Nai, Nao, Ko; name=:naksys)
     @parameters begin
         INaKmax = 2.7μAμF
@@ -48,14 +47,15 @@ function build_neonatal_ecc_sys(;
         K_i(t) = 150952.75035μM
         vm(t) = -68.79268mV
         JCa_SL(t)
+        JCa_SR(t)
     end
 
     barsys = get_bar_sys(; ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
-    capdesys = get_ca_pde_sys(; TnI_PKAp, rSR_true, rSL_true)
+    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_sys(; ROS, Ca=Cai_mean)
-    icasys = get_ica_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, vm, LCCb_PKAp)
+    icasys = get_ica_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, vm; LCCb_PKAp)
     @unpack INaCa, ICaL, ICaT, ICab = icasys
     inasys = get_ina_sys(Na_i, Na_o, vm)
     @unpack INa, INab = inasys
@@ -66,7 +66,6 @@ function build_neonatal_ecc_sys(;
     @unpack INaK = naksys
 
     sys = ODESystem([
-        JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * (Acap * Cm // Faraday),
         D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Current alreadt normalized by capacitance
         D(Na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_VMYO_F,
         D(K_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_VMYO_F,
