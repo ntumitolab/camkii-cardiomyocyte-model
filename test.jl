@@ -6,19 +6,15 @@ using Plots
 
 sys = build_neonatal_ecc_sys(simplify=true)
 
-prob = ODEProblem(sys, [], float(100))
+prob = ODEProblem(sys, [], float(10))
 
-sol = solve(prob, TRBDF2())
+# TODO: fix unstable (ICaL?)
+sol = solve(prob, Rodas5P())
 
-# TODO: fix electrophysiology
-plot(sol, idxs=sys.vm*1000)
+sol[sys.ICaL]
 
-sol[i_CK2]
+plot(sol, idxs=sys.vm)
 
-for s in unknowns(sys)
-    println(s, " => ", sol(sol.t[end], idxs=s))
-end
-
-for eq in equations(sys)
-    println(eq)
+for (k, v) in zip(unknowns(sys), sol[end])
+    println(k, " => ", v)
 end
