@@ -1,13 +1,14 @@
 using DiffEqCallbacks
+using OrdinaryDiffEq
 
 function build_stim_callbacks(sym, endtime; period = 1second, duty = 5e-4second,starttime=zero(endtime), strength=-80μAμF, baseline=0μAμF, proposeddt=0.01second)
     rise! = (integrator) -> begin
-        integrator[sym] = strength
+        integrator.ps[sym] = strength
         set_proposed_dt!(integrator, proposeddt)
     end
 
     fall! = (integrator) -> begin
-        integrator[sym] = baseline
+        integrator.ps[sym] = baseline
         set_proposed_dt!(integrator, proposeddt)
     end
 
