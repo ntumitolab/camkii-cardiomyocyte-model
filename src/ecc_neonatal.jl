@@ -66,13 +66,13 @@ function build_neonatal_ecc_sys(;
     @unpack INaK = naksys
 
     sys = ODESystem([
-        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Current alreadt normalized by capacitance
+        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Current  normalized by capacitance
         D(Na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_VMYO_F,
         D(K_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_VMYO_F,
     ], t; name)
 
     for s2 in (barsys, capdesys, camkiisys, icasys, inasys, iksys, sersys, naksys)
-        sys = extend(s2, sys; name)
+        sys = extend(sys, s2; name)
     end
 
     if simplify
