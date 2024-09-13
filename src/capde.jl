@@ -31,7 +31,7 @@ function get_ca_pde_sys(;
     m = length(j)
     @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t)
     @parameters begin
-        Dca = 7 * (μm^2 / ms)
+        Dca = 7μm^2 / ms
         V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3)
         V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3)
         TrpnTotal = 35μM
