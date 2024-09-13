@@ -53,11 +53,11 @@ function get_bar_sys(;
         k_PP_PDE = 1.5Hz                         # rate constant for PDE dephosphorylation by phosphatases
         kf_RC_cAMP = 1 / (μM * ms)               # Kd for PKA RC binding to cAMP
         kf_RCcAMP_cAMP = 1 / (μM * ms)           # Kd for PKA RC:cAMP binding to cAMP
-        kf_RcAMPcAMP_C = 4.375 / (μM * ms)       # Kd for PKA R:cAMPcAMP binding to C
+        kf_RcAMPcAMP_C = 4.375 / ms       # Kd for PKA R:cAMPcAMP binding to C
         kf_PKA_PKI = 1 / (μM * ms)               # Ki for PKA inhibition by PKI
         kr_RC_cAMP = 1.64 / ms                   # rate constant for PKA RC unbinding to cAMP
         kr_RCcAMP_cAMP = 9.14 / ms               # rate constant for PKA RC:cAMP unbinding to cAMP
-        kr_RcAMPcAMP_C = 1 / ms                  # rate constant for PKA R:cAMPcAMP unbinding to C
+        kr_RcAMPcAMP_C = 1 / (μM * ms)           # rate constant for PKA R:cAMPcAMP binding to C
         kr_PKA_PKI = 0.2Hz                       # reverse rate for PKA inhibition by PKI
         epsilon = 10                             # AKAP-mediated scaling factor
         k_PKA_I1 = 60Hz                          # rate constant for I-1 phosphorylation by type 1 PKA
