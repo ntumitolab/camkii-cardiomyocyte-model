@@ -58,7 +58,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^
     return ODESystem([
             ICa_scale ~ ICa_scale0 * favail,
             E_Ca ~ nernst(cao, cai, 2),
-            JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * (Acap * Cm / Faraday),
+            JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * (Acap * Cm / 2 / Faraday),
             INaCa ~ ICa_scale * kNaCa * (exp(iVT * gNaCa * vm) * a - exp(iVT * (gNaCa - 1) * vm) * b) / (1 + dNaCa * (a + b)),
             ICaL ~ ICa_scale * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
             dinf ~ expit((V + 11.1) / 7.2),
