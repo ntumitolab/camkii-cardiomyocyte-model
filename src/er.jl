@@ -33,9 +33,9 @@ function get_ser_sys(Cai; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:sersys)
         Jtr(t)
         betaSR(t)
         JCa_SR(t)
+        KmRyR(t)
     end
 
-    KmRyR = (3.51 * inv(1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * μM
     fCKII_PLB = (1 - 0.5 * fracPLB_CKp)  # Max effect: fCKII_PLB=0.5
     fPKA_PLB = ((1 - fracPLBp) / fracPKA_PLBo) * (1 - 0.5531) + 0.5531
     # Select smaller value (resulting in max reduction of Kmf)
@@ -47,6 +47,7 @@ function get_ser_sys(Cai; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:sersys)
     return ODESystem([
         1 ~ PO1RyR + PC1RyR,
         Jrel ~ nu1RyR * PO1RyR * (CaJSR - Cai),
+        KmRyR ~ (3.51 * inv(1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * μM,
         D(PO1RyR) ~ kaposRyR * hil(Cai, KmRyR, 4) * PC1RyR - kanegRyR * PO1RyR,
         Jup ~ (VmaxfSR * fSR - VmaxrSR * rSR) / (1 + fSR + rSR),
         Jleak ~ kleak * (CaNSR - Cai),
