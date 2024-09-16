@@ -11,15 +11,11 @@ prob = ODEProblem(sys, [], tend)
 
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, tend)
-@time sol = solve(prob, Rodas5P(); callback, progress=true, maxiters=1e8)
+@time sol = solve(prob, TRBDF2(); callback, progress=true, abstol=1e-7, reltol=1e-7)
 
-length(sys.Cai)
+plot(sol, idxs=[sys.vm*1000])
 
-[(x, y) for x in 1:3, y in 1:2]
+plot(sol, idxs=[sys.CaJSR, sys.CaNSR, sys.Cai_sub_SR])
 
-plot(25:0.01:30, 1:length(sys.Cai), (t, x) -> sol(t, idxs=sys.Cai[x]), linetype=:wireframe, size=(800, 800))
-
-
-plot(sol, idxs=sys.vm*1000)
-plot(sol, idxs=[sys.TnI_PKAp])
-plot(sol, idxs=[INaCa, ICaL, ICaT, ICab], size=(800, 800), tspan=(20, 30))
+plot(sol, idxs=[sys.PO1RyR])
+@unpack Cai_sub_SR = sys
