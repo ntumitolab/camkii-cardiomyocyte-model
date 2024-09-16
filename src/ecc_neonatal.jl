@@ -55,7 +55,7 @@ function build_neonatal_ecc_sys(;
     capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_sys(; ROS, Ca=Cai_mean)
-    icasys = get_ica_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, vm; LCCb_PKAp)
+    icasys = get_ica_sys(Na_i, Cai_sub_SL, Na_o, Ca_o, vm; Acap, Cm, LCCb_PKAp)
     @unpack INaCa, ICaL, ICaT, ICab = icasys
     inasys = get_ina_sys(Na_i, Na_o, vm)
     @unpack INa, INab = inasys

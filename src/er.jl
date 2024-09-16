@@ -3,12 +3,12 @@ function get_ser_sys(Cai; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:sersys)
     @parameters begin
         VSR = 0.043 * 1.5 * 1.4pL
         VNSR = 0.9 * VSR
-        VJSR = VSR - VNSR
+        VJSR = 0.1 * VSR
         # RyR
         nRyR = 4
-        nu1RyR = 0.01 / ms
-        kaposRyR = 1 / ms
-        kanegRyR = 0.16 / ms
+        nu1RyR = 10Hz
+        kaposRyR = 1000Hz
+        kanegRyR = 160Hz
         # SERCA
         VmaxfSR = 0.9996 * (μM / ms)
         VmaxrSR = VmaxfSR
@@ -18,7 +18,7 @@ function get_ser_sys(Cai; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:sersys)
         HrSR = 1 * HfSR
         kSRleak = 5e-6 / ms
         fracPKA_PLBo = 1 - 0.079755
-        ktrCaSR = 1 / 200ms
+        ktrCaSR = 5Hz
         csqntot = 24750μM
         Kmcsqn = 800μM
     end
@@ -36,14 +36,14 @@ function get_ser_sys(Cai; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:sersys)
         JCa_SR(t)
     end
 
-    KmRyR = (1.35 * 2.6 * expit(-(Cai - 530μM) / 200μM) + 1.5 - 0.9 - 0.3 - 0.05) * μM
+    KmRyR = (1.35 * 2.6 * expit(-(CaJSR - 530μM) / 200μM) + 0.25) * μM
     fCKII_PLB = (1 - 0.5 * fracPLB_CKp)  # Max effect: fCKII_PLB=0.5
     fPKA_PLB = ((1 - fracPLBp) / fracPKA_PLBo) * (1 - 0.5531) + 0.5531
     # Select smaller value (resulting in max reduction of Kmf)
     Kmfp = 2 * KmfSR * min(fCKII_PLB, fPKA_PLB)  #fCKII_PLB
     fSR = NaNMath.pow(Cai / Kmfp, HfSR)
     rSR = NaNMath.pow(CaNSR / KmrSR, HrSR)
-    kleak = (1 / 2 + 5 * RyR_CKp / 2) * kSRleak
+    kleak = (1 + 5 * RyR_CKp) * kSRleak / 2
 
     return ODESystem([
         1 ~ PO1RyR + PC1RyR,
