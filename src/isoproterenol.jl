@@ -2,14 +2,9 @@
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 
-function get_bar_sys(;
-    ATP=5000μM,
-    ISO=0μM,
-    name=:bar_sys,
-    simplify=false
-)
+function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     @parameters begin
-        b1ARtot = 0.00528μM
+        b1ARtot = 5.28e-3μM
         Gstot = 3.83μM
         PDEtot = 22.85e-3μM
         PKItot = 0.18μM

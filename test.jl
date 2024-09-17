@@ -11,11 +11,12 @@ prob = ODEProblem(sys, [], tend)
 
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, tend)
-@time sol = solve(prob, Rodas5P(); callback, progress=true, abstol=1e-7, reltol=1e-7)
-
-plot(sol, idxs=[sys.vm*1000])
+alg = FBDF()
+@time sol = solve(prob, FBDF(); callback, progress=true, abstol=1e-8, reltol=1e-8)
 
 plot(sol, idxs=[sys.CaJSR, sys.CaNSR])
 plot(sol, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL])
 # RyR instability?
-plot(sol, idxs=[sys.betaSR])
+plot(sol, idxs=[sys.PO1RyR])
+plot(sol, idxs=[sys.dPO1RyR])
+plot(sol, idxs=[sys.Jup], tspan=(0.08, 0.10))
