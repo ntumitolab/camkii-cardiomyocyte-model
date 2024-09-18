@@ -1,4 +1,4 @@
-# Plama membrane calcium currents
+"Plama membrane calcium currents"
 function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^2, LCCb_PKAp=0, name=:icasys)
     @parameters begin
         ICa_scale0 = 0.95 # or 5.25

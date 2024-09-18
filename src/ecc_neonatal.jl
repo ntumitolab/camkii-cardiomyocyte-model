@@ -24,6 +24,7 @@ end
 function build_neonatal_ecc_sys(;
     rSR_true=6μm,
     rSL_true=10.5μm,
+    dx=0.1μm,
     name=:neonataleccsys,
     simplify=true,
 )
@@ -52,9 +53,9 @@ function build_neonatal_ecc_sys(;
 
     barsys = get_bar_sys(ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
-    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true)
+    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
-    camkiisys = get_camkii_sys(; ROS, Ca=Cai_mean)
+    camkiisys = get_camkii_sys(Cai_mean; ROS)
     icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; Acap, Cm, LCCb_PKAp)
     @unpack INaCa, ICaL, ICaT, ICab = icasys
     inasys = get_ina_sys(na_i, na_o, vm)

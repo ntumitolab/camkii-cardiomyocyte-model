@@ -1,7 +1,4 @@
-# Beta adrenergic system activated by isoproterenol
-using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
-
+"Beta adrenergic system activated by isoproterenol"
 function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     @parameters begin
         b1ARtot = 5.28e-3μM

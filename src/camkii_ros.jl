@@ -1,6 +1,6 @@
 # CaMKII system with ROS activation
-function get_camkii_sys(;
-    Ca=0μM, ROS=0μM,
+function get_camkii_sys(Ca=0μM;
+    ROS=0μM,
     binding_To_PCaMK=0.1,
     decay_CaM=3,
     phospho_rate=1Hz,

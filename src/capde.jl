@@ -1,7 +1,7 @@
 "Calcium diffusion between sarcolemma (SL) and sarcoplasmic reticulum (SR)"
 function get_ca_pde_sys(;
     Cai_sub_SR_default=0.2556μM,
-    Cai_sub_SL_default=0.25151μM,
+    Cai_sub_SL_default=0.2556μM,
     dx=0.1μm,
     rSR_true=6μm,
     rSL_true=10.5μm,
