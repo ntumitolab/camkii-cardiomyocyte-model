@@ -12,7 +12,7 @@ prob = ODEProblem(sys, [], tend)
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, tend)
 alg = FBDF()
-@time sol = solve(prob, FBDF(); callback, progress=true, abstol=1e-8, reltol=1e-8)
+@time sol = solve(prob, FBDF(); callback, progress=true)
 
 plot(sol, idxs=[sys.CaJSR, sys.CaNSR])
 plot(sol, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL])
