@@ -1,5 +1,5 @@
 "Sarcoplasmic reticulum system"
-function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:sersys)
+function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, name=:sersys)
     @parameters begin
         VSR = 0.093pL
         VNSR = 0.9 * VSR
@@ -42,11 +42,11 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:ser
     rSR = (CaNSR / KmrSR)^2
     kleak = (1 + 5 * RyR_CKp) * kSRleak / 2
 
-    return ODESystem([
+    eqs = [
         1 ~ PO1RyR + PC1RyR,
         Jrel ~ nu1RyR * PO1RyR * (CaJSR - Cai_sub_SR),
-        KmRyR ~ (3.51 * inv(1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * μM,
-        dPO1RyR ~ kaposRyR * hil(Cai_sub_SR^4, KmRyR^4) * PC1RyR - kanegRyR * PO1RyR,
+        KmRyR ~ (3.51 / (1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * μM,
+        dPO1RyR ~ kaposRyR * hil(Cai_sub_SR, KmRyR, 4) * PC1RyR - kanegRyR * PO1RyR,
         D(PO1RyR) ~ dPO1RyR,
         Jup ~ VmaxSR * (fSR - rSR) / (1 + fSR + rSR),
         Jleak ~ kleak * (CaNSR - Cai_sub_SR),
@@ -55,5 +55,6 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0, name=:ser
         JCa_SR ~ Jleak - Jup + Jrel,
         D(CaJSR) ~ betaSR * (-Jrel + Jtr) / VJSR,
         D(CaNSR) ~ (Jup - Jleak - Jtr) / VNSR,
-    ], t; name)
+    ]
+    return ODESystem(eqs, t; name)
 end

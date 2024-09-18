@@ -43,8 +43,7 @@ function get_ca_pde_sys(;
     defaults = [Cai[1] => Cai_sub_SR_default, Cai[m] => Cai_sub_SL_default]
 
     for i in 2:m-1
-        eq = D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i])
-        push!(eqs, eq)
+        push!(eqs, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
         push!(defaults, Cai[i] => (Cai_sub_SR_default + Cai_sub_SL_default) / 2)
     end
 

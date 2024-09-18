@@ -36,6 +36,7 @@ const mSμF = ms / μF           # Common unit for conductance, normalized by ca
 Regular Hill/MM function
 """
 hil(x, k=one(x)) = x / (x + k)
+hil(x, k, n::Int) = hil(x^n, k^n)
 hil(x, k, n) = hil(NaNMath.pow(x, n), NaNMath.pow(k, n))
 
 """
@@ -56,7 +57,7 @@ exprel(x, em1=expm1(x)) = x / em1
 
 """Nernst potential"""
 nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
-nernst(x_out, x_in, z) = nernst(x_out, x_in) // z
+nernst(x_out, x_in, z) = nernst(x_out, x_in) / z
 
 "GHK flux equation"
 ghk(px, x_i, x_o, zvfrt, ezvfrtm1=expm1(zvfrt), z=1) = px * z * Faraday * ((ezvfrtm1 + 1) * x_i - x_o) * exprel(zvfrt, ezvfrtm1)

@@ -46,7 +46,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^
     a = nai^3 * cao
     b = nao^3 * cai * fNaCa
     # L-type calcium channel (LCC)
-    V = vm / mV # Convert voltage to mV
+    V = vm * inv(mV) # Convert voltage to mV
     alphad = 1.4 * expit((V + 35) / 13) + 0.25
     betad = 1.4 * expit(-(V + 5) / 5)
     gammad = expit((V - 50) / 20)
