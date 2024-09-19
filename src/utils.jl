@@ -1,41 +1,42 @@
 # Units
 const second = 1           # second
 const minute = 60second    # minute
-const ms = second//1000    # millisecond
-const Hz = 1 // second     # Herz
+const ms =  0.001second    # millisecond
+const Hz =  inv(second)    # Herz
 const kHz = 1000Hz         # kilohertz
 const metre = 1            # meter
-const cm = metre//100      # centimeter
+const cm = 0.01metre       # centimeter
 const cm² = cm^2           # square centimeter
-const μm = metre//10^6     # Micrometer
+const μm = 1E-6metre       # Micrometer
 const mL = cm^3            # milliliter = cubic centimeter
 const Liter = 1000mL       # liter
-const μL = Liter//10^6
-const pL = Liter//10^12
-const mM = 1
-const Molar = 1000mM       # molar (1000 since the SI units is mM)
-const μM = mM//10^3        # micromolar
-const nM = mM//10^6        # nanomolar
+const μL = 1E-6Liter
+const pL = 1E-12Liter
+const mM = 1               # the SI units is mM
+const Molar = 1000mM       # molar
+const μM = 0.001mM         # micromolar
+const nM = 1E-6mM          # nanomolar
 const Amp = 1              # ampere
-const mA = Amp//10^3         # milliampere
-const μA = Amp//10^6         # micropampere
-const Volt = 1               # volt
-const mV = Volt//10^3        # millivolt
-const mS = mA // Volt        # milliseimens
-const Farad = Amp * second // Volt
-const μF = Farad//10^6
-const T₀ = 310                  # Default temp (37C)
-const Faraday = 96485           # Faraday constant (columb / mol)
-const RGAS = 8314//1000         # Ideal gas constant (J/K⋅mol)
-const VT = RGAS * T₀ // Faraday # Thermal voltage (@37C), about 26.7 mV
-const iVT = inv(VT)             # Reciprocal of thermal voltage
-const μAμF = μA // μF           # Common unit for current density, normalized by capacitance
-const mSμF = ms // μF           # Common unit for conductance, normalized by capacitance
+const mA = 0.001Amp        # milliampere
+const μA = 1E-6Amp         # micropampere
+const Volt = 1             # volt
+const mV = 0.001Volt       # millivolt
+const mS = mA / Volt        # milliseimens
+const Farad = Amp * second / Volt
+const μF = 1E-6Farad
+const T₀ = 310                 # Default temp (37C)
+const Faraday = 96485          # Faraday constant (columb / mol)
+const RGAS = 8.314             # Ideal gas constant (J/K⋅mol)
+const VT = RGAS * T₀ / Faraday # Thermal voltage (@37C), about 26.7 mV
+const iVT = inv(VT)            # Reciprocal of thermal voltage
+const μAμF = μA / μF           # Common unit for current density, normalized by capacitance
+const mSμF = ms / μF           # Common unit for conductance, normalized by capacitance
 
 """
 Regular Hill/MM function
 """
 hil(x, k=one(x)) = x / (x + k)
+hil(x, k, n::Int) = hil(x^n, k^n)
 hil(x, k, n) = hil(NaNMath.pow(x, n), NaNMath.pow(k, n))
 
 """
@@ -56,7 +57,7 @@ exprel(x, em1=expm1(x)) = x / em1
 
 """Nernst potential"""
 nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
-nernst(x_out, x_in, z) = nernst(x_out, x_in) // z
+nernst(x_out, x_in, z) = nernst(x_out, x_in) / z
 
 "GHK flux equation"
 ghk(px, x_i, x_o, zvfrt, ezvfrtm1=expm1(zvfrt), z=1) = px * z * Faraday * ((ezvfrtm1 + 1) * x_i - x_o) * exprel(zvfrt, ezvfrtm1)

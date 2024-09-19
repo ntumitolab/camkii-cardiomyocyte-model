@@ -1,6 +1,6 @@
 # CaMKII system with ROS activation
-function get_camkii_sys(;
-    Ca=0μM, ROS=0μM,
+function get_camkii_sys(Ca=0μM;
+    ROS=0μM,
     binding_To_PCaMK=0.1,
     decay_CaM=3,
     phospho_rate=1Hz,
@@ -92,7 +92,6 @@ function get_camkii_sys(;
         CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
     ]
 
-    Num(0)
     rates = merge(Dict(sts .=> Num(0)), Dict(conservedvars .=> Num(0)))
 
     # Observables

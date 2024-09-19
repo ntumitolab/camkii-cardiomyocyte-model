@@ -29,7 +29,7 @@ end
 @independent_variables t
 @variables Ca(t)
 casys = ca_decay_sys()
-sys = get_camkii_sys(;Ca, ROS)
+sys = get_camkii_sys(Ca; ROS)
 sys = extend(casys, sys)
 sys = structural_simplify(sys)
 unknowns(sys)
