@@ -36,11 +36,14 @@ function build_neonatal_ecc_sys(;
         ROS = 0μM
         ISO = 0μM
         ATP = 5mM
+        Istim = 0
+        # cell geometry
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
         Vmyo = 4 / 3 * π * (rSL_true^3 - rSR_true^3) # 3.944 pL
         ACAP_F = Acap * Cm / Faraday
-        Istim = 0
+        V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
+        V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
     end
 
     @variables begin
@@ -53,7 +56,7 @@ function build_neonatal_ecc_sys(;
 
     barsys = get_bar_sys(ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
-    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx)
+    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx, V_sub_SL)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_sys(Cai_mean; ROS)
     icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; Acap, Cm, LCCb_PKAp)
@@ -62,7 +65,7 @@ function build_neonatal_ecc_sys(;
     @unpack INa, INab = inasys
     iksys = get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp)
     @unpack IK1, Ito, IKs, IKr, IfNa, IfK, If = iksys
-    sersys = get_ser_sys(Cai_sub_SR; fracPLBp)
+    sersys = get_ser_sys(Cai_sub_SR; fracPLBp, V_sub_SR)
     naksys = get_nak_sys(na_i, na_o, k_o, vm)
     @unpack INaK = naksys
 

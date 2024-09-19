@@ -1,13 +1,13 @@
 "Calcium diffusion between sarcolemma (SL) and sarcoplasmic reticulum (SR)"
 function get_ca_pde_sys(;
-    Cai_sub_SR_default=0.2556μM,
-    Cai_sub_SL_default=0.2556μM,
+    Cai_default=0.2556μM,
     dx=0.1μm,
     rSR_true=6μm,
     rSL_true=10.5μm,
     TnI_PKAp=0,
     JCa_SR=0,
     JCa_SL=0,
+    V_sub_SL=0.137pL,
     name=:capdesys
 )
     rSR = rSR_true + 0.5 * dx
@@ -17,8 +17,6 @@ function get_ca_pde_sys(;
     @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t)
     @parameters begin
         Dca = 7μm^2 / ms
-        V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
-        V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
         TrpnTotal = 35μM
         CmdnTotal = 50μM
         KmCmdn = 2.38μM
@@ -40,11 +38,11 @@ function get_ca_pde_sys(;
         D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL / V_sub_SL) * beta_cai(Cai[m]),
     ]
 
-    defaults = [Cai[1] => Cai_sub_SR_default, Cai[m] => Cai_sub_SL_default]
+    defaults = [Cai[1] => Cai_default, Cai[m] => Cai_default]
 
     for i in 2:m-1
         push!(eqs, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
-        push!(defaults, Cai[i] => (Cai_sub_SR_default + Cai_sub_SL_default) / 2)
+        push!(defaults, Cai[i] => Cai_default)
     end
 
     return ODESystem(eqs, t; name, defaults)
