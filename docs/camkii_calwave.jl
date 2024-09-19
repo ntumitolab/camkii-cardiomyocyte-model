@@ -10,7 +10,7 @@ using CaMKIIModel: get_camkii_sys, μM, nM, second
 @parameters ROS=0μM period=1/3 ca_r=100nM ca_rise=550nM tstart=200.0second tend=300.0second
 @independent_variables t
 @variables Ca(t)
-sys = get_camkii_sys(;Ca, ROS)
+sys = get_camkii_sys(Ca;ROS)
 
 # Periodic assymetric calcium pulses
 function ca_wave(t;
