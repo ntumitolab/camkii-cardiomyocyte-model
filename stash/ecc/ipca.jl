@@ -1,7 +1,5 @@
 # I_pca: Sarcolemmal Ca Pump Current
-using ModelingToolkit
 
-_ipca(ca, KmPCa) = hil(ca, KmPCa, 1.6)
 
 function get_ipca_eqs(Cajunc, Casl, Fjunc, Fsl,)
     @parameters IbarSLCaP = 0.0673 # [uA/uF]
@@ -11,9 +9,11 @@ function get_ipca_eqs(Cajunc, Casl, Fjunc, Fsl,)
 
     imax = Q10SLCaP^Qpow * IbarSLCaP
 
+    _ipca(ca) = hil(ca, KmPCa, 1.6)
+
     return [
-        I_pca_junc ~ Fjunc * imax * _ipca(Cajunc, KmPCa)
-        I_pca_sl ~ Fsl * imax * _ipca(Casl, KmPCa)
+        I_pca_junc ~ Fjunc * imax * _ipca(Cajunc)
+        I_pca_sl ~ Fsl * imax * _ipca(Casl)
         I_pca ~ I_pca_junc + I_pca_sl
     ]
 end

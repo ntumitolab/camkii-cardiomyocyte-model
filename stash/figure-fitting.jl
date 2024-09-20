@@ -457,8 +457,8 @@ function get_Morotti_equations()
     Gstot = 3.83           # (uM) total Gs protein
     k_G_act = 16e-3          # (1/ms) rate constant for Gs activation
     k_G_hyd = 0.8e-3         # (1/ms) rate constant for G-protein hydrolysis
-    k_G_reassoc = 1.21           # (1/[uM ms]) rate constant for G-protein reassociation
-    kf_bARK = 1.1e-6         # (1/[uM ms]) forward rate for b1AR phosphorylation by b1ARK
+    k_G_reassoc = 1.21       # (1/[uM ms]) rate constant for G-protein reassociation
+    kf_bARK = 1.1e-6         # (1/[ms]) forward rate for b1AR phosphorylation by b1ARK
     kr_bARK = 2.2e-6         # (1/ms) reverse rate for b1AR phosphorylation by b1ARK
     kf_PKA = 3.6e-6         # (1/[uM ms]) forward rate for b1AR phosphorylation by PKA
     kr_PKA = 2.2e-6         # (1/ms) reverse rate for b1AR phosphorylation by PKA
