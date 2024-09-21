@@ -1,11 +1,21 @@
 using ProgressLogging
 using ModelingToolkit
-using OrdinaryDiffEq
-using DiffEqCallbacks
+using DifferentialEquations
 using Plots
 using CaMKIIModel
+using CaMKIIModel: μM
 Plots.default(lw=2)
 
+@parameters ATP=5000μM ISO=0μM
+sys = get_bar_sys(ATP, ISO; simplify=true)
+tend=10.0
+callback = TerminateSteadyState()
+prob = ODEProblem(sys, [], tend)
+alg = FBDF()
+sol = solve(prob, alg; callback, progress=true, abstol=1e-6, reltol=1e-6)
+sol[end]
+
+# ECC
 sys = build_neonatal_ecc_sys(simplify=true)
 tend = 1000.0
 prob = ODEProblem(sys, [], tend)
