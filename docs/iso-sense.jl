@@ -4,7 +4,7 @@ using DifferentialEquations
 using Plots
 using LsqFit
 using CaMKIIModel
-using CaMKIIModel: μM
+using CaMKIIModel: μM, hil
 Plots.default(lw=2)
 
 #---
@@ -72,4 +72,20 @@ confidence_inter = confint(fit; level=0.95)
 #---
 
 plot(xdata, ydata, lab="Data", line=:dash, title="PKACII")
+plot!(x-> model(x, pestim), xdata, lab="Fitted", line=:dot)
+
+# PLB
+plot(iso .* 1000, extract(sim, sys.PLBp/sys.PLBtot), lab="PLBp", xlabel="ISO (μM)")
+
+#---
+@. model(x, p) = p[1] * x / (x + p[2]) + p[3]
+xdata = iso
+ydata = extract(sim, sys.PLBp/sys.PLBtot)
+p0 = [0.9, 0.00002, 0.08]
+lb = [0.0, 0.0, 0.0]
+fit = curve_fit(model, xdata, ydata, p0; lower=lb)
+pestim = coef(fit)
+
+#---
+plot(xdata, ydata, lab="Data", line=:dash, title="PLBp")
 plot!(x-> model(x, pestim), xdata, lab="Fitted", line=:dot)
