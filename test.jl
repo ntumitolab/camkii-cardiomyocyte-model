@@ -8,9 +8,24 @@ Plots.default(lw=2)
 
 @parameters ATP=5000μM ISO=0μM
 sys = get_bar_sys(ATP, ISO; simplify=true)
+tend=100000.0
+prob = ODEProblem(sys, [], tend)
+alg = Rodas5()
+callback = TerminateSteadyState()
+iso = range(0.0, 0.5μM, length=1001)
+prob_func = (prob, i, repeat) -> begin
+    remake(prob, p=[ISO => iso[i]])
+end
+trajectories = length(iso)
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, callback)
 
-prob = SteadyStateProblem(sys, [])
-alg = DynamicSS(Rodas5P())
+"""Extract values from ensemble simulations by a symbol"""
+extract(sim, k) = map(s->s[k][end], sim)
+
+plot(iso, extract(sim, sys.cAMP), lab="cAMP")
+plot(iso, extract(sim, sys.PKACI/sys.RItot), lab="PKACI")
+plot!(iso, extract(sim, sys.PKACII/sys.RIItot), lab="PKACII")
+
 @time sol = solve(prob, alg; callback, progress=true, abstol=1e-6, reltol=1e-6)
 sol[end]
 
