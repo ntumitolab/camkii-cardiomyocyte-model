@@ -3,8 +3,7 @@ module CaMKIIModel
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
-using OrdinaryDiffEq
-using DiffEqCallbacks
+using DifferentialEquations
 
 export get_camkii_sys, get_bar_sys, build_neonatal_ecc_sys, build_stim_callbacks
 

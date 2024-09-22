@@ -4,6 +4,7 @@
 format: jb-book
 root: index
 chapters:
+  - file: iso-sense
   - file: camkii_calwave
   - file: camkii_ros
   - file: bcl
