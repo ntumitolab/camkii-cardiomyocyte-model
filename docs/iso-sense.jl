@@ -77,15 +77,18 @@ plot!(x-> model(x, pestim), xdata, lab="Fitted", line=:dot)
 # PLB
 plot(iso .* 1000, extract(sim, sys.PLBp/sys.PLBtot), lab="PLBp", xlabel="ISO (μM)")
 
-#---
-@. model(x, p) = p[1] * x / (x + p[2]) + p[3]
+# Signed Hill function
+hil_s(x, k, n) = sign(x*k) * (abs(x)^n) / (abs(x)^n + abs(k)^n)
+@. model(x, p) = p[1] * hil_s(x, p[2], p[3]) + 0.089
 xdata = iso
 ydata = extract(sim, sys.PLBp/sys.PLBtot)
-p0 = [0.9, 0.00002, 0.08]
-lb = [0.0, 0.0, 0.0]
+p0 = [0.9, 2e-6, 1.0]
+lb = [0.0, 0.0, 0.1]
 fit = curve_fit(model, xdata, ydata, p0; lower=lb)
 pestim = coef(fit)
 
+#---
+confidence_inter = confint(fit; level=0.95)
 #---
 plot(xdata, ydata, lab="Data", line=:dash, title="PLBp")
 plot!(x-> model(x, pestim), xdata, lab="Fitted", line=:dot)
