@@ -19,45 +19,45 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         PLMtot = 48μM
         TnItot = 70μM
         IKurtot = 0.025μM
-        kf_LR = 1 / (μM * ms)                    # forward rate for ISO binding to b1AR
-        kr_LR = 285Hz                          # reverse rate for ISO binding to b1AR
-        kf_LRG = 1 / (μM * ms)                   # forward rate for ISO:b1AR association with Gs
-        kr_LRG = 62Hz                            # reverse rate for ISO:b1AR association with Gs
-        kf_RG = 1 / (μM * ms)                   # forward rate for b1AR association with Gs
-        kr_RG = 33000Hz                          # reverse rate for b1AR association with Gs
-        k_G_act = 16Hz                           # rate constant for Gs activation
-        k_G_hyd = 0.8Hz                          # rate constant for G-protein hydrolysis
-        k_G_reassoc = 1.21 / (μM * ms)           # rate constant for G-protein reassociation
-        kf_bARK = 1.1e-3Hz                       # forward rate for b1AR phosphorylation by b1ARK
-        kr_bARK = 2.2e-3Hz                       # reverse rate for b1AR phosphorylation by b1ARK
-        kf_PKA = 3.6Hz / mM                      # forward rate for b1AR phosphorylation by PKA
-        kr_PKA = 2.2e-3Hz                        # reverse rate for b1AR phosphorylation by PKA
-        k_AC_basal = 0.2Hz                       # basal cAMP generation rate by AC
-        Km_AC_basal = 1.03mM                     # basal AC affinity for ATP
-        kr_AC_Gsa = 0.4/ms                        # AC dissociation with Gsa
-        kf_AC_Gsa = 1 / (μM * ms)                # forward rate for AC association with Gsa
+        kf_LR = 1 / μM / ms                     # forward rate for ISO binding to b1AR
+        kr_LR = 285Hz                           # reverse rate for ISO binding to b1AR
+        kf_LRG = 1 / μM / ms                    # forward rate for ISO:b1AR association with Gs
+        kr_LRG = 62Hz                           # reverse rate for ISO:b1AR association with Gs
+        kf_RG = 1 / μM / ms                     # forward rate for b1AR association with Gs
+        kr_RG = 33000Hz                         # reverse rate for b1AR association with Gs
+        k_G_act = 16Hz                          # rate constant for Gs activation
+        k_G_hyd = 0.8Hz                         # rate constant for G-protein hydrolysis
+        k_G_reassoc = 1.21 / μM / ms            # rate constant for G-protein reassociation
+        kf_bARK = 1.1e-3Hz                      # forward rate for b1AR phosphorylation by b1ARK
+        kr_bARK = 2.2e-3Hz                      # reverse rate for b1AR phosphorylation by b1ARK
+        kf_PKA = 3.6Hz / mM                     # forward rate for b1AR phosphorylation by PKA
+        kr_PKA = 2.2e-3Hz                       # reverse rate for b1AR phosphorylation by PKA
+        k_AC_basal = 0.2Hz                      # basal cAMP generation rate by AC
+        Km_AC_basal = 1.03mM                    # basal AC affinity for ATP
+        kr_AC_Gsa = 0.4 / ms                    # AC dissociation with Gsa
+        kf_AC_Gsa = 1 / μM / ms                 # forward rate for AC association with Gsa
         k_AC_Gsa = 8.5Hz                        # basal cAMP generation rate by AC:Gsa
-        Km_AC_Gsa = 315.0μM                      # AC:Gsa affinity for ATP
-        k_cAMP_PDE = 5Hz                         # cAMP hydrolysis rate by PDE
-        k_cAMP_PDEp = 10Hz                       # cAMP hydrolysis rate by phosphorylated PDE
-        Km_PDE_cAMP = 1.3μM                      # PDE affinity for cAMP
-        k_PKA_PDE = 7.5Hz                        # rate constant for PDE phosphorylation by type 1 PKA
-        k_PP_PDE = 1.5Hz                         # rate constant for PDE dephosphorylation by phosphatases
-        kf_RC_cAMP = 1 / (μM * ms)               # Kd for PKA RC binding to cAMP
-        kf_RCcAMP_cAMP = 1 / (μM * ms)           # Kd for PKA RC:cAMP binding to cAMP
-        kf_RcAMPcAMP_C = 4.375 / ms              # Kd for PKA R:cAMPcAMP binding to C
-        kf_PKA_PKI = 1 / (μM * ms)               # Ki for PKA inhibition by PKI
-        kr_RC_cAMP = 1.64 / ms                   # rate constant for PKA RC unbinding to cAMP
-        kr_RCcAMP_cAMP = 9.14 / ms               # rate constant for PKA RC:cAMP unbinding to cAMP
-        kr_RcAMPcAMP_C = 1 / (μM * ms)           # rate constant for PKA R:cAMPcAMP binding to C
-        kr_PKA_PKI = 0.2Hz                       # reverse rate for PKA inhibition by PKI
-        epsilon = 10                             # AKAP-mediated scaling factor
-        k_PKA_I1 = 60Hz                          # rate constant for I-1 phosphorylation by type 1 PKA
-        Km_PKA_I1 = 1.0μM                        # Km for I-1 phosphorylation by type 1 PKA
-        Vmax_PP2A_I1 = 14Hz                      # Vmax for I-1 dephosphorylation by PP2A
-        Km_PP2A_I1 = 1.0μM                       # Km for I-1 dephosphorylation by PP2A
-        kr_PP1_I1 = 1.0Hz                        # Ki for PP1 inhibition by I-1
-        kf_PP1_I1 = 1μM                          # kf for PP1 inhibition by I-1
+        Km_AC_Gsa = 315.0μM                     # AC:Gsa affinity for ATP
+        k_cAMP_PDE = 5Hz                        # cAMP hydrolysis rate by PDE
+        k_cAMP_PDEp = 10Hz                      # cAMP hydrolysis rate by phosphorylated PDE
+        Km_PDE_cAMP = 1.3μM                     # PDE affinity for cAMP
+        k_PKA_PDE = 7.5Hz                       # rate constant for PDE phosphorylation by type 1 PKA
+        k_PP_PDE = 1.5Hz                        # rate constant for PDE dephosphorylation by phosphatases
+        kf_RC_cAMP = 1 / μM / ms                # Kd for PKA RC binding to cAMP
+        kf_RCcAMP_cAMP = 1 / μM / ms            # Kd for PKA RC:cAMP binding to cAMP
+        kf_RcAMPcAMP_C = 4.375 / ms             # Kd for PKA R:cAMPcAMP binding to C
+        kf_PKA_PKI = 1 / μM / ms                # Ki for PKA inhibition by PKI
+        kr_RC_cAMP = 1.64 / ms                  # rate constant for PKA RC unbinding to cAMP
+        kr_RCcAMP_cAMP = 9.14 / ms              # rate constant for PKA RC:cAMP unbinding to cAMP
+        kr_RcAMPcAMP_C = 1 / μM / ms            # rate constant for PKA R:cAMPcAMP binding to C
+        kr_PKA_PKI = 0.2Hz                      # reverse rate for PKA inhibition by PKI
+        epsilon = 10                            # AKAP-mediated scaling factor
+        k_PKA_I1 = 60Hz                         # rate constant for I-1 phosphorylation by type 1 PKA
+        Km_PKA_I1 = 1.0μM                       # Km for I-1 phosphorylation by type 1 PKA
+        Vmax_PP2A_I1 = 14Hz                     # Vmax for I-1 dephosphorylation by PP2A
+        Km_PP2A_I1 = 1.0μM                      # Km for I-1 dephosphorylation by PP2A
+        kr_PP1_I1 = 1.0Hz                       #Ki for PP1 inhibition by I-1
+        kf_PP1_I1 = 1 / μM / ms                 # kf for PP1 inhibition by I-1
         k_PKA_PLB = 54Hz
         Km_PKA_PLB = 21μM
         k_PP1_PLB = 8.5Hz
@@ -145,7 +145,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         RIItot ~ RC_II + RCcAMP_II + RCcAMPcAMP_II + RcAMPcAMP_II,
         RcAMPcAMP_I ~ PKACI + PKACI_PKI,
         RcAMPcAMP_II ~ PKACII + PKACII_PKI,
-        PKItot ~ PKI + PKACI_PKI+ PKACII_PKI,
+        PKItot ~ PKI + PKACI_PKI + PKACII_PKI,
         I1tot ~ I1 + I1p + I1p_PP1,
         PP1tot ~ PP1 + I1p_PP1,
         PLBtot ~ PLB + PLBp,
