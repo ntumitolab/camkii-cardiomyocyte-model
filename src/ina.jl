@@ -1,42 +1,46 @@
 "Fast sodium current (INa) and background sodium current"
 function get_ina_sys(nai, nao, vm; name=:inasys)
     @parameters begin
-        gNa = 35mSμF
+        gNa = 12.8mSμF
         gNab = 0.0026mSμF
     end
     @variables begin
         INa(t)
-        Naminf(t)
-        Nahinf(t)
-        Najinf(t)
-        Nataum(t)
-        Natauh(t)
-        Natauj(t)
-        i_Nam(t) = 0.0250
-        i_Nah(t) = 0.22242
-        i_Naj(t) = 0.19081
+        i_Nam(t) = 0.0327    # Fast Na gating (activation)
+        i_Nah(t) = 0.9909    # Fast Na gating (inactivation)
+        i_Naj(t) = 0.9941    # Fast Na gating (slow inactivation)
         INab(t)
         E_Na(t)
     end
 
-    V = vm * inv(mV) # Convert voltage quantity to mV
-    NatauhHI = 0.4537ms * expit((V + 10.66) / 11.1)
-    NatauhLOW = 3.49ms / (0.135 * exp((V + 80) / -6.8) + 3.56 * exp(0.079V) + 3.1e5 * exp(0.35V))
-    NataujHI = 11.63ms * (1 + exp(-0.1 * (V + 32))) / exp(-2.535e-7V)
-    NataujLOW = 3.49ms / ((V + 37.78) / (1 + exp(0.311 * (V + 79.23))) * (-127140 * exp(0.2444V) - 3.474e-5 * exp(-0.04391V)) + 0.1212 * exp(-0.01052V) / (1 + exp(-0.1378 * (V + 40.14))))
+    v = vm / mV
+    mα = 0.32 / 0.1 * exprel(-0.1 * (v + 47.13))
+    mβ = 0.08 * exp(-v / 11)
 
-    return ODESystem([
-        Naminf ~ expit((V + 45) / 6.5),
-        Nahinf ~ expit(-(V + 76.1) / 6.07),
-        Najinf ~ Nahinf,
-        Nataum ~ 1.36ms / (3.2 * exprel(-0.1 * (V + 47.13)) + 0.08 * exp(-V / 11)),
-        Natauh ~ ifelse(V >= -40, NatauhHI, NatauhLOW),
-        Natauj ~ ifelse(V >= -40, NataujHI, NataujLOW),
+    ishigh = (v >= -40)
+
+    hαhi = 0
+    hβhi = 7.6923 * expit((v + 10.66) / 11.1)
+    hαlo = 0.135 * exp(-(v + 80) / 6.8)
+    hβlo = 3.56 * exp(0.079v) + 3.1E5 * exp(0.35v)
+    hα = ishigh * hαhi + (1 - ishigh) * hαlo
+    hβ = ishigh * hβhi + (1 - ishigh) * hβlo
+
+    jαhi = 0
+    jβhi = 0.3 * exp(-2.535e-7v) * expit(0.1 * (v + 32))
+    jαlo = (-127140 * exp(0.2444v) - 3.474e-5 * exp(-0.04391v)) * (v + 37.78) * expit(-0.311 * (v + 79.23))
+    jβlo = 0.212 * exp(-0.01052v) * expit(0.1378 * (v + 40.14))
+    jα = ishigh * jαhi + (1 - ishigh) * jαlo
+    jβ = ishigh * jβhi + (1 - ishigh) * jβlo
+
+    eqs = [
         INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na),
-        D(i_Nam) ~ (Naminf - i_Nam)/Nataum,
-        D(i_Nah) ~ (Nahinf - i_Nah)/Natauh,
-        D(i_Naj) ~ (Najinf - i_Naj)/Natauj,
+        D(i_Nam) ~ inv(ms) * (mα - i_Nam * (mα + mβ)),
+        D(i_Nah) ~ inv(ms) * (hα - i_Nah * (hα + hβ)),
+        D(i_Naj) ~ inv(ms) * (jα - i_Naj * (jα + jβ)),
         E_Na ~ nernst(nao, nai),
         INab ~ gNab * (vm - E_Na),
-    ], t; name)
+    ]
+
+    return ODESystem(eqs, t; name)
 end
