@@ -9,13 +9,16 @@ function build_stim_callbacks(sym, endtime; period=1second, duty=5e-4second, sta
         set_proposed_dt!(integrator, proposeddt)
     end
 
-    riseevents = PresetTimeCallback(starttime:period:endtime, rise!)
-    fallevents = PresetTimeCallback(starttime+duty:period:endtime, fall!)
+    ts = starttime:period:endtime
+
+    riseevents = PresetTimeCallback(ts, rise!)
+    fallevents = PresetTimeCallback(ts .+ duty, fall!)
     return CallbackSet(riseevents, fallevents)
 end
 
 function build_istim_events(starttime, endtime, period, duty, istim, strength, baseline=0)
-    rise = [collect(starttime:period:endtime) => [istim ~ strength]]
-    fall = [collect(starttime+duty:period:endtime) => [istim ~ baseline]]
+    ts = starttime:period:endtime
+    rise = [collect(ts) => [istim ~ strength]]
+    fall = [collect(ts .+ duty) => [istim ~ baseline]]
     return [rise, fall]
 end
