@@ -3,17 +3,21 @@ using ModelingToolkit
 using DifferentialEquations
 using Plots
 using CaMKIIModel
+Plots.default(lw=1.5)
 
 #---
 sys = build_neonatal_ecc_sys(simplify=true)
-tend = 300.0
+tend = 500.0
 prob = ODEProblem(sys, [], tend)
+stimstart = 100.0
+stimend = 300.0
+@unpack Istim = sys
+alg = FBDF()
 
 # ## Without isoproterenol
 @unpack Istim = sys
-callback = build_stim_callbacks(Istim, tend; period=1)
-alg = FBDF()
-sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
+@time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
 
 #---
 plot(sol, idxs=sys.PKACII/sys.RIItot, title="PKA activation", lab="PKACII")
