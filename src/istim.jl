@@ -10,7 +10,7 @@ function build_stim_callbacks(sym, endtime; period=1second, duty=5e-4second, sta
     end
 
     riseevents = PresetTimeCallback(starttime:period:endtime, rise!)
-    fallevents = PresetTimeCallback(starttime+duty:period:endtime, fall!)
+    fallevents = PresetTimeCallback(starttime+duty:period:endtime+duty, fall!)
     return CallbackSet(riseevents, fallevents)
 end
 
