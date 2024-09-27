@@ -82,7 +82,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
             sinf ~ expit((V + 31.97156) / -4.64291),
             rinf ~ expit((V - 3.55716) / 14.61299),
             slowinf ~ sinf,
-            taur ~ inv(45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
+            taur ~ 1 / (45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
             taus ~ (0.35 * exp(-(((V + 70) / 15)^2)) + 0.035) - 26.9ms,
             tausslow ~ (3.7 * exp(-(((V + 70) / 30)^2)) + 0.035) + 37.4ms,
             Ito ~ gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
