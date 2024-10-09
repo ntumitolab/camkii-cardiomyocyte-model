@@ -1,6 +1,6 @@
 # # Pacing frequency
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq
 using Plots
 using CaMKIIModel
 Plots.default(lw=1.5)

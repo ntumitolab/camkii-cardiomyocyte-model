@@ -1,6 +1,6 @@
 # # Sensitivity of CaMKII system to calcium
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq
 using Plots
 using LsqFit
 using CaMKIIModel
