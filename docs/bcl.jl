@@ -78,8 +78,8 @@ plot!(sol3, idxs=sys.CaMKAct, lab="3Hz", ylim=(0.0, 0.8))
 
 # ## Data fitting
 # ### Pacing duration and Ca transient
-ts = durationdf[!, "Time(sec)"]
 durationdf = CSV.read("data/CaMKAR-duration.csv", DataFrame)
+ts = durationdf[!, "Time(sec)"]
 fifteen = durationdf[!, "1Hz 15sec (Mean)"]
 fifteen_error = durationdf[!, "1Hz 15sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 15sec (N)"])
 thirty = durationdf[!, "1Hz 30sec (Mean)"]
