@@ -86,7 +86,8 @@ jobs:
     - name: Run notebooks
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' }}
       run: |
-        cp --verbose -rf data/ docs/ || true
+        mkdir -p ${{ env.NBCACHE }}/docs
+        cp --verbose -rf data/ ${{ env.NBCACHE }}/docs/ || true
         julia --project=@. --color=yes -p ${{ env.LITERATE_PROC }} run.jl
     - name: Copy back built notebooks
       run: cp --verbose -rf ${{ env.NBCACHE }}/docs/* docs/
