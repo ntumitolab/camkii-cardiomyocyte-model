@@ -111,3 +111,30 @@ plot!(sol30, idxs=idx, tspan=(100, 300), lab="30 sec")
 plot!(sol60, idxs=idx, tspan=(100, 300), lab="60 sec")
 plot!(sol90, idxs=idx, tspan=(100, 300), lab="90 sec")
 plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="Calcium (μM)")
+
+# ### Pacing frequency and Ca transient
+freqdf = CSV.read("data/CaMKAR-freq.csv", DataFrame)
+ts = 0:5:205
+onehz = freqdf[!, "1Hz (Mean)"]
+onehz_error = freqdf[!, "1Hz (SD)"] ./ sqrt.(freqdf[!, "1Hz (N)"])
+twohz = freqdf[!, "2Hz (Mean)"]
+twohz_error = freqdf[!, "2Hz (SD)"] ./ sqrt.(freqdf[!, "2Hz (N)"])
+
+plot(ts, onehz, yerr=onehz_error, lab="1 Hz", color = :blue, markerstrokecolor=:blue)
+plot!(ts, twohz, yerr=twohz_error, lab="2 Hz", color = :red, markerstrokecolor=:red)
+
+#---
+tend = 205.0
+prob = ODEProblem(sys, [], tend)
+stimstart = 30.0
+stimend = 120.0
+callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
+@time sol1 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, saveat=1)
+
+callback2 = build_stim_callbacks(Istim, stimend; period=0.5, starttime=stimstart)
+@time sol2 = solve(prob, alg; callback=callback2, abstol=1e-6, reltol=1e-6, saveat=1)
+idx = sys.Cai_mean*1000
+
+plot(sol1, idxs=idx, lab="1 Hz", color = :blue)
+plot!(sol2, idxs=idx, lab="2 Hz", color = :red)
+plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="Calcium (μM)")
