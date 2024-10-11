@@ -2,9 +2,7 @@
 # Model of ECC of rat neonatal ventricular myocyte 2009
 # Code & model: Topi Korhonen, University of Oulu (topi.korhonen@oulu.fi)
 #
-# PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT:
-# Korhonen et al. "Model of excitation-contraction coupling of rat neonatal
-# ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
+# PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT: Korhonen et al. "Model of excitation-contraction coupling of rat neonatal ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
 function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
     @parameters begin
         INaKmax = 2.7μAμF
@@ -27,6 +25,7 @@ function build_neonatal_ecc_sys(;
     dx=0.1μm,
     name=:neonataleccsys,
     simplify=true,
+    reduce_iso=false,
 )
     @parameters begin
         ca_o = 1796μM
@@ -54,7 +53,11 @@ function build_neonatal_ecc_sys(;
         JCa_SR(t)
     end
 
-    barsys = get_bar_sys(ATP, ISO)
+    barsys = if reduce_iso
+        get_bar_sys_reduced(ISO)
+    else
+        get_bar_sys(ATP, ISO)
+    end
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
     capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx, V_sub_SL)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys

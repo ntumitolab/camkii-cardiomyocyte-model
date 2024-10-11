@@ -11,7 +11,6 @@ tend = 500.0
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0
 stimend = 300.0
-@unpack Istim = sys
 alg = FBDF()
 
 # ## Without isoproterenol

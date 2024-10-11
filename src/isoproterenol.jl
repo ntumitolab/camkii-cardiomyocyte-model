@@ -1,4 +1,4 @@
-"Beta adrenergic system activated by isoproterenol"
+"Beta-adrenergic system activated by isoproterenol"
 function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     @parameters begin
         b1ARtot = 5.28e-3μM
@@ -227,6 +227,115 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     rateeqs = [D(s) ~ rates[s] for s in sts]
 
     sys = ODESystem([rateeqs; conservedeqs; obseqs], t; name)
+    if simplify
+        sys = structural_simplify(sys)
+    end
+    return sys
+end
+
+"Reduced beta-adrenergic system. PKA and PPI activities are simple functions to isoproterenol."
+function get_bar_sys_reduced(ISO=0μM; name=:bar_sys, simplify=false)
+    @parameters begin
+        PP1tot = 0.89μM
+        PKACItot = 1.18μM
+        PKACIItot = 0.118μM
+        PKACII_LCCtot = 0.025μM
+        PKAIItot = 0.059μM
+        PKAII_KURtot = 0.025μM
+        PP1_KURtot = 0.025μM
+        LCCtot = 0.025μM
+        PLBtot = 106μM
+        PLMtot = 48μM
+        TnItot = 70μM
+        IKurtot = 0.025μM
+        epsilon = 10
+        k_PKA_PLB = 54Hz
+        Km_PKA_PLB = 21μM
+        k_PP1_PLB = 8.5Hz
+        Km_PP1_PLB = 7.0μM
+        k_PKA_PLM = 54Hz
+        Km_PKA_PLM = 21μM
+        k_PP1_PLM = 8.5Hz
+        Km_PP1_PLM = 7.0μM
+        PP1_LCC = 0.025μM
+        PP2A_LCC = 0.025μM
+        k_PKA_LCC = 54Hz
+        Km_PKA_LCC = 21μM
+        k_PP1_LCC = 8.52Hz
+        Km_PP1_LCC = 3μM
+        k_PP2A_LCC = 10.1Hz
+        Km_PP2A_LCC = 3μM
+        PP2A_TnI = 0.67μM
+        k_PKA_TnI = 54Hz
+        Km_PKA_TnI = 21μM
+        k_PP2A_TnI = 10.1Hz
+        Km_PP2A_TnI = 4.1μM
+        k_pka_KUR = 54Hz
+        Km_pka_KUR = 21μM
+        k_pp1_KUR = 8.52Hz
+        Km_pp1_KUR = 7μM
+        ## Fitted PKACI, CII, and PP1 parameters
+        PKACI_basal = 0.0831  ## basal activity
+        PKACI_activated = 0.25603
+        PKACI_KM = 0.0144μM
+        PKACII_basal =  0.2063  ## basal activity
+        PKACII_activated = 0.397
+        PKACII_KM = 0.009755μM
+        PP1_basal = 0.82365
+        PP1_activated = 0.1025
+        PP1_KI = 0.008465μM
+    end
+
+    vs = @variables begin
+        PLBp(t) = 98.33936μM
+        PLMp(t) = 41.19479μM
+        TnIp(t) = 60.75646μM
+        LCCap(t) = 0.01204μM
+        LCCbp(t) = 0.01313μM
+        KURp(t) = 0.01794μM
+        PLB(t)
+        PLM(t)
+        TnI(t)
+        LCCa(t)
+        LCCb(t)
+        KURn(t)
+        LCCa_PKAp(t)
+        LCCb_PKAp(t)
+        fracPLBp(t)
+        fracBLMp(t)
+        TnI_PKAp(t)
+        IKUR_PKAp(t)
+        PKACI(t)
+        PKACII(t)
+        PP1(t)
+    end
+
+    eqs = [
+        D(PLBp) ~ k_PKA_PLB * PKACI * hil(PLB, Km_PKA_PLB) - k_PP1_PLB * PP1 * hil(PLBp, Km_PP1_PLB),
+        D(PLMp) ~ k_PKA_PLM * PKACI * hil(PLM, Km_PKA_PLM) - k_PP1_PLM * PP1 * hil(PLMp, Km_PP1_PLM),
+        D(TnIp) ~ k_PKA_TnI * PKACI * hil(TnI, Km_PKA_TnI) - k_PP2A_TnI * PP2A_TnI * hil(TnIp, Km_PP2A_TnI),
+        D(LCCap) ~ k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII * hil(LCCa * epsilon, Km_PKA_LCC) - k_PP2A_LCC * PP2A_LCC * hil(LCCap * epsilon, Km_PP2A_LCC),
+        D(LCCbp) ~ k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII * hil(LCCb * epsilon, Km_PKA_LCC) - k_PP1_LCC * PP1_LCC * hil(LCCbp * epsilon, Km_PP1_LCC),
+        D(KURp) ~ k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII * hil(KURn * epsilon, Km_pka_KUR) - PP1_KURtot * k_pp1_KUR * hil(KURp * epsilon, Km_pp1_KUR),
+        PLBtot ~ PLB + PLBp,
+        PLMtot ~ PLM + PLMp,
+        TnItot ~ TnI + TnIp,
+        LCCtot ~ LCCa + LCCap,
+        LCCtot ~ LCCb + LCCbp,
+        IKurtot ~ KURn + KURp,
+        LCCa_PKAp ~ LCCap / LCCtot,
+        LCCb_PKAp ~ LCCbp / LCCtot,
+        fracPLBp ~ PLBp / PLBtot,
+        fracBLMp ~ PLMp / PLMtot,
+        TnI_PKAp ~ TnIp / TnItot,
+        IKUR_PKAp ~ KURp / IKurtot,
+        ## Fitted activities
+        PKACI ~ PKACItot * (PKACI_basal + PKACI_activated * hil(ISO, PKACI_KM)),
+        PKACII ~ PKACIItot * (PKACII_basal + PKACII_activated * hil(ISO, PKACII_KM)),
+        PP1 ~ PP1tot * (PP1_basal + PP1_activated * hilr(ISO, PP1_KI)),
+    ]
+
+    sys = ODESystem(eqs, t; name)
     if simplify
         sys = structural_simplify(sys)
     end
