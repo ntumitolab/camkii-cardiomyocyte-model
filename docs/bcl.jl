@@ -9,7 +9,7 @@ Plots.default(lw=1.5)
 
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 seconds and ends at `t`=300 seconds
-sys = build_neonatal_ecc_sys(simplify=true)
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
 tend = 500.0
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0
@@ -77,7 +77,7 @@ plot!(sol2, idxs=sys.CaMKAct, lab="2Hz")
 plot!(sol3, idxs=sys.CaMKAct, lab="3Hz", ylim=(0.0, 0.8))
 
 # ## Data fitting
-# ### Pacing duration and Ca transient
+# ### Pacing duration and CaMKII activity
 durationdf = CSV.read("data/CaMKAR-duration.csv", DataFrame)
 ts = durationdf[!, "Time(sec)"]
 fifteen = durationdf[!, "1Hz 15sec (Mean)"]
@@ -93,26 +93,27 @@ plot(ts, fifteen, yerr=fifteen_error, lab="15 sec", color = :blue, markerstrokec
 plot!(ts, thirty, yerr=thirty_error, lab="30 sec", color = :red, markerstrokecolor=:red)
 plot!(ts, sixty, yerr=sixty_error, lab="60 sec", color = :orange, markerstrokecolor=:orange)
 plot!(ts, ninety, yerr=ninety_error, lab="90 sec", color = :green, markerstrokecolor=:green)
-plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="Calcium (AU)")
+plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
 
 # Resolution is reduced to 1Hz
-callback15 = build_stim_callbacks(Istim, stimstart+15; period=1, starttime=stimstart)
-sol15 = solve(prob, alg; callback=callback15, abstol=1e-6, reltol=1e-6, saveat=1.0)
+stimstart=30.0
+callback15 = build_stim_callbacks(Istim, stimstart+15; period=1,starttime=stimstart)
+sol15 = solve(prob, alg; callback=callback15, abstol=1e-6, reltol=1e-6)
 callback30 = build_stim_callbacks(Istim, stimstart+30; period=1, starttime=stimstart)
-sol30 = solve(prob, alg; callback=callback30, abstol=1e-6, reltol=1e-6, saveat=1.0)
+sol30 = solve(prob, alg; callback=callback30, abstol=1e-6, reltol=1e-6)
 callback60 = build_stim_callbacks(Istim, stimstart+60; period=1, starttime=stimstart)
-sol60 = solve(prob, alg; callback=callback60, abstol=1e-6, reltol=1e-6, saveat=1.0)
+sol60 = solve(prob, alg; callback=callback60, abstol=1e-6, reltol=1e-6)
 callback90 = build_stim_callbacks(Istim, stimstart+90; period=1, starttime=stimstart)
-sol90 = solve(prob, alg; callback=callback90, abstol=1e-6, reltol=1e-6, saveat=1.0)
+sol90 = solve(prob, alg; callback=callback90, abstol=1e-6, reltol=1e-6)
 
-idx = sys.Cai_mean*1000
-plot(sol15, idxs=idx, tspan=(100, 300), lab="15 sec")
-plot!(sol30, idxs=idx, tspan=(100, 300), lab="30 sec")
-plot!(sol60, idxs=idx, tspan=(100, 300), lab="60 sec")
-plot!(sol90, idxs=idx, tspan=(100, 300), lab="90 sec")
-plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="Calcium (μM)")
+idx = sys.CaMKAct
+plot(sol15, idxs=idx, tspan=(0, 205), lab="15 sec", color = :blue)
+plot!(sol30, idxs=idx, tspan=(0, 205), lab="30 sec", color = :red)
+plot!(sol60, idxs=idx, tspan=(0, 205), lab="60 sec", color = :orange)
+plot!(sol90, idxs=idx, tspan=(0, 205), lab="90 sec", color = :green)
+plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
 
-# ### Pacing frequency and Ca transient
+# ### Pacing frequency and CaMKII activity
 freqdf = CSV.read("data/CaMKAR-freq.csv", DataFrame)
 ts = 0:5:205
 onehz = freqdf[!, "1Hz (Mean)"]
@@ -122,6 +123,7 @@ twohz_error = freqdf[!, "2Hz (SD)"] ./ sqrt.(freqdf[!, "2Hz (N)"])
 
 plot(ts, onehz, yerr=onehz_error, lab="1 Hz", color = :blue, markerstrokecolor=:blue)
 plot!(ts, twohz, yerr=twohz_error, lab="2 Hz", color = :red, markerstrokecolor=:red)
+plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
 
 #---
 tend = 205.0
@@ -129,12 +131,12 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 30.0
 stimend = 120.0
 callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
-@time sol1 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, saveat=1)
+@time sol1 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5, starttime=stimstart)
-@time sol2 = solve(prob, alg; callback=callback2, abstol=1e-6, reltol=1e-6, saveat=1)
-idx = sys.Cai_mean*1000
+@time sol2 = solve(prob, alg; callback=callback2, abstol=1e-6, reltol=1e-6)
+idx = sys.CaMKAct
 
 plot(sol1, idxs=idx, lab="1 Hz", color = :blue)
 plot!(sol2, idxs=idx, lab="2 Hz", color = :red)
-plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="Calcium (μM)")
+plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)", ylims=(0.2, 0.8))
