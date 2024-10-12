@@ -7,7 +7,7 @@ Plots.default(lw=1.5)
 
 # Setup system
 # Electrical stimulation starts at `t`=100 seconds and ends at `t`=300 seconds
-sys = build_neonatal_ecc_sys(simplify=true)
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
 tend = 500.0
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0
@@ -17,7 +17,7 @@ alg = FBDF()
 
 # ## No ROS
 callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
-@time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+@time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol, idxs=sys.vm, tspan=(298, 300), title="Action potential")
@@ -30,7 +30,7 @@ plot(sol, idxs=sys.CaMKAct, title="Active CaMKII")
 
 # ## ROS 1uM
 prob2 = remake(prob, p=[sys.ROS => 1e-3])
-sol2 = solve(prob2, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+@time sol2 = solve(prob2, alg; callback, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol2, idxs=sys.vm, tspan=(298, 300), title="Action potential")
@@ -43,7 +43,7 @@ plot(sol2, idxs=sys.CaMKAct, title="Active CaMKII")
 
 # ## ROS 5uM
 prob3 = remake(prob, p=[sys.ROS => 5e-3])
-sol3 = solve(prob3, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+@time sol3 = solve(prob3, alg; callback, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol3, idxs=sys.vm, tspan=(298, 300), title="Action potential")

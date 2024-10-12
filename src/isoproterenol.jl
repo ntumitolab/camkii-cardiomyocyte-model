@@ -287,12 +287,12 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys, simplify=false)
     end
 
     vs = @variables begin
-        PLBp(t) = 98.33936μM
-        PLMp(t) = 41.19479μM
-        TnIp(t) = 60.75646μM
-        LCCap(t) = 0.01204μM
-        LCCbp(t) = 0.01313μM
-        KURp(t) = 0.01794μM
+        PLBp(t) = 11.35μM
+        PLMp(t) = 7μM
+        TnIp(t) = 6μM
+        LCCap(t) = 6.04nM
+        LCCbp(t) = 6.87nM
+        KURp(t) = 11.71nM
         PLB(t)
         PLM(t)
         TnI(t)

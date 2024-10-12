@@ -63,23 +63,23 @@ function get_camkii_sys(Ca=0μM;
     end
 
     sts = @variables begin
-        Ca2CaM_C(t) = 0
-        Ca2CaM_N(t) = 0
-        Ca4CaM(t) = 0
-        CaM0_CaMK(t) = 0
-        Ca2CaM_C_CaMK(t) = 0
-        Ca2CaM_N_CaMK(t) = 0
-        Ca4CaM_CaMK(t) = 0
-        CaM0_CaMKP(t) = 0
-        Ca2CaM_C_CaMKP(t) = 0
-        Ca2CaM_N_CaMKP(t) = 0
-        Ca4CaM_CaMKP(t) = 0
-        Ca4CaM_CaMKOX(t) = 0
-        Ca4CaM_CaMKPOX(t) = 0
-        CaMKP(t) = 0
-        CaMKP2(t) = 0
-        CaMKPOX(t) = 0
-        CaMKOX(t) = 0
+        Ca2CaM_C(t) = 31nM
+        Ca2CaM_N(t) = 7.5nM
+        Ca4CaM(t) = 1.215e-8mM
+        CaM0_CaMK(t) = 0.903μM
+        Ca2CaM_C_CaMK(t) = 164nM
+        Ca2CaM_N_CaMK(t) = 14.87nM
+        Ca4CaM_CaMK(t) = 5.366nM
+        CaM0_CaMKP(t) = 1.9μM
+        Ca2CaM_C_CaMKP(t) = 1.365μM
+        Ca2CaM_N_CaMKP(t) = 81.1nM
+        Ca4CaM_CaMKP(t) = 52.23nM
+        Ca4CaM_CaMKOX(t) = 0mM
+        Ca4CaM_CaMKPOX(t) = 0mM
+        CaMKP(t) = 6.33μM
+        CaMKP2(t) = 2.53μM
+        CaMKPOX(t) = 0mM
+        CaMKOX(t) = 0mM
     end
 
     conservedvars = @variables begin
