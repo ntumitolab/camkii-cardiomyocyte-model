@@ -39,7 +39,7 @@ function model(x, p)
     kmca = p[1]
     nca = p[2]
     kfb = p[3]
-    k0 = p[4]
+    k0 = 0.022/A
     y = map(x) do ca
         keq = kfb * hil_s(ca, kmca, nca) + k0
         xterm = A + B + 1/keq
@@ -47,3 +47,18 @@ function model(x, p)
         y = camkcam4 / B
     end
 end
+
+p0 = [1μM, 2.0, 1.0e7]
+lb = [0.0, 1.0, 0.0]
+
+fit = curve_fit(model, xdata, ydata, p0; lower=lb)
+pestim = coef(fit)
+
+confidence_inter = confint(fit; level=0.95)
+
+yestim = model.(xdata, Ref(pestim))
+
+plot(xdata .* 1000, [ydata yestim], lab=["Truth" "Pred"], xlabel="Ca (μM)", xscale=:log10)
+
+# 30% error
+plot(xdata, (ydata .- yestim) ./ ydata .* 100, xscale=:log10)
