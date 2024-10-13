@@ -17,7 +17,7 @@ tend=100.0
 prob = ODEProblem(sys, [], tend)
 alg = Rodas5()
 callback = TerminateSteadyState()
-ca = exp10.(range(log10(1e-2μM), log10(10μM), length=1001))
+ca = exp10.(range(log10(1e-2μM), log10(10μM), length=10001))
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end
@@ -46,12 +46,12 @@ plot(ca .* 1000, extract(sim, sys.CaMKAct), lab="Active CaMKII", xlabel="Ca (μM
 
 # ## Least-square fitting of CaMKII activity
 hil_s(x, k, n) = sign(x*k) * (abs(x)^n) / (abs(x)^n + abs(k)^n)
-@. model_camk(x, p) = p[1] * hil_s(x, p[2], p[3]) + p[4]
+@. model_camk(x, p) = p[1] * hil_s(x, p[2], p[3]) + 0.021
 xdata = ca
 ydata = extract(sim, sys.CaMKAct)
 
-p0 = [0.4, 1e-3, 3.0, 0.01]
-lb = [0.0, 0.0, 0.1, 0.0]
+p0 = [0.4, 1e-3, 2.5]
+lb = [0.0, 0.0, 0.1]
 
 fit = curve_fit(model_camk, xdata, ydata, p0; lower=lb)
 pestim = coef(fit)
@@ -60,5 +60,8 @@ pestim = coef(fit)
 confidence_inter = confint(fit; level=0.95)
 
 #---
-plot(xdata, ydata, lab="Data", line=:dash, title="CaMKII activity", xscale=:log10)
-plot!(x-> model_camk(x, pestim), xdata, lab="Fitted", line=:dot, legend=:topleft)
+yestim = model_camk.(xdata, Ref(pestim))
+plot(xdata, [ydata yestim], lab=["Data" "Fitted"], line=[:dash :dot], title="CaMKII activity", xscale=:log10, legend=:topleft)
+
+#---
+plot(xdata, (yestim .- ydata) ./ ydata .* 100, title="Error", xscale=:log10)
