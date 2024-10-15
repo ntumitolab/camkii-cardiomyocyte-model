@@ -19,7 +19,6 @@ env:
   JULIA_CONDAPKG_BACKEND: 'Null'
   JULIA_CI: 'true'
   NBCACHE: '.cache'
-  UV_SYSTEM_PYTHON: 1
 
 jobs:
   CI:
@@ -29,13 +28,12 @@ jobs:
       uses: actions/checkout@v4
     - name: Setup Python
       uses: actions/setup-python@v5
-      id: setup-python
       with:
         python-version: '3.x'
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
     - name: Install Python dependencies
-      run: uv pip install -r requirements.txt
+      run: |
+        pip install uv
+        uv pip install --system -r requirements.txt
     - name: Read Julia version
       uses: SebRollen/toml-action@v1.2.0
       id: read_toml
