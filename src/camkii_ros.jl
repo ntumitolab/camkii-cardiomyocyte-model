@@ -108,21 +108,21 @@ function get_camkii_sys(Ca=0μM;
     ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
     kon, koff = _ca_cam(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off)
     add_rate!(rates, kon, [CaM0], koff, [Ca2CaM_C]) # CaM0 <--> Ca2CaM_C
-    add_rate!(rates, kon, [Ca2CaM_C], koff, [Ca4CaM]) # Ca2CaM_C <--> Ca4CaM
+    add_rate!(rates, kon, [Ca2CaM_N], koff, [Ca4CaM]) # Ca2CaM_C <--> Ca4CaM
     kon, koff = _ca_cam(Ca, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
     add_rate!(rates, kon, [CaM0], koff, [Ca2CaM_N]) # CaM0 <--> Ca2CaM_N
-    add_rate!(rates, kon, [Ca2CaM_N], koff, [Ca4CaM]) # Ca2CaM_N <--> Ca4CaM
+    add_rate!(rates, kon, [Ca2CaM_C], koff, [Ca4CaM]) # Ca2CaM_N <--> Ca4CaM
     ## Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII(P) complex
     kon, koff = _ca_cam(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off)
     add_rate!(rates, kon, [CaM0_CaMK], koff, [Ca2CaM_C_CaMK]) # CaM0_CaMK <--> Ca2CaM_C_CaMK
-    add_rate!(rates, kon, [Ca2CaM_C_CaMK], koff, [Ca4CaM_CaMK]) # Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
+    add_rate!(rates, kon, [Ca2CaM_N_CaMK], koff, [Ca4CaM_CaMK]) # Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
     add_rate!(rates, kon, [CaM0_CaMKP], koff, [Ca2CaM_C_CaMKP]) # CaM0_CaMKP <--> Ca2CaM_C_CaMKP
-    add_rate!(rates, kon, [Ca2CaM_C_CaMKP], koff, [Ca4CaM_CaMKP]) # Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
+    add_rate!(rates, kon, [Ca2CaM_N_CaMKP], koff, [Ca4CaM_CaMKP]) # Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
     kon, koff = _ca_cam(Ca, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
     add_rate!(rates, kon, [CaM0_CaMK], koff, [Ca2CaM_N_CaMK]) # CaM0_CaMK <--> Ca2CaM_N_CaMK
-    add_rate!(rates, kon, [Ca2CaM_N_CaMK], koff, [Ca4CaM_CaMK]) # Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
+    add_rate!(rates, kon, [Ca2CaM_C_CaMK], koff, [Ca4CaM_CaMK]) # Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
     add_rate!(rates, kon, [CaM0_CaMKP], koff, [Ca2CaM_N_CaMKP]) # CaM0_CaMKP <--> Ca2CaM_N_CaMKP
-    add_rate!(rates, kon, [Ca2CaM_N_CaMKP], koff, [Ca4CaM_CaMKP]) # Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
+    add_rate!(rates, kon, [Ca2CaM_C_CaMKP], koff, [Ca4CaM_CaMKP]) # Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
 
     ## CaM binding to CaMKII / CaMkII-P / CaMkII-POX / CaMkII-OX
     add_rate!(rates, kCaM0_on, [CaM0, CaMK], kCaM0_off, [CaM0_CaMK]) # CaM0 + CaMK <--> CaM0_CaMK
