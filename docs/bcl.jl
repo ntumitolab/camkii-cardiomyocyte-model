@@ -19,7 +19,7 @@ alg = FBDF()
 
 # ## 1Hz
 callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
-@time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+@time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol, idxs=sys.vm*1000, title="Action potential")
@@ -35,7 +35,7 @@ plot(sol, idxs=sys.CaMKAct, title="Active CaMKII")
 
 # ## 2Hz
 callback = build_stim_callbacks(Istim, stimend; period=1/2, starttime=stimstart)
-@time sol2 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+@time sol2 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol2, idxs=sys.vm*1000, title="Action potential")
@@ -51,7 +51,7 @@ plot(sol2, idxs=sys.CaMKAct, title="Active CaMKII")
 
 # ## 3Hz
 callback = build_stim_callbacks(Istim, stimend; period=1/3, starttime=stimstart)
-@time sol3 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6, maxiters=Int(1e8))
+@time sol3 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol3, idxs=sys.vm*1000, title="Action potential")
