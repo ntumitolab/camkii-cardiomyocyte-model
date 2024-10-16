@@ -18,7 +18,7 @@ prob = ODEProblem(sys, [], tend)
 alg = Rodas5()
 callback = TerminateSteadyState()
 # Log scale for ISO concentration
-iso = exp10.(range(log10(1e-10μM), log10(1μM), length=1001))
+iso = exp10.(range(log10(1e-6μM), log10(10μM), length=1001))
 
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[ISO => iso[i]])
@@ -36,11 +36,11 @@ plot(sol, idxs=sys.PKACI/sys.RItot)
 extract(sim, k) = map(s->s[k][end], sim)
 
 #---
-plot(iso .* 1000, extract(sim, sys.cAMP), lab="cAMP", ylabel="Conc. (mM)", xlabel="ISO (μM)")
+plot(iso .* 1000, extract(sim, sys.cAMP), lab="cAMP", ylabel="Conc. (mM)", xlabel="ISO (μM)", xscale=:log10, legend=:topleft)
 
 #---
 plot(iso .* 1000, extract(sim, sys.PKACI/sys.RItot), lab="PKACI", xlabel="ISO (μM)", ylabel="Activation fraction")
-plot!(iso .* 1000, extract(sim, sys.PKACII/sys.RIItot), lab="PKACII")
+plot!(iso .* 1000, extract(sim, sys.PKACII/sys.RIItot), lab="PKACII", xscale=:log10, legend=:topleft)
 
 # ## Least-square fitting of PKACI activity
 @. model(x, p) = p[1] * x / (x + p[2]) + p[3]
@@ -58,8 +58,12 @@ println("Michaelis constant: ", pkac1_coef[2] * 1000, " μM")
 confidence_inter = confint(pkac1_fit; level=0.95)
 
 #---
-plot(xdata, ydata, lab="Data", line=:dash, title="PKACI", xscale=:log10)
-plot!(x-> model(x, pkac1_coef), xdata, lab="Fitted", line=:dot, legend=:topleft)
+ypred = model.(xdata, Ref(pkac1_coef))
+plot(xdata, ydata, lab="Full model", line=:dash, title="PKACI", xscale=:log10)
+plot!(xdata, ypred, lab="Fitted", line=:dot, legend=:topleft)
+
+#---
+plot(xdata, (ypred .- ydata) ./ ydata, title="PKACI Error", xscale=:log10, lab=false)
 
 # ## Least-square fitting of PKACII activity
 xdata = iso
@@ -76,8 +80,11 @@ println("Michaelis constant: ", pkac2_coef[2] * 1000, " μM")
 confidence_inter = confint(pkac2_fit; level=0.95)
 
 #---
-plot(xdata, ydata, lab="Data", line=:dash, title="PKACII", xscale=:log10)
-plot!(x-> model(x, pkac2_coef), xdata, lab="Fitted", line=:dot, legend=:topleft)
+ypred = model.(xdata, Ref(pkac2_coef))
+plot(xdata, ydata, lab="Full model", line=:dash, title="PKACII", xscale=:log10)
+plot!(xdata, ypred, lab="Fitted", line=:dot, legend=:topleft)
+#---
+plot(xdata, (ypred .- ydata) ./ ydata, title="PKACII Error", xscale=:log10, lab=false)
 
 # ## Least-square fitting of PP1 activity
 @. model_pp1(x, p) = p[1] * p[2] / (x + p[2]) + p[3]
@@ -95,25 +102,34 @@ println("Repressive Michaelis constant: ", pp1_coef[2] * 1000, " μM")
 confidence_inter = confint(pp1_fit; level=0.95)
 
 #---
+ypred = model_pp1.(xdata, Ref(pp1_coef))
 plot(xdata, ydata, lab="Data", line=:dash, title="PP1", xscale=:log10)
-plot!(x-> model_pp1(x, pp1_coef), xdata, lab="Fitted", line=:dot)
+plot!(xdata, ypred, lab="Fitted", line=:dot)
+
+#---
+plot(xdata, (ypred .- ydata) ./ ydata, title="PP1 Error", xscale=:log10, lab=false)
 
 # ## Least-square fitting of PLBp
-# Signed Hill function
-hil_s(x, k, n) = sign(x*k) * (abs(x)^n) / (abs(x)^n + abs(k)^n)
 xdata = iso
 ydata = extract(sim, sys.PLBp/sys.PLBtot)
+
+plot(xdata, ydata, xscale=:log10, title="PLBp activity", lab=false)
+
+# Signed Hill function
+hil_s(x, k, n) = sign(x*k) * (abs(x)^n) / (abs(x)^n + abs(k)^n)
 @. model_plb(x, p) = p[1] * hil_s(x, p[2], p[3]) + p[4]
 p0 = [0.8, 2e-6, 1.0, 0.1]
-lb = [0.0, 0.0, 0.1, -Inf]
-fit = curve_fit(model_plb, xdata, ydata, p0; lower=lb)
+lb = [0.0, 0.0, 0.1, 0.0]
+fit = curve_fit(model_plb, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
 pestim = coef(fit)
 
 #---
 confidence_inter = confint(fit; level=0.95)
 
 # It does not fit as good as the previous ones because it's in fact a cubic equation.
-plot(xdata, ydata, lab="Data", line=:dash, title="PLBp", xscale=:log10)
-plot!(x-> model_plb(x, pestim), xdata, lab="Fitted", line=:dot, legend=:topleft)
+ypred = model_plb.(xdata, Ref(pestim))
+plot(xdata, ydata, lab="Full model", line=:dash, title="PLBp", xscale=:log10)
+plot!(xdata, ypred, lab="Fitted", line=:dot, legend=:topleft)
+
 #---
-plot(xdata, (model_plb.(xdata, Ref(pestim)) .- ydata)./ydata, lab="Error", xscale=:log10)
+plot(xdata, (ypred .- ydata) ./ ydata, lab="PLBp error", xscale=:log10)
