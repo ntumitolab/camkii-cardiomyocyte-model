@@ -51,7 +51,7 @@ xdata = ca
 ydata = extract(sim, sys.CaMKAct)
 
 p0 = [0.4, 1e-3, 2.5]
-lb = [0.0, 0.0, 0.1]
+lb = [0.0, 1e-9, 1.0]
 
 fit = curve_fit(model_camk, xdata, ydata, p0; lower=lb)
 pestim = coef(fit)
