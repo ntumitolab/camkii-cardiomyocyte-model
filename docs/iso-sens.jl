@@ -153,7 +153,7 @@ function plbp_analytic(iso)
     PP1_activated = 0.1025
     PP1_KI = 0.008465μM
 
-    # Solve for Vf * x / (x + k1) = Vr * (1 - x) / (1 - x + k2)
+    ## Solve for Vf * x / (x + k1) = Vr * (1 - x) / (1 - x + k2)
     PKACI = PKACItot * (PKACI_basal + PKACI_activated * hil(iso, PKACI_KM))
     PP1 = PP1tot * (PP1_basal + PP1_activated * hilr(iso, PP1_KI))
 
