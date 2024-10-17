@@ -316,7 +316,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         A = 1 - (Vf / Vr)
         B = (Vf / Vr) * (1 + k2) + (k1 - 1)
         C = -k1
-        n = ifelse(A ≈ 0.0, k1 / (k1 + k2), (-B + sqrt(B^2 - 4 * A * C)) / 2A)
+        n = (-B + sqrt(B^2 - 4 * A * C)) / 2A
         return 1 - n
     end
 
