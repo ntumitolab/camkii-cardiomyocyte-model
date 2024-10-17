@@ -6,6 +6,7 @@ using Plots
 using LsqFit
 using CaMKIIModel
 using CaMKIIModel: μM, hil
+Plots.default(lw=1.5)
 
 # ## Setup CaMKII system
 # Model CaM/Calcium binding only. NO phosphorylation or oxidation.
@@ -29,7 +30,7 @@ sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectorie
 extract(sim, k) = map(s -> s[k][end], sim)
 
 # Components
-plot(ca .* 1000, extract(sim, sys.CaM0), lab="CaM0", ylabel="Conc. (mM)", xlabel="Ca (μM)", xscale=:log10)
+plot(ca .* 1000, extract(sim, sys.CaM0), lab="CaM0", ylabel="Conc. (mM)", xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10))
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_C), lab="Ca2CaM_C")
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_N), lab="Ca2CaM_N")
 plot!(ca .* 1000, extract(sim, sys.Ca4CaM), lab="Ca4CaM")
@@ -37,20 +38,20 @@ plot!(ca .* 1000, extract(sim, sys.CaMK), lab="CaMK")
 plot!(ca .* 1000, extract(sim, sys.CaM0_CaMK), lab="CaM0_CaMK")
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
-plot!(ca .* 1000, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft, size=(800, 800))
+plot!(ca .* 1000, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft, size=(800, 600))
 
 # Active CaMKII
-println("Basal activity when Ca=0 is ", sol0[sys.CaMKAct][end])
-plot(ca .* 1000, extract(sim, sys.CaMKAct), lab="Active CaMKII", xlabel="Ca (μM)", xscale=:log10)
+println("Basal activity without ca is ", sol0[sys.CaMKAct][end])
+plot(ca .* 1000, extract(sim, sys.CaMKAct), lab="Active CaMKII", xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10))
 
 # ## Least-square fitting of steady state CaMKII activity
 hil_s(x, k, n) = sign(x * k) * (abs(x)^n) / (abs(x)^n + abs(k)^n)
-@. model_camk(x, p) = p[1] * hil(x, p[2], 2.2) + p[3]
+@. model_camk(x, p) = p[1] * hil(x, p[2], p[4]) + p[3]
 xdata = ca
 ydata = extract(sim, sys.CaMKAct)
 
-p0 = [0.4, 1e-3, 0.019]
-lb = [0.0, 1e-9, 0.0]
+p0 = [0.4, 1e-3, 0.019, 2.2]
+lb = [0.0, 1e-9, 0.0, 1.0]
 
 fit = curve_fit(model_camk, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
 pestim = coef(fit)
@@ -60,10 +61,10 @@ sum(abs2, fit.resid)
 
 #---
 yestim = model_camk.(xdata, Ref(pestim))
-plot(xdata, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", xscale=:log10, legend=:topleft)
+plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", xscale=:log10, legend=:topleft, minorgrid=true, xlims=(1e-2, 10), xlabel="Ca (μM)")
 
 #---
-plot(xdata, (yestim .- ydata) ./ ydata .* 100, title="Relative error (%)", xscale=:log10)
+plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, title="Relative error (%)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10), xlabel="Ca (μM)", lab=false)
 
 # ## Least-square fitting of kinetic CaMKII activity
 # CaM + CaMK + 4Ca <---> CaMCa4_CaMKII
@@ -77,7 +78,7 @@ ydata = extract(sim, sys.CaMKAct)
 function model(x, p)
     A = 30μM
     B = 70μM
-    hcoef = 2.7
+    hcoef = p[5]
     kmca = p[1]
     khill = p[2]
     kca = p[3]
@@ -90,9 +91,10 @@ function model(x, p)
     end
 end
 
-p0 = [1μM, 1e7, 1000.0, 0.1]
-lb = [0.0, 0.0, 0.0, 0.0]
-fit = curve_fit(model, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+p0 = [1μM, 1e7, 1000.0, 0.1, 2.7]
+lb = [0.0, 0.0, 0.0, 0.0, 1.0]
+
+fit = curve_fit(model, xdata, ydata, inv.(xdata), p0; lower=lb, autodiff=:forwarddiff)
 pestim = coef(fit)
 
 # Loss value
@@ -101,10 +103,10 @@ sum(abs2, fit.resid)
 # Fit result
 yestim = model.(xdata, Ref(pestim))
 
-plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", xlabel="Ca (μM)", xscale=:log10)
+plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10))
 
 # < 6% error
 maximum((yestim .- ydata) ./ ydata .* 100)
 
 #---
-plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xscale=:log10, xlabel="Ca (μM)", title="Relative error (%)", yticks=-6:6, lab=false)
+plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xscale=:log10, minorgrid=true, xlabel="Ca (μM)", xlims=(1e-2, 10), title="Relative error (%)", yticks=-6:6, lab=false)
