@@ -158,3 +158,6 @@ docs/site/
 # environment.
 # Manifest.toml
 LocalPreferences.toml
+
+# Local VSCode config
+.vscode/
