@@ -233,8 +233,8 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     return sys
 end
 
-"Reduced beta-adrenergic system. PKA and PPI activities are simple functions to isoproterenol."
-function get_bar_sys_reduced(ISO=0μM; name=:bar_sys, simplify=false)
+"Algebraic beta-adrenergic system."
+function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
     @parameters begin
         PP1tot = 0.89μM
         PKACItot = 1.18μM
@@ -287,12 +287,12 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys, simplify=false)
     end
 
     vs = @variables begin
-        PLBp(t) = 11.35μM
-        PLMp(t) = 7μM
-        TnIp(t) = 6μM
-        LCCap(t) = 6.04nM
-        LCCbp(t) = 6.87nM
-        KURp(t) = 11.71nM
+        PLBp(t)
+        PLMp(t)
+        TnIp(t)
+        LCCap(t)
+        LCCbp(t)
+        KURp(t)
         PLB(t)
         PLM(t)
         TnI(t)
@@ -310,34 +310,40 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys, simplify=false)
         PP1(t)
     end
 
+    ## Solve x for Vf * x / (x + k1) = Vr * (1 - x) / (1 - x + k2)
+    ## To find steady-state phosphorylation fraction
+    function _phos_fraction(Vf, Vr, k1, k2)
+        A = 1 - (Vf / Vr)
+        B = (Vf / Vr) * (1 + k2) + (k1 - 1)
+        C = -k1
+        n = ifelse(A ≈ 0.0, k1 / (k1 + k2), (-B + sqrt(B^2 - 4 * A * C)) / 2A)
+        return 1 - n
+    end
+
     eqs = [
-        D(PLBp) ~ k_PKA_PLB * PKACI * hil(PLB, Km_PKA_PLB) - k_PP1_PLB * PP1 * hil(PLBp, Km_PP1_PLB),
-        D(PLMp) ~ k_PKA_PLM * PKACI * hil(PLM, Km_PKA_PLM) - k_PP1_PLM * PP1 * hil(PLMp, Km_PP1_PLM),
-        D(TnIp) ~ k_PKA_TnI * PKACI * hil(TnI, Km_PKA_TnI) - k_PP2A_TnI * PP2A_TnI * hil(TnIp, Km_PP2A_TnI),
-        D(LCCap) ~ k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII * hil(LCCa * epsilon, Km_PKA_LCC) - k_PP2A_LCC * PP2A_LCC * hil(LCCap * epsilon, Km_PP2A_LCC),
-        D(LCCbp) ~ k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII * hil(LCCb * epsilon, Km_PKA_LCC) - k_PP1_LCC * PP1_LCC * hil(LCCbp * epsilon, Km_PP1_LCC),
-        D(KURp) ~ k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII * hil(KURn * epsilon, Km_pka_KUR) - PP1_KURtot * k_pp1_KUR * hil(KURp * epsilon, Km_pp1_KUR),
         PLBtot ~ PLB + PLBp,
         PLMtot ~ PLM + PLMp,
         TnItot ~ TnI + TnIp,
         LCCtot ~ LCCa + LCCap,
         LCCtot ~ LCCb + LCCbp,
         IKurtot ~ KURn + KURp,
-        LCCa_PKAp ~ LCCap / LCCtot,
-        LCCb_PKAp ~ LCCbp / LCCtot,
-        fracPLBp ~ PLBp / PLBtot,
-        fracBLMp ~ PLMp / PLMtot,
-        TnI_PKAp ~ TnIp / TnItot,
-        IKUR_PKAp ~ KURp / IKurtot,
+        PLBp ~ PLBtot * fracPLBp,
+        PLMp ~ PLMtot * fracPLMp,
+        TnIp ~ TnItot * TnI_PKAp,
+        LCCap ~ LCCtot * LCCa_PKAp,
+        LCCbp ~ LCCtot * LCCb_PKAp,
+        KURp ~ IKurtot * IKUR_PKAp,
         ## Fitted activities
         PKACI ~ PKACItot * (PKACI_basal + PKACI_activated * hil(ISO, PKACI_KM)),
         PKACII ~ PKACIItot * (PKACII_basal + PKACII_activated * hil(ISO, PKACII_KM)),
         PP1 ~ PP1tot * (PP1_basal + PP1_activated * hilr(ISO, PP1_KI)),
+        fracPLBp ~ _phos_fraction(k_PKA_PLB * PKACI, k_PP1_PLB * PP1, Km_PKA_PLB / PLBtot, Km_PP1_PLB / PLBtot),
+        fracBLMp ~ _phos_fraction(k_PKA_PLM * PKACI, k_PP1_PLM * PP1, Km_PKA_PLM/PLMtot, Km_PP1_PLM/PLMtot),
+        TnI_PKAp ~ _phos_fraction(k_PKA_TnI * PKACI, k_PP2A_TnI * PP2A_TnI, Km_PKA_TnI/TnItot, Km_PP2A_TnI/TnItot),
+        LCCa_PKAp ~ _phos_fraction(k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII, k_PP2A_LCC * PP2A_LCC, Km_PKA_LCC/LCCtot/epsilon, Km_PP2A_LCC/LCCtot/epsilon),
+        LCCb_PKAp ~ _phos_fraction(k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII, k_PP1_LCC * PP1_LCC, Km_PKA_LCC/LCCtot/epsilon, Km_PP1_LCC/LCCtot/epsilon),
+        IKUR_PKAp ~ _phos_fraction(k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII, PP1_KURtot * k_pp1_KUR, Km_pka_KUR/IKurtot/epsilon, Km_pp1_KUR/IKurtot/epsilon),
     ]
 
-    sys = ODESystem(eqs, t; name)
-    if simplify
-        sys = structural_simplify(sys)
-    end
-    return sys
+    return ODESystem(eqs, t; name)
 end
