@@ -163,7 +163,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         LCCa_PKAp(t)
         LCCb_PKAp(t)
         fracPLBp(t)
-        fracBLMp(t)
+        fracPLMp(t)
         TnI_PKAp(t)
         IKUR_PKAp(t)
     end
@@ -172,7 +172,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         LCCa_PKAp ~ LCCap / LCCtot,
         LCCb_PKAp ~ LCCbp / LCCtot,
         fracPLBp ~ PLBp / PLBtot,
-        fracBLMp ~ PLMp / PLMtot,
+        fracPLMp ~ PLMp / PLMtot,
         TnI_PKAp ~ TnIp / TnItot,
         IKUR_PKAp ~ KURp / IKurtot,
     ]
@@ -302,7 +302,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         LCCa_PKAp(t)
         LCCb_PKAp(t)
         fracPLBp(t)
-        fracBLMp(t)
+        fracPLMp(t)
         TnI_PKAp(t)
         IKUR_PKAp(t)
         PKACI(t)
@@ -338,7 +338,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         PKACII ~ PKACIItot * (PKACII_basal + PKACII_activated * hil(ISO, PKACII_KM)),
         PP1 ~ PP1tot * (PP1_basal + PP1_activated * hilr(ISO, PP1_KI)),
         fracPLBp ~ _phos_fraction(k_PKA_PLB * PKACI, k_PP1_PLB * PP1, Km_PKA_PLB / PLBtot, Km_PP1_PLB / PLBtot),
-        fracBLMp ~ _phos_fraction(k_PKA_PLM * PKACI, k_PP1_PLM * PP1, Km_PKA_PLM/PLMtot, Km_PP1_PLM/PLMtot),
+        fracPLMp ~ _phos_fraction(k_PKA_PLM * PKACI, k_PP1_PLM * PP1, Km_PKA_PLM/PLMtot, Km_PP1_PLM/PLMtot),
         TnI_PKAp ~ _phos_fraction(k_PKA_TnI * PKACI, k_PP2A_TnI * PP2A_TnI, Km_PKA_TnI/TnItot, Km_PP2A_TnI/TnItot),
         LCCa_PKAp ~ _phos_fraction(k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII, k_PP2A_LCC * PP2A_LCC, Km_PKA_LCC/LCCtot/epsilon, Km_PP2A_LCC/LCCtot/epsilon),
         LCCb_PKAp ~ _phos_fraction(k_PKA_LCC * (PKACII_LCCtot / PKAIItot) * PKACII, k_PP1_LCC * PP1_LCC, Km_PKA_LCC/LCCtot/epsilon, Km_PP1_LCC/LCCtot/epsilon),
