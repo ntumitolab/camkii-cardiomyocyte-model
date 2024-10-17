@@ -5,7 +5,7 @@ using DiffEqCallbacks
 using Plots
 using LsqFit
 using CaMKIIModel
-using CaMKIIModel: μM, hil
+using CaMKIIModel: μM, hil, Hz, hilr
 Plots.default(lw=1.5)
 
 # ## Setup b1AR system
@@ -36,9 +36,9 @@ plot(sol, idxs=sys.PKACI / sys.RItot)
 extract(sim, k) = map(s -> s[k][end], sim)
 
 #---
-xopts = (xlims=(iso[begin]*1000, iso[end]*1000), minorgrid=true, xscale=:log10, xlabel="ISO (μM)",)
+xopts = (xlims=(iso[begin] * 1000, iso[end] * 1000), minorgrid=true, xscale=:log10, xlabel="ISO (μM)",)
 
-plot(iso .* 1000, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (mM)",  legend=:topleft, xopts...)
+plot(iso .* 1000, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (mM)", legend=:topleft, xopts...)
 
 #---
 plot(iso .* 1000, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation fraction")
@@ -62,7 +62,7 @@ confidence_inter = confint(pkac1_fit; level=0.95)
 #---
 ypred = model.(xdata, Ref(pkac1_coef))
 plot(xdata .* 1000, ydata, lab="Full model", line=:dash, title="PKACI")
-plot!(xdata .* 1000, ypred; lab="Fitted", line=:dot, legend=:topleft, xopts... )
+plot!(xdata .* 1000, ypred; lab="Fitted", line=:dot, legend=:topleft, xopts...)
 
 #---
 plot(xdata .* 1000, (ypred .- ydata) ./ ydata .* 100; title="PKACI error (%)", lab=false, xopts...)
@@ -118,7 +118,8 @@ ydata = extract(sim, sys.PLBp / sys.PLBtot)
 
 plot(xdata .* 1000, ydata, title="PLBp activity", lab=false; xopts...)
 
-# Sigmoid
+# Hill function
+
 @. model_plb(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-5, 1.0, 0.1]
 lb = [0.5, 1e-9, 1.0, 0.0]
@@ -128,10 +129,49 @@ pestim = coef(fit)
 #---
 confidence_inter = confint(fit; level=0.95)
 
-# It does not fit as good as the previous ones because it's in fact a cubic equation.
+#---
 ypred = model_plb.(xdata, Ref(pestim))
 plot(xdata .* 1000, ydata, lab="Full model", line=:dash, title="PLBp")
 plot!(xdata .* 1000, ypred, lab="Fitted", line=:dot, legend=:topleft; xopts...)
 
 #---
+plot(xdata .* 1000, (ypred .- ydata) ./ ydata .* 100; lab="PLBp error (%)", xopts...)
+
+# Analytic PLB by solving quadratic equation
+function plbp_analytic(iso)
+    PLBtot = 106μM
+    PKACItot = 1.18μM
+    PP1tot = 0.89μM
+    k_PKA_PLB = 54Hz
+    Km_PKA_PLB = 21μM
+    k_PP1_PLB = 8.5Hz
+    Km_PP1_PLB = 7.0μM
+    PKACI_basal = 0.0831  ## basal activity
+    PKACI_activated = 0.25603
+    PKACI_KM = 0.0144μM
+    PP1_basal = 0.82365
+    PP1_activated = 0.1025
+    PP1_KI = 0.008465μM
+
+    # Solve for Vf * x / (x + k1) = Vr * (1 - x) / (1 - x + k2)
+    PKACI = PKACItot * (PKACI_basal + PKACI_activated * hil(iso, PKACI_KM))
+    PP1 = PP1tot * (PP1_basal + PP1_activated * hilr(iso, PP1_KI))
+
+    Vf = k_PKA_PLB * PKACI
+    k1 = Km_PKA_PLB / PLBtot
+    Vr = k_PP1_PLB * PP1
+    k2 = Km_PP1_PLB / PLBtot
+    A = 1 - (Vf / Vr)
+    B = (Vf / Vr) * (1 + k2) + (k1 - 1)
+    C = -k1
+    plb = ifelse(A ≈ 0.0, k1 / (k1 + k2), (-B + sqrt(B^2 - 4 * A * C)) / 2A)
+    plbp = 1 - plb
+end
+
+# quadratic prediction looks better
+ypred = plbp_analytic.(xdata)
+plot(xdata .* 1000, ydata, lab="Full model", line=:dash, title="PLBp")
+plot!(xdata .* 1000, ypred, lab="Fitted (quadratic)", line=:dot, legend=:topleft; xopts...)
+
+# 1.5% error
 plot(xdata .* 1000, (ypred .- ydata) ./ ydata .* 100; lab="PLBp error (%)", xopts...)
