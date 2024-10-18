@@ -67,7 +67,7 @@ plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :do
 plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, title="Relative error (%)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10), xlabel="Ca (μM)", lab=false)
 
 # ## Least-square fitting of kinetic CaMKII activity
-# CaM + CaMK + 4Ca <---> CaMCa4_CaMKII
+# Finding the Keq for the reaction CaM + CaMK + 4Ca <---> CaMCa4_CaMKII
 extract(sim, k) = map(s -> s[k][end], sim)
 hil_s(x, k, n) = sign(x * k) * (abs(x)^n) / (abs(x)^n + abs(k)^n)
 sqrt_s(x) = sign(x) * sqrt(abs(x))
