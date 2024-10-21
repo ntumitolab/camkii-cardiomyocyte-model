@@ -133,9 +133,10 @@ function main(;
         # Run the nbconvert commands in parallel
         ts_ipynb = asyncmap(ipynbs; ntasks) do nb
             @elapsed begin
-                cmd = `jupyter nbconvert --to notebook $(execute) $(timeout) $(kernelname) --output $(joinpath(abspath(pwd()), cachedir, nb)) $(nb)`
+                nbout = joinpath(abspath(pwd()), cachedir, nb)
+                cmd = `jupyter nbconvert --to notebook $(execute) $(timeout) $(kernelname) --output $(nbout) $(nb)`
                 run(cmd)
-                rmsvg && strip_svg(ipynb)
+                rmsvg && strip_svg(nbout)
             end
         end
     else
