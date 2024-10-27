@@ -1,4 +1,10 @@
-# CaMKII system with ROS activation
+"""
+CaMKII system with ROS activation
+
+CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in single dendritic spines" (Chang et al., 2019, Nature Communications)
+
+ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Following Myocardial Infarction: A Computational Analysis (Christensen et al. 2009)
+"""
 function get_camkii_sys(Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0.1,
@@ -161,4 +167,117 @@ function get_camkii_sys(Ca=0μM;
         sys = structural_simplify(sys)
     end
     return sys
+end
+
+
+"CaMKII system with ROS activation and fast calcium binding"
+function get_camkii_fast_ca_bindinggsys(Ca=0μM;
+    ROS=0μM,
+    binding_To_PCaMK=0.1,
+    decay_CaM=3,
+    phospho_rate=1Hz,
+    phosphatase=1Hz,
+    name=:camkii_sys,
+    simplify=false
+)
+
+    @parameters begin
+        CAM_T = 30μM            ## Total calmodulin Concentration
+        CAMKII_T = 70μM         ## Total CaMKII Concentration
+        k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1s-1
+        k_1C_off = 50Hz         ## 10-70 s-1
+        k_2C_on = 10Hz / μM     ## 5-25uM-1s-1.
+        k_2C_off = 10Hz         ## 8.5-10s-1.
+        ## N-lobe
+        k_1N_on = 100Hz / μM    ## 25-260uM-1s-1
+        k_1N_off = 2000Hz       ## 1000-4000 s-1
+        k_2N_on = 200Hz / μM    ## 50-300uM-1s-1.
+        k_2N_off = 500Hz        ## 500->1000.s-1
+
+        ## Ca2+ binding to CaM-CAMKII(K)
+        ## C-lobe
+        k_K1C_on = 44Hz / μM
+        k_K1C_off = 33Hz
+        k_K2C_on = 44Hz / μM
+        k_K2C_off = 0.8Hz ## 0.49-4.9Hz
+        ## N-lobe
+        k_K1N_on = 76Hz / μM
+        k_K1N_off = 300Hz
+        k_K2N_on = 76Hz / μM
+        k_K2N_off = 20Hz ## 6-60-1
+
+        ## CaM binding to CaMKII
+        kCaM0_on = 3.8e-3Hz / μM
+        kCaM2C_on = 0.92Hz / μM
+        kCaM2N_on = 0.12Hz / μM
+        kCaM4_on = 30Hz / μM
+        kCaM0_off = 5.5Hz
+        kCaM2C_off = 6.8Hz
+        kCaM2N_off = 1.7Hz
+        kCaM4_off = 1.5Hz
+        kCaM0P_on = 3.8e-3Hz / μM * binding_To_PCaMK
+        kCaM2CP_on = 0.92Hz / μM * binding_To_PCaMK
+        kCaM2NP_on = 0.12Hz / μM * binding_To_PCaMK
+        kCaM4P_on = 30Hz / μM * binding_To_PCaMK
+        kCaM0P_off = 1Hz / decay_CaM
+        kCaM2CP_off = 1Hz / decay_CaM
+        kCaM2NP_off = 1Hz / decay_CaM
+        kCaM4P_off = 1Hz / decay_CaM
+        k_phosCaM = 30 * phospho_rate
+        k_dephospho = (1 / 6) * phosphatase
+        k_P1_P2 = 1 / 60Hz
+        k_P2_P1 = (1 / 6) * 0.25Hz
+
+        ## Oxidation / reduction
+        k_OXPOX = 0.03Hz / μM
+        k_POXP = 0.291Hz / μM
+        k_OXB = 2.23e-2Hz
+        k_OXPP = 2.23e-2Hz
+    end
+
+    sts = @variables begin
+        Ca2CaM_C(t) = 31nM
+        Ca2CaM_N(t) = 7.5nM
+        Ca4CaM(t) = 1.215e-8mM
+        CaM0_CaMK(t) = 0.903μM
+        Ca2CaM_C_CaMK(t) = 164nM
+        Ca2CaM_N_CaMK(t) = 14.87nM
+        Ca4CaM_CaMK(t) = 5.366nM
+        CaM0_CaMKP(t) = 1.9μM
+        Ca2CaM_C_CaMKP(t) = 1.365μM
+        Ca2CaM_N_CaMKP(t) = 81.1nM
+        Ca4CaM_CaMKP(t) = 52.23nM
+        Ca4CaM_CaMKOX(t) = 0mM
+        Ca4CaM_CaMKPOX(t) = 0mM
+        CaMKP(t) = 6.33μM
+        CaMKP2(t) = 2.53μM
+        CaMKPOX(t) = 0mM
+        CaMKOX(t) = 0mM
+    end
+
+    conservedvars = @variables begin
+        CaM0(t)
+        CaMK(t)
+    end
+
+    conservedeqs = [
+        CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
+        CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
+    ]
+
+    rates = merge(Dict(sts .=> Num(0)), Dict(conservedvars .=> Num(0)))
+
+    # Observables
+    @variables CaMKAct(t)
+    obseqs = [CaMKAct ~ (1 - CaMK / CAMKII_T)]
+
+    "Ca binding/unbinding reaction equilibrium"
+    _ca_eq(ca, k1on, k1off, k2on, k2off) = ca^2 * k1on * k2on / k1off / k2off
+
+
+    ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
+    keqc = _ca_eq(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off)
+    keqn = _ca_eq(Ca, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
+
+
 end
