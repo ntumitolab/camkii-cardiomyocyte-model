@@ -18,7 +18,7 @@ tend = 10000.0
 prob = ODEProblem(sys, [], tend)
 alg = Rodas5()
 callback = TerminateSteadyState()
-ca = exp10.(range(log10(1e-2μM), log10(10μM), length=1001))
+ca = exp10.(range(log10(0.1μM), log10(100μM), length=101))
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end
@@ -31,7 +31,8 @@ sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectorie
 extract(sim, k) = map(s -> s[k][end], sim)
 
 # Components
-plot(ca .* 1000, extract(sim, sys.CaM0), lab="CaM0", ylabel="Conc. (mM)", xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10))
+xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1] * 1000, ca[end]*1000))
+plot(ca .* 1000, extract(sim, sys.CaM0), lab="CaM0", ylabel="Conc. (mM)"; xopts...)
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_C), lab="Ca2CaM_C")
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_N), lab="Ca2CaM_N")
 plot!(ca .* 1000, extract(sim, sys.Ca4CaM), lab="Ca4CaM")
@@ -43,13 +44,13 @@ plot!(ca .* 1000, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topl
 
 #---
 println("Basal activity without ca is ", sol0[sys.CaMKAct][end])
-plot(ca .* 1000, extract(sim, sys.CaMKAct), label=false, title="Active CaMKII", xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(1e-2, 10))
+plot(ca .* 1000, extract(sim, sys.CaMKAct), label=false, title="Active CaMKII"; xopts...)
 
 # ## Least-square fitting of steady state CaMKII activity
 @. model_camk(x, p) = p[1] * hil(x, p[2], p[4]) + p[3]
 xdata = ca
 ydata = extract(sim, sys.CaMKAct)
-p0 = [0.4, 1e-3, 0.019, 2.2]
+p0 = [0.2, 1e-3, 0.019, 2.2]
 lb = [0.0, 1e-9, 0.0, 1.0]
 fit = curve_fit(model_camk, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
 
@@ -61,26 +62,25 @@ sum(abs2, fit.resid)
 
 # Fit result
 yestim = model_camk.(xdata, Ref(pestim))
-opts = (minorgrid=true, xlims=(1e-2, 10), xscale=:log10)
 
-p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", legend=:topleft; opts...)
-p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, title="Relative error (%)", xlabel="Ca (μM)", lab=false; opts...)
+p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", legend=:topleft; xopts...)
+p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, title="Relative error (%)", xlabel="Ca (μM)", lab=false; xopts...)
 plot(p1, p2, layout=(2, 1), size=(600, 600))
 
 # ## Least-square fitting of kinetic CaMKII activity
 # Finding the Keq for the reaction: CaM + CaMK + 4Ca <---> CaMCa4_CaMKII
-
+# Cannot find a satisfactory model
 xdata = ca
 ydata = extract(sim, sys.CaMKAct)
 
 function model(x, p)
     A = 30μM
     B = 70μM
-    k0 = p[4]
+    k0 = 0.19/A
     k1 = p[2]
     k2 = p[3]
     kmca = p[1]
-    nca = p[5]
+    nca = p[4]
     y = map(x) do ca
         keq = k1 * hil(ca, kmca, nca) + k2 * ca + k0
         xterm = A + B + 1 / keq
@@ -90,9 +90,10 @@ function model(x, p)
 end
 
 #---
-p0 = [100μM, 1e6, 1000.0, 0.5, 2.7]
-lb = [0.0, 0.0, 0.0, 0.0, 1.0]
-fit = curve_fit(model, xdata, ydata, inv.(ydata), p0; lower=lb, autodiff=:forwarddiff)
+p0 = [10μM, 1e5, 100.0, 1.0]
+lb = [0.1μM, 0.0, 0.0, 0.5]
+ub= [1000μM, Inf, Inf, 4.0]
+fit = curve_fit(model, xdata, ydata, inv.(ydata), p0; lower=lb, upper=ub, autodiff=:forwarddiff)
 
 #---
 pestim = coef(fit)
@@ -103,6 +104,6 @@ sum(abs2, fit.resid)
 # Fit result
 
 yestim = model.(xdata, Ref(pestim))
-p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity"; opts...)
-p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xlabel="Ca (μM)", title="Relative error (%)", lab=false, yticks=-7:7; opts...)
+p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity"; xopts...)
+p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xlabel="Ca (μM)", title="Relative error (%)", lab=false, yticks=-7:7; xopts...)
 plot(p1, p2, layout=(2, 1), size=(600, 600))

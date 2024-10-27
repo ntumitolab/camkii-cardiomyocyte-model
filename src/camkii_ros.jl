@@ -8,6 +8,7 @@ ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Followi
 function get_camkii_sys(Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0, # 0.1 for T287D mutation
+    phospho_rate=30Hz,
     name=:camkii_sys,
     simplify=false
 )
@@ -53,7 +54,7 @@ function get_camkii_sys(Ca=0μM;
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
         kCaM4P_off = inv(3second)
-        k_phosCaM = 30Hz # 12.6Hz
+        k_phosCaM = phospho_rate # 12.6Hz
         k_dephospho = inv(6second)
         k_P1_P2 = inv(15second)
         k_P2_P1 = inv(60second)
