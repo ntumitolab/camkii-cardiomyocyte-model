@@ -1,16 +1,13 @@
 """
 CaMKII system with ROS activation
 
-CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in single dendritic spines" (Chang et al., 2019, Nature Communications)
+CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in single dendritic spines" (Chang et al., 2019, Nature Communications); https://doi.org/10.1038/s41467-019-10694-z
 
-ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Following Myocardial Infarction: A Computational Analysis (Christensen et al. 2009)
+ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Following Myocardial Infarction: A Computational Analysis (Christensen et al. 2009); https://doi.org/10.1371/journal.pcbi.1000583
 """
 function get_camkii_sys(Ca=0μM;
     ROS=0μM,
-    binding_To_PCaMK=0.1,
-    decay_CaM=3,
-    phospho_rate=1Hz,
-    phosphatase=1Hz,
+    binding_To_PCaMK=0, # 0.1 for T287D mutation
     name=:camkii_sys,
     simplify=false
 )
@@ -27,7 +24,7 @@ function get_camkii_sys(Ca=0μM;
         k_2N_on = 200Hz / μM    ## 50-300uM-1s-1.
         k_2N_off = 500Hz        ## 500->1000.s-1
 
-        ## Ca2+ binding to CaM-CAMKII(K)
+        ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
         k_K1C_on = 44Hz / μM
         k_K1C_off = 33Hz
@@ -40,32 +37,32 @@ function get_camkii_sys(Ca=0μM;
         k_K2N_off = 20Hz ## 6-60-1
 
         ## CaM binding to CaMKII
-        kCaM0_on = 3.8e-3Hz / μM
-        kCaM2C_on = 0.92Hz / μM
-        kCaM2N_on = 0.12Hz / μM
-        kCaM4_on = 30Hz / μM
+        kCaM0_on = 3.8Hz / mM
+        kCaM2C_on = 0.92Hz / mM
+        kCaM2N_on = 0.12Hz / mM
+        kCaM4_on = 30Hz / mM
         kCaM0_off = 5.5Hz
         kCaM2C_off = 6.8Hz
         kCaM2N_off = 1.7Hz
         kCaM4_off = 1.5Hz
-        kCaM0P_on = 3.8e-3Hz / μM * binding_To_PCaMK
-        kCaM2CP_on = 0.92Hz / μM * binding_To_PCaMK
-        kCaM2NP_on = 0.12Hz / μM * binding_To_PCaMK
-        kCaM4P_on = 30Hz / μM * binding_To_PCaMK
-        kCaM0P_off = 1Hz / decay_CaM
-        kCaM2CP_off = 1Hz / decay_CaM
-        kCaM2NP_off = 1Hz / decay_CaM
-        kCaM4P_off = 1Hz / decay_CaM
-        k_phosCaM = 30 * phospho_rate
-        k_dephospho = (1 / 6) * phosphatase
-        k_P1_P2 = 1 / 60Hz
-        k_P2_P1 = (1 / 6) * 0.25Hz
+        kCaM0P_on = kCaM0_on * binding_To_PCaMK
+        kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
+        kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
+        kCaM4P_on = kCaM4_on * binding_To_PCaMK
+        kCaM0P_off = inv(3second)
+        kCaM2CP_off = inv(3second)
+        kCaM2NP_off = inv(3second)
+        kCaM4P_off = inv(3second)
+        k_phosCaM = 30Hz # 12.6Hz
+        k_dephospho = inv(6second)
+        k_P1_P2 = inv(15second)
+        k_P2_P1 = inv(60second)
 
         ## Oxidation / reduction
-        k_OXPOX = 0.03Hz / μM
-        k_POXP = 0.291Hz / μM
-        k_OXB = 2.23e-2Hz
-        k_OXPP = 2.23e-2Hz
+        k_OXPOX = k_phosCaM
+        k_POXP = 291Hz / mM
+        k_OXB = inv(45second)
+        k_OXPP = inv(45second)
     end
 
     sts = @variables begin
@@ -194,7 +191,7 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         k_2N_on = 200Hz / μM    ## 50-300uM-1s-1.
         k_2N_off = 500Hz        ## 500->1000.s-1
 
-        ## Ca2+ binding to CaM-CAMKII(K)
+        ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
         k_K1C_on = 44Hz / μM
         k_K1C_off = 33Hz
@@ -207,32 +204,32 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         k_K2N_off = 20Hz ## 6-60-1
 
         ## CaM binding to CaMKII
-        kCaM0_on = 3.8e-3Hz / μM
-        kCaM2C_on = 0.92Hz / μM
-        kCaM2N_on = 0.12Hz / μM
-        kCaM4_on = 30Hz / μM
+        kCaM0_on = 3.8Hz / mM
+        kCaM2C_on = 0.92Hz / mM
+        kCaM2N_on = 0.12Hz / mM
+        kCaM4_on = 30Hz / mM
         kCaM0_off = 5.5Hz
         kCaM2C_off = 6.8Hz
         kCaM2N_off = 1.7Hz
         kCaM4_off = 1.5Hz
-        kCaM0P_on = 3.8e-3Hz / μM * binding_To_PCaMK
-        kCaM2CP_on = 0.92Hz / μM * binding_To_PCaMK
-        kCaM2NP_on = 0.12Hz / μM * binding_To_PCaMK
-        kCaM4P_on = 30Hz / μM * binding_To_PCaMK
-        kCaM0P_off = 1Hz / decay_CaM
-        kCaM2CP_off = 1Hz / decay_CaM
-        kCaM2NP_off = 1Hz / decay_CaM
-        kCaM4P_off = 1Hz / decay_CaM
-        k_phosCaM = 30 * phospho_rate
-        k_dephospho = (1 / 6) * phosphatase
-        k_P1_P2 = 1 / 60Hz
-        k_P2_P1 = (1 / 6) * 0.25Hz
+        kCaM0P_on = kCaM0_on * binding_To_PCaMK
+        kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
+        kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
+        kCaM4P_on = kCaM4_on * binding_To_PCaMK
+        kCaM0P_off = inv(3second)
+        kCaM2CP_off = inv(3second)
+        kCaM2NP_off = inv(3second)
+        kCaM4P_off = inv(3second)
+        k_phosCaM = 30Hz # 12.6Hz
+        k_dephospho = inv(6second)
+        k_P1_P2 = inv(15second)
+        k_P2_P1 = inv(60second)
 
         ## Oxidation / reduction
-        k_OXPOX = 0.03Hz / μM
-        k_POXP = 0.291Hz / μM
-        k_OXB = 2.23e-2Hz
-        k_OXPP = 2.23e-2Hz
+        k_OXPOX = k_phosCaM
+        k_POXP = 291Hz / mM
+        k_OXB = inv(45second)
+        k_OXPP = inv(45second)
     end
 
     sts = @variables begin
