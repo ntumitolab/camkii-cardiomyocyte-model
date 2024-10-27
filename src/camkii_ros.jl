@@ -7,7 +7,7 @@ ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Followi
 """
 function get_camkii_sys(Ca=0μM;
     ROS=0μM,
-    binding_To_PCaMK=0, # 0.1 for T287D mutation
+    binding_To_PCaMK=0,   ## 0.1 for T287D mutation
     phospho_rate=30Hz,
     name=:camkii_sys,
     simplify=false
