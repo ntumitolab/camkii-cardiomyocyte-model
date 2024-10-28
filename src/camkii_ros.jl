@@ -171,10 +171,8 @@ end
 "CaMKII system with ROS activation and fast calcium binding"
 function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     ROS=0μM,
-    binding_To_PCaMK=0.1,
-    decay_CaM=3,
-    phospho_rate=1Hz,
-    phosphatase=1Hz,
+    binding_To_PCaMK=0,
+    phospho_rate=30Hz,
     name=:camkii_sys,
     simplify=false
 )
@@ -221,7 +219,7 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
         kCaM4P_off = inv(3second)
-        k_phosCaM = 30Hz # 12.6Hz
+        k_phosCaM = phospho_rate # 12.6Hz
         k_dephospho = inv(6second)
         k_P1_P2 = inv(15second)
         k_P2_P1 = inv(60second)
@@ -234,6 +232,9 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     end
 
     sts = @variables begin
+        CaM(t) = CAM_T
+        KCaM(t) = 0
+        PCaM(t) = 0
         Ca2CaM_C(t) = 31nM
         Ca2CaM_N(t) = 7.5nM
         Ca4CaM(t) = 1.215e-8mM
@@ -266,16 +267,40 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     rates = merge(Dict(sts .=> Num(0)), Dict(conservedvars .=> Num(0)))
 
     # Observables
-    @variables CaMKAct(t)
-    obseqs = [CaMKAct ~ (1 - CaMK / CAMKII_T)]
+    @variables begin
+        CaMKAct(t)
+        CaM0(t)
+        CaM2C(t)
+        CaM2N(t)
+        CaM4(t)
+        CaM0_CaMK(t)
+        CaM2C_CaMK(t)
+        CaM2N_CaMK(t)
+        CaM4_CaMK(t)
+        CaM0_CaMKP(t)
+        CaM2C_CaMKP(t)
+        CaM2N_CaMKP(t)
+        CaM4_CaMKP(t)
+    end
+    obseqs = [
+        CaMKAct ~ (1 - CaMK / CAMKII_T),
+    ]
 
     "Ca binding/unbinding reaction equilibrium"
     _ca_eq(ca, k1on, k1off, k2on, k2off) = ca^2 * k1on * k2on / k1off / k2off
 
-
     ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
     keqc = _ca_eq(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off)
     keqn = _ca_eq(Ca, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
+    den = (1 + keqc) * (1 + keqn)
+    push!(obseqs, CaM0 ~ CaM / den, CaM2C ~ CaM * keqc / den, CaM2N ~ CaM * eqn / den, CaM4 ~ CaM * keqc * keqn / den)
+
+    ## Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII(P) complex
+    keqc = _ca_eq(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off)
+    keqn = _ca_eq(Ca, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
+    den = (1 + keqc) * (1 + keqn)
+    push!(obseqs, CaM0_CaMK ~ KCaM / den, CaM2C_CaMK ~ KCaM * keqc / den, CaM2N_CaMK ~ KCaM * eqn / den, CaM4_CaMK ~ KCaM * keqc * keqn / den)
+    push!(obseqs, CaM0_CaMKP ~ PCaM / den, CaM2C_CaMKP ~ PCaM * keqc / den, CaM2N_CaMKP ~ PCaM * eqn / den, CaM4_CaMKP ~ PCaM * keqc * keqn / den)
 
 
 end
