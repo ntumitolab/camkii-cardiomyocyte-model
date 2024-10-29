@@ -19,7 +19,7 @@ alg = Rodas5()
 callback = TerminateSteadyState()
 
 # Log scale for ISO concentration
-iso = logrange(1e-5μM, 10μM, 101)
+iso = exp10.(range(log10(1e-5μM), log10(10μM), length=101))
 
 #---
 prob_func = (prob, i, repeat) -> begin
