@@ -1,4 +1,4 @@
-"""
+ """
 CaMKII system with ROS activation
 
 CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in single dendritic spines" (Chang et al., 2019, Nature Communications); https://doi.org/10.1038/s41467-019-10694-z
@@ -67,23 +67,23 @@ function get_camkii_sys(Ca=0μM;
     end
 
     sts = @variables begin
-        Ca2CaM_C(t) = 31nM
-        Ca2CaM_N(t) = 7.5nM
-        Ca4CaM(t) = 1.215e-8mM
-        CaM0_CaMK(t) = 0.903μM
-        Ca2CaM_C_CaMK(t) = 164nM
-        Ca2CaM_N_CaMK(t) = 14.87nM
-        Ca4CaM_CaMK(t) = 5.366nM
-        CaM0_CaMKP(t) = 1.9μM
-        Ca2CaM_C_CaMKP(t) = 1.365μM
-        Ca2CaM_N_CaMKP(t) = 81.1nM
-        Ca4CaM_CaMKP(t) = 52.23nM
-        Ca4CaM_CaMKOX(t) = 0mM
-        Ca4CaM_CaMKPOX(t) = 0mM
-        CaMKP(t) = 6.33μM
-        CaMKP2(t) = 2.53μM
-        CaMKPOX(t) = 0mM
-        CaMKOX(t) = 0mM
+        Ca2CaM_C(t) = 100nM
+        Ca2CaM_N(t) = 8.21nM
+        Ca4CaM(t) = 3.74e-8mM
+        CaM0_CaMK(t) = 95.7nM
+        Ca2CaM_C_CaMK(t) = 100nM
+        Ca2CaM_N_CaMK(t) = 8.21nM
+        Ca4CaM_CaMK(t) = 0.872nM
+        CaM0_CaMKP(t) = 448nM
+        Ca2CaM_C_CaMKP(t) = 628nM
+        Ca2CaM_N_CaMKP(t) = 8.94nM
+        Ca4CaM_CaMKP(t) = 9nM
+        Ca4CaM_CaMKOX(t) = 0μM
+        Ca4CaM_CaMKPOX(t) = 0μM
+        CaMKP(t) = 21.9μM
+        CaMKP2(t) = 8.75μM
+        CaMKPOX(t) = 0μM
+        CaMKOX(t) = 0μM
     end
 
     conservedvars = @variables begin

@@ -23,9 +23,9 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         E_K(t)
         IK1(t)
         Ito(t)
-        i_r(t) = 0.00702
-        i_s(t) = 0.9660
-        i_sslow(t) = 0.22156
+        i_r(t) = 0.00778
+        i_s(t) = 1.0
+        i_sslow(t) = 1.0
         sinf(t)
         rinf(t)
         slowinf(t)
@@ -33,20 +33,20 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         taus(t)
         tausslow(t)
         IKs(t)
-        i_nKs(t) = 0.09243
+        i_nKs(t) = 0.00237
         IKr(t)
         E_Kr(t)
         CK0(t)
-        i_CK1(t) = 0.00188
-        i_CK2(t) = 0.00977
-        i_OK(t) = 0.26081
-        i_IK(t) = 0.07831
+        i_CK1(t) = 0.00306
+        i_CK2(t) = 0.00198
+        i_OK(t) = 0.00181
+        i_IK(t) = 0.00058
         IfNa(t)
         IfK(t)
         If(t)
         yinf(t)
         tauy(t)
-        i_y(t) = 0.07192
+        i_y(t) = 0.1425
     end
 
     V = vm * inv(mV)  # Convert voltage to mV

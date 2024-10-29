@@ -6,9 +6,9 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
     end
     @variables begin
         INa(t)
-        i_Nam(t) = 0.0327    # Fast Na gating (activation)
-        i_Nah(t) = 0.9909    # Fast Na gating (inactivation)
-        i_Naj(t) = 0.9941    # Fast Na gating (slow inactivation)
+        i_Nam(t) = 0.02658    # Fast Na gating (activation)
+        i_Nah(t) = 0.54334    # Fast Na gating (inactivation)
+        i_Naj(t) = 0.40931    # Fast Na gating (slow inactivation)
         INab(t)
         E_Na(t)
     end

@@ -20,17 +20,17 @@ function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^
         E_Ca(t)
         INaCa(t)
         ICaL(t)
-        i_d(t) = 0.00033
-        i_f(t) = 0.99869
-        i_fca(t) = 0.9911
+        i_d(t) = 0.000408
+        i_f(t) = 0.997
+        i_fca(t) = 1.0
         dinf(t)
         taud(t)
         finf(t)
         tauf(t)
         fcainf(t)
         ICaT(t)
-        i_b(t) = 0.00305
-        i_g(t) = 0.61179
+        i_b(t) = 0.00402
+        i_g(t) = 0.5536
         binf(t)
         taub(t)
         ginf(t)
