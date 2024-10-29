@@ -46,9 +46,9 @@ function build_neonatal_ecc_sys(;
     end
 
     @variables begin
-        na_i(t) = 2.243mM
-        k_i(t) = 152.586mM
-        vm(t) = -67.3mV
+        na_i(t) = 13838.37602μM
+        k_i(t) = 150952.75035μM
+        vm(t) = -68.79268mV
         JCa_SL(t)
         JCa_SR(t)
     end
