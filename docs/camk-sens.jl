@@ -12,6 +12,7 @@ Plots.default(lw=1.5)
 # Model CaM/Calcium binding only. NO phosphorylation or oxidation.
 @parameters Ca = 0μM ROS = 0μM
 sys = get_camkii_sys(Ca; ROS, phospho_rate=0, simplify=true)
+equations(sys)
 
 #---
 tend = 10000.0
@@ -29,6 +30,8 @@ sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectorie
 #---
 """Extract values from ensemble simulations by a symbol"""
 extract(sim, k) = map(s -> s[k][end], sim)
+"""Calculate Root Mean Square Error (RMSE)"""
+rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
 # Components
 xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1] * 1000, ca[end]*1000))
@@ -58,7 +61,7 @@ fit = curve_fit(model_camk, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
 pestim = coef(fit)
 
 # Loss value
-sum(abs2, fit.resid)
+rmse(fit)
 
 # Fit result
 yestim = model_camk.(xdata, Ref(pestim))
@@ -69,41 +72,38 @@ plot(p1, p2, layout=(2, 1), size=(600, 600))
 
 # ## Least-square fitting of kinetic CaMKII activity
 # Finding the Keq for the reaction: CaM + CaMK + 4Ca <---> CaMCa4_CaMKII
-# Cannot find a satisfactory model
-# xdata = ca
-# ydata = extract(sim, sys.CaMKAct)
+xdata = ca
+ydata = extract(sim, sys.CaMKAct)
 
-# function model(x, p)
-#     A = 30μM
-#     B = 70μM
-#     k0 = 0.19/A
-#     k1 = p[2]
-#     k2 = p[3]
-#     kmca = p[1]
-#     nca = p[4]
-#     y = map(x) do ca
-#         keq = k1 * hil(ca, kmca, nca) + k2 * ca + k0
-#         xterm = A + B + 1 / keq
-#         camkcam4 = 0.5 * (xterm - sqrt(xterm^2 - 4 * A * B))
-#         y = camkcam4 / B
-#     end
-# end
+function model(x, p)
+    A = 30μM
+    B = 70μM
+    k0 = p[4]
+    k1 = p[2]
+    kmca = p[1]
+    nca = p[3]
+    y = map(x) do ca
+        keq = k1 * hil(ca, kmca, nca) + k0
+        xterm = A + B + 1 / keq
+        camkcam4 = 0.5 * (xterm - sqrt(xterm^2 - 4 * A * B))
+        y = camkcam4 / B
+    end
+end
 
-# #---
-# p0 = [10μM, 1e5, 100.0, 1.0]
-# lb = [0.1μM, 0.0, 0.0, 0.5]
-# ub= [1000μM, Inf, Inf, 4.0]
-# fit = curve_fit(model, xdata, ydata, inv.(ydata), p0; lower=lb, upper=ub, autodiff=:forwarddiff)
+#---
+p0 = [1μM, 1e4, 1.0, 0.5]
+lb = [0.1μM, 0.0, 0.5, 0.0]
+ub= [1000μM, Inf, 4.0, 1000.0]
+fit = curve_fit(model, xdata, ydata, inv.(ydata), p0; lower=lb, upper=ub, autodiff=:forwarddiff)
 
-# #---
-# pestim = coef(fit)
+#---
+pestim = coef(fit)
 
-# # Loss value
-# sum(abs2, fit.resid)
+# Loss value
+rmse(fit)
 
-# # Fit result
-
-# yestim = model.(xdata, Ref(pestim))
-# p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity"; xopts...)
-# p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xlabel="Ca (μM)", title="Relative error (%)", lab=false, yticks=-7:7; xopts...)
-# plot(p1, p2, layout=(2, 1), size=(600, 600))
+# Fit result
+yestim = model.(xdata, Ref(pestim))
+p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity"; xopts...)
+p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xlabel="Ca (μM)", title="Relative error (%)", lab=false, yticks=-7:7; xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
