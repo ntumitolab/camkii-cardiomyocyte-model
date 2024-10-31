@@ -56,8 +56,8 @@ function get_camkii_sys(Ca=0μM;
         kCaM4P_off = inv(3second)
         k_phosCaM = phospho_rate # 12.6Hz
         k_dephospho = inv(6second)
-        k_P1_P2 = inv(15second)
-        k_P2_P1 = inv(60second)
+        k_P1_P2 = inv(60second)
+        k_P2_P1 = inv(15second)
 
         ## Oxidation / reduction
         k_OXPOX = 291Hz / mM
@@ -221,8 +221,8 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         kCaM4P_off = inv(3second)
         k_phosCaM = phospho_rate # 30Hz/12.6Hz
         k_dephospho = inv(6second)
-        k_P1_P2 = inv(15second)
-        k_P2_P1 = inv(60second)
+        k_P1_P2 = inv(60second)
+        k_P2_P1 = inv(15second)
 
         ## Oxidation / reduction
         k_BOX = 291Hz / mM
@@ -232,13 +232,12 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     end
 
     sts = @variables begin
-        CaM(t) = CAM_T
         KCaM(t) = 0
         PCaM(t) = 0
         OCaM(t) = 0
         OPCaM(t) = 0
-        CaMKP(t) = 6.33μM
-        CaMKP2(t) = 2.53μM
+        CaMKP(t) = 0
+        CaMKP2(t) = 0
         CaMKPOX(t) = 0
         CaMKOX(t) = 0
     end
@@ -247,11 +246,6 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         CaM(t)
         CaMK(t)
     end
-
-    conservedeqs = [
-        CAMKII_T ~ CaMK + KCaM + PCaM + OCaM + OPCaM + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
-        CAM_T ~ CaM + KCaM + PCaM + OCaM + OPCaM,
-    ]
 
     rates = merge(Dict(sts .=> Num(0)), Dict(conservedvars .=> Num(0)))
 
@@ -281,6 +275,8 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     end
     eqs = [
         CaMKAct ~ (1 - CaMK / CAMKII_T),
+        CAMKII_T ~ CaMK + KCaM + PCaM + OCaM + OPCaM + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
+        CAM_T ~ CaM + KCaM + PCaM + OCaM + OPCaM,
     ]
 
     "Ca binding/unbinding reaction equilibrium"
@@ -333,5 +329,16 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     add_rate!(rates, k_dephospho, [CaMKP], 0, [CaMK])
     add_rate!(rates, k_dephospho, [CaMKPOX], 0, [CaMKOX])
 
+    ## Redox reactions by ROS and reductases
+    add_rate!(rates, k_BOX * ROS, [KCaM], k_OXB, [OCaM])
+    add_rate!(rates, k_POXP * ROS, [PCaM], k_OXPP, [OPCaM])
+    add_rate!(rates, k_OXB, [CaMKOX], 0, [CaMK])
+    add_rate!(rates, k_POXP, [CaMKPOX], 0, [CaMKP])
 
+    rateeqs = [D(s) ~ rates[s] for s in sts]
+    sys = ODESystem([rateeqs; eqs], t; name)
+    if simplify
+        sys = structural_simplify(sys)
+    end
+    return sys
 end
