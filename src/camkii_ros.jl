@@ -60,7 +60,7 @@ function get_camkii_sys(Ca=0μM;
         k_P2_P1 = inv(60second)
 
         ## Oxidation / reduction
-        k_OXPOX = k_phosCaM
+        k_OXPOX = 291Hz / mM
         k_POXP = 291Hz / mM
         k_OXB = inv(45second)
         k_OXPP = inv(45second)
@@ -211,21 +211,21 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         kCaM2C_off = 6.8Hz
         kCaM2N_off = 1.7Hz
         kCaM4_off = 1.5Hz
-        kCaM0P_on = kCaM0_on * binding_To_PCaMK
-        kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
-        kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
-        kCaM4P_on = kCaM4_on * binding_To_PCaMK
+        kCaM0P_on = kCaM0_on
+        kCaM2CP_on = kCaM2C_on
+        kCaM2NP_on = kCaM2N_on
+        kCaM4P_on = kCaM4_on
         kCaM0P_off = inv(3second)
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
         kCaM4P_off = inv(3second)
-        k_phosCaM = phospho_rate # 12.6Hz
+        k_phosCaM = phospho_rate # 30Hz/12.6Hz
         k_dephospho = inv(6second)
         k_P1_P2 = inv(15second)
         k_P2_P1 = inv(60second)
 
         ## Oxidation / reduction
-        k_OXPOX = k_phosCaM
+        k_BOX = 291Hz / mM
         k_POXP = 291Hz / mM
         k_OXB = inv(45second)
         k_OXPP = inv(45second)
@@ -235,33 +235,22 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         CaM(t) = CAM_T
         KCaM(t) = 0
         PCaM(t) = 0
-        Ca2CaM_C(t) = 31nM
-        Ca2CaM_N(t) = 7.5nM
-        Ca4CaM(t) = 1.215e-8mM
-        CaM0_CaMK(t) = 0.903μM
-        Ca2CaM_C_CaMK(t) = 164nM
-        Ca2CaM_N_CaMK(t) = 14.87nM
-        Ca4CaM_CaMK(t) = 5.366nM
-        CaM0_CaMKP(t) = 1.9μM
-        Ca2CaM_C_CaMKP(t) = 1.365μM
-        Ca2CaM_N_CaMKP(t) = 81.1nM
-        Ca4CaM_CaMKP(t) = 52.23nM
-        Ca4CaM_CaMKOX(t) = 0mM
-        Ca4CaM_CaMKPOX(t) = 0mM
+        OCaM(t) = 0
+        OPCaM(t) = 0
         CaMKP(t) = 6.33μM
         CaMKP2(t) = 2.53μM
-        CaMKPOX(t) = 0mM
-        CaMKOX(t) = 0mM
+        CaMKPOX(t) = 0
+        CaMKOX(t) = 0
     end
 
     conservedvars = @variables begin
-        CaM0(t)
+        CaM(t)
         CaMK(t)
     end
 
     conservedeqs = [
-        CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
-        CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
+        CAMKII_T ~ CaMK + KCaM + PCaM + OCaM + OPCaM + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
+        CAM_T ~ CaM + KCaM + PCaM + OCaM + OPCaM,
     ]
 
     rates = merge(Dict(sts .=> Num(0)), Dict(conservedvars .=> Num(0)))
@@ -281,8 +270,16 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
         CaM2C_CaMKP(t)
         CaM2N_CaMKP(t)
         CaM4_CaMKP(t)
+        CaM0_CaMKOX(t)
+        CaM2C_CaMKOX(t)
+        CaM2N_CaMKOX(t)
+        CaM4_CaMKOX(t)
+        CaM0_CaMKPOX(t)
+        CaM2C_CaMKPOX(t)
+        CaM2N_CaMKPOX(t)
+        CaM4_CaMKPOX(t)
     end
-    obseqs = [
+    eqs = [
         CaMKAct ~ (1 - CaMK / CAMKII_T),
     ]
 
@@ -293,14 +290,48 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
     keqc = _ca_eq(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off)
     keqn = _ca_eq(Ca, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
     den = (1 + keqc) * (1 + keqn)
-    push!(obseqs, CaM0 ~ CaM / den, CaM2C ~ CaM * keqc / den, CaM2N ~ CaM * eqn / den, CaM4 ~ CaM * keqc * keqn / den)
+    push!(eqs, CaM0 ~ CaM / den, CaM2C ~ CaM * keqc / den, CaM2N ~ CaM * keqn / den, CaM4 ~ CaM * keqc * keqn / den)
 
     ## Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII(P) complex
     keqc = _ca_eq(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off)
     keqn = _ca_eq(Ca, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
     den = (1 + keqc) * (1 + keqn)
-    push!(obseqs, CaM0_CaMK ~ KCaM / den, CaM2C_CaMK ~ KCaM * keqc / den, CaM2N_CaMK ~ KCaM * eqn / den, CaM4_CaMK ~ KCaM * keqc * keqn / den)
-    push!(obseqs, CaM0_CaMKP ~ PCaM / den, CaM2C_CaMKP ~ PCaM * keqc / den, CaM2N_CaMKP ~ PCaM * eqn / den, CaM4_CaMKP ~ PCaM * keqc * keqn / den)
+    push!(eqs, CaM0_CaMK ~ KCaM / den, CaM2C_CaMK ~ KCaM * keqc / den, CaM2N_CaMK ~ KCaM * keqn / den, CaM4_CaMK ~ KCaM * keqc * keqn / den)
+    push!(eqs, CaM0_CaMKP ~ PCaM / den, CaM2C_CaMKP ~ PCaM * keqc / den, CaM2N_CaMKP ~ PCaM * keqn / den, CaM4_CaMKP ~ PCaM * keqc * keqn / den)
+    push!(eqs, CaM0_CaMKOX ~ OCaM / den, CaM2C_CaMKOX ~ OCaM * keqc / den, CaM2N_CaMKOX ~ OCaM * keqn / den, CaM4_CaMKOX ~ OCaM * keqc * keqn / den)
+    push!(eqs, CaM0_CaMKPOX ~ OPCaM / den, CaM2C_CaMKPOX ~ OPCaM * keqc / den, CaM2N_CaMKPOX ~ OPCaM * keqn / den, CaM4_CaMKPOX ~ OPCaM * keqc * keqn / den)
+
+    ## CaM + CaMK <--> KCaM
+    vf1 = CaMK * (kCaM0_on * CaM0 + kCaM2C_on * CaM2C + kCaM2N_on * CaM2N + kCaM4_on * CaM4)
+    vr1 = kCaM0_off * CaM0_CaMK + kCaM2C_off * CaM2C_CaMK + kCaM2N_off * CaM2N_CaMK + kCaM4_off * CaM4_CaMK
+    add_raw_rate!(rates, vf1 - vr1, [CaMK, CaM], [KCaM])
+
+    ## CaM + CaMKP <--> PCaM
+    vf2 = binding_To_PCaMK * CaMKP * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
+    vr2 = kCaM0P_off * CaM0_CaMKP + kCaM2CP_off * Ca2CaM_C_CaMKP + kCaM2NP_off * Ca2CaM_N_CaMKP + kCaM4P_off * Ca4CaM_CaMKP
+    add_raw_rate!(rates, vf2 - vr2, [CaMKP, CaM], [PCaM])
+
+    ## CaM + CaMKOX <--> OCaM
+    vf3 = CaMKOX * (kCaM0_on * CaM0 + kCaM2C_on * CaM2C + kCaM2N_on * CaM2N + kCaM4_on * CaM4)
+    vr3 = kCaM0_off * CaM0_CaMKOX + kCaM2C_off * CaM2C_CaMKOX + kCaM2N_off * CaM2N_CaMKOX + kCaM4_off * CaM4_CaMKOX
+    add_raw_rate!(rates, vf3 - vr3, [CaMKOX, CaM], [OCaM])
+
+    ## CaM + CaMKPOX <--> OPCaM
+    vf4 = binding_To_PCaMK * CaMKPOX * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
+    vr4 = kCaM0P_off * CaM0_CaMKPOX + kCaM2CP_off * Ca2CaM_C_CaMKPOX + kCaM2NP_off * Ca2CaM_N_CaMKPOX + kCaM4P_off * Ca4CaM_CaMKPOX
+    add_raw_rate!(rates, vf4 - vr4, [CaMKPOX, CaM], [OPCaM])
+
+    ## Auto-phosphorylation of CaMKII
+    k = k_phosCaM * CaMKAct
+    add_rate!(rates, k, [KCaM], 0, [PCaM])
+    add_rate!(rates, k, [OCaM], 0, [OPCaM])
+
+    ## Second phosphorylation of CaMKII-P
+    add_rate!(rates, k_P1_P2, [CaMKP], k_P2_P1, [CaMKP2]) # CaMKP <--> CaMKP2
+
+    ## Dephosphorylation of CaMKII-P: (CaMKP, CaMKPOX) --> (CaMK, CaMKOX)
+    add_rate!(rates, k_dephospho, [CaMKP], 0, [CaMK])
+    add_rate!(rates, k_dephospho, [CaMKPOX], 0, [CaMKOX])
 
 
 end
