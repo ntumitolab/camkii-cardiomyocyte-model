@@ -53,11 +53,7 @@ function build_neonatal_ecc_sys(;
         JCa_SR(t)
     end
 
-    barsys = if reduce_iso
-        get_bar_sys_reduced(ISO)
-    else
-        get_bar_sys(ATP, ISO)
-    end
+    barsys = reduce_iso ? get_bar_sys_reduced(ISO) : get_bar_sys(ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
     capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx, V_sub_SL)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys

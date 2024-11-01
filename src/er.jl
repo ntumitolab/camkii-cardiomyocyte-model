@@ -52,9 +52,9 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         Jleak ~ kleak * (CaNSR - Cai_sub_SR),
         Jtr ~ ktrCaSR * (CaNSR - CaJSR),
         betaSR ~ inv(1 + csqntot * Kmcsqn / (CaJSR + Kmcsqn)^2),
-        JCa_SR ~ Jleak - Jup + Jrel,
-        D(CaJSR) ~ betaSR * (-Jrel * V_sub_SR + Jtr * VNSR)/VJSR,
-        D(CaNSR) ~ (Jup - Jleak) * V_sub_SR / VNSR - Jtr,
+        JCa_SR ~ ((Jleak - Jup) * VNSR + Jrel * VJSR) / V_sub_SR,
+        D(CaJSR) ~ betaSR * (-Jrel + Jtr),
+        D(CaNSR) ~ ((Jup - Jleak) - Jtr * VJSR/VNSR),
     ]
     return ODESystem(eqs, t; name)
 end

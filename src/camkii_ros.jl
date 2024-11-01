@@ -60,7 +60,7 @@ function get_camkii_sys(Ca=0μM;
         k_P2_P1 = inv(15second)
 
         ## Oxidation / reduction
-        k_OXPOX = 291Hz / mM
+        k_BOX = 291Hz / mM
         k_POXP = 291Hz / mM
         k_OXB = inv(45second)
         k_OXPP = inv(45second)
@@ -154,7 +154,7 @@ function get_camkii_sys(Ca=0μM;
     add_rate!(rates, k_dephospho, [CaMKP], 0, [CaMK])
     add_rate!(rates, k_dephospho, [CaMKPOX], 0, [CaMKOX])
     ## Redox reactions by ROS and reductases
-    add_rate!(rates, k_OXPOX * ROS, [Ca4CaM_CaMK], k_OXB, [Ca4CaM_CaMKOX]) # Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
+    add_rate!(rates, k_BOX * ROS, [Ca4CaM_CaMK], k_OXB, [Ca4CaM_CaMKOX]) # Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
     add_rate!(rates, k_POXP * ROS, [Ca4CaM_CaMKP], k_OXPP, [Ca4CaM_CaMKPOX]) # Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
     add_rate!(rates, k_OXB, [CaMKOX], 0, [CaMK])
     add_rate!(rates, k_OXPP, [CaMKPOX], 0, [CaMKP])
