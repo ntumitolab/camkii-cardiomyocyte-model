@@ -169,7 +169,7 @@ end
 
 
 "CaMKII system with ROS activation and fast calcium binding"
-function get_camkii_fast_ca_bindinggsys(Ca=0μM;
+function get_camkii_fast_ca_binding_sys(Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0,
     phospho_rate=30Hz,
@@ -304,7 +304,7 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
 
     ## CaM + CaMKP <--> PCaM
     vf2 = binding_To_PCaMK * CaMKP * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
-    vr2 = kCaM0P_off * CaM0_CaMKP + kCaM2CP_off * Ca2CaM_C_CaMKP + kCaM2NP_off * Ca2CaM_N_CaMKP + kCaM4P_off * Ca4CaM_CaMKP
+    vr2 = kCaM0P_off * CaM0_CaMKP + kCaM2CP_off * CaM2C_CaMKP + kCaM2NP_off * CaM2N_CaMKP + kCaM4P_off * CaM4_CaMKP
     add_raw_rate!(rates, vf2 - vr2, [CaMKP, CaM], [PCaM])
 
     ## CaM + CaMKOX <--> OCaM
@@ -314,7 +314,7 @@ function get_camkii_fast_ca_bindinggsys(Ca=0μM;
 
     ## CaM + CaMKPOX <--> OPCaM
     vf4 = binding_To_PCaMK * CaMKPOX * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
-    vr4 = kCaM0P_off * CaM0_CaMKPOX + kCaM2CP_off * Ca2CaM_C_CaMKPOX + kCaM2NP_off * Ca2CaM_N_CaMKPOX + kCaM4P_off * Ca4CaM_CaMKPOX
+    vr4 = kCaM0P_off * CaM0_CaMKPOX + kCaM2CP_off * CaM2C_CaMKPOX + kCaM2NP_off * CaM2N_CaMKPOX + kCaM4P_off * CaM4_CaMKPOX
     add_raw_rate!(rates, vf4 - vr4, [CaMKPOX, CaM], [OPCaM])
 
     ## Auto-phosphorylation of CaMKII
