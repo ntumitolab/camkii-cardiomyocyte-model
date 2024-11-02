@@ -7,7 +7,6 @@ function get_ca_pde_sys(;
     TnI_PKAp=0,
     JCa_SR=0,
     JCa_SL=0,
-    V_sub_SL=0.137pL,
     name=:capdesys
 )
     rSR = rSR_true + 0.5 * dx
@@ -35,7 +34,7 @@ function get_ca_pde_sys(;
         Cai_sub_SR ~ Cai[1],
         Cai_sub_SL ~ Cai[m],
         D(Cai[1]) ~ (Dca / (j[1] * dx^2) * ((1 + j[1]) * Cai[2] - 2 * j[1] * Cai[1] + (j[1] - 1) * Cai[1]) + JCa_SR) * beta_cai(Cai[1]),
-        D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL / V_sub_SL) * beta_cai(Cai[m]),
+        D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL) * beta_cai(Cai[m]),
     ]
 
     defaults = [Cai[1] => Cai_default, Cai[m] => Cai_default]

@@ -55,10 +55,10 @@ function build_neonatal_ecc_sys(;
 
     barsys = reduce_iso ? get_bar_sys_reduced(ISO) : get_bar_sys(ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
-    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx, V_sub_SL)
+    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_sys(Cai_mean; ROS)
-    icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; Acap, Cm, LCCb_PKAp)
+    icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; LCCb_PKAp)
     @unpack INaCa, ICaL, ICaT, ICab = icasys
     inasys = get_ina_sys(na_i, na_o, vm)
     @unpack INa, INab = inasys
@@ -69,17 +69,15 @@ function build_neonatal_ecc_sys(;
     @unpack INaK = naksys
 
     eqs = [
-        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Current  normalized by capacitance
+        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Currents are normalized by capacitance
         D(na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_F / Vmyo,
         D(k_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_F / Vmyo,
+        JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_F / 2 / V_sub_SL,
     ]
 
     sys = ODESystem(eqs, t; name)
     for s2 in (barsys, capdesys, camkiisys, icasys, inasys, iksys, sersys, naksys)
         sys = extend(sys, s2; name)
     end
-    if simplify
-        sys = structural_simplify(sys)
-    end
-    return sys
+    return simplify ? structural_simplify(sys) : sys
 end
