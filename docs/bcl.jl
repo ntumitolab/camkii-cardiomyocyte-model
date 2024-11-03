@@ -30,16 +30,6 @@ plot(sol, idxs=sys.vm*1000, title="Action potential", tspan=(299, 300))
 #---
 plot(sol, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean], tspan=(299, 300), title="Calcium transient")
 
-# Not RyR problem, ICa problem
-prob2 = remake(prob, p = [sys.kRyR => 3600])
-
-sol2 = solve(prob2, alg; callback, abstol=1e-6, reltol=1e-6)
-
-plot(sol2, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean], tspan=(105, 107), title="Calcium transient")
-
-# Imbalance in the SR
-plot(sol2, idxs=[sys.CaNSR, sys.CaJSR], tspan=(299, 300), title="Calcium")
-
 #---
 plot(sol, idxs=sys.CaMKAct, title="Active CaMKII")
 
