@@ -28,14 +28,14 @@ function build_neonatal_ecc_sys(;
     reduce_iso=false,
 )
     @parameters begin
-        ca_o = 1796μM
-        na_o = 154578μM
-        k_o = 5366μM
-        mg_i = 1000μM
+        ca_o = 1.796mM
+        na_o = 154.578mM
+        k_o = 5.366mM
+        mg_i = 1mM
         ROS = 0μM
         ISO = 0μM
         ATP = 5mM
-        Istim = 0
+        Istim = 0μAμF
         # cell geometry
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
@@ -46,8 +46,8 @@ function build_neonatal_ecc_sys(;
     end
 
     @variables begin
-        na_i(t) = 13838.37602μM
-        k_i(t) = 150952.75035μM
+        na_i(t) = 13.83837602mM
+        k_i(t) = 150.95275035mM
         vm(t) = -68.79268mV
         JCa_SL(t)
         JCa_SR(t)

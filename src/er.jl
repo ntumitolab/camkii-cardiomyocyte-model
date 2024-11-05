@@ -1,7 +1,7 @@
 "Sarcoplasmic reticulum system"
 function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL, name=:sersys)
     @parameters begin
-        VSR = 0.093pL
+        VSR = 0.0903pL
         VNSR = 0.9 * VSR
         VJSR = VSR - VNSR
         # RyR
@@ -9,14 +9,14 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         kaposRyR = 1000Hz
         kanegRyR = 160Hz
         # SERCA
-        VmaxSR = 0.9996 * μM / ms
+        VmaxSR = 0.9996mM*Hz
         KmfSR = 0.5μM
-        KmrSR = 7000 * KmfSR
-        kSRleak = 5e-6 / ms
+        KmrSR = 3.5mM
+        kSRleak = 0.005Hz
         fracPKA_PLBo = 1 - 0.079755
         ktrCaSR = inv(200ms)
-        csqntot = 24750μM
-        Kmcsqn = 800μM
+        csqntot = 24.750mM
+        Kmcsqn = 0.8mM
     end
 
     @variables begin
@@ -53,8 +53,8 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         Jtr ~ ktrCaSR * (CaNSR - CaJSR),
         betaSR ~ inv(1 + csqntot * Kmcsqn / (CaJSR + Kmcsqn)^2),
         JCa_SR ~ ((Jleak - Jup) * VNSR + Jrel * VJSR) / V_sub_SR,
-        D(CaJSR) ~ betaSR * (-Jrel + Jtr),
-        D(CaNSR) ~ ((Jup - Jleak) - Jtr * VJSR/VNSR),
+        D(CaJSR) ~ betaSR * (-Jrel + Jtr * VNSR/VJSR),
+        D(CaNSR) ~ Jup - Jleak - Jtr,
     ]
     return ODESystem(eqs, t; name)
 end
