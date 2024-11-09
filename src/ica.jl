@@ -5,7 +5,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
         fracLCCbp0 = 0.250657 # Derived quantity - (LCCbp(baseline)/LCCbtot)
         fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
         fNaCa = 1
-        kNaCa = 2.268e-016μAμF / μM^4
+        kNaCa = 2.268e-16μAμF / μM^4
         dNaCa = 1e-16 / μM^4
         gNaCa = 0.5
         GCaL = 6.3e-5 * ((0.1metre)^3 / ms / Farad)
