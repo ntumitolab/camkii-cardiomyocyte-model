@@ -16,7 +16,7 @@ function get_ca_pde_sys(;
     @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t)
     @parameters begin
         Dca = 7μm^2 / ms
-        TrpnTotal = 35μM  # Half of adult rat CMC
+        TrpnTotal = 35μM  # Half of adult rat CMC (70 μM)
         CmdnTotal = 50μM
         KmCmdn = 2.38μM
         KmTrpn = 0.5μM

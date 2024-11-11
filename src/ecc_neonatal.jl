@@ -3,6 +3,7 @@
 # Code & model: Topi Korhonen, University of Oulu (topi.korhonen@oulu.fi)
 #
 # PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT: Korhonen et al. "Model of excitation-contraction coupling of rat neonatal ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
+# https://pmc.ncbi.nlm.nih.gov/articles/PMC2716686/
 function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
     @parameters begin
         INaKmax = 2.7μAμF

@@ -8,7 +8,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
         kNaCa = 2.268e-16μAμF / μM^4
         dNaCa = 1e-16 / μM^4
         gNaCa = 0.5
-        GCaL = 6.3e-5 * ((0.1metre)^3 / ms / Farad)
+        GCaL = 6.3e-5 * (metre^3 / second / Farad)
         taufca = 10ms
         gCaT = 0.2mSμF
         gCab = 0.0008mSμF
