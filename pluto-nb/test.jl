@@ -19,7 +19,6 @@ begin
 	using CaMKIIModel
 	using CaMKIIModel: μM, Hz, μm
 	Plots.default(lw=1.5)
-	Plots.plotlyjs()
 end
 
 # ╔═╡ fe7e7c0b-1ae0-4a04-9549-23aba60efcf5
