@@ -1,5 +1,4 @@
 # # Initial conditions
-# No stimulation for 50000 seconds.
 using ModelingToolkit
 using OrdinaryDiffEq
 using SteadyStateDiffEq
@@ -8,7 +7,6 @@ using CaMKIIModel
 Plots.default(lw=2)
 
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
-tend = 50000.0
 prob = SteadyStateProblem(sys, [])
 alg = DynamicSS(Rodas5P())
 

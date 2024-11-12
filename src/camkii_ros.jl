@@ -67,21 +67,21 @@ function get_camkii_sys(Ca=0μM;
     end
 
     sts = @variables begin
-        Ca2CaM_C(t) = 31nM
-        Ca2CaM_N(t) = 7.5nM
-        Ca4CaM(t) = 1.215e-8mM
-        CaM0_CaMK(t) = 0.903μM
-        Ca2CaM_C_CaMK(t) = 164nM
-        Ca2CaM_N_CaMK(t) = 14.87nM
-        Ca4CaM_CaMK(t) = 5.366nM
-        CaM0_CaMKP(t) = 1.9μM
-        Ca2CaM_C_CaMKP(t) = 1.365μM
-        Ca2CaM_N_CaMKP(t) = 81.1nM
-        Ca4CaM_CaMKP(t) = 52.23nM
+        Ca2CaM_C(t) = 139.72nM
+        Ca2CaM_N(t) = 9.99nM
+        Ca4CaM(t) = 0.05897nM
+        CaM0_CaMK(t) = 1.1211μM
+        Ca2CaM_C_CaMK(t) = 113.911nM
+        Ca2CaM_N_CaMK(t) = 15.951nM
+        Ca4CaM_CaMK(t) = 2.2624nM
+        CaM0_CaMKP(t) = 195.18nM
+        Ca2CaM_C_CaMKP(t) = 320nM
+        Ca2CaM_N_CaMKP(t) = 4.337nM
+        Ca4CaM_CaMKP(t) = 5.513nM
         Ca4CaM_CaMKOX(t) = 0mM
         Ca4CaM_CaMKPOX(t) = 0mM
-        CaMKP(t) = 6.33μM
-        CaMKP2(t) = 2.53μM
+        CaMKP(t) = 1.05μM
+        CaMKP2(t) = 262.55nM
         CaMKPOX(t) = 0mM
         CaMKOX(t) = 0mM
     end
