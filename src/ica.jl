@@ -1,14 +1,14 @@
 "Plama membrane calcium currents"
-function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^2, LCCb_PKAp=0, name=:icasys)
+function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
     @parameters begin
         ICa_scale0 = 0.95 # or 5.25
         fracLCCbp0 = 0.250657 # Derived quantity - (LCCbp(baseline)/LCCbtot)
         fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
         fNaCa = 1
-        kNaCa = 2.268e-016μAμF / μM^4
+        kNaCa = 2.268e-16μAμF / μM^4
         dNaCa = 1e-16 / μM^4
         gNaCa = 0.5
-        GCaL = 6.3e-5 * ((0.1metre)^3 / ms / Farad)
+        GCaL = 1.3e-4 * (metre^3 / second / Farad) # 6.3e-5
         taufca = 10ms
         gCaT = 0.2mSμF
         gCab = 0.0008mSμF
@@ -45,6 +45,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^
     # Na-Ca exchanger (NCX)
     a = nai^3 * cao
     b = nao^3 * cai * fNaCa
+    inaca = ICa_scale * kNaCa * (exp(iVT * gNaCa * vm) * a - exp(iVT * (gNaCa - 1) * vm) * b) / (1 + dNaCa * (a + b))
     # L-type calcium channel (LCC)
     V = vm * inv(mV) # Convert voltage to mV
     alphad = 1.4 * expit((V + 35) / 13) + 0.25
@@ -58,8 +59,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; Acap=4π * (10μm)^2, Cm=1μF / cm^
     return ODESystem([
             ICa_scale ~ ICa_scale0 * favail,
             E_Ca ~ nernst(cao, cai, 2),
-            JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * (Acap * Cm / 2 / Faraday),
-            INaCa ~ ICa_scale * kNaCa * (exp(iVT * gNaCa * vm) * a - exp(iVT * (gNaCa - 1) * vm) * b) / (1 + dNaCa * (a + b)),
+            INaCa ~ inaca,
             ICaL ~ ICa_scale * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
             dinf ~ expit((V + 11.1) / 7.2),
             taud ~ (alphad * betad + gammad) * ms,

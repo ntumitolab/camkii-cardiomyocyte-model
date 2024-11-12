@@ -7,7 +7,6 @@ function get_ca_pde_sys(;
     TnI_PKAp=0,
     JCa_SR=0,
     JCa_SL=0,
-    V_sub_SL=0.137pL,
     name=:capdesys
 )
     rSR = rSR_true + 0.5 * dx
@@ -17,7 +16,7 @@ function get_ca_pde_sys(;
     @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t)
     @parameters begin
         Dca = 7μm^2 / ms
-        TrpnTotal = 35μM
+        TrpnTotal = 35μM  # Half of adult rat CMC (70 μM)
         CmdnTotal = 50μM
         KmCmdn = 2.38μM
         KmTrpn = 0.5μM
@@ -35,7 +34,7 @@ function get_ca_pde_sys(;
         Cai_sub_SR ~ Cai[1],
         Cai_sub_SL ~ Cai[m],
         D(Cai[1]) ~ (Dca / (j[1] * dx^2) * ((1 + j[1]) * Cai[2] - 2 * j[1] * Cai[1] + (j[1] - 1) * Cai[1]) + JCa_SR) * beta_cai(Cai[1]),
-        D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL / V_sub_SL) * beta_cai(Cai[m]),
+        D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL) * beta_cai(Cai[m]),
     ]
 
     defaults = [Cai[1] => Cai_default, Cai[m] => Cai_default]

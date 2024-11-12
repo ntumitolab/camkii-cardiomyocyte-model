@@ -1,8 +1,1236 @@
+### A Pluto.jl notebook ###
+# v0.20.3
+
+using Markdown
+using InteractiveUtils
+
+# ╔═╡ 67a68b30-9d7f-11ef-1c30-bf3107341c1b
+begin
+	using ProgressLogging
+	using Catalyst
+	using OrdinaryDiffEq
+	using Plots
+	using ModelingToolkit
+	using Statistics
+	import NaNMath as nm
+	using ModelingToolkit: t_nounits as t, D_nounits as D
+end
+
+# ╔═╡ 0583b4d2-6c54-4621-8d98-3df7a69e306d
+function beta_cai(Cai, TnI_PKAp)
+    fracTnIpo = 0.062698  # Derived quantity (TnI_PKAp(baseline)/TnItot)
+    fPKA_TnI = (1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIpo)) # Max effect +61#
+    TrpnTotal = 35
+    KmTrpn = 0.5 / fPKA_TnI
+    CmdnTotal = 50
+    KmCmdn = 2.38
+    return inv(1 + TrpnTotal * KmTrpn / (Cai + KmTrpn)^2 + CmdnTotal * KmCmdn / (Cai + KmCmdn)^2)
+end
+
+# ╔═╡ 447af9d0-daa7-4855-be20-c38dac16e8a0
+function get_Morotti_equations()
+    # CaMDyad / Cyt / SL variables
+    #@variables CaM_dyad(t) Ca2CaM_dyad(t) Ca4CaM_dyad(t) CaMB_dyad(t) Ca2CaMB_dyad(t) Ca4CaMB_dyad(t) Pb2_dyad(t) Pb_dyad(t) Pt_dyad(t) Pt2_dyad(t)
+    #@variables Pa_dyad(t) Ca4CaN_dyad(t) CaMCa4CaN_dyad(t) Ca2CaMCa4CaN_dyad(t) Ca4CaMCa4CaN_dyad(t)
+    @variables CaM_sl(t) Ca2CaM_sl(t) Ca4CaM_sl(t) CaMB_sl(t) Ca2CaMB_sl(t) Ca4CaMB_sl(t) Pb2_sl(t) Pb_sl(t) Pt_sl(t) Pt2_sl(t)
+    @variables Pa_sl(t) Ca4CaN_sl(t) CaMCa4CaN_sl(t) Ca2CaMCa4CaN_sl(t) Ca4CaMCa4CaN_sl(t)
+    @variables CaM_cyt(t) Ca2CaM_cyt(t) Ca4CaM_cyt(t) CaMB_cyt(t) Ca2CaMB_cyt(t) Ca4CaMB_cyt(t) Pb2_cyt(t) Pb_cyt(t) Pt_cyt(t) Pt2_cyt(t)
+    @variables Pa_cyt(t) Ca4CaN_cyt(t) CaMCa4CaN_cyt(t) Ca2CaMCa4CaN_cyt(t) Ca4CaMCa4CaN_cyt(t)
+
+    # CaMKII variables
+    @variables LCC_PKAp(t) RyR2809p(t) RyR2815p(t) PLBT17p(t) LCC_CKslp(t) #LCC_CKdyadp(t)
+    @variables I1p_PP1(t) Pb_sl(t) Pt_sl(t) Pt2_sl(t) Pa_sl(t) #Pb_dyad(t) Pt_dyad(t) Pt2_dyad(t) Pa_dyad(t)
+
+    #BAR variables
+    @variables LR(t) LRG(t) RG(t) b1AR_S464(t) b1AR_S301(t) GsaGTPtot(t) GsaGDP(t) Gsby(t) AC_GsaGTP(t) PDEp(t)
+    @variables cAMPtot(t) RC_I(t) RCcAMP_I(t) RCcAMPcAMP_I(t) RcAMPcAMP_I(t) PKACI(t) PKACI_PKI(t) RC_II(t) RCcAMP_II(t) RCcAMPcAMP_II(t)
+    @variables RcAMPcAMP_II(t) PKACII(t) PKACII_PKI(t) I1p_PP1(t) I1ptot(t) PLBp(t) PLMp(t) LCCap(t) LCCbp(t) RyRp(t)
+    @variables TnIp(t) KS79(t) KS80(t) KSp(t) CFTRp(t) KURp(t)
+
+    # ECC variables
+    @variables i_CaJSR(t) CaNSR(t) V(t) Nai(t) Ki(t) i_b(t) i_g(t) i_d(t) i_f(t) i_fca(t) i_y(t) i_r(t) i_s(t) i_sslow(t)
+    @variables i_Nam(t) i_Nah(t) i_Naj(t) i_PO1(t) i_PO2(t) i_PC2(t) i_nKs(t) i_CK1(t) i_CK2(t) i_OK(t) i_IK(t)
+    #@variables Cai_mean(t)
+
+    ## Neonatal Rat
+    # Cell geometry (μm)
+    rSR_true = 6
+    rSL_true = 10.5
+
+    # Ca diffusion grid
+    dx = 0.1
+    rSR = rSR_true + 0.5 * dx
+    rSL = rSL_true - 0.5 * dx
+    j = round(rSR / dx):1:round(rSL / dx) # Spatial index of Cai diffusion
+    # Cai
+    m = length(j)
+    @variables Cai(t)[1:m]
+
+    Cai_sub_SR = Cai[1]
+    Cai_sub_SL = Cai[m]
+    Cai_mean = mean(skipmissing(Cai))
+
+    ## CamDyad/ CaMSL/ CamCyt
+    ## Parameters
+    Mg = 1      # [mM]
+    K = 135     # [mM]s
+    Btot_dyad = 0
+    CaMKIItot_dyad = 120         # [uM]
+    CaNtot_dyad = 3e-3 / 8.293e-4  # [uM]
+    PP1tot_dyad = 96.5           # [uM]
+
+    ## Parameters for Cyt and SL
+    Btot = 24.2     # [uM]
+    CaMKIItot = 120 * 8.293e-4  # [uM]
+    CaNtot = 3e-3             # [uM]
+    PP1tot = 0.57             # [uM]
+
+    ## Parameters
+    # Ca/CaM parameters
+    if Mg <= 1
+        Kd02 = 0.0025 * (1 + K / 0.94 - Mg / 0.012) * (1 + K / 8.1 + Mg / 0.022)  # [uM^2]
+        Kd24 = 0.128 * (1 + K / 0.64 + Mg / 0.0014) * (1 + K / 13.0 - Mg / 0.153) # [uM^2]
+    else
+        Kd02 = 0.0025 * (1 + K / 0.94 - 1 / 0.012 + (Mg - 1) / 0.060) * (1 + K / 8.1 + 1 / 0.022 + (Mg - 1) / 0.068)   # [uM^2]
+        Kd24 = 0.128 * (1 + K / 0.64 + 1 / 0.0014 + (Mg - 1) / 0.005) * (1 + K / 13.0 - 1 / 0.153 + (Mg - 1) / 0.150)  # [uM^2]
+    end
+    k20 = 10               # [s^-1]
+    k02 = k20 / Kd02         # [uM^-2 s^-1]
+    k42 = 500              # [s^-1]
+    k24 = k42 / Kd24         # [uM^-2 s^-1]
+
+    # CaM buffering (B) parameters
+    k0Boff = 0.0014        # [s^-1]
+    k0Bon = k0Boff / 0.2   # [uM^-1 s^-1] kon = koff/Kd
+    k2Boff = k0Boff / 100    # [s^-1]
+    k2Bon = k0Bon          # [uM^-1 s^-1]
+    k4Boff = k2Boff        # [s^-1]
+    k4Bon = k0Bon          # [uM^-1 s^-1]
+
+    # using thermodynamic constraints
+    k20B = k20 / 100 # [s^-1] thermo constraint on loop 1
+    k02B = k02     # [uM^-2 s^-1]
+    k42B = k42     # [s^-1] thermo constraint on loop 2
+    k24B = k24     # [uM^-2 s^-1]
+
+    # CaMKII parameters
+    # Wi Wa Wt Wp
+    kbi = 2.2      # [s^-1] (Ca4CaM dissocation from Wb)
+    kib = kbi / 33.5e-3 # [uM^-1 s^-1]
+    kib2 = kib
+    kb2i = kib2 * 5
+    kb24 = k24
+    kb42 = k42 * 33.5e-3 / 5
+    kpp1 = 1.72     # [s^-1] (PP1-dep dephosphorylation rates)
+    Kmpp1 = 11.5    # [uM]
+    kta = kbi / 1000  # [s^-1] (Ca4CaM dissociation from Wt)
+    kat = kib       # [uM^-1 s^-1] (Ca4CaM reassociation with Wa)
+    kt42 = k42 * 33.5e-6 / 5
+    kt24 = k24
+    kat2 = kib
+    kt2a = kib * 5
+
+    # CaN parameters
+    kcanCaoff = 1              # [s^-1]
+    kcanCaon = kcanCaoff / 0.5               # [uM^-1 s^-1]
+    kcanCaM4on = 46            # [uM^-1 s^-1]
+    kcanCaM4off = 1.3e-3       # [s^-1]
+    kcanCaM2on = kcanCaM4on
+    kcanCaM2off = 2508 * kcanCaM4off
+    kcanCaM0on = kcanCaM4on
+    kcanCaM0off = 165 * kcanCaM2off
+    k02can = k02
+    k20can = k20 / 165
+    k24can = k24
+    k42can = k20 / 2508
+
+    #=
+    ## Dyad Fluxes
+
+    Ca_Dyad = Ca_j*100
+    # CaM Reaction fluxes
+    B_dyad = Btot_dyad - CaMB_dyad - Ca2CaMB_dyad - Ca4CaMB_dyad
+    rcn02_dyad = k02*Ca_Dyad^2*CaM_dyad - k20*Ca2CaM_dyad
+    rcn24_dyad = k24*Ca_Dyad^2*Ca2CaM_dyad - k42*Ca4CaM_dyad
+    # CaM buffer fluxes
+    rcn02B_dyad = k02B*Ca_Dyad^2*CaMB_dyad - k20B*Ca2CaMB_dyad
+    rcn24B_dyad = k24B*Ca_Dyad^2*Ca2CaMB_dyad - k42B*Ca4CaMB_dyad
+    rcn0B_dyad = k0Bon*CaM_dyad*B_dyad - k0Boff*CaMB_dyad
+    rcn2B_dyad = k2Bon*Ca2CaM_dyad*B_dyad - k2Boff*Ca2CaMB_dyad
+    rcn4B_dyad = k4Bon*Ca4CaM_dyad*B_dyad - k4Boff*Ca4CaMB_dyad
+    # CaN reaction fluxes
+    Ca2CaN_dyad = CaNtot_dyad - Ca4CaN_dyad - CaMCa4CaN_dyad - Ca2CaMCa4CaN_dyad - Ca4CaMCa4CaN_dyad
+    rcnCa4CaN_dyad = kcanCaon*Ca_Dyad^2*Ca2CaN_dyad - kcanCaoff*Ca4CaN_dyad
+    rcn02CaN_dyad = k02can*Ca_Dyad^2*CaMCa4CaN_dyad - k20can*Ca2CaMCa4CaN_dyad
+    rcn24CaN_dyad = k24can*Ca_Dyad^2*Ca2CaMCa4CaN_dyad - k42can*Ca4CaMCa4CaN_dyad
+    rcn0CaN_dyad = kcanCaM0on*CaM_dyad*Ca4CaN_dyad - kcanCaM0off*CaMCa4CaN_dyad
+    rcn2CaN_dyad = kcanCaM2on*Ca2CaM_dyad*Ca4CaN_dyad - kcanCaM2off*Ca2CaMCa4CaN_dyad
+    rcn4CaN_dyad = kcanCaM4on*Ca4CaM_dyad*Ca4CaN_dyad - kcanCaM4off*Ca4CaMCa4CaN_dyad
+    # CaMKII reaction fluxes
+    Pi_dyad = 1 - Pb2_dyad - Pb_dyad - Pt_dyad - Pt2_dyad - Pa_dyad
+    rcnCKib2_dyad = kib2*Ca2CaM_dyad*Pi_dyad - kb2i*Pb2_dyad
+    rcnCKb2b_dyad = kb24*Ca_Dyad^2*Pb2_dyad - kb42*Pb_dyad
+    rcnCKib_dyad = kib*Ca4CaM_dyad*Pi_dyad - kbi*Pb_dyad
+    T_dyad = Pb_dyad + Pt_dyad + Pt2_dyad + Pa_dyad
+    kbt_dyad = 0.055*T_dyad + 0.0074*T_dyad^2 + 0.015*T_dyad^3
+    rcnCKbt_dyad = kbt_dyad*Pb_dyad - kpp1*PP1tot_dyad*Pt_dyad/(Kmpp1+CaMKIItot_dyad*Pt_dyad)
+    rcnCKtt2_dyad = kt42*Pt_dyad - kt24*Ca_Dyad^2*Pt2_dyad
+    rcnCKta_dyad = kta*Pt_dyad - kat*Ca4CaM_dyad*Pa_dyad
+    rcnCKt2a_dyad = kt2a*Pt2_dyad - kat2*Ca2CaM_dyad*Pa_dyad
+    rcnCKt2b2_dyad = kpp1*PP1tot_dyad*Pt2_dyad/(Kmpp1+CaMKIItot_dyad*Pt2_dyad)
+    rcnCKai_dyad = kpp1*PP1tot_dyad*Pa_dyad/(Kmpp1+CaMKIItot_dyad*Pa_dyad)
+    =#
+
+    ## SL Fluxes
+
+    Ca_SL = Cai_sub_SL
+    # CaM Reaction fluxes
+    B_sl = Btot - CaMB_sl - Ca2CaMB_sl - Ca4CaMB_sl
+    rcn02_sl = k02 * Ca_SL^2 * CaM_sl - k20 * Ca2CaM_sl
+    rcn24_sl = k24 * Ca_SL^2 * Ca2CaM_sl - k42 * Ca4CaM_sl
+    # CaM buffer fluxes
+    rcn02B_sl = k02B * Ca_SL^2 * CaMB_sl - k20B * Ca2CaMB_sl
+    rcn24B_sl = k24B * Ca_SL^2 * Ca2CaMB_sl - k42B * Ca4CaMB_sl
+    rcn0B_sl = k0Bon * CaM_sl * B_sl - k0Boff * CaMB_sl
+    rcn2B_sl = k2Bon * Ca2CaM_sl * B_sl - k2Boff * Ca2CaMB_sl
+    rcn4B_sl = k4Bon * Ca4CaM_sl * B_sl - k4Boff * Ca4CaMB_sl
+    # CaN reaction fluxes
+    Ca2CaN_sl = CaNtot - Ca4CaN_sl - CaMCa4CaN_sl - Ca2CaMCa4CaN_sl - Ca4CaMCa4CaN_sl
+    rcnCa4CaN_sl = kcanCaon * Ca_SL^2 * Ca2CaN_sl - kcanCaoff * Ca4CaN_sl
+    rcn02CaN_sl = k02can * Ca_SL^2 * CaMCa4CaN_sl - k20can * Ca2CaMCa4CaN_sl
+    rcn24CaN_sl = k24can * Ca_SL^2 * Ca2CaMCa4CaN_sl - k42can * Ca4CaMCa4CaN_sl
+    rcn0CaN_sl = kcanCaM0on * CaM_sl * Ca4CaN_sl - kcanCaM0off * CaMCa4CaN_sl
+    rcn2CaN_sl = kcanCaM2on * Ca2CaM_sl * Ca4CaN_sl - kcanCaM2off * Ca2CaMCa4CaN_sl
+    rcn4CaN_sl = kcanCaM4on * Ca4CaM_sl * Ca4CaN_sl - kcanCaM4off * Ca4CaMCa4CaN_sl
+    # CaMKII reaction fluxes
+    Pi_sl = 1 - Pb2_sl - Pb_sl - Pt_sl - Pt2_sl - Pa_sl
+    rcnCKib2_sl = kib2 * Ca2CaM_sl * Pi_sl - kb2i * Pb2_sl
+    rcnCKb2b_sl = kb24 * Ca_SL^2 * Pb2_sl - kb42 * Pb_sl
+    rcnCKib_sl = kib * Ca4CaM_sl * Pi_sl - kbi * Pb_sl
+    T_sl = Pb_sl + Pt_sl + Pt2_sl + Pa_sl
+    kbt_sl = 0.055 * T_sl + 0.0074 * T_sl^2 + 0.015 * T_sl^3
+    rcnCKbt_sl = kbt_sl * Pb_sl - kpp1 * PP1tot * Pt_sl / (Kmpp1 + CaMKIItot * Pt_sl)
+    rcnCKtt2_sl = kt42 * Pt_sl - kt24 * Ca_SL^2 * Pt2_sl
+    rcnCKta_sl = kta * Pt_sl - kat * Ca4CaM_sl * Pa_sl
+    rcnCKt2a_sl = kt2a * Pt2_sl - kat2 * Ca2CaM_sl * Pa_sl
+    rcnCKt2b2_sl = kpp1 * PP1tot * Pt2_sl / (Kmpp1 + CaMKIItot * Pt2_sl)
+    rcnCKai_sl = kpp1 * PP1tot * Pa_sl / (Kmpp1 + CaMKIItot * Pa_sl)
+
+    ## Cyt Fluxes
+
+    Ca_Cyt = Cai_mean
+    # CaM Reaction fluxes
+    B_cyt = Btot - CaMB_cyt - Ca2CaMB_cyt - Ca4CaMB_cyt
+    rcn02_cyt = k02 * Ca_Cyt^2 * CaM_cyt - k20 * Ca2CaM_cyt
+    rcn24_cyt = k24 * Ca_Cyt^2 * Ca2CaM_cyt - k42 * Ca4CaM_cyt
+    # CaM buffer fluxes
+    rcn02B_cyt = k02B * Ca_Cyt^2 * CaMB_cyt - k20B * Ca2CaMB_cyt
+    rcn24B_cyt = k24B * Ca_Cyt^2 * Ca2CaMB_cyt - k42B * Ca4CaMB_cyt
+    rcn0B_cyt = k0Bon * CaM_cyt * B_cyt - k0Boff * CaMB_cyt
+    rcn2B_cyt = k2Bon * Ca2CaM_cyt * B_cyt - k2Boff * Ca2CaMB_cyt
+    rcn4B_cyt = k4Bon * Ca4CaM_cyt * B_cyt - k4Boff * Ca4CaMB_cyt
+    # CaN reaction fluxes
+    Ca2CaN_cyt = CaNtot - Ca4CaN_cyt - CaMCa4CaN_cyt - Ca2CaMCa4CaN_cyt - Ca4CaMCa4CaN_cyt
+    rcnCa4CaN_cyt = kcanCaon * Ca_Cyt^2 * Ca2CaN_cyt - kcanCaoff * Ca4CaN_cyt
+    rcn02CaN_cyt = k02can * Ca_Cyt^2 * CaMCa4CaN_cyt - k20can * Ca2CaMCa4CaN_cyt
+    rcn24CaN_cyt = k24can * Ca_Cyt^2 * Ca2CaMCa4CaN_cyt - k42can * Ca4CaMCa4CaN_cyt
+    rcn0CaN_cyt = kcanCaM0on * CaM_cyt * Ca4CaN_cyt - kcanCaM0off * CaMCa4CaN_cyt
+    rcn2CaN_cyt = kcanCaM2on * Ca2CaM_cyt * Ca4CaN_cyt - kcanCaM2off * Ca2CaMCa4CaN_cyt
+    rcn4CaN_cyt = kcanCaM4on * Ca4CaM_cyt * Ca4CaN_cyt - kcanCaM4off * Ca4CaMCa4CaN_cyt
+    # CaMKII reaction fluxes
+    Pi_cyt = 1 - Pb2_cyt - Pb_cyt - Pt_cyt - Pt2_cyt - Pa_cyt
+    rcnCKib2_cyt = kib2 * Ca2CaM_cyt * Pi_cyt - kb2i * Pb2_cyt
+    rcnCKb2b_cyt = kb24 * Ca_Cyt^2 * Pb2_cyt - kb42 * Pb_cyt
+    rcnCKib_cyt = kib * Ca4CaM_cyt * Pi_cyt - kbi * Pb_cyt
+    T_cyt = Pb_cyt + Pt_cyt + Pt2_cyt + Pa_cyt
+    kbt_cyt = 0.055 * T_cyt + 0.0074 * T_cyt^2 + 0.015 * T_cyt^3
+    #rcnCKbt_cyt = Pb_cyt - kpp1*PP1tot*Pt_cyt/(Kmpp1+CaMKIItot*Pt_cyt)
+    rcnCKbt_cyt = kbt_cyt * Pb_cyt - kpp1 * PP1tot * Pt_cyt / (Kmpp1 + CaMKIItot * Pt_cyt)
+    rcnCKtt2_cyt = kt42 * Pt_cyt - kt24 * Ca_Cyt^2 * Pt2_cyt
+    rcnCKta_cyt = kta * Pt_cyt - kat * Ca4CaM_cyt * Pa_cyt
+    rcnCKt2a_cyt = kt2a * Pt2_cyt - kat2 * Ca2CaM_cyt * Pa_cyt
+    rcnCKt2b2_cyt = kpp1 * PP1tot * Pt2_cyt / (Kmpp1 + CaMKIItot * Pt2_cyt)
+    rcnCKai_cyt = kpp1 * PP1tot * Pa_cyt / (Kmpp1 + CaMKIItot * Pa_cyt)
+
+
+    ## Ordinary Differential Equations
+    Vmyo = 2.1454e-11           # [L]
+    Vdyad = 1.7790e-014         # [L]
+    VSL = 6.6013e-013           # [L]
+    kSLmyo = 8.587e-15          # [L/msec]
+    CaMKIItotDyad = 120         # [uM]
+    BtotDyad = 1.54 / 8.293e-4    # [uM]
+    #CaMtotDyad = CaM_dyad+Ca2CaM_dyad+Ca4CaM_dyad+CaMB_dyad+Ca2CaMB_dyad+Ca4CaMB_dyad+CaMKIItotDyad*(Pb2_dyad+Pb_dyad+Pt_dyad+Pt2_dyad)+CaMCa4CaN_dyad+Ca2CaMCa4CaN_dyad+Ca4CaMCa4CaN_dyad
+    #Bdyad = BtotDyad - CaMtotDyad                                                  # [uM dyad]
+    #J_cam_dyadSL = 1e-3*(k0Boff*CaM_dyad - k0Bon*Bdyad*CaM_sl)                     # [uM/msec dyad]
+    #J_ca2cam_dyadSL = 1e-3*(k2Boff*Ca2CaM_dyad - k2Bon*Bdyad*Ca2CaM_sl)            # [uM/msec dyad]
+    #J_ca4cam_dyadSL = 1e-3*(k2Boff*Ca4CaM_dyad - k4Bon*Bdyad*Ca4CaM_sl)            # [uM/msec dyad]
+    J_cam_SLmyo = kSLmyo * (CaM_sl - CaM_cyt)                                          # [umol/msec]
+    J_ca2cam_SLmyo = kSLmyo * (Ca2CaM_sl - Ca2CaM_cyt)                                 # [umol/msec]
+    J_ca4cam_SLmyo = kSLmyo * (Ca4CaM_sl - Ca4CaM_cyt)                                 # [umol/msec]
+
+    #=
+    # CaMDyad equations
+    CaMdyad_eqs = [
+        D(CaM_dyad) ~ (1e-3*(-rcn02_dyad - rcn0B_dyad - rcn0CaN_dyad)-J_cam_dyadSL),                                                                      # du[1]
+        D(Ca2CaM_dyad) ~ (1e-3*(rcn02_dyad - rcn24_dyad - rcn2B_dyad - rcn2CaN_dyad + CaMKIItot_dyad.*(-rcnCKib2_dyad + rcnCKt2a_dyad))-J_ca2cam_dyadSL),      # du[2]
+        D(Ca4CaM_dyad) ~ (1e-3*(rcn24_dyad - rcn4B_dyad - rcn4CaN_dyad + CaMKIItot_dyad.*(-rcnCKib_dyad+rcnCKta_dyad))-J_ca4cam_dyadSL),                       # du[3]
+        D(CaMB_dyad) ~ 1e-3*(rcn0B_dyad-rcn02B_dyad),                       # du[4]
+        D(Ca2CaMB_dyad) ~ 1e-3*(rcn02B_dyad + rcn2B_dyad - rcn24B_dyad),    # du[5]
+        D(Ca4CaMB_dyad) ~ 1e-3*(rcn24B_dyad + rcn4B_dyad),                  # du[6]
+        # CaMKII equations
+        D(Pb2_dyad) ~ 1e-3*(rcnCKib2_dyad - rcnCKb2b_dyad + rcnCKt2b2_dyad),     # du[7]
+        D(Pb_dyad) ~ 1e-3*(rcnCKib_dyad + rcnCKb2b_dyad - rcnCKbt_dyad),         # du[8]
+        D(Pt_dyad) ~ 1e-3*(rcnCKbt_dyad-rcnCKta_dyad-rcnCKtt2_dyad),             # du[9]
+        D(Pt2_dyad) ~ 1e-3*(rcnCKtt2_dyad-rcnCKt2a_dyad-rcnCKt2b2_dyad),         # du[10]
+        D(Pa_dyad) ~ 1e-3*(rcnCKta_dyad+rcnCKt2a_dyad-rcnCKai_dyad),             # du[11]
+        # CaN equations
+        D(Ca4CaN_dyad) ~ 1e-3*(rcnCa4CaN_dyad - rcn0CaN_dyad - rcn2CaN_dyad - rcn4CaN_dyad),      # du[12]
+        D(CaMCa4CaN_dyad) ~ 1e-3*(rcn0CaN_dyad - rcn02CaN_dyad),                        # du[13]
+        D(Ca2CaMCa4CaN_dyad) ~ 1e-3*(rcn2CaN_dyad+rcn02CaN_dyad-rcn24CaN_dyad),              # du[14]
+        D(Ca4CaMCa4CaN_dyad) ~ 1e-3*(rcn4CaN_dyad+rcn24CaN_dyad)                       # du[15]
+    ]
+    =#
+    # CaMSL equations
+    CaMSL_eqs = [
+        D(CaM_sl) ~ (1e-3 * (-rcn02_sl - rcn0B_sl - rcn0CaN_sl) - J_cam_SLmyo / VSL), #+ J_cam_dyadSL*Vdyad/VSL                                                                    # du[1]
+        D(Ca2CaM_sl) ~ (1e-3 * (rcn02_sl - rcn24_sl - rcn2B_sl - rcn2CaN_sl + CaMKIItot .* (-rcnCKib2_sl + rcnCKt2a_sl)) - J_ca2cam_SLmyo / VSL), #+ J_ca2cam_dyadSL*Vdyad/VSL       # du[2]
+        D(Ca4CaM_sl) ~ (1e-3 * (rcn24_sl - rcn4B_sl - rcn4CaN_sl + CaMKIItot .* (-rcnCKib_sl + rcnCKta_sl)) - J_ca4cam_SLmyo / VSL),  #+ J_ca4cam_dyadSL*Vdyad/VSL                     # du[3]
+        D(CaMB_sl) ~ 1e-3 * (rcn0B_sl - rcn02B_sl),                     # du[4]
+        D(Ca2CaMB_sl) ~ 1e-3 * (rcn02B_sl + rcn2B_sl - rcn24B_sl),    # du[5]
+        D(Ca4CaMB_sl) ~ 1e-3 * (rcn24B_sl + rcn4B_sl),                # du[6]
+        # CaMKII equations
+        D(Pb2_sl) ~ 1e-3 * (rcnCKib2_sl - rcnCKb2b_sl + rcnCKt2b2_sl),     # du[7]
+        D(Pb_sl) ~ 1e-3 * (rcnCKib_sl + rcnCKb2b_sl - rcnCKbt_sl),         # du[8]
+        D(Pt_sl) ~ 1e-3 * (rcnCKbt_sl - rcnCKta_sl - rcnCKtt2_sl),             # du[9]
+        D(Pt2_sl) ~ 1e-3 * (rcnCKtt2_sl - rcnCKt2a_sl - rcnCKt2b2_sl),         # du[10]
+        D(Pa_sl) ~ 1e-3 * (rcnCKta_sl + rcnCKt2a_sl - rcnCKai_sl),             # du[11]
+        # CaN equations
+        D(Ca4CaN_sl) ~ 1e-3 * (rcnCa4CaN_sl - rcn0CaN_sl - rcn2CaN_sl - rcn4CaN_sl),      # du[12]
+        D(CaMCa4CaN_sl) ~ 1e-3 * (rcn0CaN_sl - rcn02CaN_sl),                        # du[13]
+        D(Ca2CaMCa4CaN_sl) ~ 1e-3 * (rcn2CaN_sl + rcn02CaN_sl - rcn24CaN_sl),              # du[14]
+        D(Ca4CaMCa4CaN_sl) ~ 1e-3 * (rcn4CaN_sl + rcn24CaN_sl)                       # du[15]
+    ]
+    # CaMCyt equations
+    CaMcyt_eqs = [
+        D(CaM_cyt) ~ (1e-3 * (-rcn02_cyt - rcn0B_cyt - rcn0CaN_cyt) + J_cam_SLmyo / Vmyo),                                                                    # du[1]
+        D(Ca2CaM_cyt) ~ (1e-3 * (rcn02_cyt - rcn24_cyt - rcn2B_cyt - rcn2CaN_cyt + CaMKIItot .* (-rcnCKib2_cyt + rcnCKt2a_cyt)) + J_ca2cam_SLmyo / Vmyo),       # du[2]
+        D(Ca4CaM_cyt) ~ (1e-3 * (rcn24_cyt - rcn4B_cyt - rcn4CaN_cyt + CaMKIItot .* (-rcnCKib_cyt + rcnCKta_cyt)) + J_ca4cam_SLmyo / Vmyo),                       # du[3]
+        D(CaMB_cyt) ~ 1e-3 * (rcn0B_cyt - rcn02B_cyt),                      # du[4]
+        D(Ca2CaMB_cyt) ~ 1e-3 * (rcn02B_cyt + rcn2B_cyt - rcn24B_cyt),    # du[5]
+        D(Ca4CaMB_cyt) ~ 1e-3 * (rcn24B_cyt + rcn4B_cyt),                 # du[6]
+        # CaMKII equations
+        D(Pb2_cyt) ~ 1e-3 * (rcnCKib2_cyt - rcnCKb2b_cyt + rcnCKt2b2_cyt),     # du[7]
+        D(Pb_cyt) ~ 1e-3 * (rcnCKib_cyt + rcnCKb2b_cyt - rcnCKbt_cyt),         # du[8]
+        D(Pt_cyt) ~ 1e-3 * (rcnCKbt_cyt - rcnCKta_cyt - rcnCKtt2_cyt),             # du[9]
+        D(Pt2_cyt) ~ 1e-3 * (rcnCKtt2_cyt - rcnCKt2a_cyt - rcnCKt2b2_cyt),         # du[10]
+        D(Pa_cyt) ~ 1e-3 * (rcnCKta_cyt + rcnCKt2a_cyt - rcnCKai_cyt),             # du[11]
+        # CaN equations
+        D(Ca4CaN_cyt) ~ 1e-3 * (rcnCa4CaN_cyt - rcn0CaN_cyt - rcn2CaN_cyt - rcn4CaN_cyt),      # du[12]
+        D(CaMCa4CaN_cyt) ~ 1e-3 * (rcn0CaN_cyt - rcn02CaN_cyt),                        # du[13]
+        D(Ca2CaMCa4CaN_cyt) ~ 1e-3 * (rcn2CaN_cyt + rcn02CaN_cyt - rcn24CaN_cyt),              # du[14]
+        D(Ca4CaMCa4CaN_cyt) ~ 1e-3 * (rcn4CaN_cyt + rcn24CaN_cyt)                       # du[15]
+    ]
+    ## For adjusting Ca buffering in EC coupling model
+    #JCaDyad = 1e-3*(2*CaMKIItot_dyad*(rcnCKtt2_dyad-rcnCKb2b_dyad) - 2*(rcn02_dyad+rcn24_dyad+rcn02B_dyad+rcn24B_dyad+rcnCa4CaN_dyad+rcn02CaN_dyad+rcn24CaN_dyad))   # [uM/msec]
+    #JCaSL = 1e-3*(2*CaMKIItot*(rcnCKtt2_sl-rcnCKb2b_sl) - 2*(rcn02_sl+rcn24_sl+rcn02B_sl+rcn24B_sl+rcnCa4CaN_sl+rcn02CaN_sl+rcn24CaN_sl))   # [uM/msec]
+    #JCaCyt = 1e-3*(2*CaMKIItot*(rcnCKtt2_cyt-rcnCKb2b_cyt) - 2*(rcn02_cyt+rcn24_cyt+rcn02B_cyt+rcn24B_cyt+rcnCa4CaN_cyt+rcn02CaN_cyt+rcn24CaN_cyt))   # [uM/msec]
+
+
+    ## CaMKII
+    ## RATE CONSTANTS and KM VALUES
+    # L-Type Ca Channel (LTCC) parameters
+    k_ckLCC = 0.4                   # [s^-1]
+    k_pp1LCC = 0.1103               # [s^-1]
+    k_pkaLCC = 13.5                 # [s^-1]
+    k_pp2aLCC = 10.1                # [s^-1]
+    KmCK_LCC = 12                   # [uM]
+    KmPKA_LCC = 21                  # [uM]
+    KmPP2A_LCC = 47                 # [uM]
+    KmPP1_LCC = 9                   # [uM]
+
+    # Ryanodine Receptor (RyR) parameters
+    k_ckRyR = 0.4                   # [s^-1]
+    k_pkaRyR = 1.35                 # [s^-1]
+    k_pp1RyR = 1.07                 # [s^-1]
+    k_pp2aRyR = 0.481               # [s^-1]
+
+    # Basal RyR phosphorylation (numbers based on param estimation)
+    kb_2809 = 0.51                  # [uM/s] - PKA site
+    kb_2815 = 0.35                  # [uM/s] - CaMKII site
+
+    KmCK_RyR = 12                   # [uM]
+    KmPKA_RyR = 21                  # [uM]
+    KmPP1_RyR = 9                   # [uM]
+    KmPP2A_RyR = 47                 # [uM]
+
+    # Phospholamban (PLB) parameters
+    k_ckPLB = 8e-3                  # [s^-1]
+    k_pp1PLB = 0.0428               # [s^-1]
+
+    KmCK_PLB = 12
+    KmPP1_PLB = 9
+
+    # Okadaic Acid inhibition params (based on Huke/Bers [2008])
+    # Want to treat OA as non-competitive inhibitor of PP1 and PP2A
+    Ki_OA_PP1 = 0.78                # [uM] - Values from fit
+    Ki_OA_PP2A = 0.037              # [uM] - Values from fit
+
+    # Default PKA level
+    PKAc = 95.6 * 0.54
+
+    ## Parameters for CaMKII module
+    LCCtotDyad = 31.4 * 0.9      # [uM] - Total Dyadic [LCC] - (umol/l dyad)
+    LCCtotSL = 0.0846          # [uM] - Total Subsarcolemmal [LCC] (umol/l sl)
+    RyRtot = 382.6             # [uM] - Total RyR (in Dyad)
+    PP1_dyad = 95.7            # [uM] - Total dyadic [PP1]
+    PP1_SL = 0.57              # [uM] - Total Subsarcolemmal [PP1]
+    PP2A_dyad = 95.76          # [uM] - Total dyadic PP2A
+    OA = 0                     # [uM] - PP1/PP2A inhibitor Okadaic Acid
+    plb_val = 106 # MOUSE
+    PLBtot = plb_val           # [uM] - Total [PLB] in cytosolic units
+
+    ## OA inhibition term (non-competitive) for PP1 and PP2A
+    OA_PP1 = 1 / (1 + (OA / Ki_OA_PP1)^3)
+    OA_PP2A = 1 / (1 + (OA / Ki_OA_PP2A)^3)
+
+    CaMKIItotDyad = 120             # [uM]
+    CaMKIItotSL = 120 * 8.293e-4      # [uM]
+    PP1_PLBtot = 0.89               # [uM] - [umol/L cytosol]
+
+    ## ODE EQUATIONS
+    # LTCC states (note: PP2A is acting on PKA site and PP1 on CKII site)
+
+    # Variables related to camdyad_ODEfile
+    #CaMKIIact_Dyad = CaMKIItotDyad .* (Pb_dyad + Pt_dyad + Pt2_dyad + Pa_dyad)
+    CaMKIIact_SL = CaMKIItotSL .* (Pb_sl + Pt_sl + Pt2_sl + Pa_sl)
+    PP1_PLB_avail = 1 - I1p_PP1 / PP1_PLBtot + 0.081698
+    # CaMKII phosphorylation of Dyadic LCCs
+    #LCC_CKdyadn = LCCtotDyad - LCC_CKdyadp
+    #LCCDyad_PHOS = (k_ckLCC*CaMKIIact_Dyad*LCC_CKdyadn)/(KmCK_LCC+LCC_CKdyadn)
+    #LCCDyad_DEPHOS = (k_pp1LCC*PP1_dyad*LCC_CKdyadp)/(KmPP1_LCC+LCC_CKdyadp)*OA_PP1
+    LCC_CKsln = LCCtotSL - LCC_CKslp
+    LCCSL_PHOS = (k_ckLCC * CaMKIIact_SL * LCC_CKsln) / (KmCK_LCC + LCC_CKsln)
+    LCCSL_DEPHOS = (k_pp1LCC * PP1_SL * LCC_CKslp) / (KmPP1_LCC + LCC_CKslp) * OA_PP1
+    LCC_PKAn = LCCtotDyad - LCC_PKAp
+    RyR2815n = RyRtot - RyR2815p
+    RyR_BASAL = kb_2815 * RyR2815n
+    #RyR_PHOS = (k_ckRyR*CaMKIIact_Dyad*RyR2815n)/(KmCK_RyR+RyR2815n)
+    RyR_PP1_DEPHOS = (k_pp1RyR * PP1_dyad * RyR2815p) / (KmPP1_RyR + RyR2815p) * OA_PP1
+    RyR_PP2A_DEPHOS = (k_pp2aRyR * PP2A_dyad * RyR2815p) / (KmPP2A_RyR + RyR2815p) * OA_PP2A
+    RyR2809n = RyRtot - RyR2809p
+    PP1_PLB = PP1_dyad * PP1_PLB_avail  # Inhibitor-1 regulation of PP1_dyad included here
+    PLBT17n = PLBtot - PLBT17p
+    #PLB_PHOS = (k_ckPLB*PLBT17n*CaMKIIact_Dyad)/(KmCK_PLB+PLBT17n)
+    PLB_DEPHOS = (k_pp1PLB * PP1_PLB * PLBT17p) / (KmPP1_PLB + PLBT17p) * OA_PP1
+
+    CaMKII_eqs = [
+        #D(LCC_CKdyadp) ~ (LCCDyad_PHOS - LCCDyad_DEPHOS)*1e-3, # du[2]
+        # CaMKII phosphorylation of Sub-sarcolemmal LCCs
+        D(LCC_CKslp) ~ (LCCSL_PHOS - LCCSL_DEPHOS) * 1e-3, # du[6]
+        # PKA phosphorylation (currently unused elsewhere)
+        D(LCC_PKAp) ~ ((k_pkaLCC * PKAc * LCC_PKAn) / (KmPKA_LCC + LCC_PKAn) - (k_pp2aLCC * PP2A_dyad * LCC_PKAp) / (KmPP2A_LCC + LCC_PKAp) * OA_PP2A) * 1e-3, # du[1]
+        # RyR states
+        D(RyR2815p) ~ (RyR_BASAL - RyR_PP1_DEPHOS - RyR_PP2A_DEPHOS) * 1e-3, # du[4] + RyR_PHOS
+        # PKA phosphorylation of Ser 2809 on RyR (currently unused elsewhere)
+        D(RyR2809p) ~ (kb_2809 * RyR2809n + (k_pkaRyR * PKAc * RyR2809n) / (KmPKA_RyR + RyR2809n) - (k_pp1RyR * PP1_dyad * RyR2809p) / (KmPP1_RyR + RyR2809p) * OA_PP1) * 1e-3, # du[3]
+        # PLB states
+        D(PLBT17p) ~ (-PLB_DEPHOS) * 1e-3 # du[5]PLB_PHOS
+    ]
+
+
+    ## BAR
+    # Drug concentrations
+    Ligtot = 0.0               # [uM] - SET LIGAND CONCENTRATION (0 or 0.1)
+    FSK = 0
+    IBMX = 0
+    LCCtotBA = 0.025           # [uM] - [umol/L cytosol]
+    plb_val = 106                # MOUSE
+    PP1_PLBtot = 0.89          # [uM] - [umol/L cytosol]
+    PLMtotBA = 48              # [uM] - [umol/L cytosol] MOUSE
+    PLBtotBA = plb_val                     # [uM] - [umol/L cytosol]
+    ISO = Ligtot
+
+    ## b-AR module
+    b1ARtot = 0.00528        # (uM) total b1-AR protein # MOUSE
+    #b1ARtot=0.028  # RABBIT
+    kf_LR = 1              # (1/[uM ms]) forward rate for ISO binding to b1AR
+    kr_LR = 0.285          # (1/ms) reverse rate for ISO binding to b1AR
+    kf_LRG = 1              # (1/[uM ms]) forward rate for ISO:b1AR association with Gs
+    kr_LRG = 0.062          # (1/ms) reverse rate for ISO:b1AR association with Gs
+    kf_RG = 1              # (1/[uM ms]) forward rate for b1AR association with Gs
+    kr_RG = 33             # (1/ms) reverse rate for b1AR association with Gs
+    Gstot = 3.83           # (uM) total Gs protein
+    k_G_act = 16e-3          # (1/ms) rate constant for Gs activation
+    k_G_hyd = 0.8e-3         # (1/ms) rate constant for G-protein hydrolysis
+    k_G_reassoc = 1.21       # (1/[uM ms]) rate constant for G-protein reassociation
+    kf_bARK = 1.1e-6         # (1/[ms]) forward rate for b1AR phosphorylation by b1ARK
+    kr_bARK = 2.2e-6         # (1/ms) reverse rate for b1AR phosphorylation by b1ARK
+    kf_PKA = 3.6e-6         # (1/[uM ms]) forward rate for b1AR phosphorylation by PKA
+    kr_PKA = 2.2e-6         # (1/ms) reverse rate for b1AR phosphorylation by PKA
+    b1ARact = b1ARtot - b1AR_S464 - b1AR_S301
+    b1AR = b1ARact - LR - LRG - RG
+    Gs = Gstot - LRG - RG - Gsby
+    bARK_desens = kf_bARK * (LR + LRG)
+    bARK_resens = kr_bARK * b1AR_S464
+    PKA_desens = kf_PKA * PKACI * b1ARact
+    PKA_resens = kr_PKA * b1AR_S301
+    G_act = k_G_act * (RG + LRG)
+    G_hyd = k_G_hyd * GsaGTPtot
+    G_reassoc = k_G_reassoc * GsaGDP * Gsby
+
+    bar_eqs = [
+        D(LR) ~ (kf_LR * ISO * b1AR - kr_LR * LR + kr_LRG * LRG - kf_LRG * LR * Gs),    # du[1]
+        D(LRG) ~ (kf_LRG * LR * Gs - kr_LRG * LRG - k_G_act * LRG),                 # du[2]
+        D(RG) ~ (kf_RG * b1AR * Gs - kr_RG * RG - k_G_act * RG),                    # du[3]
+        D(b1AR_S464) ~ (bARK_desens - bARK_resens),                         # du[4]
+        D(b1AR_S301) ~ (PKA_desens - PKA_resens),                           # du[5]
+        D(GsaGTPtot) ~ (G_act - G_hyd),                                     # du[6]
+        D(GsaGDP) ~ (G_hyd - G_reassoc),                                    # du[7]
+        D(Gsby) ~ (G_act - G_reassoc)                                       # du[8]
+    ]
+
+    ## cAMP module
+    ACtot = 70.57e-3        # (uM) total adenylyl cyclase # MOUSE
+    # ACtot=47e-3  # RABBIT
+    ATP = 5e3             # (uM) total ATP
+    k_AC_basal = 0.2e-3          # (1/ms) basal cAMP generation rate by AC
+    Km_AC_basal = 1.03e3          # (uM) basal AC affinity for ATP
+    Kd_AC_Gsa = 0.4             # (uM) Kd for AC association with Gsa
+    kf_AC_Gsa = 1               # (1/[uM ms]) forward rate for AC association with Gsa
+    kr_AC_Gsa = Kd_AC_Gsa       # (1/ms) reverse rate for AC association with Gsa
+    k_AC_Gsa = 8.5e-3          # (1/ms) basal cAMP generation rate by AC:Gsa
+    Km_AC_Gsa = 315.0           # (uM) AC:Gsa affinity for ATP
+    Kd_AC_FSK = 44.0            # (uM) Kd for FSK binding to AC
+    k_AC_FSK = 7.3e-3          # (1/ms) basal cAMP generation rate by AC:FSK
+    Km_AC_FSK = 860.0           # (uM) AC:FSK affinity for ATP
+    PDEtot = 22.85e-3        # (uM) total phosphodiesterase
+    k_cAMP_PDE = 5e-3            # (1/ms) cAMP hydrolysis rate by PDE
+    k_cAMP_PDEp = 2 * k_cAMP_PDE    # (1/ms) cAMP hydrolysis rate by phosphorylated PDE
+    Km_PDE_cAMP = 1.3             # (uM) PDE affinity for cAMP
+    Kd_PDE_IBMX = 30.0            # (uM) Kd_R2cAMP_C for IBMX binding to PDE
+    k_PKA_PDE = 7.5e-3          # (1/ms) rate constant for PDE phosphorylation by type 1 PKA
+    k_PP_PDE = 1.5e-3          # (1/ms) rate constant for PDE dephosphorylation by phosphatases
+    cAMP = cAMPtot - (RCcAMP_I + 2 * RCcAMPcAMP_I + 2 * RcAMPcAMP_I) - (RCcAMP_II + 2 * RCcAMPcAMP_II + 2 * RcAMPcAMP_II)
+    AC = ACtot - AC_GsaGTP
+    GsaGTP = GsaGTPtot - AC_GsaGTP
+    AC_FSK = FSK * AC / Kd_AC_FSK
+    AC_ACT_BASAL = k_AC_basal * AC * ATP / (Km_AC_basal + ATP)
+    AC_ACT_GSA = k_AC_Gsa * AC_GsaGTP * ATP / (Km_AC_Gsa + ATP)
+    AC_ACT_FSK = k_AC_FSK * AC_FSK * ATP / (Km_AC_FSK + ATP)
+    PDE_IBMX = PDEtot * IBMX / Kd_PDE_IBMX
+    PDE = PDEtot - PDE_IBMX - PDEp
+    PDE_ACT = k_cAMP_PDE * PDE * cAMP / (Km_PDE_cAMP + cAMP) + k_cAMP_PDEp * PDEp * cAMP / (Km_PDE_cAMP + cAMP)
+
+    cAMP_eqs = [
+        D(AC_GsaGTP) ~ (kf_AC_Gsa * GsaGTP * AC - kr_AC_Gsa * AC_GsaGTP),
+        D(PDEp) ~ (k_PKA_PDE * PKACII * PDE - k_PP_PDE * PDEp),
+        D(cAMPtot) ~ (AC_ACT_BASAL + AC_ACT_GSA + AC_ACT_FSK - PDE_ACT)
+    ]
+
+
+    ## PKA module
+    PKItot = 0.18             # (uM) total PKI
+    kf_RC_cAMP = 1                # (1/[uM ms]) Kd for PKA RC binding to cAMP
+    kf_RCcAMP_cAMP = 1                # (1/[uM ms]) Kd for PKA RC:cAMP binding to cAMP
+    kf_RcAMPcAMP_C = 4.375            # (1/[uM ms]) Kd for PKA R:cAMPcAMP binding to C
+    kf_PKA_PKI = 1                # (1/[uM ms]) Ki for PKA inhibition by PKI
+    kr_RC_cAMP = 1.64             # (1/ms) Kd for PKA RC binding to cAMP
+    kr_RCcAMP_cAMP = 9.14             # (1/ms) Kd for PKA RC:cAMP binding to cAMP
+    kr_RcAMPcAMP_C = 1                # (1/ms) Kd for PKA R:cAMPcAMP binding to C
+    kr_PKA_PKI = 2e-4             # (1/ms) Ki for PKA inhibition by PKI
+    epsilon = 10               # (-) AKAP-mediated scaling factor
+    PKI = PKItot - PKACI_PKI - PKACII_PKI
+
+    PKA_eqs = [
+        D(RC_I) ~ (-kf_RC_cAMP * RC_I * cAMP + kr_RC_cAMP * RCcAMP_I),
+        D(RCcAMP_I) ~ (-kr_RC_cAMP * RCcAMP_I + kf_RC_cAMP * RC_I * cAMP - kf_RCcAMP_cAMP * RCcAMP_I * cAMP + kr_RCcAMP_cAMP * RCcAMPcAMP_I),
+        D(RCcAMPcAMP_I) ~ (-kr_RCcAMP_cAMP * RCcAMPcAMP_I + kf_RCcAMP_cAMP * RCcAMP_I * cAMP - kf_RcAMPcAMP_C * RCcAMPcAMP_I + kr_RcAMPcAMP_C * RcAMPcAMP_I * PKACI),
+        D(RcAMPcAMP_I) ~ (-kr_RcAMPcAMP_C * RcAMPcAMP_I * PKACI + kf_RcAMPcAMP_C * RCcAMPcAMP_I),
+        D(PKACI) ~ (-kr_RcAMPcAMP_C * RcAMPcAMP_I * PKACI + kf_RcAMPcAMP_C * RCcAMPcAMP_I - kf_PKA_PKI * PKACI * PKI + kr_PKA_PKI * PKACI_PKI),
+        D(PKACI_PKI) ~ (-kr_PKA_PKI * PKACI_PKI + kf_PKA_PKI * PKACI * PKI),
+        D(RC_II) ~ (-kf_RC_cAMP * RC_II * cAMP + kr_RC_cAMP * RCcAMP_II),
+        D(RCcAMP_II) ~ (-kr_RC_cAMP * RCcAMP_II + kf_RC_cAMP * RC_II * cAMP - kf_RCcAMP_cAMP * RCcAMP_II * cAMP + kr_RCcAMP_cAMP * RCcAMPcAMP_II),
+        D(RCcAMPcAMP_II) ~ (-kr_RCcAMP_cAMP * RCcAMPcAMP_II + kf_RCcAMP_cAMP * RCcAMP_II * cAMP - kf_RcAMPcAMP_C * RCcAMPcAMP_II + kr_RcAMPcAMP_C * RcAMPcAMP_II * PKACII),
+        D(RcAMPcAMP_II) ~ (-kr_RcAMPcAMP_C * RcAMPcAMP_II * PKACII + kf_RcAMPcAMP_C * RCcAMPcAMP_II),
+        D(PKACII) ~ (-kr_RcAMPcAMP_C * RcAMPcAMP_II * PKACII + kf_RcAMPcAMP_C * RCcAMPcAMP_II - kf_PKA_PKI * PKACII * PKI + kr_PKA_PKI * PKACII_PKI),
+        D(PKACII_PKI) ~ (-kr_PKA_PKI * PKACII_PKI + kf_PKA_PKI * PKACII * PKI)
+    ]
+
+
+    ## I-1/PP1 module
+    I1tot = 0.3             # (uM) total inhibitor 1
+    k_PKA_I1 = 60e-3           # (1/ms) rate constant for I-1 phosphorylation by type 1 PKA
+    Km_PKA_I1 = 1.0             # (uM) Km for I-1 phosphorylation by type 1 PKA
+    Vmax_PP2A_I1 = 14.0e-3         # (uM/ms) Vmax for I-1 dephosphorylation by PP2A
+    Km_PP2A_I1 = 1.0             # (uM) Km for I-1 dephosphorylation by PP2A
+    Ki_PP1_I1 = 1.0e-3          # (uM) Ki for PP1 inhibition by I-1
+    kf_PP1_I1 = 1               # (uM) Ki for PP1 inhibition by I-1
+    PP1tot = PP1_PLBtot      # PP1tot = 0.89  # (uM) total phosphatase 1
+    kr_PP1_I1 = Ki_PP1_I1       # (uM) Ki for PP1 inhibition by I-1
+    I1 = I1tot - I1ptot
+    PP1 = PP1tot - I1p_PP1
+    I1p = I1ptot - I1p_PP1
+    I1_phosph = k_PKA_I1 * PKACI * I1 / (Km_PKA_I1 + I1)
+    I1_dephosph = Vmax_PP2A_I1 * I1ptot / (Km_PP2A_I1 + I1ptot)
+
+    PP1_eqs = [
+        D(I1p_PP1) ~ (kf_PP1_I1 * PP1 * I1p - kr_PP1_I1 * I1p_PP1),
+        D(I1ptot) ~ (I1_phosph - I1_dephosph)
+    ]
+
+
+    ## PLB module
+    PLBtot = PLBtotBA   # [uM]
+    k_PKA_PLB = 54e-3   # [1/ms]
+    Km_PKA_PLB = 21     # [uM]
+    k_PP1_PLB = 8.5e-3  # [1/ms]
+    Km_PP1_PLB = 7.0    # [uM]
+
+    PLB = PLBtot - PLBp
+    PLB_phosph = k_PKA_PLB * PKACI * PLB / (Km_PKA_PLB + PLB)
+    PLB_dephosph = k_PP1_PLB * PP1 * PLBp / (Km_PP1_PLB + PLBp)
+
+    PLB_eqs = [
+        D(PLBp) ~ (PLB_phosph - PLB_dephosph)
+    ]
+
+
+    ## PLM module (included 09/18/12) MOUSE
+    PLMtot = PLMtotBA   # [uM]
+    k_PKA_PLM = 54e-3   # [1/ms]
+    Km_PKA_PLM = 21     # [uM]
+    k_PP1_PLM = 8.5e-3  # [1/ms]
+    Km_PP1_PLM = 7.0    # [uM]
+    PLM = PLMtot - PLMp
+    PLM_phosph = k_PKA_PLM * PKACI * PLM / (Km_PKA_PLM + PLM)
+    PLM_dephosph = k_PP1_PLM * PP1 * PLMp / (Km_PP1_PLM + PLMp)
+
+    PLM_eqs = [
+        D(PLMp) ~ (PLM_phosph - PLM_dephosph)
+    ]
+
+    ## LCC module
+    PKAIItot = 0.059        # (uM) total type 2 PKA # MOUSE
+    LCCtot = LCCtotBA       # [uM]
+    PKACII_LCCtot = 0.025   # [uM]
+    PP1_LCC = 0.025         # [uM]
+    PP2A_LCC = 0.025        # [uM]
+    k_PKA_LCC = 54e-3       # [1/ms]
+    Km_PKA_LCC = 21         # [uM]
+    k_PP1_LCC = 8.52e-3     # [1/ms] RABBIT, MOUSE
+    Km_PP1_LCC = 3          # [uM]
+    k_PP2A_LCC = 10.1e-3    # [1/ms]
+    Km_PP2A_LCC = 3         # [uM]
+    PKACII_LCC = (PKACII_LCCtot / PKAIItot) * PKACII
+    LCCa = LCCtot - LCCap
+    LCCa_phosph = epsilon * k_PKA_LCC * PKACII_LCC * LCCa / (Km_PKA_LCC + epsilon * LCCa)
+    LCCa_dephosph = epsilon * k_PP2A_LCC * PP2A_LCC * LCCap / (Km_PP2A_LCC + epsilon * LCCap)
+    LCCb = LCCtot - LCCbp
+    LCCb_phosph = epsilon * k_PKA_LCC * PKACII_LCC * LCCb / (Km_PKA_LCC + epsilon * LCCb)
+    LCCb_dephosph = epsilon * k_PP1_LCC * PP1_LCC * LCCbp / (Km_PP1_LCC + epsilon * LCCbp)
+
+    LCC_eqs = [
+        D(LCCap) ~ (LCCa_phosph - LCCa_dephosph),
+        D(LCCbp) ~ (LCCb_phosph - LCCb_dephosph)
+    ]
+
+    ## RyR module (not included in Yang-Saucerman)
+    PKAIIryrtot = 0.034         # [uM]
+    PP1ryr = 0.034              # [uM]
+    PP2Aryr = 0.034             # [uM]
+    kcat_pka_ryr = 54e-3        # [1/ms]
+    Km_pka_ryr = 21             # [uM]
+    kcat_pp1_ryr = 8.52e-3      # [1/ms]
+    Km_pp1_ryr = 7              # [uM]
+    kcat_pp2a_ryr = 10.1e-3     # [1/ms]
+    Km_pp2a_ryr = 4.1           # [uM]
+    RyRtot = 0.135              # [uM]
+
+    PKACryr = (PKAIIryrtot / PKAIItot) * PKACII
+    RyR = RyRtot - RyRp
+    RyRPHOSPH = epsilon * kcat_pka_ryr * PKACryr * RyR / (Km_pka_ryr + epsilon * RyR)
+    RyRDEPHOSPH1 = epsilon * kcat_pp1_ryr * PP1ryr * RyRp / (Km_pp1_ryr + epsilon * RyRp)
+    RyRDEPHOSPH2A = epsilon * kcat_pp2a_ryr * PP2Aryr * RyRp / (Km_pp2a_ryr + epsilon * RyRp)
+
+    RyRp_eqs = [
+        D(RyRp) ~ (RyRPHOSPH - RyRDEPHOSPH1 - RyRDEPHOSPH2A)
+    ]
+
+
+    ## TnI module
+    PP2A_TnI = 0.67         # [uM]
+    k_PKA_TnI = 54e-3       # [1/ms]
+    Km_PKA_TnI = 21         # [uM]
+    k_PP2A_TnI = 10.1e-3    # [1/ms]
+    Km_PP2A_TnI = 4.1       # [uM]
+    TnItot = 70             # [uM]
+    TnI = TnItot - TnIp
+    TnI_phosph = k_PKA_TnI * PKACI * TnI / (Km_PKA_TnI + TnI)
+    TnI_dephosph = k_PP2A_TnI * PP2A_TnI * TnIp / (Km_PP2A_TnI + TnIp)
+
+    TnI_eqs = [
+        D(TnIp) ~ (TnI_phosph - TnI_dephosph)
+    ]
+
+
+    ## Iks module (not present in mouse)
+    IKstot = 0.025
+
+    IKs_eqs = [
+        D(KS79) ~ 0,  # ydot(27) not ODE
+        D(KS80) ~ 0,  # ydot(28) not ODE
+        D(KSp) ~ 0  # ydot(29)
+    ]
+
+
+    ## CFTR module (included 04/30/10)
+    ICFTRtot = 0.025
+
+    CFTR_eqs = [
+        D(CFTRp) ~ 0  #CFTRphos - CFTRdephos  # ydot(30)
+    ]
+
+    ## Ikur module (included 04/10/12) MOUSE
+    PKAII_KURtot = 0.025    # [uM]
+    PP1_KURtot = 0.025      # [uM]
+    k_pka_KUR = 54e-3       # [1/ms]
+    Km_pka_KUR = 21         # [uM]
+    k_pp1_KUR = 8.52e-3     # [1/ms]
+    Km_pp1_KUR = 7          # [uM]
+    IKurtot = 0.025         # [uM]
+    KURn = IKurtot - KURp   # Non-phos = tot - phos
+    PKAC_KUR = (PKAII_KURtot / PKAIItot) * PKACII     # (PKA_KURtot/PKAIItot)*PKAIIact
+    KURphos = epsilon * KURn * PKAC_KUR * k_pka_KUR / (Km_pka_KUR + epsilon * KURn)
+    KURdephos = PP1_KURtot * k_pp1_KUR * epsilon * KURp / (Km_pp1_KUR + epsilon * KURp)
+    Ikur_eqs = [
+        D(KURp) ~ (KURphos - KURdephos)
+    ]
+
+
+    ## ECC
+
+    ## Adjusting Variables
+    LCCtotDyad = 31.4 * 0.9        # [uM] - Total Dyadic [LCC] - (umol/l dyad)
+    RyRtot = 382.6              # [uM] - Total RyR (in Dyad)
+    plb_val = 106                 # MOUSE
+    LCCtotBA = 0.025            # [uM] - [umol/L cytosol]
+    TnItotBA = 70               # [uM] - [umol/L cytosol]
+    IKurtotBA = 0.025           # [uM] - [umol/L cytosol] MOUSE
+    PLBtot = plb_val                        # [uM] - Total [PLB] in cytosolic units
+    PLBtotBA = plb_val                      # [uM] - [umol/L cytosol]
+
+
+    RyR_CKp = RyR2815p / RyRtot
+    PLB_CKp = PLBT17p / PLBtot
+    LCCa_PKAp = LCCap / LCCtotBA
+    LCCb_PKAp = LCCbp / LCCtotBA
+    PLB_PKAn = (PLBtotBA - PLBp) / PLBtotBA
+    TnI_PKAp = TnIp / TnItotBA
+    IKur_PKAp = KURp / IKurtotBA
+
+    # -------------------------------------------------------------------------
+    # Model of ECC of rat neonatal ventricular myocyte 2009
+    # Code & model: Topi Korhonen, University of Oulu (topi.korhonen@oulu.fi)
+    #
+    # PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT:
+    # Korhonen et al. "Model of excitation-contraction coupling of rat neonatal
+    # ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
+    #
+    # ONLY FOR ACADEMIC USE, DO NOT DISTRIBUTE
+    # -------------------------------------------------------------------------
+
+    # Index numbers, put the Cai equations to the end -> increase i_Cai_sub_SR when
+    # adding other odes
+
+    # Physical constants
+    F = 96.5
+    T = 305
+    R = 8.314
+    Cm = 1.0
+
+    # Ion concentrations in DMEM
+    Cao = 1796
+    Nao = 154578
+    Ko = 5366
+
+    # Cell geometry
+    rSR_true = 6
+    rSL_true = 10.5
+
+    # Ca diffusion grid
+    dx = 0.1
+    rSR = rSR_true + 0.5 * dx
+    rSL = rSL_true - 0.5 * dx
+    j = round(rSR / dx):1:round(rSL / dx) # Spatial index of Cai diffusion
+
+    # More cell geometry
+    V_sub_SR = 4 / 3 * pi * (rSR_true + dx)^3 / 1000 - 4 / 3 * pi * (rSR_true)^3 / 1000 # pl
+    V_sub_SL = 4 / 3 * pi * rSL_true^3 / 1000 - 4 / 3 * pi * (rSL_true - dx)^3 / 1000 #pl
+    Acap = 4 * pi * rSL_true^2 * 1e-8 # cm^2
+    VSR = 0.043 * 1.5 * 1.4
+    VNSR = 0.9 * VSR
+    VJSR = VSR - VNSR
+    Vmyo = 4 / 3 * pi * rSL_true^3 / 1000 - 4 / 3 * pi * rSR_true^3 / 1000
+
+
+    # Ca buffers
+    csqntot = 24750
+    Kmcsqn = 800
+    betaSR = inv(1 + csqntot * Kmcsqn ./ (i_CaJSR + Kmcsqn) .^ 2)
+
+
+    # NCX from Pandit rat model
+    fNaCa = 1
+    kNaCa = 2.2680e-016
+    dNaCa = 1e-16
+    gamma = 0.5
+
+    # INaK
+    INaKmax = 2.7
+    KmNai = 18600
+    nNaK = 3.2
+    KmKo = 1500
+
+
+    # PKA PHOSPHOREGULATION OF LCC AVAILABLILITY (beta subunit phosph)
+    ICa_scale = 0.95#5.25
+    fracLCCbp0 = 0.250657 # Derived quantity - (LCCbp(baseline)/LCCbtot)
+    fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
+    a_favail = (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1) # fracLCCbp ISO (x1.56 o.1 ISO)
+    favail = (1 - a_favail) + a_favail * (LCCb_PKAp / fracLCCbp0)  # Test (max x2.52 100# phosph)
+    ICa_scalep = ICa_scale * favail
+
+
+    # --------------------------------------------------------
+    # Equations used in odes
+    # --------------------------------------------------------
+
+    ENa = R * T / F * nm.log((Nao) / (Nai))
+    EK = R * T / F * nm.log((Ko) / (Ki))
+    ECa = R * T / 2 / F * nm.log(Cao / Cai_sub_SL)
+
+    # NCX
+    INaCa = ICa_scalep * kNaCa * ((exp(0.03743 * gamma .* V) .* Nai .^ 3 .* Cao - exp(0.03743 * (gamma - 1) .* V) .* Nao^3 .* Cai_sub_SL .* fNaCa) / (1 + dNaCa * (Nao^3 .* Cai_sub_SL .* fNaCa + Nai .^ 3 .* Cao)))
+
+    # L-type calcium current
+
+    GCaL = 1.3125e-4 * 0.8 * 0.6
+    ICaL = ICa_scalep * GCaL * i_d * i_f * i_fca * 4 * V * F^2 / R / T * (Cai_sub_SL * exp(2 * V * F / R / T) - 0.341 * Cao) / (exp(2 * V * F / R / T) - 1)
+    dinf = 1 / (1 + exp((11.1 + V) / -7.2))
+    alphad = 1.4 / (1 + exp((-35 - V) / 13)) + 0.25
+    betad = 1.4 / (1 + exp((V + 5) / 5))
+    gammad = 1 / (1 + exp((50 - V) / 20))
+    taud = alphad * betad + gammad
+    finf = 1 / (1 + exp((V + 23.3) / 5.4))
+    tauf = 1125 * exp(-(V + 27)^2 / 240) + 165 / (1 + exp((25 - V) / 10)) + 120
+    #a = finf/tauf * (1-junc_mode2)
+    #b = 1/8 * (1-finf) / tauf * junc_mode2
+    alphafca = 1 / (1 + (Cai_sub_SL * 1e-3 / (0.000325 * 1.5))^8)
+    betafca = 0.1 / (1 + exp((Cai_sub_SL * 1e-3 - 0.0005) / 0.0001))
+    gammafca = 0.2 / (1 + exp((Cai_sub_SL * 1e-3 - 0.00075) / 0.0008))
+    fcainf = (alphafca + betafca + gammafca + 0.23) / 1.46
+    taufca = 10 # modif
+    kfca = 1 - (fcainf > i_fca) * (V > -60)
+
+    # T-Type
+    gCaT = 0.2
+    binf = 1 / (1 + exp(-(V + 37.49098) / 5.40634))
+    taub = 0.6 + 5.4 / (1 + exp((V + 100) * 0.03))
+    ginf = 1 / (1 + exp((V + 66) / 6))
+    taug = 1 + 40 / (1 + exp((V + 65) * 0.08))
+    ICaT = gCaT * i_b * i_g * (V - ECa + 106.5)
+
+    # Cab
+    gCab = 0.0008
+    ICab = gCab * (V - ECa)
+
+    # Nab
+    gNab = 0.0026
+    INab = gNab * (V - ENa)
+
+    # If
+    gf = 0.021
+    fNa = 0.2
+    fK = 1 - fNa
+    yinf = 1 / (1 + exp((V + 78.65) ./ 6.33)) # Fitted
+    tauy = 1 / (0.11885 .* exp((V + 75) ./ 28.37) + 0.56236 .* exp((V + 75) ./ -14.19)) .* 1000
+    IfNa = gf * i_y * fNa * (V - ENa)
+    IfK = gf * i_y * fK * (V - EK)
+    If = gf * i_y * (fNa * (V - ENa) + fK * (V - EK))
+
+    # IK1
+    IK1 = 0.0515 .* (Ko / (Ko + 210)) .* ((V - EK - 6.1373) ./ (0.1653 + exp(0.0319 * (V - EK - 6.1373))))
+
+    # Ito
+    gt = 0.1
+    sinf = 1 ./ (1 + exp((V + 31.97156) ./ 4.64291))
+    rinf = 1 ./ (1 + exp((V - 3.55716) ./ -14.61299))
+    slowinf = sinf
+    taur = 1 ./ (45.16 .* exp(0.03577 .* (V + 50)) + 98.9 .* exp(-0.1 .* (V + 38))) * 1000
+    taus = (0.35 .* exp(-(((V + 70) / 15) .^ 2)) + 0.035) * 1000 - 26.9
+    tausslow = (3.7 .* exp(-(((V + 70) / 30) .^ 2)) + 0.035) * 1000 + 37.4
+    Ito = gt * i_r .* (0.706 .* i_s + 0.294 .* i_sslow) * (V - EK)
+
+    # INa
+    gNa = 35
+    Naminf = 1 / (1 + exp((V + 45) / -6.5))
+    Nahinf = 1 / (1 + exp((V + 76.1) / 6.07))
+    Najinf = Nahinf
+    Nataum = 0.00136 / (0.32 * (V + 47.13) / (1 - exp(-0.1 * (V + 47.13))) + 0.08 * exp(-V / 11))
+    Natauh = ifelse(V >= -40, 0.0004537 .* (1 + exp((V + 10.66) ./ -11.1)), 0.00349 ./ (0.135 .* exp((V + 80) ./ -6.8) + 3.56 .* exp(0.079 .* V) + 3.1e5 .* exp(0.35 .* V)))
+    Natauj = ifelse(V >= -40, 0.01163 .* (1 + exp(-0.1 .* (V + 32))) ./ exp(-2.535e-7 .* V), 0.00349 ./ ((V + 37.78) ./ (1 + exp(0.311 .* (V + 79.23))) .* (-127140 .* exp(0.2444 .* V) - 3.474e-5 .* exp(-0.04391 .* V)) + 0.1212 .* exp(-0.01052 .* V) ./ (1 + exp(-0.1378 .* (V + 40.14)))))
+
+    INa = gNa * i_Nam .^ 3 * i_Nah * i_Naj * (V - ENa)
+
+    # RyR
+    n = 4
+    PC1 = 1 - i_PO1
+    kapos = 3 / 3
+    kaneg = 0.48 / 3
+    nu1 = 0.01 * 3 / 3
+    KmRyR = 1.35 * 2.6 ./ (1 + exp((i_CaJSR - 530) ./ 200)) + 1.5 - 0.9 - 0.3 - 0.05
+    Jrel = nu1 * (i_PO1) * (i_CaJSR - Cai_sub_SR)
+
+
+    # SR Ca-ATPase
+    Vmaxf = 0.9996
+    Vmaxr = Vmaxf
+    Kmf = 0.5
+    Kmr = 7000 * Kmf
+    Hf = 2
+    Hr = 1 * Hf
+    k = 5e-6
+
+    # CaMKII and PKA-dependent phosphoregulation of PLB (changes to SERCA flux)
+    fCKII_PLB = (1 - 0.5 * PLB_CKp)  # Max effect: fCKII_PLB=0.5
+    fracPKA_PLBo = 1 - 0.079755
+    fPKA_PLB = (PLB_PKAn / fracPKA_PLBo) * (100 - 55.31) / 100 + 55.31 / 100
+    # Select smaller value (resulting in max reduction of Kmf)
+    Kmfp = ifelse(fCKII_PLB < fPKA_PLB, Kmf * fCKII_PLB, Kmf * fPKA_PLB) * 2   #fCKII_PLB
+
+    Jup = (Vmaxf .* (Cai_sub_SR ./ Kmfp) .^ Hf - Vmaxr .* (CaNSR ./ Kmr) .^ Hr) ./ (1 + (Cai_sub_SR ./ Kmfp) .^ Hf + (CaNSR ./ Kmr) .^ Hr)
+
+    # Jleak
+    kleak = (1 / 2 + 5 * RyR_CKp / 2) * k
+    Jleak = kleak * (CaNSR - Cai_sub_SR)
+
+    # IKs
+    GKs = 0.05
+    # PKA-dependent phosphoregulation of Ik,slow1 (increases Gkur1)
+    fracIKurp0 = 0.437635       # Derived quantity (IKur_PKAp(baseline)/IKurtot)
+    fracIKurpISO = 0.718207     # Derived quantity (IKur_PKAp(ISO)/IKurtot)
+    a_Kur = (1.20 - 1) / (fracIKurpISO / fracIKurp0 - 1)
+    fracIKuravail = (1 - a_Kur) + a_Kur * (IKur_PKAp / fracIKurp0)  # +20# with 0.1 uM ISO
+    IKs = GKs * i_nKs^2 * (V - EK) * fracIKuravail * 2
+    alphan = 0.00000481333 * (V + 26.5) / (1 - exp(-0.128 * (V + 26.5)))
+    betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
+    nKsinf = alphan / (alphan + betan)
+    nKstau = 750
+
+
+    # Na/K pump current
+    sigma = 1 / 7 * (exp(Nao / 67300) - 1)
+    fNaK = 1 / (1 + 0.1245 * exp(-0.1 * V * F / R / T) + 0.0365 * sigma * exp(-V * F / R / T))
+    INaK = INaKmax * fNaK * Ko / (1 + (KmNai / Nai)^(nNaK)) / (Ko + KmKo)
+
+    # IKr
+    GKr = 0.06
+    kf = 0.023761
+    kb = 0.036778
+    IKr = i_OK * GKr * (V - R * T / F * nm.log((0.98 * Ko + 0.02 * Nao) / (0.98 * Ki + 0.02 * Nai)))
+    CK0 = 1 - (i_CK1 + i_CK2 + i_OK + i_IK)
+    alphaa0 = 0.022348 * exp(0.01176 * V)
+    betaa0 = 0.047002 * exp(-0.0631 * V)
+    alphaa1 = 0.013733 * exp(0.038198 * V)
+    betaa1 = 0.0000689 * exp(-0.04178 * V)
+    alphai_mERG = 0.090821 * exp(0.023391 * V)
+    betai_mERG = 0.006497 * exp(-0.03268 * V)
+
+    Jtr = (CaNSR - i_CaJSR) / 200
+
+    # Ca fluxes
+    JCa_SL = (2 * INaCa - ICaL - ICaT - ICab) * Acap * Cm / 2 / 1 / F * 1e6
+    JCa_SR = Jleak - Jup + Jrel
+
+    # -------------------------------------------------------------------
+    # Differential equations
+    # -------------------------------------------------------------------
+    # Cai
+    m = length(j)
+    @variables Cai(t)[1:m]
+    # Diffusion coefficient
+    @parameters Dca = 7 # mum^2/ms set to achive correct diff. speed 0.31 mum/ms
+
+    eqs = [D(Cai[1]) ~ (Dca / (j[1] * dx^2) * ((1 + j[1]) * Cai[2] - 2 * j[1] * Cai[1] + (j[1] - 1) * Cai[1]) + JCa_SR / V_sub_SR) * beta_cai(Cai[1], TnI_PKAp)]
+
+
+    #eqs = [eq, Cai_sub_SR~Cai[1], Cai_sub_SL~Cai[m], Ca_j~Cai[23]]
+
+    for i in 2:m-1
+        eq = D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i], TnI_PKAp)
+        push!(eqs, eq)
+    end
+
+    eq_end = D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL / V_sub_SL) * beta_cai(Cai[m], TnI_PKAp)
+    push!(eqs, eq_end)
+
+    # Istim
+    freq = 1                     # [Hz] - CHANGE DEPENDING ON FREQUENCY (1, <=1, -40) (2, <=2, -35) (3, <=2, -30)
+    cycleLength = 1e3 / freq      # [ms]
+
+    Istim = ifelse(mod(t, cycleLength) <= 1, -40, 0.0)
+
+    # Other odes
+    SR_eqs = [
+        D(i_CaJSR) ~ betaSR * (-Jrel + Jtr) / VJSR,
+        D(CaNSR) ~ (Jup - Jleak - Jtr) / VNSR,
+        D(V) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim) / Cm
+    ]
+    # Nai, Ki
+    Na_K_eqs = [
+        D(Nai) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * Acap * Cm / F * 1e6 / Vmyo,
+        D(Ki) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * Acap * Cm / F * 1e6 / Vmyo
+    ]
+
+    # T-Type
+    Ttype_eqs = [
+        D(i_b) ~ (binf - i_b) / taub,
+        D(i_g) ~ (ginf - i_g) / taug
+    ]
+
+    # L-type calcium current
+    Ltype_eqs = [
+        D(i_d) ~ (dinf - i_d) / taud,
+        D(i_f) ~ (finf - i_f) / tauf,
+        #D(i_f) ~ a-(a+b)*i_f*1.5,
+        D(i_fca) ~ kfca * (fcainf - i_fca) / taufca
+    ]
+
+
+    # If
+    IF_eqs = [
+        D(i_y) ~ (yinf - i_y) / tauy
+    ]
+
+
+    # IKto
+    IKto_eqs = [
+        D(i_r) ~ (rinf - i_r) / taur,
+        D(i_s) ~ (sinf - i_s) / taus,
+        D(i_sslow) ~ (slowinf - i_sslow) / tausslow
+    ]
+
+    # INa
+    INa_eqs = [
+        D(i_Nam) ~ (Naminf - i_Nam) / Nataum / 1000,
+        D(i_Nah) ~ (Nahinf - i_Nah) / Natauh / 1000,
+        D(i_Naj) ~ (Najinf - i_Naj) / Natauj / 1000
+    ]
+
+
+    # RyR
+    ryr_eqs = [
+        D(i_PO1) ~ kapos * (Cai_sub_SR)^n / ((Cai_sub_SR)^n + KmRyR^n) * PC1 - kaneg * i_PO1,
+        D(i_PO2) ~ 0,
+        D(i_PC2) ~ 0
+    ]
+
+
+    # IKs
+    InKs_eqs = [
+        D(i_nKs) ~ (nKsinf - i_nKs) / nKstau
+    ]
+
+
+    # Rapid delayed rectifier K current (mERG)
+    IKr_eqs = [
+        D(i_CK1) ~ (alphaa0 * CK0 - betaa0 * i_CK1 + kb * i_CK2 - kf * i_CK1),
+        D(i_CK2) ~ (kf * i_CK1 - kb * i_CK2 + betaa1 * i_OK - alphaa1 * i_CK2),
+        D(i_OK) ~ (alphaa1 * i_CK2 - betaa1 * i_OK + betai_mERG * i_IK - alphai_mERG * i_OK),
+        D(i_IK) ~ (alphai_mERG * i_OK - betai_mERG * i_IK)
+    ]
+
+
+    return vcat(eqs, SR_eqs, Na_K_eqs, Ttype_eqs, Ltype_eqs, IF_eqs, IKto_eqs, INa_eqs, ryr_eqs, InKs_eqs, IKr_eqs, CaMSL_eqs, CaMcyt_eqs, #CaMdyad_eqs,
+        CaMKII_eqs, bar_eqs, cAMP_eqs, PKA_eqs, PP1_eqs, PLB_eqs, PLM_eqs, LCC_eqs, RyRp_eqs, TnI_eqs, IKs_eqs, CFTR_eqs, Ikur_eqs)
+end
+
+# ╔═╡ ee3c7f42-4e1d-4ee5-b0b2-ffbe8b4fd197
+eq_morotti = get_Morotti_equations();
+
+# ╔═╡ e9271d60-9abb-49b2-90ea-d5c543834e8e
+@named osys = ODESystem(eq_morotti, t);
+
+# ╔═╡ 34816d55-a8a9-411f-9a03-adeceb6518f9
+function get_camkii_model()
+	@variables t Cai(t)[1:45]
+	Cai_mean = mean(skipmissing(Cai))
+	##Chemical Reaction of CaMKII Activity (Including OX states)
+	ca_model = @reaction_network begin
+	    ##  Two Ca2+ ions bind to C or N-lobe.
+	    (k_1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2C_on / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1C_off * k_2C_off / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0 <--> Ca2CaM_C
+	    (k_1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2N_on / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1N_off * k_2N_off / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0 <--> Ca2CaM_N
+	    (k_1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2C_on / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1C_off * k_2C_off / (k_1C_off + k_2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_C <--> Ca4CaM
+	    (k_1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_2N_on / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_1N_off * k_2N_off / (k_1N_off + k_2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_N <--> Ca4CaM
+	    ##  Two Ca2+ ions bind to C or N-lobe of CaM-CaMKII complex.
+	    (k_K1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMK <--> Ca2CaM_C_CaMK
+	    (k_K1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMK <--> Ca2CaM_N_CaMK
+	    (k_K1C_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_C_CaMK <--> Ca4CaM_CaMK
+	    (k_K1N_on * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart) * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_N_CaMK <--> Ca4CaM_CaMK
+	    ##  Binding of Ca to CaM-CaMKIIP.
+	    (k_K1C_on * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMKP <--> Ca2CaM_C_CaMKP
+	    (k_K1N_on * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), CaM0_CaMKP <--> Ca2CaM_N_CaMKP
+	    (k_K1C_on * k_K2C_on / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1C_off * k_K2C_off / (k_K1C_off + k_K2C_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_C_CaMKP <--> Ca4CaM_CaMKP
+	    (k_K1N_on * k_K2N_on / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart)) * ($Cai_mean)^2 * (t <= tstop) * (t >= tstart), k_K1N_off * k_K2N_off / (k_K1N_off + k_K2N_on * ($Cai_mean) * (t <= tstop) * (t >= tstart))), Ca2CaM_N_CaMKP <--> Ca4CaM_CaMKP
+	    ##  Binding of CaM to CaMKII or CaMII-P
+	    (kCaM0_on, kCaM0_off), CaM0 + CaMK <--> CaM0_CaMK
+	    (kCaM2C_on, kCaM2C_off), Ca2CaM_C + CaMK <--> Ca2CaM_C_CaMK
+	    (kCaM2N_on, kCaM2N_off), Ca2CaM_N + CaMK <--> Ca2CaM_N_CaMK
+	    (kCaM4_on, kCaM4_off), Ca4CaM + CaMK <--> Ca4CaM_CaMK
+	    (kCaM0P_on, kCaM0P_off), CaM0 + CaMKP <--> CaM0_CaMKP
+	    (kCaM2CP_on, kCaM2CP_off), Ca2CaM_C + CaMKP <--> Ca2CaM_C_CaMKP
+	    (kCaM2NP_on, kCaM2NP_off), Ca2CaM_N + CaMKP <--> Ca2CaM_N_CaMKP
+	    (kCaM4P_on, kCaM4P_off), Ca4CaM + CaMKP <--> Ca4CaM_CaMKP
+	    ##  Phosphorylation CaMXCaMKII -> CaMXCaMKIIP.
+	    (k_phosCaM * (Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca4CaM_CaMK + Ca4CaM_CaMKP + CaMKP + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, k_PB), Ca2CaM_C_CaMK <--> Ca2CaM_C_CaMKP
+	    (k_phosCaM * (Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca4CaM_CaMK + Ca4CaM_CaMKP + CaMKP + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, k_OXPOX), Ca2CaM_N_CaMK <--> Ca2CaM_N_CaMKP
+	    #(kbi*kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)/(kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)+0.01851e3),k_PB), Ca2CaM_C_CaMK <--> Ca2CaM_C_CaMKP
+	    #(kbi*kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)/(kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)+0.01851e3),k_OXPOX),Ca2CaM_N_CaMK <--> Ca2CaM_N_CaMKP
+	    ##  Dephosphorylation CaMKP -> CaMK
+	    k_dephospho, CaMKP --> CaMK
+	    ## Adjustment for Oxdization
+	
+	    (k_phosCaM * (Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca4CaM_CaMK + Ca4CaM_CaMKP + CaMKP + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, k_PB), Ca4CaM_CaMK <--> Ca4CaM_CaMKP #
+	    (k_phosCaM * (Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca4CaM_CaMK + Ca4CaM_CaMKP + CaMKP + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, k_OXPOX), Ca4CaM_CaMKOX <--> Ca4CaM_CaMKPOX #
+	    #(kbi*kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)/(kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)+0.01851e3),k_PB), Ca4CaM_CaMK <--> Ca4CaM_CaMKP #
+	    #(kbi*kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)/(kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)+0.01851e3),k_OXPOX), Ca4CaM_CaMKOX <--> Ca4CaM_CaMKPOX #
+	    (ROS * k_BOX, k_OXB), Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
+	    (ROS * k_POXP, k_OXPP), Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
+	end
+	
+end
+
+# ╔═╡ fac108bf-63be-4524-8622-71ce4cddab60
+rn_osys = convert(ODESystem, get_camkii_model());
+
+# ╔═╡ a798d3ac-5841-4811-9009-776f6f02b7de
+begin
+	@named sys = extend(osys, rn_osys);
+	sys = structural_simplify(sys)
+end;
+
+# ╔═╡ d8e639a5-c0cb-476c-b5a4-e3e841bcf4a0
+ tspan = (0.0, 300e3)
+
+# ╔═╡ 838f5859-0e71-42f6-97b7-6f00732438a2
+oprob = let
+
+CaMT = 30 #Total calmodulin concentration.
+CaMKII_T = 70 #Total CaMKII concentration.
+
+binding_To_PCaMK = 0.1  ## 0.1
+decay_CaM = 3000 # seconds
+phospho_rate = 1
+phosphatase = 1
+
+@unpack Cai, i_CaJSR, CaNSR, V, Nai, Ki, i_b, i_g, i_d, i_f, i_fca, i_y, i_r, i_s, i_sslow,
+i_Nam, i_Nah, i_Naj, i_PO1, i_PO2, i_PC2, i_nKs, i_CK1, i_CK2, i_OK, i_IK,                                                  # ecc_ODEfile
+#CaM_dyad, Ca2CaM_dyad, Ca4CaM_dyad, CaMB_dyad, Ca2CaMB_dyad, Ca4CaMB_dyad, Pb2_dyad, Pb_dyad,
+#Pt_dyad, Pt2_dyad, Pa_dyad, Ca4CaN_dyad, CaMCa4CaN_dyad, Ca2CaMCa4CaN_dyad, Ca4CaMCa4CaN_dyad,                              # camdyad_ODEfile
+CaM_sl, Ca2CaM_sl, Ca4CaM_sl, CaMB_sl, Ca2CaMB_sl, Ca4CaMB_sl, Pb2_sl, Pb_sl,
+Pt_sl, Pt2_sl, Pa_sl, Ca4CaN_sl, CaMCa4CaN_sl, Ca2CaMCa4CaN_sl, Ca4CaMCa4CaN_sl,                                            # camsl_ODEfile
+CaM_cyt, Ca2CaM_cyt, Ca4CaM_cyt, CaMB_cyt, Ca2CaMB_cyt, Ca4CaMB_cyt, Pb2_cyt, Pb_cyt,
+Pt_cyt, Pt2_cyt, Pa_cyt, Ca4CaN_cyt, CaMCa4CaN_cyt, Ca2CaMCa4CaN_cyt, Ca4CaMCa4CaN_cyt,                                     # camcyt_ODEfile
+LCC_PKAp, RyR2809p, RyR2815p, PLBT17p, LCC_CKslp,                                                                           # camkii_ODEfile LCC_CKdyadp,
+LR, LRG, RG, b1AR_S464, b1AR_S301, GsaGTPtot, GsaGDP, Gsby, AC_GsaGTP, PDEp, cAMPtot, RC_I, RCcAMP_I,
+RCcAMPcAMP_I, RcAMPcAMP_I, PKACI, PKACI_PKI, RC_II, RCcAMP_II, RCcAMPcAMP_II, RcAMPcAMP_II, PKACII,                         # bar_ODEfile
+PKACII_PKI, I1p_PP1, I1ptot, PLBp, PLMp, LCCap, LCCbp, RyRp, TnIp, KS79, KS80, KSp, CFTRp, KURp,
+CaMK, CaM0, Ca2CaM_C, Ca2CaM_N, Ca4CaM, CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKP,
+CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, CaMKP, Ca4CaM_CaMKOX, Ca4CaM_CaMKPOX, k_1C_on, k_1C_off, k_2C_on, k_2C_off,
+k_1N_on, k_1N_off, k_2N_on, k_2N_off, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off,
+k_K2N_on, k_K2N_off, kCaM0_on, kCaM2C_on, kCaM2N_on, kCaM4_on, kCaM0_off, kCaM2C_off, kCaM2N_off, kCaM4_off,
+kCaM0P_on, kCaM2CP_on, kCaM2NP_on, kCaM4P_on, kCaM0P_off, kCaM2CP_off, kCaM2NP_off, kCaM4P_off, # kbi, kib,
+k_PB, k_OXPOX, k_dephospho, ROS, k_phosCaM, CaMKII_T, k_BOX, k_OXB, k_POXP, k_OXPP, tstop, tstart = sys
+
+u0 = [Cai[1] => 0.2556, Cai[2] => 0.25574, Cai[3] => 0.25587, Cai[4] => 0.25599, Cai[5] => 0.25609,
+    Cai[6] => 0.25618, Cai[7] => 0.25625, Cai[8] => 0.25631, Cai[9] => 0.25636, Cai[10] => 0.25639,
+    Cai[11] => 0.25642, Cai[12] => 0.25643, Cai[13] => 0.25642, Cai[14] => 0.25641, Cai[15] => 0.25639,
+    Cai[16] => 0.25635, Cai[17] => 0.25631, Cai[18] => 0.25625, Cai[19] => 0.25619, Cai[20] => 0.25611,
+    Cai[21] => 0.25602, Cai[22] => 0.25593, Cai[23] => 0.25583, Cai[24] => 0.25571, Cai[25] => 0.25559,
+    Cai[26] => 0.25546, Cai[27] => 0.25532, Cai[28] => 0.25517, Cai[29] => 0.25502, Cai[30] => 0.25485,
+    Cai[31] => 0.25468, Cai[32] => 0.2545, Cai[33] => 0.25431, Cai[34] => 0.25412, Cai[35] => 0.25392,
+    Cai[36] => 0.25371, Cai[37] => 0.25349, Cai[38] => 0.25326, Cai[39] => 0.25303, Cai[40] => 0.2528,
+    Cai[41] => 0.25255, Cai[42] => 0.2523, Cai[43] => 0.25204, Cai[44] => 0.25178, Cai[45] => 0.25151,
+    i_CaJSR => 613.87556, CaNSR => 619.09843, V => -68.79268, Nai => 13838.37602, Ki => 150952.75035,
+    i_b => 0.00305, i_g => 0.61179, i_d => 0.00033, i_f => 0.99869, i_fca => 0.9911, i_y => 0.07192,
+    i_r => 0.00702, i_s => 0.96604, i_sslow => 0.22156, i_Nam => 0.02506, i_Nah => 0.22242, i_Naj => 0.19081,
+    i_PO1 => 0.0037, i_PO2 => 0.0, i_PC2 => 0.0, i_nKs => 0.09243, i_CK1 => 0.00188, i_CK2 => 0.00977,
+    i_OK => 0.26081, i_IK => 0.07831, CaM_sl => 0.03744, Ca2CaM_sl => 0.00031, Ca4CaM_sl => 0.0,
+    CaMB_sl => 4.20703, Ca2CaMB_sl => 10.08438, Ca4CaMB_sl => 0.00111, Pb2_sl => 6.0e-5, Pb_sl => 0.0, Pt_sl => 0.0,
+    Pt2_sl => 0.0, Pa_sl => 0.0, Ca4CaN_sl => 0.00037, CaMCa4CaN_sl => 0.0, Ca2CaMCa4CaN_sl => 0.0,
+    Ca4CaMCa4CaN_sl => 0.00141, CaM_cyt => 0.03779, Ca2CaM_cyt => 0.00031, Ca4CaM_cyt => 0.0, CaMB_cyt => 2.5048,
+    Ca2CaMB_cyt => 2.789, Ca4CaMB_cyt => 0.00032, Pb2_cyt => 6.0e-5, Pb_cyt => 0.0, Pt_cyt => 0.0, Pt2_cyt => 0.0,
+    Pa_cyt => 0.0, Ca4CaN_cyt => 0.00069, CaMCa4CaN_cyt => 0.0, Ca2CaMCa4CaN_cyt => 1.0e-5, Ca4CaMCa4CaN_cyt => 1.0e-5,
+    LCC_PKAp => 16.45439, RyR2809p => 297.35744, RyR2815p => 130.5212, PLBT17p => 1.87769,
+    LCC_CKslp => 1.0e-5, LR => 0.0, LRG => 0.0, RG => 0.00048, b1AR_S464 => 0.0, b1AR_S301 => 0.00065,
+    GsaGTPtot => 0.00961, GsaGDP => 0.00063, Gsby => 0.01002, AC_GsaGTP => 0.00142, PDEp => 0.00223,
+    cAMPtot => 1.02286, RC_I => 0.80424, RCcAMP_I => 0.14186, RCcAMPcAMP_I => 0.00449, RcAMPcAMP_I => 0.22889,
+    PKACI => 0.08583, PKACI_PKI => 0.14356, RC_II => 0.051, RCcAMP_II => 0.009, RCcAMPcAMP_II => 0.00028,
+    RcAMPcAMP_II => 0.0577, PKACII => 0.02159, PKACII_PKI => 0.0361, I1p_PP1 => 0.07292, I1ptot => 0.07301,
+    PLBp => 8.49358, PLMp => 5.62885, LCCap => 0.0055, LCCbp => 0.00628, RyRp => 0.02763, TnIp => 4.41392,
+    KURp => 0.01095, KS79 => 0.00153, KS80 => 0.00153, KSp => 0.00184, CFTRp => 0.00406,
+    CaM0 => 1000, Ca2CaM_C => 0.0, Ca2CaM_N => 0.0, Ca4CaM => 0.0,
+    CaM0_CaMK => 0.0, Ca2CaM_C_CaMK => 0.0, Ca2CaM_N_CaMK => 0.0, Ca4CaM_CaMK => 0.0,
+    CaM0_CaMKP => 0.0, Ca2CaM_C_CaMKP => 0.0, Ca2CaM_N_CaMKP => 0.0, Ca4CaM_CaMKP => 0.0,
+    CaMK => 0.0, CaMKP => CaMKII_T, Ca4CaM_CaMKOX => 0.0, Ca4CaM_CaMKPOX => 0.0]
+
+ks = [k_1C_on => 5e-3, k_1C_off => 50e-3, k_2C_on => 10e-3, k_2C_off => 10e-3, k_1N_on => 100e-3, k_1N_off => 2000e-3, k_2N_on => 200e-3, k_2N_off => 500e-3, k_K1C_on => 44e-3, k_K1C_off => 33e-3, k_K2C_on => 44e-3, k_K2C_off => 0.8e-3, k_K1N_on => 76e-3, k_K1N_off => 300e-3, k_K2N_on => 76e-3, k_K2N_off => 20e-3, kCaM0_on => 3.8e-6, kCaM2C_on => 0.92e-3, kCaM2N_on => 0.12e-3, kCaM4_on => 30e-3, kCaM0_off => 5.5e-3, kCaM2C_off => 6.8e-3, kCaM2N_off => 1.7e-3, kCaM4_off => 1.5e-3, kCaM0P_on => 3.8e-6 * binding_To_PCaMK, kCaM2CP_on => 0.92e-3 * binding_To_PCaMK, kCaM2NP_on => 0.12e-3 * binding_To_PCaMK, kCaM4P_on => 30e-3 * binding_To_PCaMK, kCaM0P_off => 1 / decay_CaM, kCaM2CP_off => 1 / decay_CaM, kCaM2NP_off => 1 / decay_CaM, kCaM4P_off => 1 / decay_CaM, k_dephospho => (1 / 6000) * phosphatase, k_phosCaM => 2e-3 * phospho_rate, CaMKII_T => 70, k_BOX => 2.91e-4, k_PB => 0.00003, k_OXPOX => 0.00003, k_OXB => 2.23e-5, k_POXP => 2.91e-4, k_OXPP => 2.23e-5, tstop => 260e3, tstart => 130e3, ROS => 0]
+
+
+oprob = ODEProblem(sys, u0, tspan, ks)
+end
+
+# ╔═╡ c31a50c7-b116-485a-aa4c-57bc37ab3812
+alg = TRBDF2()
+
+# ╔═╡ 6c80bb29-dda0-4f1a-8865-47bb5f2bab72
+@time sol = solve(oprob, alg, abstol=1e-6, reltol=1e-6, tstops=0:1000:tspan[end], progress=true)
+
+# ╔═╡ ef4446ea-5210-4586-a7c2-3ab21a3594f0
+length(sol)
+
+# ╔═╡ 94bfa7bc-458c-4fc1-b31d-64261d8fb6a6
+plot(sol, idxs=sys.Cai[45]*1000, tspan=(200e3, 201e3), xlabel="Time (ms)", ylabel="Conc. (nM)", label="Ca (SL)", ylims=(250, 600))
+
+# ╔═╡ 00000000-0000-0000-0000-000000000001
+PLUTO_PROJECT_TOML_CONTENTS = """
+[deps]
+Catalyst = "479239e8-5488-4da2-87a7-35f2df7eef83"
+ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
+NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[compat]
+Catalyst = "~14.4.1"
+ModelingToolkit = "~9.49.0"
+NaNMath = "~1.0.2"
+OrdinaryDiffEq = "~6.89.0"
+Plots = "~1.40.8"
+ProgressLogging = "~0.1.4"
+Statistics = "~1.11.1"
+"""
+
+# ╔═╡ 00000000-0000-0000-0000-000000000002
+PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "59790a49873d13dffc12303a936abd751ae64bc5"
+project_hash = "6e59a36aec1aef56ad83ada0481e0d3f0ff07518"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "eea5d80188827b35333801ef97a40c2ed653b081"
@@ -72,16 +1300,15 @@ version = "0.4.0"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra"]
-git-tree-sha1 = "d60a1922358aa203019b7857a2c8c37329b8736c"
+git-tree-sha1 = "3640d077b6dafd64ceb8fd5c1ec76f7ca53bcf76"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.17.0"
+version = "7.16.0"
 
     [deps.ArrayInterface.extensions]
     ArrayInterfaceBandedMatricesExt = "BandedMatrices"
     ArrayInterfaceBlockBandedMatricesExt = "BlockBandedMatrices"
     ArrayInterfaceCUDAExt = "CUDA"
     ArrayInterfaceCUDSSExt = "CUDSS"
-    ArrayInterfaceChainRulesCoreExt = "ChainRulesCore"
     ArrayInterfaceChainRulesExt = "ChainRules"
     ArrayInterfaceGPUArraysCoreExt = "GPUArraysCore"
     ArrayInterfaceReverseDiffExt = "ReverseDiff"
@@ -95,7 +1322,6 @@ version = "7.17.0"
     CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
     CUDSS = "45b445bb-4962-46a0-9369-b4df9d0f772e"
     ChainRules = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
     GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
     ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
     SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
@@ -148,16 +1374,6 @@ version = "1.1.1"
     [deps.BlockArrays.weakdeps]
     BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
 
-[[deps.BracketingNonlinearSolve]]
-deps = ["CommonSolve", "ConcreteStructs", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase"]
-git-tree-sha1 = "95cb19c37ea427617e9795655667712f03058d98"
-uuid = "70df07ce-3d50-431d-a3e7-ca6ddb60ac1e"
-version = "1.1.0"
-weakdeps = ["ForwardDiff"]
-
-    [deps.BracketingNonlinearSolve.extensions]
-    BracketingNonlinearSolveForwardDiffExt = "ForwardDiff"
-
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "8873e196c2eb87962a2048b3b8e08946535864a1"
@@ -176,22 +1392,31 @@ git-tree-sha1 = "0157e592151e39fa570645e2b2debcdfb8a0f112"
 uuid = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
 version = "3.4.3"
 
-[[deps.CSV]]
-deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
-uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.15"
-
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
 
-[[deps.Cassette]]
-git-tree-sha1 = "f8764df8d9d2aec2812f009a1ac39e46c33354b8"
-uuid = "7057c7e9-c182-5462-911a-8362d720325c"
-version = "0.3.14"
+[[deps.Catalyst]]
+deps = ["Combinatorics", "DataStructures", "DiffEqBase", "DocStringExtensions", "DynamicPolynomials", "DynamicQuantities", "Graphs", "JumpProcesses", "LaTeXStrings", "Latexify", "LinearAlgebra", "MacroTools", "ModelingToolkit", "Parameters", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SymbolicUtils", "Symbolics", "Unitful"]
+git-tree-sha1 = "dafd059c1d80ba02006978cd05ea7264ff1f362e"
+uuid = "479239e8-5488-4da2-87a7-35f2df7eef83"
+version = "14.4.1"
+
+    [deps.Catalyst.extensions]
+    CatalystBifurcationKitExtension = "BifurcationKit"
+    CatalystCairoMakieExtension = "CairoMakie"
+    CatalystGraphMakieExtension = "GraphMakie"
+    CatalystHomotopyContinuationExtension = "HomotopyContinuation"
+    CatalystStructuralIdentifiabilityExtension = "StructuralIdentifiability"
+
+    [deps.Catalyst.weakdeps]
+    BifurcationKit = "0f109fa4-8a5d-4b75-95aa-f515264e7665"
+    CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+    GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
+    HomotopyContinuation = "f213a82b-91d6-5c5d-acf7-10f1c761b327"
+    StructuralIdentifiability = "220ca800-aa68-49bb-acd8-6037fa93a544"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -217,9 +1442,9 @@ version = "0.7.6"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "c785dfb1b3bfddd1da557e861b919819b82bbe5b"
+git-tree-sha1 = "13951eb68769ad1cd460cdb2e64e5e95f1bf123d"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.27.1"
+version = "3.27.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -233,9 +1458,9 @@ weakdeps = ["StyledStrings"]
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
-git-tree-sha1 = "8b3b6f87ce8f65a2b4f857528fd8d70086cd72b1"
+git-tree-sha1 = "3e532ae5ac37b4be60228d63e28e0bc9d5900bcc"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.11.0"
+version = "0.10.1"
 weakdeps = ["SpecialFunctions"]
 
     [deps.ColorVectorSpace.extensions]
@@ -346,12 +1571,6 @@ git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
 
-[[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "fb61b4812c49343d7ef0b533ba982c46021938a6"
-uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.7.0"
-
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
 git-tree-sha1 = "1d0a14036acb104d9e89698bd408f63ab58cdc82"
@@ -446,9 +1665,9 @@ version = "1.15.1"
 
 [[deps.DifferentiationInterface]]
 deps = ["ADTypes", "LinearAlgebra"]
-git-tree-sha1 = "0c99576d0b93df0aff1bed9d9adddef14e4e658f"
+git-tree-sha1 = "ba137efeddd4b6e6a7154f2a92d2922a0057486f"
 uuid = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
-version = "0.6.22"
+version = "0.6.21"
 
     [deps.DifferentiationInterface.extensions]
     DifferentiationInterfaceChainRulesCoreExt = "ChainRulesCore"
@@ -549,9 +1768,9 @@ version = "0.6.0"
 
 [[deps.DynamicQuantities]]
 deps = ["DispatchDoctor", "TestItems", "Tricks"]
-git-tree-sha1 = "192f34efd3912f4020b225e01d896f567f5f03e8"
+git-tree-sha1 = "9f826f051e3d2c76f924d39c9aa4fcfd18cc9256"
 uuid = "06fc5a27-2a28-4c7c-a15d-362465fb6821"
-version = "1.3.0"
+version = "1.2.0"
 
     [deps.DynamicQuantities.extensions]
     DynamicQuantitiesLinearAlgebraExt = "LinearAlgebra"
@@ -664,17 +1883,6 @@ version = "1.1.1"
     ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 
-[[deps.FilePathsBase]]
-deps = ["Compat", "Dates"]
-git-tree-sha1 = "7878ff7172a8e6beedd1dea14bd27c3c6340d361"
-uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
-version = "0.9.22"
-weakdeps = ["Mmap", "Test"]
-
-    [deps.FilePathsBase.extensions]
-    FilePathsBaseMmapExt = "Mmap"
-    FilePathsBaseTestExt = "Test"
-
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 version = "1.11.0"
@@ -733,9 +1941,9 @@ version = "1.3.7"
 
 [[deps.ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions"]
-git-tree-sha1 = "a2df1b776752e3f344e5116c06d75a10436ab853"
+git-tree-sha1 = "a9ce73d3c827adab2d70bf168aaece8cce196898"
 uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "0.10.38"
+version = "0.10.37"
 weakdeps = ["StaticArrays"]
 
     [deps.ForwardDiff.extensions]
@@ -752,12 +1960,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "1ed150b39aebcc805c26b93a8d0122c940f64ce2"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.14+0"
-
-[[deps.FunctionProperties]]
-deps = ["Cassette", "DiffRules"]
-git-tree-sha1 = "bf7c740307eb0ee80e05d8aafbd0c5a901578398"
-uuid = "f62d2435-5019-4c03-9749-2d4c77af0cbc"
-version = "0.1.2"
 
 [[deps.FunctionWrappers]]
 git-tree-sha1 = "d62485945ce5ae9c0c48f124a84998d755bae00e"
@@ -853,9 +2055,9 @@ version = "1.0.2"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
-git-tree-sha1 = "1336e07ba2eb75614c99496501a8f4b233e9fafe"
+git-tree-sha1 = "bc3f416a965ae61968c20d0ad867556367f2817d"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "1.10.10"
+version = "1.10.9"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll"]
@@ -871,9 +2073,9 @@ version = "0.1.17"
 
 [[deps.HypergeometricFunctions]]
 deps = ["LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
-git-tree-sha1 = "b1c2585431c382e3fe5805874bda6aea90a95de9"
+git-tree-sha1 = "7c4195be1649ae622304031ed46a2f4df989f1eb"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.3.25"
+version = "0.3.24"
 
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
@@ -884,19 +2086,6 @@ version = "0.1.1"
 git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
-
-[[deps.InlineStrings]]
-git-tree-sha1 = "45521d31238e87ee9f9732561bfee12d4eebd52d"
-uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
-version = "1.4.2"
-
-    [deps.InlineStrings.extensions]
-    ArrowTypesExt = "ArrowTypes"
-    ParsersExt = "Parsers"
-
-    [deps.InlineStrings.weakdeps]
-    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
-    Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 
 [[deps.IntegerMathUtils]]
 git-tree-sha1 = "b8ffb903da9f7b8cf695a8bead8e01814aa24b30"
@@ -934,11 +2123,6 @@ weakdeps = ["Dates", "Test"]
     [deps.InverseFunctions.extensions]
     InverseFunctionsDatesExt = "Dates"
     InverseFunctionsTestExt = "Test"
-
-[[deps.InvertedIndices]]
-git-tree-sha1 = "0dc7b50b8d436461be01300fd8cd45aa0274b038"
-uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.3.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
@@ -1244,12 +2428,6 @@ weakdeps = ["ChainRulesCore", "ForwardDiff", "SpecialFunctions"]
     ForwardDiffExt = ["ChainRulesCore", "ForwardDiff"]
     SpecialFunctionsExt = "SpecialFunctions"
 
-[[deps.LsqFit]]
-deps = ["Distributions", "ForwardDiff", "LinearAlgebra", "NLSolversBase", "Printf", "StatsAPI"]
-git-tree-sha1 = "40acc20cfb253cf061c1a2a2ea28de85235eeee1"
-uuid = "2fda8390-95c7-5789-9bda-21331edee243"
-version = "0.15.0"
-
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
 git-tree-sha1 = "f046ccd0c6db2832a9f639e2c669c6fe867e5f4f"
@@ -1315,9 +2493,9 @@ version = "1.11.0"
 
 [[deps.ModelingToolkit]]
 deps = ["AbstractTrees", "ArrayInterface", "BlockArrays", "Combinatorics", "CommonSolve", "Compat", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffEqNoiseProcess", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "DomainSets", "DynamicQuantities", "ExprTools", "Expronicon", "FindFirstFunctions", "ForwardDiff", "FunctionWrappers", "FunctionWrappersWrappers", "Graphs", "InteractiveUtils", "JuliaFormatter", "JumpProcesses", "Latexify", "Libdl", "LinearAlgebra", "MLStyle", "NaNMath", "NonlinearSolve", "OffsetArrays", "OrderedCollections", "PrecompileTools", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLBase", "SciMLStructures", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "URIs", "UnPack", "Unitful"]
-git-tree-sha1 = "b96b0749d6d9c8d6480641dcfcc02a265cf6d9e7"
+git-tree-sha1 = "db309b354ade7fe3deb97d95ca241ed8f1096e91"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "9.50.0"
+version = "9.49.0"
 
     [deps.ModelingToolkit.extensions]
     MTKBifurcationKitExt = "BifurcationKit"
@@ -1371,78 +2549,32 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
 
 [[deps.NonlinearSolve]]
-deps = ["ADTypes", "ArrayInterface", "BracketingNonlinearSolve", "CommonSolve", "ConcreteStructs", "DiffEqBase", "DifferentiationInterface", "FastClosures", "FiniteDiff", "ForwardDiff", "LineSearch", "LinearAlgebra", "LinearSolve", "NonlinearSolveBase", "NonlinearSolveFirstOrder", "NonlinearSolveQuasiNewton", "NonlinearSolveSpectralMethods", "PrecompileTools", "Preferences", "Reexport", "SciMLBase", "SimpleNonlinearSolve", "SparseArrays", "SparseMatrixColorings", "StaticArraysCore", "SymbolicIndexingInterface"]
-git-tree-sha1 = "22f3efdd47bd18d8a26bd559fff254e6b21000fd"
+deps = ["ADTypes", "ArrayInterface", "ConcreteStructs", "DiffEqBase", "DifferentiationInterface", "FastBroadcast", "FastClosures", "FiniteDiff", "ForwardDiff", "LazyArrays", "LineSearch", "LineSearches", "LinearAlgebra", "LinearSolve", "MaybeInplace", "PrecompileTools", "Preferences", "Printf", "RecursiveArrayTools", "Reexport", "SciMLBase", "SciMLJacobianOperators", "SciMLOperators", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "SparseConnectivityTracer", "SparseMatrixColorings", "StaticArraysCore", "SymbolicIndexingInterface", "TimerOutputs"]
+git-tree-sha1 = "4d8944f32db2b07a2bdf8477e878bcb9c9ea2308"
 uuid = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
-version = "4.1.0"
+version = "3.15.1"
 
     [deps.NonlinearSolve.extensions]
+    NonlinearSolveBandedMatricesExt = "BandedMatrices"
     NonlinearSolveFastLevenbergMarquardtExt = "FastLevenbergMarquardt"
     NonlinearSolveFixedPointAccelerationExt = "FixedPointAcceleration"
     NonlinearSolveLeastSquaresOptimExt = "LeastSquaresOptim"
     NonlinearSolveMINPACKExt = "MINPACK"
     NonlinearSolveNLSolversExt = "NLSolvers"
-    NonlinearSolveNLsolveExt = ["NLsolve", "LineSearches"]
-    NonlinearSolvePETScExt = ["PETSc", "MPI"]
+    NonlinearSolveNLsolveExt = "NLsolve"
     NonlinearSolveSIAMFANLEquationsExt = "SIAMFANLEquations"
     NonlinearSolveSpeedMappingExt = "SpeedMapping"
-    NonlinearSolveSundialsExt = "Sundials"
 
     [deps.NonlinearSolve.weakdeps]
+    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
     FastLevenbergMarquardt = "7a0df574-e128-4d35-8cbd-3d84502bf7ce"
     FixedPointAcceleration = "817d07cb-a79a-5c30-9a31-890123675176"
     LeastSquaresOptim = "0fc2ff8b-aaa3-5acd-a817-1944a5e08891"
-    LineSearches = "d3d80556-e9d4-5f37-9878-2ab0fcc64255"
     MINPACK = "4854310b-de5a-5eb6-a2a5-c1dee2bd17f9"
-    MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
     NLSolvers = "337daf1e-9722-11e9-073e-8b9effe078ba"
     NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
-    PETSc = "ace2c81b-2b5f-4b1e-a30d-d662738edfe0"
     SIAMFANLEquations = "084e46ad-d928-497d-ad5e-07fa361a48c4"
     SpeedMapping = "f1835b91-879b-4a3f-a438-e4baacf14412"
-    Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
-
-[[deps.NonlinearSolveBase]]
-deps = ["ADTypes", "Adapt", "ArrayInterface", "CommonSolve", "Compat", "ConcreteStructs", "DifferentiationInterface", "EnzymeCore", "FastClosures", "FunctionProperties", "LinearAlgebra", "Markdown", "MaybeInplace", "Preferences", "Printf", "RecursiveArrayTools", "SciMLBase", "SciMLJacobianOperators", "SciMLOperators", "StaticArraysCore", "SymbolicIndexingInterface", "TimerOutputs"]
-git-tree-sha1 = "1589ef8aac99a21d132adf1ec5cbe6ef651760ff"
-uuid = "be0214bd-f91f-a760-ac4e-3421ce2b2da0"
-version = "1.3.1"
-
-    [deps.NonlinearSolveBase.extensions]
-    NonlinearSolveBaseBandedMatricesExt = "BandedMatrices"
-    NonlinearSolveBaseDiffEqBaseExt = "DiffEqBase"
-    NonlinearSolveBaseForwardDiffExt = "ForwardDiff"
-    NonlinearSolveBaseLineSearchExt = "LineSearch"
-    NonlinearSolveBaseLinearSolveExt = "LinearSolve"
-    NonlinearSolveBaseSparseArraysExt = "SparseArrays"
-    NonlinearSolveBaseSparseMatrixColoringsExt = "SparseMatrixColorings"
-
-    [deps.NonlinearSolveBase.weakdeps]
-    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
-    DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    LineSearch = "87fe0de2-c867-4266-b59a-2f0a94fc965b"
-    LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-    SparseMatrixColorings = "0a514795-09f3-496d-8182-132a7b665d35"
-
-[[deps.NonlinearSolveFirstOrder]]
-deps = ["ADTypes", "ArrayInterface", "CommonSolve", "ConcreteStructs", "DiffEqBase", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "MaybeInplace", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase", "SciMLJacobianOperators", "Setfield", "StaticArraysCore"]
-git-tree-sha1 = "dc8535cecb0f9d978019e44b7144b9e84ab85424"
-uuid = "5959db7a-ea39-4486-b5fe-2dd0bf03d60d"
-version = "1.0.0"
-
-[[deps.NonlinearSolveQuasiNewton]]
-deps = ["ArrayInterface", "CommonSolve", "ConcreteStructs", "DiffEqBase", "LinearAlgebra", "LinearSolve", "MaybeInplace", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase", "SciMLOperators", "StaticArraysCore"]
-git-tree-sha1 = "066d4940938f4bb5fd1ce146e61a373f40b89d31"
-uuid = "9a2c21bd-3a47-402d-9113-8faf9a0ee114"
-version = "1.0.0"
-
-[[deps.NonlinearSolveSpectralMethods]]
-deps = ["CommonSolve", "ConcreteStructs", "DiffEqBase", "LineSearch", "MaybeInplace", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase"]
-git-tree-sha1 = "cc97c44e396ab820401c8c404bc1fd18d4c884bd"
-uuid = "26075421-4e9a-44e1-8bd1-420ed7ad02b2"
-version = "1.0.0"
 
 [[deps.OffsetArrays]]
 git-tree-sha1 = "1a27764e945a152f7ca7efa04de513d473e9542e"
@@ -1512,9 +2644,9 @@ version = "1.6.3"
 
 [[deps.OrdinaryDiffEq]]
 deps = ["ADTypes", "Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "EnumX", "ExponentialUtilities", "FastBroadcast", "FastClosures", "FillArrays", "FiniteDiff", "ForwardDiff", "FunctionWrappersWrappers", "InteractiveUtils", "LineSearches", "LinearAlgebra", "LinearSolve", "Logging", "MacroTools", "MuladdMacro", "NonlinearSolve", "OrdinaryDiffEqAdamsBashforthMoulton", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqDefault", "OrdinaryDiffEqDifferentiation", "OrdinaryDiffEqExplicitRK", "OrdinaryDiffEqExponentialRK", "OrdinaryDiffEqExtrapolation", "OrdinaryDiffEqFIRK", "OrdinaryDiffEqFeagin", "OrdinaryDiffEqFunctionMap", "OrdinaryDiffEqHighOrderRK", "OrdinaryDiffEqIMEXMultistep", "OrdinaryDiffEqLinear", "OrdinaryDiffEqLowOrderRK", "OrdinaryDiffEqLowStorageRK", "OrdinaryDiffEqNonlinearSolve", "OrdinaryDiffEqNordsieck", "OrdinaryDiffEqPDIRK", "OrdinaryDiffEqPRK", "OrdinaryDiffEqQPRK", "OrdinaryDiffEqRKN", "OrdinaryDiffEqRosenbrock", "OrdinaryDiffEqSDIRK", "OrdinaryDiffEqSSPRK", "OrdinaryDiffEqStabilizedIRK", "OrdinaryDiffEqStabilizedRK", "OrdinaryDiffEqSymplecticRK", "OrdinaryDiffEqTsit5", "OrdinaryDiffEqVerner", "Polyester", "PreallocationTools", "PrecompileTools", "Preferences", "RecursiveArrayTools", "Reexport", "SciMLBase", "SciMLOperators", "SciMLStructures", "SimpleNonlinearSolve", "SimpleUnPack", "SparseArrays", "SparseDiffTools", "Static", "StaticArrayInterface", "StaticArrays", "TruncatedStacktraces"]
-git-tree-sha1 = "36ce9bfc14a4b3dcf1490e80b5f1f4d35bfddf39"
+git-tree-sha1 = "cd892f12371c287dc50d6ad3af075b088b6f2d48"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "6.90.1"
+version = "6.89.0"
 
 [[deps.OrdinaryDiffEqAdamsBashforthMoulton]]
 deps = ["ADTypes", "DiffEqBase", "FastBroadcast", "MuladdMacro", "OrdinaryDiffEqCore", "OrdinaryDiffEqLowOrderRK", "Polyester", "RecursiveArrayTools", "Reexport", "Static"]
@@ -1546,9 +2678,9 @@ version = "1.1.0"
 
 [[deps.OrdinaryDiffEqDifferentiation]]
 deps = ["ADTypes", "ArrayInterface", "DiffEqBase", "FastBroadcast", "FiniteDiff", "ForwardDiff", "FunctionWrappersWrappers", "LinearAlgebra", "LinearSolve", "OrdinaryDiffEqCore", "SciMLBase", "SparseArrays", "SparseDiffTools", "StaticArrayInterface", "StaticArrays"]
-git-tree-sha1 = "8977f283a7d89c5d5c06c933467ed4af0a99f2f7"
+git-tree-sha1 = "e63ec633b1efa99e3caa2e26a01faaa88ba6cef9"
 uuid = "4302a76b-040a-498a-8c04-15b101fed76b"
-version = "1.2.0"
+version = "1.1.0"
 
 [[deps.OrdinaryDiffEqExplicitRK]]
 deps = ["DiffEqBase", "FastBroadcast", "LinearAlgebra", "MuladdMacro", "OrdinaryDiffEqCore", "RecursiveArrayTools", "Reexport", "TruncatedStacktraces"]
@@ -1618,9 +2750,9 @@ version = "1.2.1"
 
 [[deps.OrdinaryDiffEqNonlinearSolve]]
 deps = ["ADTypes", "ArrayInterface", "DiffEqBase", "FastBroadcast", "FastClosures", "ForwardDiff", "LinearAlgebra", "LinearSolve", "MuladdMacro", "NonlinearSolve", "OrdinaryDiffEqCore", "OrdinaryDiffEqDifferentiation", "PreallocationTools", "RecursiveArrayTools", "SciMLBase", "SciMLOperators", "SciMLStructures", "SimpleNonlinearSolve", "StaticArrays"]
-git-tree-sha1 = "5e1b316555fa95892edc13f6a429ac784d0be4dd"
+git-tree-sha1 = "e4be6539f4aaae8db1f29fcfdf6ef817df1f25cf"
 uuid = "127b3ac7-2247-4354-8eb6-78cf4e7c58e8"
-version = "1.2.4"
+version = "1.2.2"
 
 [[deps.OrdinaryDiffEqNordsieck]]
 deps = ["DiffEqBase", "FastBroadcast", "LinearAlgebra", "MuladdMacro", "OrdinaryDiffEqCore", "OrdinaryDiffEqTsit5", "Polyester", "RecursiveArrayTools", "Reexport", "Static"]
@@ -1654,9 +2786,9 @@ version = "1.1.0"
 
 [[deps.OrdinaryDiffEqRosenbrock]]
 deps = ["ADTypes", "DiffEqBase", "FastBroadcast", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "MacroTools", "MuladdMacro", "OrdinaryDiffEqCore", "OrdinaryDiffEqDifferentiation", "Polyester", "PrecompileTools", "Preferences", "RecursiveArrayTools", "Reexport", "Static"]
-git-tree-sha1 = "56cbbdc43bd0e88083fcef3efa296501b5a435da"
+git-tree-sha1 = "96b47cdd12cb4ce8f70d701b49f855271a462bd4"
 uuid = "43230ef6-c299-4910-a778-202eb28ce4ce"
-version = "1.3.0"
+version = "1.2.0"
 
 [[deps.OrdinaryDiffEqSDIRK]]
 deps = ["DiffEqBase", "FastBroadcast", "LinearAlgebra", "MacroTools", "MuladdMacro", "OrdinaryDiffEqCore", "OrdinaryDiffEqDifferentiation", "OrdinaryDiffEqNonlinearSolve", "RecursiveArrayTools", "Reexport", "SciMLBase", "TruncatedStacktraces"]
@@ -1823,12 +2955,6 @@ version = "4.0.11"
     MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
     MutableArithmetics = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
 
-[[deps.PooledArrays]]
-deps = ["DataAPI", "Future"]
-git-tree-sha1 = "36d8b4b899628fb92c2749eb488d884a926614d3"
-uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.3"
-
 [[deps.PositiveFactorizations]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "17275485f373e6673f7e7f97051f703ed5b15b20"
@@ -1858,12 +2984,6 @@ deps = ["TOML"]
 git-tree-sha1 = "9306f6085165d270f7e3db02af26a400d580f5c6"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.3"
-
-[[deps.PrettyTables]]
-deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.4.0"
 
 [[deps.Primes]]
 deps = ["IntegerMathUtils"]
@@ -2057,9 +3177,9 @@ version = "0.6.43"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "Accessors", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "Expronicon", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "SciMLStructures", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface"]
-git-tree-sha1 = "7527b9adb22904f0f51d8ab85d826f81ebb6f78d"
+git-tree-sha1 = "f102316e5c958b425ef530ee51c7c8a1def55d1f"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "2.59.2"
+version = "2.58.1"
 
     [deps.SciMLBase.extensions]
     SciMLBaseChainRulesCoreExt = "ChainRulesCore"
@@ -2109,12 +3229,6 @@ git-tree-sha1 = "3bac05bc7e74a75fd9cba4295cde4045d9fe2386"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.1"
 
-[[deps.SentinelArrays]]
-deps = ["Dates", "Random"]
-git-tree-sha1 = "d0553ce4031a081cc42387a9b9c8441b7d99f32d"
-uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.4.7"
-
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 version = "1.11.0"
@@ -2142,22 +3256,22 @@ uuid = "777ac1f9-54b0-4bf8-805c-2214025038e7"
 version = "1.2.0"
 
 [[deps.SimpleNonlinearSolve]]
-deps = ["ADTypes", "ArrayInterface", "BracketingNonlinearSolve", "CommonSolve", "ConcreteStructs", "DifferentiationInterface", "FastClosures", "FiniteDiff", "ForwardDiff", "LineSearch", "LinearAlgebra", "MaybeInplace", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase", "Setfield", "StaticArraysCore"]
-git-tree-sha1 = "f7e2042e0b68c6bb19a0a1594839792737f51d84"
+deps = ["ADTypes", "ArrayInterface", "ConcreteStructs", "DiffEqBase", "DiffResults", "DifferentiationInterface", "FastClosures", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "MaybeInplace", "PrecompileTools", "Reexport", "SciMLBase", "Setfield", "StaticArraysCore"]
+git-tree-sha1 = "44021f3efc023be3871195d8ad98b865001a2fa1"
 uuid = "727e6d20-b764-4bd8-a329-72de5adea6c7"
-version = "2.0.0"
+version = "1.12.3"
 
     [deps.SimpleNonlinearSolve.extensions]
     SimpleNonlinearSolveChainRulesCoreExt = "ChainRulesCore"
-    SimpleNonlinearSolveDiffEqBaseExt = "DiffEqBase"
     SimpleNonlinearSolveReverseDiffExt = "ReverseDiff"
     SimpleNonlinearSolveTrackerExt = "Tracker"
+    SimpleNonlinearSolveZygoteExt = "Zygote"
 
     [deps.SimpleNonlinearSolve.weakdeps]
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-    DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
     ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [[deps.SimpleTraits]]
 deps = ["InteractiveUtils", "MacroTools"]
@@ -2185,6 +3299,26 @@ deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 version = "1.11.0"
 
+[[deps.SparseConnectivityTracer]]
+deps = ["ADTypes", "DocStringExtensions", "FillArrays", "LinearAlgebra", "Random", "SparseArrays"]
+git-tree-sha1 = "6914df6005bab9940e2a96879a97a43e1fb1ce78"
+uuid = "9f842d2f-2579-4b1d-911e-f412cf18a3f5"
+version = "0.6.8"
+
+    [deps.SparseConnectivityTracer.extensions]
+    SparseConnectivityTracerDataInterpolationsExt = "DataInterpolations"
+    SparseConnectivityTracerLogExpFunctionsExt = "LogExpFunctions"
+    SparseConnectivityTracerNNlibExt = "NNlib"
+    SparseConnectivityTracerNaNMathExt = "NaNMath"
+    SparseConnectivityTracerSpecialFunctionsExt = "SpecialFunctions"
+
+    [deps.SparseConnectivityTracer.weakdeps]
+    DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
+    LogExpFunctions = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
+    NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
+    NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
 [[deps.SparseDiffTools]]
 deps = ["ADTypes", "Adapt", "ArrayInterface", "Compat", "DataStructures", "FiniteDiff", "ForwardDiff", "Graphs", "LinearAlgebra", "PackageExtensionCompat", "Random", "Reexport", "SciMLOperators", "Setfield", "SparseArrays", "StaticArrayInterface", "StaticArrays", "UnPack", "VertexSafeGraphs"]
 git-tree-sha1 = "b906758c107b049b6b71599b9f928d9b14e5554a"
@@ -2207,9 +3341,9 @@ version = "2.23.0"
 
 [[deps.SparseMatrixColorings]]
 deps = ["ADTypes", "DataStructures", "DocStringExtensions", "LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "76b44c879661552d64f382acf66faa29ab56b3d9"
+git-tree-sha1 = "f37f046636f8dc353a39279abfefe296db212171"
 uuid = "0a514795-09f3-496d-8182-132a7b665d35"
-version = "0.4.10"
+version = "0.4.8"
 weakdeps = ["Colors"]
 
     [deps.SparseMatrixColorings.extensions]
@@ -2303,23 +3437,11 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
     StatsFunsChainRulesCoreExt = "ChainRulesCore"
     StatsFunsInverseFunctionsExt = "InverseFunctions"
 
-[[deps.SteadyStateDiffEq]]
-deps = ["ConcreteStructs", "DiffEqBase", "DiffEqCallbacks", "LinearAlgebra", "Reexport", "SciMLBase"]
-git-tree-sha1 = "920acf6ae36c86f23969fea1d317e040dbfccf53"
-uuid = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
-version = "2.4.1"
-
 [[deps.StrideArraysCore]]
 deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static", "StaticArrayInterface", "ThreadingUtilities"]
 git-tree-sha1 = "f35f6ab602df8413a50c4a25ca14de821e8605fb"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
 version = "0.5.7"
-
-[[deps.StringManipulation]]
-deps = ["PrecompileTools"]
-git-tree-sha1 = "a6b1675a536c5ad1a60e5a5153e1fee12eb146e3"
-uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.4.0"
 
 [[deps.StyledStrings]]
 uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
@@ -2546,17 +3668,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "93f43ab61b16ddfb2fd3bb13b3ce241cafb0e6c9"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
 version = "1.31.0+0"
-
-[[deps.WeakRefStrings]]
-deps = ["DataAPI", "InlineStrings", "Parsers"]
-git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
-uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
-version = "1.4.2"
-
-[[deps.WorkerUtilities]]
-git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
-uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
-version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -2841,3 +3952,22 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Wayland_jll", "Wayland_prot
 git-tree-sha1 = "9c304562909ab2bab0262639bd4f444d7bc2be37"
 uuid = "d8fb68d0-12a3-5cfd-a85a-d49703b185fd"
 version = "1.4.1+1"
+"""
+
+# ╔═╡ Cell order:
+# ╠═67a68b30-9d7f-11ef-1c30-bf3107341c1b
+# ╠═0583b4d2-6c54-4621-8d98-3df7a69e306d
+# ╠═447af9d0-daa7-4855-be20-c38dac16e8a0
+# ╠═ee3c7f42-4e1d-4ee5-b0b2-ffbe8b4fd197
+# ╠═e9271d60-9abb-49b2-90ea-d5c543834e8e
+# ╠═34816d55-a8a9-411f-9a03-adeceb6518f9
+# ╠═fac108bf-63be-4524-8622-71ce4cddab60
+# ╠═a798d3ac-5841-4811-9009-776f6f02b7de
+# ╠═d8e639a5-c0cb-476c-b5a4-e3e841bcf4a0
+# ╠═838f5859-0e71-42f6-97b7-6f00732438a2
+# ╠═c31a50c7-b116-485a-aa4c-57bc37ab3812
+# ╠═6c80bb29-dda0-4f1a-8865-47bb5f2bab72
+# ╠═ef4446ea-5210-4586-a7c2-3ab21a3594f0
+# ╠═94bfa7bc-458c-4fc1-b31d-64261d8fb6a6
+# ╟─00000000-0000-0000-0000-000000000001
+# ╟─00000000-0000-0000-0000-000000000002

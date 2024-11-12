@@ -3,6 +3,7 @@
 # Code & model: Topi Korhonen, University of Oulu (topi.korhonen@oulu.fi)
 #
 # PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT: Korhonen et al. "Model of excitation-contraction coupling of rat neonatal ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
+# https://pmc.ncbi.nlm.nih.gov/articles/PMC2716686/
 function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
     @parameters begin
         INaKmax = 2.7μAμF
@@ -28,14 +29,14 @@ function build_neonatal_ecc_sys(;
     reduce_iso=false,
 )
     @parameters begin
-        ca_o = 1796μM
-        na_o = 154578μM
-        k_o = 5366μM
-        mg_i = 1000μM
+        ca_o = 1.796mM
+        na_o = 154.578mM
+        k_o = 5.366mM
+        mg_i = 1mM
         ROS = 0μM
         ISO = 0μM
         ATP = 5mM
-        Istim = 0
+        Istim = 0μAμF
         # cell geometry
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
@@ -46,23 +47,19 @@ function build_neonatal_ecc_sys(;
     end
 
     @variables begin
-        na_i(t) = 13838.37602μM
-        k_i(t) = 150952.75035μM
+        na_i(t) = 13.83837602mM
+        k_i(t) = 150.95275035mM
         vm(t) = -68.79268mV
         JCa_SL(t)
         JCa_SR(t)
     end
 
-    barsys = if reduce_iso
-        get_bar_sys_reduced(ISO)
-    else
-        get_bar_sys(ATP, ISO)
-    end
+    barsys = reduce_iso ? get_bar_sys_reduced(ISO) : get_bar_sys(ATP, ISO)
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
-    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx, V_sub_SL)
+    capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
     camkiisys = get_camkii_sys(Cai_mean; ROS)
-    icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; Acap, Cm, LCCb_PKAp)
+    icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; LCCb_PKAp)
     @unpack INaCa, ICaL, ICaT, ICab = icasys
     inasys = get_ina_sys(na_i, na_o, vm)
     @unpack INa, INab = inasys
@@ -73,17 +70,15 @@ function build_neonatal_ecc_sys(;
     @unpack INaK = naksys
 
     eqs = [
-        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Current  normalized by capacitance
+        D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Currents are normalized by capacitance
         D(na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_F / Vmyo,
         D(k_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_F / Vmyo,
+        JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_F / 2 / V_sub_SL,
     ]
 
     sys = ODESystem(eqs, t; name)
     for s2 in (barsys, capdesys, camkiisys, icasys, inasys, iksys, sersys, naksys)
         sys = extend(sys, s2; name)
     end
-    if simplify
-        sys = structural_simplify(sys)
-    end
-    return sys
+    return simplify ? structural_simplify(sys) : sys
 end
