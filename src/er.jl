@@ -5,7 +5,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         VNSR = 0.9 * VSR
         VJSR = VSR - VNSR
         # RyR
-        kRyR = 10Hz
+        kRyR = 20Hz
         kaposRyR = 1000Hz
         kanegRyR = 160Hz
         # SERCA
@@ -14,7 +14,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         KmrSR = 3.5mM
         kSRleak = 0.005Hz
         fracPKA_PLBo = 1 - 0.079755
-        ktrCaSR = inv(200ms)
+        ktrCaSR = 50Hz
         csqntot = 24.750mM
         Kmcsqn = 0.8mM
     end
@@ -31,7 +31,6 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         betaSR(t)
         JCa_SR(t)
         KmRyR(t)
-        dPO1RyR(t)
     end
 
     fCKII_PLB = (1 - 0.5 * fracPLB_CKp)  # Max effect: fCKII_PLB=0.5
@@ -46,8 +45,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         1 ~ PO1RyR + PC1RyR,
         Jrel ~ kRyR * PO1RyR * (CaJSR - Cai_sub_SR),
         KmRyR ~ (3.51 / (1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * μM,
-        dPO1RyR ~ kaposRyR * hil(Cai_sub_SR, KmRyR, 4) * PC1RyR - kanegRyR * PO1RyR,
-        D(PO1RyR) ~ dPO1RyR,
+        D(PO1RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR, 4) * PC1RyR - kanegRyR * PO1RyR,
         Jup ~ VmaxSR * (fSR - rSR) / (1 + fSR + rSR),
         Jleak ~ kleak * (CaNSR - Cai_sub_SR),
         Jtr ~ ktrCaSR * (CaNSR - CaJSR),
