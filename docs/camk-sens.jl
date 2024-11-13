@@ -1,6 +1,7 @@
 # # Sensitivity of CaMKII system to calcium
 using ModelingToolkit
 using OrdinaryDiffEq
+using SteadyStateDiffEq
 using DiffEqCallbacks
 using Plots
 using LsqFit
@@ -15,21 +16,19 @@ sys = get_camkii_sys(Ca; ROS, phospho_rate=0, simplify=true)
 equations(sys)
 
 #---
-tend = 10000.0
-prob = ODEProblem(sys, [], tend)
-alg = Rodas5()
-callback = TerminateSteadyState()
+prob = SteadyStateProblem(sys, [])
+alg = DynamicSS(Rodas5P())
 ca = exp10.(range(log10(0.1μM), log10(100μM), length=101))
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end
 trajectories = length(ca)
-sol0 = solve(remake(prob, p=[Ca => 0.0]), alg; callback) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, callback)
+sol0 = solve(remake(prob, p=[Ca => 0.0]), alg) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k][end], sim)
+extract(sim, k) = map(s -> s[k], sim)
 """Calculate Root Mean Square Error (RMSE)"""
 rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
@@ -47,7 +46,7 @@ plot!(ca .* 1000, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topl
 
 #---
 println("Basal activity without ca is ", sol0[sys.CaMKAct][end])
-plot(ca .* 1000, extract(sim, sys.CaMKAct), label=false, title="Active CaMKII"; xopts...)
+plot(ca .* 1000, extract(sim, sys.CaMKAct), label=false, title="Active CaMKII", ylims=(0, 0.25); xopts...)
 
 # ## Least-square fitting of steady state CaMKII activity
 @. model_camk(x, p) = p[1] * hil(x, p[2], p[4]) + p[3]
