@@ -8,7 +8,6 @@ ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Followi
 function get_camkii_sys(Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
-    phospho_rate=30Hz,
     name=:camkii_sys,
     simplify=false
 )
@@ -23,7 +22,7 @@ function get_camkii_sys(Ca=0μM;
         k_1N_on = 100Hz / μM    ## 25-260uM-1s-1
         k_1N_off = 2000Hz       ## 1000-4000 s-1
         k_2N_on = 200Hz / μM    ## 50-300uM-1s-1.
-        k_2N_off = 500Hz        ## 500->1000.s-1
+        k_2N_off = 500Hz        ## 500-1000.s-1
 
         ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
@@ -39,13 +38,13 @@ function get_camkii_sys(Ca=0μM;
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8Hz / mM
-        kCaM2C_on = 0.92Hz / mM
-        kCaM2N_on = 0.12Hz / mM
-        kCaM4_on = 30Hz / mM
         kCaM0_off = 5.5Hz
+        kCaM2C_on = 0.92Hz / μM
         kCaM2C_off = 6.8Hz
+        kCaM2N_on = 0.12Hz / μM
         kCaM2N_off = 1.7Hz
-        kCaM4_off = 1.5Hz
+        kCaM4_on = 30Hz / μM  # 14-60 uM-1s-1
+        kCaM4_off = 1.5Hz  # 1.1 - 2.3 s-1
         kCaM0P_on = kCaM0_on * binding_To_PCaMK
         kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
         kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
@@ -54,12 +53,12 @@ function get_camkii_sys(Ca=0μM;
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
         kCaM4P_off = inv(3second)
-        k_phosCaM = phospho_rate # 12.6Hz
+        k_phosCaM = 12.6Hz # 30Hz
         k_dephospho = inv(6second)
         k_P1_P2 = inv(60second)
         k_P2_P1 = inv(15second)
 
-        ## Oxidation / reduction
+        ## Oxidation / reduction of Met
         k_BOX = 291Hz / mM
         k_POXP = 291Hz / mM
         k_OXB = inv(45second)
@@ -167,12 +166,10 @@ function get_camkii_sys(Ca=0μM;
     return sys
 end
 
-
 "CaMKII system with ROS activation and fast calcium binding"
 function get_camkii_fast_ca_binding_sys(Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0,
-    phospho_rate=30Hz,
     name=:camkii_sys,
     simplify=false
 )
@@ -204,9 +201,9 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8Hz / mM
-        kCaM2C_on = 0.92Hz / mM
-        kCaM2N_on = 0.12Hz / mM
-        kCaM4_on = 30Hz / mM
+        kCaM2C_on = 0.92Hz / μM
+        kCaM2N_on = 0.12Hz / μM
+        kCaM4_on = 30Hz / μM
         kCaM0_off = 5.5Hz
         kCaM2C_off = 6.8Hz
         kCaM2N_off = 1.7Hz
@@ -219,7 +216,7 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
         kCaM4P_off = inv(3second)
-        k_phosCaM = phospho_rate # 30Hz/12.6Hz
+        k_phosCaM = 12.6Hz # 30Hz
         k_dephospho = inv(6second)
         k_P1_P2 = inv(60second)
         k_P2_P1 = inv(15second)

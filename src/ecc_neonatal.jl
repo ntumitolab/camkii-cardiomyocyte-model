@@ -27,6 +27,7 @@ function build_neonatal_ecc_sys(;
     name=:neonataleccsys,
     simplify=true,
     reduce_iso=false,
+    reduce_camk=false,
 )
     @parameters begin
         ca_o = 1.796mM
@@ -58,7 +59,7 @@ function build_neonatal_ecc_sys(;
     @unpack LCCa_PKAp, LCCb_PKAp, fracPLBp, TnI_PKAp, IKUR_PKAp = barsys
     capdesys = get_ca_pde_sys(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx)
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean = capdesys
-    camkiisys = get_camkii_sys(Cai_mean; ROS)
+    camkiisys = reduce_camk ? get_camkii_fast_ca_binding_sys(Cai_mean; ROS) : get_camkii_sys(Cai_mean; ROS)
     icasys = get_ica_sys(na_i, Cai_sub_SL, na_o, ca_o, vm; LCCb_PKAp)
     @unpack INaCa, ICaL, ICaT, ICab = icasys
     inasys = get_ina_sys(na_i, na_o, vm)

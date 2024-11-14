@@ -49,31 +49,13 @@ plot(sol2, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean], tspan=(299, 300)
 #---
 plot(sol2, idxs=sys.CaMKAct, title="Active CaMKII")
 
-# ## 3Hz
-callback = build_stim_callbacks(Istim, stimend; period=1/3, starttime=stimstart)
-sol3 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
-
-#---
-plot(sol3, idxs=sys.vm*1000, title="Action potential")
-
-#---
-plot(sol3, idxs=sys.vm*1000, title="Action potential", tspan=(299, 300))
-
-#---
-plot(sol3, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean], tspan=(299, 300), title="Calcium transient")
-
-#---
-plot(sol3, idxs=sys.CaMKAct, title="Active CaMKII")
-
-# ## Comparing 1-3 Hz
-plot(sol, idxs=sys.vm*1000, title="Action potential", lab="1Hz")
-plot!(sol2, idxs=sys.vm*1000, lab="2Hz")
-plot!(sol3, idxs=sys.vm*1000, lab="3Hz", tspan=(299, 300), xlabel="Time (sec.)", ylabel="Voltage (mV)")
+# ## Comparing 1-2 Hz
+plot(sol, idxs=sys.vm*1000, title="Action potential", lab="1Hzf")
+plot!(sol2, idxs=sys.vm*1000, lab="2Hz", tspan=(299, 300), xlabel="Time (sec.)", ylabel="Voltage (mV)")
 
 #---
 plot(sol, idxs=sys.CaMKAct, title="CaMKII", lab="1Hz")
-plot!(sol2, idxs=sys.CaMKAct, lab="2Hz")
-plot!(sol3, idxs=sys.CaMKAct, lab="3Hz", ylim=(0.0, 1.0), xlabel="Time (sec.)", ylabel="Act. fraction (AU)")
+plot!(sol2, idxs=sys.CaMKAct, lab="2Hz",  ylim=(0.0, 1.0), xlabel="Time (sec.)", ylabel="Act. fraction (AU)")
 
 # ## Data fitting
 ### Pacing duration and CaMKII activity
