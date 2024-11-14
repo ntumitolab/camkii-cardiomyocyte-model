@@ -12,18 +12,19 @@ Plots.default(lw=1.5)
 # ## Setup CaMKII system
 # Model CaM/Calcium binding only. NO phosphorylation or oxidation.
 @parameters Ca = 0μM ROS = 0μM
-sys = get_camkii_sys(Ca; ROS, phospho_rate=0, simplify=true)
+sys = get_camkii_sys(Ca; ROS, simplify=true)
 equations(sys)
 
 #---
-prob = SteadyStateProblem(sys, [])
+prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 alg = DynamicSS(Rodas5P())
-ca = exp10.(range(log10(0.1μM), log10(100μM), length=101))
+logrange(0.01μM, 10μM, length=101)
+ca = logrange(0.03μM, 10μM, length=101)
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end
 trajectories = length(ca)
-sol0 = solve(remake(prob, p=[Ca => 0.0]), alg) ## warmup
+sol0 = solve(prob, alg) ## warmup
 sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories)
 
 #---
@@ -42,19 +43,19 @@ plot!(ca .* 1000, extract(sim, sys.CaMK), lab="CaMK")
 plot!(ca .* 1000, extract(sim, sys.CaM0_CaMK), lab="CaM0_CaMK")
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
 plot!(ca .* 1000, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
-plot!(ca .* 1000, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft, size=(800, 600))
+plot!(ca .* 1000, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft, size=(600, 600))
 
 #---
 println("Basal activity without ca is ", sol0[sys.CaMKAct][end])
-plot(ca .* 1000, extract(sim, sys.CaMKAct), label=false, title="Active CaMKII", ylims=(0, 0.25); xopts...)
+plot(ca .* 1000, extract(sim, sys.CaMKAct), label=false, title="Active CaMKII", ylims=(0, 0.5); xopts...)
 
 # ## Least-square fitting of steady state CaMKII activity
 @. model_camk(x, p) = p[1] * hil(x, p[2], p[4]) + p[3]
 xdata = ca
 ydata = extract(sim, sys.CaMKAct)
-p0 = [0.2, 1e-3, 0.019, 2.2]
+p0 = [0.2, 1e-3, 0.01, 2.2]
 lb = [0.0, 1e-9, 0.0, 1.0]
-fit = curve_fit(model_camk, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+fit = curve_fit(model_camk, xdata, ydata, inv.(ydata), p0; lower=lb, autodiff=:forwarddiff)
 
 # Parameters
 pestim = coef(fit)
@@ -104,5 +105,5 @@ rmse(fit)
 # Fit result
 yestim = model.(xdata, Ref(pestim))
 p1 = plot(xdata .* 1000, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity"; xopts...)
-p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xlabel="Ca (μM)", title="Relative error (%)", lab=false, yticks=-7:7; xopts...)
+p2 = plot(xdata .* 1000, (yestim .- ydata) ./ ydata .* 100, xlabel="Ca (μM)", title="Relative error (%)", lab=false; xopts...)
 plot(p1, p2, layout=(2, 1), size=(600, 600))

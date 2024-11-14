@@ -1,4 +1,4 @@
-# # Rapid binding of ca and calmodulin
+# # Test: rapid binding of Ca and calmodulin
 # Assuming rapid equilibrium for CaM0 <--> CaM2 <--> Ca4CaM
 using ModelingToolkit
 using OrdinaryDiffEq
