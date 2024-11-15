@@ -7,7 +7,7 @@ using DiffEqCallbacks
 using Plots
 using LsqFit
 using CaMKIIModel
-using CaMKIIModel: μM, hil
+using CaMKIIModel: μM, hil, Hz
 Plots.default(lw=1.5)
 
 #---
@@ -24,8 +24,8 @@ stimend = 300.0
 alg = FBDF()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
-prob = ODEProblem(sys, [], tend)
-prob_simp = ODEProblem(sys_simp, [], tend)
+prob = ODEProblem(sys, [sys.kCaM4_on => 15Hz / μM, sys.kCaM2C_on => 0.5Hz / μM], tend)
+prob_simp = ODEProblem(sys_simp, [sys_simp.kCaM4_on => 15Hz / μM, sys_simp.kCaM2C_on => 0.5Hz / μM], tend)
 
 #---
 @time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
@@ -38,7 +38,6 @@ plot!(sol_simp, idxs=sys.vm*1000, tspan=(295, 300), label= "Simplified model", l
 # Something is wrong
 plot(sol, idxs=sys.CaMKAct, label= "Full model", title="Active CaMKII")
 plot!(sol_simp, idxs=sys_simp.CaMKAct, label= "Simplified model", line=:dash)
-
 
 # PCaM too high
 @unpack CaM, KCaM, PCaM, CaMK = sys_simp

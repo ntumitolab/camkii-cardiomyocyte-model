@@ -50,7 +50,7 @@ plot(sol2, idxs=[sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean], tspan=(299, 300)
 plot(sol2, idxs=sys.CaMKAct, title="Active CaMKII")
 
 # ## Comparing 1-2 Hz
-plot(sol, idxs=sys.vm*1000, title="Action potential", lab="1Hzf")
+plot(sol, idxs=sys.vm*1000, title="Action potential", lab="1Hz")
 plot!(sol2, idxs=sys.vm*1000, lab="2Hz", tspan=(299, 300), xlabel="Time (sec.)", ylabel="Voltage (mV)")
 
 #---

@@ -18,8 +18,7 @@ equations(sys)
 #---
 prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 alg = DynamicSS(Rodas5P())
-logrange(0.01μM, 10μM, length=101)
-ca = logrange(0.03μM, 10μM, length=101)
+ca = logrange(0.1μM, 10μM, length=101)
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end

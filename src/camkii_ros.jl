@@ -39,11 +39,11 @@ function get_camkii_sys(Ca=0μM;
         ## CaM binding to CaMKII
         kCaM0_on = 3.8Hz / mM
         kCaM0_off = 5.5Hz
-        kCaM2C_on = 0.92Hz / μM
+        kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1s-1
         kCaM2C_off = 6.8Hz
         kCaM2N_on = 0.12Hz / μM
         kCaM2N_off = 1.7Hz
-        kCaM4_on = 30Hz / μM  # 14-60 uM-1s-1
+        kCaM4_on = 15Hz / μM  # 14-60 uM-1s-1
         kCaM4_off = 1.5Hz  # 1.1 - 2.3 s-1
         kCaM0P_on = kCaM0_on * binding_To_PCaMK
         kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
@@ -208,10 +208,10 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
         kCaM2C_off = 6.8Hz
         kCaM2N_off = 1.7Hz
         kCaM4_off = 1.5Hz
-        kCaM0P_on = kCaM0_on
-        kCaM2CP_on = kCaM2C_on
-        kCaM2NP_on = kCaM2N_on
-        kCaM4P_on = kCaM4_on
+        kCaM0P_on = kCaM0_on * binding_To_PCaMK
+        kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
+        kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
+        kCaM4P_on = kCaM4_on * binding_To_PCaMK
         kCaM0P_off = inv(3second)
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
@@ -300,7 +300,7 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
     add_raw_rate!(rates, vf1 - vr1, [CaMK, CaM], [KCaM])
 
     ## CaM + CaMKP <--> PCaM
-    vf2 = binding_To_PCaMK * CaMKP * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
+    vf2 = CaMKP * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
     vr2 = kCaM0P_off * CaM0_CaMKP + kCaM2CP_off * CaM2C_CaMKP + kCaM2NP_off * CaM2N_CaMKP + kCaM4P_off * CaM4_CaMKP
     add_raw_rate!(rates, vf2 - vr2, [CaMKP, CaM], [PCaM])
 
@@ -310,7 +310,7 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
     add_raw_rate!(rates, vf3 - vr3, [CaMKOX, CaM], [OCaM])
 
     ## CaM + CaMKPOX <--> OPCaM
-    vf4 = binding_To_PCaMK * CaMKPOX * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
+    vf4 = CaMKPOX * (kCaM0P_on * CaM0 + kCaM2CP_on * CaM2C + kCaM2NP_on * CaM2N + kCaM4P_on * CaM4)
     vr4 = kCaM0P_off * CaM0_CaMKPOX + kCaM2CP_off * CaM2C_CaMKPOX + kCaM2NP_off * CaM2N_CaMKPOX + kCaM4P_off * CaM4_CaMKPOX
     add_raw_rate!(rates, vf4 - vr4, [CaMKPOX, CaM], [OPCaM])
 
