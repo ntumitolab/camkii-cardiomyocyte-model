@@ -34,7 +34,7 @@ function get_camkii_sys(Ca=0μM;
         k_K1N_on = 76Hz / μM
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
-        k_K2N_off = 20Hz ## 6-60-1
+        k_K2N_off = 20Hz ## 6-60s-1
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8Hz / mM
@@ -66,21 +66,21 @@ function get_camkii_sys(Ca=0μM;
     end
 
     sts = @variables begin
-        Ca2CaM_C(t) = 139.72nM
-        Ca2CaM_N(t) = 9.99nM
-        Ca4CaM(t) = 0.05897nM
-        CaM0_CaMK(t) = 1.1211μM
-        Ca2CaM_C_CaMK(t) = 113.911nM
-        Ca2CaM_N_CaMK(t) = 15.951nM
-        Ca4CaM_CaMK(t) = 2.2624nM
-        CaM0_CaMKP(t) = 195.18nM
-        Ca2CaM_C_CaMKP(t) = 320nM
-        Ca2CaM_N_CaMKP(t) = 4.337nM
-        Ca4CaM_CaMKP(t) = 5.513nM
+        Ca2CaM_C(t) = 84.33nM
+        Ca2CaM_N(t) = 8.578nM
+        Ca4CaM(t) = 0.02nM
+        CaM0_CaMK(t) = 1μM
+        Ca2CaM_C_CaMK(t) = 398.68nM
+        Ca2CaM_N_CaMK(t) = 16.6nM
+        Ca4CaM_CaMK(t) = 6.66nM
+        CaM0_CaMKP(t) = 623.72nM
+        Ca2CaM_C_CaMKP(t) = 1.01μM
+        Ca2CaM_N_CaMKP(t) = 10.75nM
+        Ca4CaM_CaMKP(t) = 15.81nM
         Ca4CaM_CaMKOX(t) = 0mM
         Ca4CaM_CaMKPOX(t) = 0mM
-        CaMKP(t) = 1.05μM
-        CaMKP2(t) = 262.55nM
+        CaMKP(t) = 3.3μM
+        CaMKP2(t) = 831.43nM
         CaMKPOX(t) = 0mM
         CaMKOX(t) = 0mM
     end
@@ -197,17 +197,17 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
         k_K1N_on = 76Hz / μM
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
-        k_K2N_off = 20Hz ## 6-60-1
+        k_K2N_off = 20Hz ## 6-60s-1
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8Hz / mM
-        kCaM2C_on = 0.92Hz / μM
-        kCaM2N_on = 0.12Hz / μM
-        kCaM4_on = 30Hz / μM
         kCaM0_off = 5.5Hz
+        kCaM2C_on = 0.5Hz / μM # 0.92 μM-1s-1
         kCaM2C_off = 6.8Hz
+        kCaM2N_on = 0.12Hz / μM
         kCaM2N_off = 1.7Hz
-        kCaM4_off = 1.5Hz
+        kCaM4_on = 15Hz / μM # 14-60 uM-1s-1
+        kCaM4_off = 1.5Hz # 1.1 - 2.3 s-1
         kCaM0P_on = kCaM0_on * binding_To_PCaMK
         kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
         kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
@@ -277,7 +277,7 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
     ]
 
     "Ca binding/unbinding reaction equilibrium"
-    _ca_eq(ca, k1on, k1off, k2on, k2off) = ca^2 * k1on * k2on / k1off / k2off
+    _ca_eq(ca, k1on, k1off, k2on, k2off) = ca^2 * (k1on * k2on) / (k1off * k2off)
 
     ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
     keqc = _ca_eq(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off)
@@ -330,7 +330,7 @@ function get_camkii_fast_ca_binding_sys(Ca=0μM;
     add_rate!(rates, k_BOX * ROS, [KCaM], k_OXB, [OCaM])
     add_rate!(rates, k_POXP * ROS, [PCaM], k_OXPP, [OPCaM])
     add_rate!(rates, k_OXB, [CaMKOX], 0, [CaMK])
-    add_rate!(rates, k_POXP, [CaMKPOX], 0, [CaMKP])
+    add_rate!(rates, k_OXPP, [CaMKPOX], 0, [CaMKP])
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     sys = ODESystem([rateeqs; eqs], t; name)

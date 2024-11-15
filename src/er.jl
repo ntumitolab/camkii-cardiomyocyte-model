@@ -20,9 +20,9 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
     end
 
     @variables begin
-        CaNSR(t) = 619.09843μM
-        CaJSR(t) = 613.87556μM
-        PO1RyR(t) = 0.0037
+        CaNSR(t) = 830μM
+        CaJSR(t) = 830μM
+        PO1RyR(t) = 0.0026
         PC1RyR(t)
         Jrel(t)
         Jup(t)
