@@ -7,6 +7,7 @@ chapters:
   - file: u0
   - file: iso-sens
   - file: camk-sens
+  - file: camk-simp
   - file: bcl
   - file: iso
   - file: ros
