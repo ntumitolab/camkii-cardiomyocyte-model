@@ -18,7 +18,7 @@ begin
 	using LsqFit
 	using CaMKIIModel
 	using CaMKIIModel: μM, Hz, μAμF
-	Plots.default(lw=1.5, fmt=:png)
+	Plots.default(lw=1.5)
 end
 
 # ╔═╡ fe7e7c0b-1ae0-4a04-9549-23aba60efcf5
@@ -34,7 +34,7 @@ tend = 100.0
 ps = [
 	sys.ktrCaSR => 50Hz,
 	sys.kRyR => 20Hz,
-	sys.GCaL => 1.3e-4, # 6.3e-5
+	sys.GCaL => 1e-4, # 6.3e-5
 	sys.kNaCa => 2.268e-16μAμF / μM^4 # 2.268e-16
 ]
 
@@ -62,7 +62,7 @@ end
 plot(sol, idxs=sys.vm*1000, lab="Membrane potential", tspan=(90, 92))
 
 # ╔═╡ 152536f6-3cb9-48dd-9467-f1a2b64b3dba
-# Calcium transient is smaller than paper (550 nM vs 800 nM)
+# Calcium transient is smaller than paper (550 nM vs 750 nM)
 plot(sol, idxs=[sys.Cai_sub_SL*1E6, sys.Cai_sub_SR*1E6], tspan=(90, 92), ylabel="nM", lab=["Ca (sub SL)" "Ca (sub SR)"], ylims=(100, 800))
 
 # ╔═╡ cd11a3d5-bdd8-415c-8b8d-58c4228f8877
@@ -70,7 +70,23 @@ plot(sol, idxs=[sys.Cai_sub_SL*1E6, sys.Cai_sub_SR*1E6], tspan=(90, 92), ylabel=
 plot(sol, idxs=[sys.CaJSR, sys.CaNSR], tspan=(90, 92), ylabel="mM")
 
 # ╔═╡ b563ef4c-1dc3-4b3e-9f58-bace24d03d9e
-plot(sol, idxs=sys.CaMKAct, ylim=(0, 0.28))
+plot(sol, idxs=sys.CaMKAct)
+
+# ╔═╡ 3e63b27f-a13a-45a6-9f95-83d31d64db34
+begin 
+	@unpack CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2, CaMK= sys;
+	KCaM = CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK
+	PCaM = CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP
+end;
+
+# ╔═╡ 5d7497ec-d7b0-41b6-ba68-4015bb98090a
+begin
+	plot(sol, idxs=KCaM, lab="KCaM")
+	plot!(sol, idxs=PCaM, lab="PCaM")
+	plot!(sol, idxs=CaMKP)
+	plot!(sol, idxs=CaMKP2)
+	plot!(sol, idxs=CaMK, lab="Inactive CaMK")
+end
 
 # ╔═╡ Cell order:
 # ╠═fe7e7c0b-1ae0-4a04-9549-23aba60efcf5
@@ -87,3 +103,5 @@ plot(sol, idxs=sys.CaMKAct, ylim=(0, 0.28))
 # ╠═152536f6-3cb9-48dd-9467-f1a2b64b3dba
 # ╠═cd11a3d5-bdd8-415c-8b8d-58c4228f8877
 # ╠═b563ef4c-1dc3-4b3e-9f58-bace24d03d9e
+# ╠═3e63b27f-a13a-45a6-9f95-83d31d64db34
+# ╠═5d7497ec-d7b0-41b6-ba68-4015bb98090a
