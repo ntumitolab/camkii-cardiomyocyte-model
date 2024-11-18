@@ -35,7 +35,8 @@ ps = [
 	sys.ktrCaSR => 50Hz,
 	sys.kRyR => 20Hz,
 	sys.GCaL => 1e-4, # 6.3e-5
-	sys.kNaCa => 2.268e-16μAμF / μM^4 # 2.268e-16
+	sys.kNaCa => 2.268e-16μAμF / μM^4, # 2.268e-16
+	sys.rCaffeine => 0.1
 ]
 
 # ╔═╡ 78fb22d4-2f06-49b0-a818-377eedf7ca8d
@@ -58,6 +59,9 @@ begin
 	plot(sol, idxs=[INaCa, ICaL], tspan=(90, 92), ylabel="uA/uF or uM/ms")
 end
 
+# ╔═╡ 32ea73cb-f2f1-4530-a401-f7db9fb1b313
+plot(sol, idxs=sys.PO1RyR, tspan=(90, 92))
+
 # ╔═╡ 8a2eb462-92ee-4ed3-a315-3c58a9a194f4
 plot(sol, idxs=sys.vm*1000, lab="Membrane potential", tspan=(90, 92))
 
@@ -66,7 +70,6 @@ plot(sol, idxs=sys.vm*1000, lab="Membrane potential", tspan=(90, 92))
 plot(sol, idxs=[sys.Cai_sub_SL*1E6, sys.Cai_sub_SR*1E6], tspan=(90, 92), ylabel="nM", lab=["Ca (sub SL)" "Ca (sub SR)"], ylims=(100, 800))
 
 # ╔═╡ cd11a3d5-bdd8-415c-8b8d-58c4228f8877
-# SR Ca release is reletively small (see JSR)
 plot(sol, idxs=[sys.CaJSR, sys.CaNSR], tspan=(90, 92), ylabel="mM")
 
 # ╔═╡ b563ef4c-1dc3-4b3e-9f58-bace24d03d9e
@@ -99,6 +102,7 @@ end
 # ╠═12ded313-721a-4d7b-a2e3-25b313c1a582
 # ╠═761a0baf-b5ec-4caa-ae56-5808a2840987
 # ╠═58073dd2-9670-48d1-876e-82ba2a1f5611
+# ╠═32ea73cb-f2f1-4530-a401-f7db9fb1b313
 # ╠═8a2eb462-92ee-4ed3-a315-3c58a9a194f4
 # ╠═152536f6-3cb9-48dd-9467-f1a2b64b3dba
 # ╠═cd11a3d5-bdd8-415c-8b8d-58c4228f8877
