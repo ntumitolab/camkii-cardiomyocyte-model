@@ -9,5 +9,5 @@ chapters:
   - file: camk-sens
   - file: camk-simp
   - file: bcl
-  - file: iso
-  - file: ros
+  - file: iso-effects
+  - file: ros-effects
