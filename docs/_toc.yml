@@ -8,6 +8,6 @@ chapters:
   - file: iso-sens
   - file: camk-sens
   - file: camk-simp
-  - file: bcl
+  - file: effects-bcl
   - file: iso-effects
   - file: ros-effects
