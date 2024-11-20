@@ -1,4 +1,4 @@
-# # Pacing frequency
+# # Pacing frequency Effects
 using ModelingToolkit
 using OrdinaryDiffEq
 using Plots
