@@ -8,7 +8,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         kRyR = 20Hz # 10 Hz
         kaposRyR = 1000Hz
         kanegRyR = 160Hz
-        rCaffeine = 1.0 # Caffeine factor sensitizes RyR
+        RyRsensitivity = 1.0
         # SERCA
         VmaxSR = 0.9996mM*Hz
         KmfSR = 0.5μM
@@ -46,7 +46,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         1 ~ PO1RyR + PC1RyR,
         Jrel ~ kRyR * PO1RyR * (CaJSR - Cai_sub_SR),
         KmRyR ~ (3.51 / (1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * μM,
-        D(PO1RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR * rCaffeine, 4) * PC1RyR - kanegRyR * PO1RyR,
+        D(PO1RyR) ~ kaposRyR * hil(Cai_sub_SR, KmRyR / RyRsensitivity, 4) * PC1RyR - kanegRyR * PO1RyR,
         Jup ~ VmaxSR * (fSR - rSR) / (1 + fSR + rSR),
         Jleak ~ kleak * (CaNSR - Cai_sub_SR),
         Jtr ~ ktrCaSR * (CaNSR - CaJSR),

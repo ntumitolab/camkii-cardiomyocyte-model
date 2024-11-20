@@ -15,7 +15,6 @@ begin
 	using OrdinaryDiffEq
 	using DiffEqCallbacks
 	using Plots
-	using LsqFit
 	using CaMKIIModel
 	using CaMKIIModel: μM, Hz, μAμF
 	Plots.default(lw=1.5)
@@ -28,15 +27,11 @@ Base.current_project()
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true);
 
 # ╔═╡ fb697567-fa32-4963-a490-0668657b22f5
-tend = 100.0
+tend = 500.0
 
 # ╔═╡ 638be248-21ad-4833-bbc8-f2f9a805a900
 ps = [
-	sys.ktrCaSR => 50Hz,
-	sys.kRyR => 20Hz,
-	sys.GCaL => 1e-4, # 6.3e-5
-	sys.kNaCa => 2.268e-16μAμF / μM^4, # 2.268e-16
-	sys.rCaffeine => 0.1
+	sys.RyRsensitivity => 10
 ]
 
 # ╔═╡ 78fb22d4-2f06-49b0-a818-377eedf7ca8d
@@ -75,22 +70,6 @@ plot(sol, idxs=[sys.CaJSR, sys.CaNSR], tspan=(90, 92), ylabel="mM")
 # ╔═╡ b563ef4c-1dc3-4b3e-9f58-bace24d03d9e
 plot(sol, idxs=sys.CaMKAct)
 
-# ╔═╡ 3e63b27f-a13a-45a6-9f95-83d31d64db34
-begin 
-	@unpack CaM0_CaMK, Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, CaM0_CaMKP, Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, CaMKP, CaMKP2, CaMK= sys;
-	KCaM = CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK
-	PCaM = CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP
-end;
-
-# ╔═╡ 5d7497ec-d7b0-41b6-ba68-4015bb98090a
-begin
-	plot(sol, idxs=KCaM, lab="KCaM")
-	plot!(sol, idxs=PCaM, lab="PCaM")
-	plot!(sol, idxs=CaMKP)
-	plot!(sol, idxs=CaMKP2)
-	plot!(sol, idxs=CaMK, lab="Inactive CaMK")
-end
-
 # ╔═╡ Cell order:
 # ╠═fe7e7c0b-1ae0-4a04-9549-23aba60efcf5
 # ╠═f4d83570-9d1c-11ef-0654-53e2d6f12d6e
@@ -107,5 +86,3 @@ end
 # ╠═152536f6-3cb9-48dd-9467-f1a2b64b3dba
 # ╠═cd11a3d5-bdd8-415c-8b8d-58c4228f8877
 # ╠═b563ef4c-1dc3-4b3e-9f58-bace24d03d9e
-# ╠═3e63b27f-a13a-45a6-9f95-83d31d64db34
-# ╠═5d7497ec-d7b0-41b6-ba68-4015bb98090a
