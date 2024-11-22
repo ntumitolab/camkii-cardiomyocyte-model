@@ -30,11 +30,15 @@ sol_caf = solve(prob, alg; callback = callback_caf, abstol=1e-6, reltol=1e-6)
 
 #---
 plot(sol, idxs=sys.vm*1000, title="Action potential", lab="Ctl")
-plot!(sol_caf, idxs=sys.vm*1000, lab="Caf", tspan=(199, 210), ylabel="Voltage (mV)")
+plot!(sol_caf, idxs=sys.vm*1000, lab="Caf", tspan=(195, 210), ylabel="Voltage (mV)")
 
 #---
 plot(sol, idxs=sys.Cai_sub_SR*1E6, title="Calcium transient (During caffeine addition)", lab="Ctl")
 plot!(sol_caf, idxs=sys.Cai_sub_SR*1E6, tspan=(195, 210), lab="Caf", ylabel="Subspace calcium (nM)")
+
+#---
+plot(sol, idxs=sys.PO1RyR, title="RyR open (During caffeine addition)", lab="Ctl")
+plot!(sol_caf, idxs=sys.PO1RyR, tspan=(195, 210), lab="Caf", ylabel="Open probability", ylims=(0, 1))
 
 #---
 plot(sol, idxs=sys.Cai_sub_SR*1E6, title="Calcium transient (After caffeine addition)", lab="Ctl", ylabel="Subspace calcium (nM)")
