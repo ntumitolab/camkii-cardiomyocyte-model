@@ -28,3 +28,4 @@ Neonatal rat ventricular myocyte model: Model of Excitation-Contraction Coupling
 - kCaM2C_on: 0.92 -> 0.5Hz / μM
 - k_phosCaM: 30 -> 12.6Hz
 - CmdnTotal: 50 -> 30μM
+- kRyR: 10 -> 50Hz

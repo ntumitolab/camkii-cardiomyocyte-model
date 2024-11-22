@@ -32,7 +32,8 @@ tend = 500.0
 # ╔═╡ 638be248-21ad-4833-bbc8-f2f9a805a900
 ps = [
 	sys.GCaL => 6.3e-5 , 
-	sys.RyRsensitivity => 10
+	sys.RyRsensitivity => 10,
+	sys.kRyR => 50
 ]
 
 # ╔═╡ 78fb22d4-2f06-49b0-a818-377eedf7ca8d
