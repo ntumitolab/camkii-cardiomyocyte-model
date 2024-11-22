@@ -9,7 +9,7 @@ chapters:
   - file: iso-sens
   - file: camk-sens
   - file: camk-simp
-  - file: effects-bcl
+  - file: bcl-effects
   - file: iso-effects
   - file: ros-effects
   - file: caffeine-effects
