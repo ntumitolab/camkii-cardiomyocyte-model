@@ -82,17 +82,17 @@ durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)
 ts = durationdf[!, "Time(sec)"]
 fifteen = durationdf[!, "1Hz 15sec (Mean)"]
 fifteen_error = durationdf[!, "1Hz 15sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 15sec (N)"])
-thirty = durationdf[!, "1Hz 30sec (Mean)"]
+thirty = durationdf[!, "1Hz 30sec (Mean)"] .+ 0.25
 thirty_error = durationdf[!, "1Hz 30sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 30sec (N)"])
 sixty = durationdf[!, "1Hz 60sec (Mean)"]
 sixty_error = durationdf[!, "1Hz 60sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 60sec (N)"])
-ninety = durationdf[!, "1Hz 90sec (Mean)"]
+ninety = durationdf[!, "1Hz 90sec (Mean)"] .- 0.25
 ninety_error = durationdf[!, "1Hz 90sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 90sec (N)"])
 
 plot(ts, fifteen, yerr=fifteen_error, lab="15 sec", color = :blue, markerstrokecolor=:blue)
-plot!(ts, thirty, yerr=thirty_error, lab="30 sec", color = :red, markerstrokecolor=:red)
+plot!(ts, thirty, yerr=thirty_error, lab="30 sec (+0.25)", color = :red, markerstrokecolor=:red)
 plot!(ts, sixty, yerr=sixty_error, lab="60 sec", color = :orange, markerstrokecolor=:orange)
-plot!(ts, ninety, yerr=ninety_error, lab="90 sec", color = :green, markerstrokecolor=:green)
+plot!(ts, ninety, yerr=ninety_error, lab="90 sec (-0.25)", color = :green, markerstrokecolor=:green)
 plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
 
 # Simulation resolution is reduced to 1Hz.
@@ -135,8 +135,8 @@ sol1 = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5, starttime=stimstart)
 sol2 = solve(prob, alg; callback=callback2, abstol=1e-6, reltol=1e-6)
-idx = sys.CaMKAct
+idx = sys.CaMKAct * 100
 
 plot(sol1, idxs=idx, lab="1 Hz", color = :blue)
 plot!(sol2, idxs=idx, lab="2 Hz", color = :red)
-plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)", ylims=(0.0, 0.9))
+plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="CaMKII activity (%)", ylims=(5, 70))

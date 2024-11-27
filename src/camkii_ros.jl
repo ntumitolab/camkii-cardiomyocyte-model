@@ -140,12 +140,12 @@ function get_camkii_sys(Ca=0μM;
     add_rate!(rates, kCaM4P_on, [Ca4CaM, CaMKPOX], kCaM4P_off, [Ca4CaM_CaMKPOX]) # Ca4CaM + CaMKPOX <--> Ca4CaM_CaMKPOX
 
     ## Auto-phosphorylation of CaMKII
-    # (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKOX) --> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, Ca4CaM_CaMKPOX)
-    k = k_phosCaM * CaMKAct
-    add_rate!(rates, k, [Ca2CaM_C_CaMK], 0, [Ca2CaM_C_CaMKP])
-    add_rate!(rates, k, [Ca2CaM_N_CaMK], 0, [Ca2CaM_N_CaMKP])
-    add_rate!(rates, k, [Ca4CaM_CaMK], 0, [Ca4CaM_CaMKP])
-    add_rate!(rates, k, [Ca4CaM_CaMKOX], 0, [Ca4CaM_CaMKPOX])
+    # (Ca2CaM_C_CaMK, Ca2CaM_N_CaMK, Ca4CaM_CaMK, Ca4CaM_CaMKOX) <--> (Ca2CaM_C_CaMKP, Ca2CaM_N_CaMKP, Ca4CaM_CaMKP, Ca4CaM_CaMKPOX)
+    kphos = k_phosCaM * CaMKAct
+    add_rate!(rates, kphos, [Ca2CaM_C_CaMK], k_dephospho, [Ca2CaM_C_CaMKP])
+    add_rate!(rates, kphos, [Ca2CaM_N_CaMK], k_dephospho, [Ca2CaM_N_CaMKP])
+    add_rate!(rates, kphos, [Ca4CaM_CaMK], k_dephospho, [Ca4CaM_CaMKP])
+    add_rate!(rates, kphos, [Ca4CaM_CaMKOX], k_dephospho, [Ca4CaM_CaMKPOX])
     ## Second phosphorylation of CaMKII-P
     add_rate!(rates, k_P1_P2, [CaMKP], k_P2_P1, [CaMKP2]) # CaMKP <--> CaMKP2
     ## Dephosphorylation of CaMKII-P
