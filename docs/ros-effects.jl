@@ -13,7 +13,7 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 100.0
 stimend = 300.0
 @unpack Istim = sys
-alg = FBDF()
+alg = TRBDF2()
 
 # ## No ROS
 callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)

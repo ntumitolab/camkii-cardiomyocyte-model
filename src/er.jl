@@ -5,7 +5,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         VNSR = 0.9 * VSR
         VJSR = VSR - VNSR
         # RyR
-        kRyR = 20Hz # 10 Hz
+        kRyR = 50Hz # 10 Hz
         kaposRyR = 1000Hz
         kanegRyR = 160Hz
         RyRsensitivity = 1.0
