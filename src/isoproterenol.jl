@@ -6,7 +6,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         PDEtot = 22.85e-3μM
         PKItot = 0.18μM
         I1tot = 0.3μM
-        PP1tot = 0.89μM
+        PP1totBA = 0.89μM
         RItot = 1.18μM
         RIItot = 0.118μM
         ACtot = 70.57e-3μM
@@ -18,7 +18,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         PLBtotBA = 106μM
         PLMtotBA = 48μM
         TnItotBA = 70μM
-        IKurtot = 0.025μM
+        IKurtotBA = 0.025μM
         RyRtotBA = 0.135μM                      # Total RyR content for the BAR module
         PKAII_RyRtot = 0.034μM
         kf_LR = 1 / μM / ms                     # forward rate for ISO binding to b1AR
@@ -85,14 +85,14 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         Km_pka_KUR = 21μM
         k_pp1_KUR = 8.52Hz
         Km_pp1_KUR = 7μM
-        PP1_ryr = 0.034μM
-        PP2A_ryr = 0.034μM
-        kcat_pka_ryr = 54Hz
-        Km_pka_ryr = 21μM
-        kcat_pp1_ryr = 8.52Hz
-        Km_pp1_ryr = 7μM
-        kcat_pp2a_ryr = 10.1Hz
-        Km_pp2a_ryr = 4.1μM
+        PP1_RyR = 0.034μM
+        PP2A_RyR = 0.034μM
+        kcat_pka_RyR = 54Hz
+        Km_pka_RyR = 21μM
+        kcat_pp1_RyR = 8.52Hz
+        Km_pp1_RyR = 7μM
+        kcat_pp2a_RyR = 10.1Hz
+        Km_pp2a_RyR = 4.1μM
     end
 
     sts = @variables begin
@@ -159,13 +159,13 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         RcAMPcAMP_II ~ PKACII + PKACII_PKI,
         PKItot ~ PKI + PKACI_PKI + PKACII_PKI,
         I1tot ~ I1 + I1p + I1p_PP1,
-        PP1tot ~ PP1 + I1p_PP1,
+        PP1totBA ~ PP1 + I1p_PP1,
         PLBtotBA ~ PLB + PLBp,
         PLMtotBA ~ PLM + PLMp,
         TnItotBA ~ TnI + TnIp,
         LCCtotBA ~ LCCa + LCCap,
         LCCtotBA ~ LCCb + LCCbp,
-        IKurtot ~ KURn + KURp,
+        IKurtotBA ~ KURn + KURp,
         RyRtotBA ~ RyRp + RyRn
     ]
 
@@ -188,7 +188,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         fracPLBp ~ PLBp / PLBtotBA,
         fracPLMp ~ PLMp / PLMtotBA,
         TnI_PKAp ~ TnIp / TnItotBA,
-        IKUR_PKAp ~ KURp / IKurtot,
+        IKUR_PKAp ~ KURp / IKurtotBA,
         RyR_PKAp ~ RyRp / RyRtotBA
     ]
 
@@ -238,7 +238,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     add_raw_rate!(rates, v, [LCCb], [LCCbp]) # LCCb <=> LCCbp
     v = k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII * hil(KURn * epsilon, Km_pka_KUR) - PP1_KURtot * k_pp1_KUR * hil(KURp * epsilon, Km_pp1_KUR)
     add_raw_rate!(rates, v, [KURn], [KURp]) # KURn <=> KURp
-    v = kcat_pka_ryr * (PKAII_RyRtot / PKAIItot) * PKACII * hil(RyRn * epsilon, Km_pka_ryr) - kcat_pp1_ryr * PP1_ryr * hil(RyRp * epsilon, Km_pp1_ryr) - kcat_pp2a_ryr * PP2A_ryr * hil(RyRp * epsilon, Km_pp2a_ryr)
+    v = kcat_pka_RyR * (PKAII_RyRtot / PKAIItot) * PKACII * hil(RyRn * epsilon, Km_pka_RyR) - kcat_pp1_RyR * PP1_RyR * hil(RyRp * epsilon, Km_pp1_RyR) - kcat_pp2a_RyR * PP2A_RyR * hil(RyRp * epsilon, Km_pp2a_RyR)
     add_raw_rate!(rates, v, [RyRn], [RyRp]) # RyRn <=> RyRp
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
@@ -253,7 +253,7 @@ end
 "Algebraic beta-adrenergic system."
 function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
     @parameters begin
-        PP1tot = 0.89μM
+        PP1totBA = 0.89μM
         PKACItot = 1.18μM
         PKACIItot = 0.118μM
         PKACII_LCCtotBA = 0.025μM
@@ -264,7 +264,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         PLBtotBA = 106μM
         PLMtotBA = 48μM
         TnItotBA = 70μM
-        IKurtot = 0.025μM
+        IKurtotBA = 0.025μM
         RyRtotBA = 0.135μM                      # Total RyR content for the BAR module
         PKAII_RyRtot = 0.034μM
         epsilon = 10
@@ -293,14 +293,14 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         Km_pka_KUR = 21μM
         k_pp1_KUR = 8.52Hz
         Km_pp1_KUR = 7μM
-        PP1_ryr = 0.034μM
-        PP2A_ryr = 0.034μM
-        kcat_pka_ryr = 54Hz
-        Km_pka_ryr = 21μM
-        kcat_pp1_ryr = 8.52Hz
-        Km_pp1_ryr = 7μM
-        kcat_pp2a_ryr = 10.1Hz
-        Km_pp2a_ryr = 4.1μM
+        PP1_RyR = 0.034μM
+        PP2A_RyR = 0.034μM
+        kcat_pka_RyR = 54Hz
+        Km_pka_RyR = 21μM
+        kcat_pp1_RyR = 8.52Hz
+        Km_pp1_RyR = 7μM
+        kcat_pp2a_RyR = 10.1Hz
+        Km_pp2a_RyR = 4.1μM
         ## Fitted PKACI, CII, and PP1 parameters
         PKACI_basal = 0.0831  ## basal activity
         PKACI_activated = 0.25603
@@ -320,7 +320,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         LCCap(t)
         LCCbp(t)
         KURp(t)
-        RyRp(t)
+        RyRp(t) = 0μM
         PLB(t)
         PLM(t)
         TnI(t)
@@ -356,27 +356,27 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         TnItotBA ~ TnI + TnIp,
         LCCtotBA ~ LCCa + LCCap,
         LCCtotBA ~ LCCb + LCCbp,
-        IKurtot ~ KURn + KURp,
+        IKurtotBA ~ KURn + KURp,
         RyRtotBA ~ RyRn + RyRp,
         PLBp ~ PLBtotBA * fracPLBp,
         PLMp ~ PLMtotBA * fracPLMp,
         TnIp ~ TnItotBA * TnI_PKAp,
         LCCap ~ LCCtotBA * LCCa_PKAp,
         LCCbp ~ LCCtotBA * LCCb_PKAp,
-        KURp ~ IKurtot * IKUR_PKAp,
-        RyRp ~ RyRtotBA * RyR_PKAp,
+        KURp ~ IKurtotBA * IKUR_PKAp,
+        RyR_PKAp ~ RyRp / RyRtotBA,
         ## Fitted activities
         PKACI ~ PKACItot * (PKACI_basal + PKACI_activated * hil(ISO, PKACI_KM)),
         PKACII ~ PKACIItot * (PKACII_basal + PKACII_activated * hil(ISO, PKACII_KM)),
-        PP1 ~ PP1tot * (PP1_basal + PP1_activated * hilr(ISO, PP1_KI)),
+        PP1 ~ PP1totBA * (PP1_basal + PP1_activated * hilr(ISO, PP1_KI)),
         fracPLBp ~ _phos_fraction(k_PKA_PLB * PKACI, k_PP1_PLB * PP1, Km_PKA_PLB / PLBtotBA, Km_PP1_PLB / PLBtotBA),
         fracPLMp ~ _phos_fraction(k_PKA_PLM * PKACI, k_PP1_PLM * PP1, Km_PKA_PLM / PLMtotBA, Km_PP1_PLM / PLMtotBA),
         TnI_PKAp ~ _phos_fraction(k_PKA_TnI * PKACI, k_PP2A_TnI * PP2A_TnI, Km_PKA_TnI / TnItotBA, Km_PP2A_TnI / TnItotBA),
         LCCa_PKAp ~ _phos_fraction(k_PKA_LCC * (PKACII_LCCtotBA / PKAIItot) * PKACII, k_PP2A_LCC * PP2A_LCC, Km_PKA_LCC / LCCtotBA / epsilon, Km_PP2A_LCC / LCCtotBA / epsilon),
         LCCb_PKAp ~ _phos_fraction(k_PKA_LCC * (PKACII_LCCtotBA / PKAIItot) * PKACII, k_PP1_LCC * PP1_LCC, Km_PKA_LCC / LCCtotBA / epsilon, Km_PP1_LCC / LCCtotBA / epsilon),
-        IKUR_PKAp ~ _phos_fraction(k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII, PP1_KURtot * k_pp1_KUR, Km_pka_KUR / IKurtot / epsilon, Km_pp1_KUR / IKurtot / epsilon),
-        # Not applicable to RyR
-        # RyR_PKAp ~ _phos_fraction(kcat_pka_ryr * (PKAII_RyRtot/PKAIItot) * PKACII, ),
+        IKUR_PKAp ~ _phos_fraction(k_pka_KUR * (PKAII_KURtot / PKAIItot) * PKACII, PP1_KURtot * k_pp1_KUR, Km_pka_KUR / IKurtotBA / epsilon, Km_pp1_KUR / IKurtotBA / epsilon),
+        # _phos_fraction is not applicable to RyR
+        D(RyRp) ~ kcat_pka_RyR * (PKAII_RyRtot / PKAIItot) * PKACII * hil(RyRn * epsilon, Km_pka_RyR) - kcat_pp1_RyR * PP1_RyR * hil(RyRp * epsilon, Km_pp1_RyR) - kcat_pp2a_RyR * PP2A_RyR * hil(RyRp * epsilon, Km_pp2a_RyR)
     ]
 
     return ODESystem(eqs, t; name)

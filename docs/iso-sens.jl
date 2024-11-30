@@ -1,7 +1,7 @@
 # # Sensitivity to ISO
 using ModelingToolkit
 using OrdinaryDiffEq
-using DiffEqCallbacks
+using SteadyStateDiffEq
 using Plots
 using LsqFit
 using CaMKIIModel
@@ -13,35 +13,29 @@ Plots.default(lw=1.5)
 sys = get_bar_sys(ATP, ISO; simplify=true)
 
 #---
-tend = 10000.0
-prob = ODEProblem(sys, [], tend)
-alg = Rodas5()
-callback = TerminateSteadyState()
+prob = SteadyStateProblem(sys, [])
+alg = DynamicSS(Rodas5P())
 
 # Log scale for ISO concentration
-iso = exp10.(range(log10(1e-5μM), log10(10μM), length=101))
+iso = logrange(1e-5μM, 10μM, length=101)
 
 #---
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[ISO => iso[i]])
 end
 trajectories = length(iso)
-sol = solve(prob, alg; callback) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, callback)
-
-# ## Time series
-# It took about 1000 seconds to reach equilibrium.
-plot(sol, idxs=sys.PKACI / sys.RItot)
+sol = solve(prob, alg, abstol=1e-8, reltol=1e-8) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-8, reltol=1e-8)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k][end], sim)
+extract(sim, k) = map(s -> s[k], sim)
 """Calculate Root Mean Square Error (RMSE)"""
 rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
 #---
 xopts = (xlims=(iso[begin] * 1000, iso[end] * 1000), minorgrid=true, xscale=:log10, xlabel="ISO (μM)",)
-plot(iso .* 1000, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (mM)", legend=:topleft, xopts...)
+plot(iso .* 1000, extract(sim, sys.cAMP*1000); lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
 
 #---
 plot(iso .* 1000, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation fraction")
@@ -93,7 +87,7 @@ plot(p1, p2, layout=(2, 1), size=(600, 600))
 # ## Least-square fitting of PP1 activity
 @. model_pp1(x, p) = p[1] * p[2] / (x + p[2]) + p[3]
 xdata = iso
-ydata = extract(sim, sys.PP1 / sys.PP1tot)
+ydata = extract(sim, sys.PP1 / sys.PP1totBA)
 p0 = [0.1, 8e-6, 0.8]
 lb = [0.0, 0.0, 0.0]
 pp1_fit = curve_fit(model_pp1, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
@@ -108,13 +102,13 @@ println("RMSE: ", rmse(pp1_fit))
 
 #---
 ypred = model_pp1.(xdata, Ref(pp1_coef))
-p1 = plot(xdata .* 1000, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PP1", legend=:topleft; xopts...)
+p1 = plot(xdata .* 1000, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PP1", legend=:topright; xopts...)
 p2 = plot(xdata .* 1000, (ypred .- ydata) ./ ydata .* 100; title="PP1 error (%)", lab=false, xopts...)
 plot(p1, p2, layout=(2, 1), size=(600, 600))
 
 # ## Least-square fitting of PLBp
 xdata = iso
-ydata = extract(sim, sys.PLBp / sys.PLBtot)
+ydata = extract(sim, sys.PLBp / sys.PLBtotBA)
 plot(xdata .* 1000, ydata, title="PLBp activity", lab=false; xopts...)
 
 # First try: Hill function
