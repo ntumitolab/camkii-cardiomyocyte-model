@@ -32,7 +32,7 @@ tend = 500.0
 # ╔═╡ 638be248-21ad-4833-bbc8-f2f9a805a900
 ps = [
 	sys.GCaL => 6.3e-5 , 
-	sys.RyRsensitivity => 10,
+	sys.RyRsensitivity => 1,
 	sys.kRyR => 50
 ]
 
@@ -46,7 +46,7 @@ prob = ODEProblem(sys, [], tend, ps)
 callback = build_stim_callbacks(Istim, tend; period=1)
 
 # ╔═╡ 761a0baf-b5ec-4caa-ae56-5808a2840987
-sol = solve(prob, FBDF(); callback, abstol=1e-6, reltol=1e-6, progress=true);
+sol = solve(prob, TRBDF2(); callback, abstol=1e-6, reltol=1e-6, progress=true);
 
 # ╔═╡ 58073dd2-9670-48d1-876e-82ba2a1f5611
 begin
