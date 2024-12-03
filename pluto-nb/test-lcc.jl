@@ -27,12 +27,12 @@ Base.current_project()
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true);
 
 # ╔═╡ fb697567-fa32-4963-a490-0668657b22f5
-tend = 500.0
+tend = 100.0
 
 # ╔═╡ 638be248-21ad-4833-bbc8-f2f9a805a900
 ps = [
 	sys.GCaL => 6.3e-5 , 
-	sys.RyRsensitivity => 10,
+	sys.RyRsensitivity => 1,
 	sys.kRyR => 50
 ]
 
@@ -46,7 +46,7 @@ prob = ODEProblem(sys, [], tend, ps)
 callback = build_stim_callbacks(Istim, tend; period=1)
 
 # ╔═╡ 761a0baf-b5ec-4caa-ae56-5808a2840987
-sol = solve(prob, FBDF(); callback, abstol=1e-6, reltol=1e-6, progress=true);
+sol = solve(prob, TRBDF2(); callback, abstol=1e-6, reltol=1e-6, progress=true);
 
 # ╔═╡ 58073dd2-9670-48d1-876e-82ba2a1f5611
 begin
@@ -67,7 +67,7 @@ plot(sol, idxs=sys.vm*1000, lab="Membrane potential", tspan=(90, 92))
 plot(sol, idxs=[sys.Cai_sub_SL*1E6, sys.Cai_sub_SR*1E6], tspan=(90, 92), ylabel="nM", lab=["Ca (sub SL)" "Ca (sub SR)"], ylims=(100, 800))
 
 # ╔═╡ cd11a3d5-bdd8-415c-8b8d-58c4228f8877
-plot(sol, idxs=[sys.CaJSR, sys.CaNSR], tspan=(90, 92), ylabel="mM")
+plot(sol, idxs=[sys.CaJSR, sys.CaNSR], tspan=(90, 92), ylabel="nM")
 
 # ╔═╡ b563ef4c-1dc3-4b3e-9f58-bace24d03d9e
 plot(sol, idxs=sys.CaMKAct)

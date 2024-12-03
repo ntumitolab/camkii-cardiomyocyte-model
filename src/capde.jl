@@ -17,7 +17,7 @@ function get_ca_pde_sys(;
     @parameters begin
         Dca = 7μm^2 / ms
         TrpnTotal = 35μM  # Half of adult rat CMC (70 μM)
-        CmdnTotal = 30μM
+        CmdnTotal = 30μM  # Adjusted from 50μM
         KmCmdn = 2.38μM
         KmTrpn = 0.5μM
         fracTnIp0 = 0.062698 # Baseline effect
