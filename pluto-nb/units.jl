@@ -8,11 +8,22 @@ using InteractiveUtils
 md"""
 # Common units
 
-For electrophysiology
+For electrophysiology models
+
+- time as millisecond (ms)
+- concentration as micromolar (μM)
+- voltage as millivolt (mV)
+- amount of substance as millimolar (mmol)
+- current density as μA/μF
+
+Thus, 
+
+- Faraday constant = 96.485 columb / mmol
+- Length unit = **meter (m)** since μM = mmol * $m^{-3}$
+- Current density = μA/μF = mV/ms
 """
 
 # ╔═╡ 600921d1-9338-48a5-8c11-486cf14836f4
-# Microseconds
 ms = 1
 
 # ╔═╡ 69259624-2f29-4828-9fb1-f8bf5e9997af
@@ -21,6 +32,9 @@ second = 1000ms
 # ╔═╡ 82854a56-9131-4525-9986-cd0cac3869b5
 Hz = 1/second
 
+# ╔═╡ f29a4041-f2f3-4bbb-bb90-eb3ff5ab6124
+μM = 1
+
 # ╔═╡ a77a1d2f-968f-4557-a132-a2489d78feb5
 mmol = 1
 
@@ -28,13 +42,7 @@ mmol = 1
 mol = 1000mmol
 
 # ╔═╡ 2f51d1ba-b241-4eb4-9ca2-f67ea1f26bc8
-metre = 1
-
-# ╔═╡ 08033864-3fc2-4f70-b3ff-2dc110b39885
-μM = mmol/metre^3
-
-# ╔═╡ 8a6e71dc-ad8f-4246-947c-26a98ce79a8b
-μM/ms
+metre = cbrt(mmol/μM)
 
 # ╔═╡ 25c59861-7469-4f5f-838d-c2f137841d34
 mV = 1
@@ -89,11 +97,10 @@ pL = 1e-12litre
 # ╠═600921d1-9338-48a5-8c11-486cf14836f4
 # ╠═69259624-2f29-4828-9fb1-f8bf5e9997af
 # ╠═82854a56-9131-4525-9986-cd0cac3869b5
+# ╠═f29a4041-f2f3-4bbb-bb90-eb3ff5ab6124
 # ╠═a77a1d2f-968f-4557-a132-a2489d78feb5
 # ╠═4cdf9934-bc30-4456-a06b-76ed19a2ba0f
 # ╠═2f51d1ba-b241-4eb4-9ca2-f67ea1f26bc8
-# ╠═08033864-3fc2-4f70-b3ff-2dc110b39885
-# ╠═8a6e71dc-ad8f-4246-947c-26a98ce79a8b
 # ╠═25c59861-7469-4f5f-838d-c2f137841d34
 # ╠═7e46345b-8af8-4d9e-9951-e0132f0995e9
 # ╠═197e0bf3-3856-422a-87da-c4a0b1d36dfa
