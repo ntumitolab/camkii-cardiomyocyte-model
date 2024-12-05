@@ -5,27 +5,31 @@ using Plots
 using CSV
 using DataFrames
 using CaMKIIModel
+using CaMKIIModel: second
 Plots.default(lw=1.5)
 
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 seconds and ends at `t`=300 seconds.
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
-tend = 500.0
+tend = 500.0second
 prob = ODEProblem(sys, [], tend)
-stimstart = 100.0
-stimend = 300.0
+stimstart = 100.0second
+stimend = 300.0second
 @unpack Istim = sys
-alg = TRBDF2()
+alg = FBDF()
 
 # ## 1Hz
-callback = build_stim_callbacks(Istim, stimend; period=1, starttime=stimstart)
-@time sol = solve(prob, alg; callback, abstol=1e-6, reltol=1e-6)
+callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
+@time sol = solve(prob, alg; callback)
 
 #---
-plot(sol, idxs=sys.vm * 1000, title="Action potential", ylabel="mV", xlabel="Time (sec.)", label=false)
+plot(sol, idxs=sys.vm, title="Action potential", ylabel="mV", xlabel="Time (ms)", label=false)
 
 #---
-plot(sol, idxs=sys.vm * 1000, title="Action potential", tspan=(299, 300), ylabel="mV", xlabel="Time (sec.)", label=false)
+plot(sol, idxs=sys.vm, title="Action potential", tspan=(299000, 300000), ylabel="mV", xlabel="Time (ms)", label=false)
+
+#---
+plot(sol, idxs=[sys.IK1, sys.Ito, sys.IKs, sys.IKr, sys.If], tspan=(299000, 300000), xlabel="Time (ms)")
 
 #---
 plot(sol, idxs=[sys.Cai_sub_SR * 1E6, sys.Cai_sub_SL * 1E6, sys.Cai_mean * 1E6], tspan=(299, 300), title="Calcium transient", ylabel="nM", xlabel="Time (sec.)", label=["CaSR" "CaSL" "CaAvg"])
