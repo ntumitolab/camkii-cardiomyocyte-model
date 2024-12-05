@@ -5,7 +5,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         VNSR = 0.9 * VSR
         VJSR = VSR - VNSR
         # RyR
-        kRyR = 10Hz
+        kRyR = 20Hz  # 10Hz
         kaposRyR = 1000Hz
         kanegRyR = 160Hz
         RyRsensitivity = 1.0
@@ -15,7 +15,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         KmrSR = 3.5mM
         kSRleak = 0.005Hz
         fracPKA_PLBo = 1 - 0.079755
-        ktrCaSR = 5Hz
+        ktrCaSR = 50Hz # 5Hz
         csqntot = 24.750mM
         Kmcsqn = 0.8mM
     end
@@ -51,9 +51,9 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         Jleak ~ kleak * (CaNSR - Cai_sub_SR),
         Jtr ~ ktrCaSR * (CaNSR - CaJSR),
         betaSR ~ inv(1 + csqntot * Kmcsqn / (CaJSR + Kmcsqn)^2),
-        JCa_SR ~ (Jleak - Jup + Jrel) * (1pL / V_sub_SR),
-        D(CaJSR) ~ betaSR * (-Jrel + Jtr) * (1pL / VJSR),
-        D(CaNSR) ~ (Jup - Jleak - Jtr) * (1pL / VNSR),
+        JCa_SR ~ ((Jleak - Jup) * VNSR / V_sub_SR + Jrel),
+        D(CaJSR) ~ betaSR * (-Jrel * V_sub_SR + Jtr * VNSR) / VJSR,
+        D(CaNSR) ~ Jup - Jleak - Jtr,
     ]
     return ODESystem(eqs, t; name)
 end
