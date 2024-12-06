@@ -6,7 +6,7 @@ using OrdinaryDiffEq
 using DiffEqCallbacks
 using Plots
 using CaMKIIModel
-using CaMKIIModel: second
+using CaMKIIModel: second, metre, Farad
 Plots.default(lw=1.5)
 
 #---
@@ -58,33 +58,35 @@ plot(sol, idxs=sys.CaMKAct*100, title="Active CaMKII", lab="Ctl")
 plot!(sol_caf, idxs=sys.CaMKAct*100, lab="Caf", ylabel="CaMKII activity (%)", xlabel="Time (ms)")
 
 # Add caffeine in the beginning of the simulation
+# Add caffeine and nifedipine in the beginning of the simulation (nifedipine blocks 90% of L-type calcium channel)
 prob_caf = ODEProblem(sys, [sys.RyRsensitivity => 10], tend)
+prob_nif_caf = ODEProblem(sys, [sys.RyRsensitivity => 10, sys.GCaL => 6.3e-6 * (metre^3 / second / Farad)], tend)
+@time sol = solve(prob, alg; callback)
 @time sol_caf = solve(prob_caf, alg; callback)
+@time sol_nif_caf = solve(prob_nif_caf, alg; callback)
 
 #---
 plot(sol, idxs=sys.vm, title="Action potential", lab="Ctl")
-plot!(sol_caf, idxs=sys.vm, lab="Caf", tspan=(198second, 205second), ylabel="Voltage (mV)")
+plot!(sol_caf, idxs=sys.vm, lab="Caf")
+plot!(sol_nif_caf, idxs=sys.vm, lab="Caf + Nif", tspan=(198second, 205second), ylabel="Voltage (mV)", xlabel="Time (ms)")
 
 #---
-plot(sol, idxs=sys.Cai_sub_SR * 1000, title="Calcium transient (During caffeine addition)", lab="Ctl")
-plot!(sol_caf, idxs=sys.Cai_sub_SR * 1000, tspan=(198second, 205second), lab="Caf", ylabel="Subspace calcium (nM)")
+plot(sol, idxs=sys.Cai_sub_SR * 1000, title="Calcium transient", lab="Ctl")
+plot!(sol_caf, idxs=sys.Cai_sub_SR * 1000, lab="Caf", ylabel="Subspace calcium (nM)")
+plot!(sol_nif_caf, idxs=sys.Cai_sub_SR * 1000, tspan=(198second, 205second), lab="Caf + Nif", ylabel="Subspace calcium (nM)", xlabel="Time (ms)")
+
 
 #---
-plot(sol, idxs=sys.PO1RyR, title="RyR open (During caffeine addition)", lab="Ctl")
-plot!(sol_caf, idxs=sys.PO1RyR, tspan=(198second, 205second), lab="Caf", ylabel="Open probability", ylims=(0, 1), xlabel="Time (ms)")
+plot(sol, idxs=sys.PO1RyR, title="RyR opening", lab="Ctl")
+plot!(sol_caf, idxs=sys.PO1RyR, lab="Caf")
+plot!(sol_nif_caf, idxs=sys.PO1RyR, tspan=(198second, 205second), lab="Caf + Nif", ylabel="Open probability", ylims=(0, 1), xlabel="Time (ms)")
 
 #---
-plot(sol, idxs=sys.Cai_sub_SR * 1000, title="Calcium transient (After caffeine addition)", lab="Ctl", ylabel="Subspace calcium (nM)")
-plot!(sol_caf, idxs=sys.Cai_sub_SR * 1000, tspan=(198second, 205second), lab="Caf", xlabel="Time (ms)")
-
-#---
-plot(sol, idxs=sys.CaJSR, title="SR Calcium (During caffeine addition)", lab="Ctl", ylabel="SR calcium (μM)")
-plot!(sol_caf, idxs=sys.CaJSR, tspan=(198second, 205second), lab="Caf", ylims=(0, 850), xlabel="Time (ms)")
-
-#---
-plot(sol, idxs=sys.Jrel, title="Ca flux", lab="Ctl  (Jrel)")
-plot!(sol_caf, idxs=sys.Jrel, lab="Caf (Jrel)", tspan=(198second, 205second), ylabel="μM/ms", xlabel="Time (ms)")
+plot(sol, idxs=sys.CaJSR, title="SR Calcium", lab="Ctl", ylabel="SR calcium (μM)")
+plot!(sol_caf, idxs=sys.CaJSR, lab="Caf")
+plot!(sol_nif_caf, idxs=sys.CaJSR, tspan=(198second, 205second), lab="Caf + Nif", ylims=(0, 850), xlabel="Time (ms)")
 
 #---
 plot(sol, idxs=sys.CaMKAct*100, title="Active CaMKII", lab="Ctl")
-plot!(sol_caf, idxs=sys.CaMKAct*100, lab="Caf", ylabel="CaMKII activity (%)", xlabel="Time (ms)")
+plot!(sol_caf, idxs=sys.CaMKAct*100, lab="Caf")
+plot!(sol_nif_caf, idxs=sys.CaMKAct*100, lab="Caf + Nif", ylabel="CaMKII activity (%)", xlabel="Time (ms)")
