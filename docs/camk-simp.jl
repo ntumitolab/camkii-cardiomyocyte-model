@@ -40,6 +40,6 @@ plot(sol, idxs=sys.CaMKAct, label= "Full model", title="Active CaMKII")
 plot!(sol_simp, idxs=sys_simp.CaMKAct, label= "Simplified model", line=:dash, xlabel="Time (ms)")
 
 # Phosphorylated CaMKII too high
-@unpack CaM, KCaM, PCaM, CaMKP = sys_simp
+@unpack CaM, KCaM, PCaM, CaMKP, CaMK = sys_simp
 @unpack CaM0, CaM2C, CaM2N, CaM4, CaM0_CaMK, CaM2C_CaMK, CaM2N_CaMK, CaM4_CaMK, CaM0_CaMKP, CaM2C_CaMKP, CaM2N_CaMKP, CaM4_CaMKP = sys_simp
 plot(sol_simp, idxs=[CaMKP, KCaM, PCaM, CaMK], tspan=(100second, 105second))
