@@ -13,7 +13,7 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
         E_Na(t)
     end
 
-    v = vm / mV
+    v = vm
     mα = 0.32 / 0.1 * exprel(-0.1 * (v + 47.13))
     mβ = 0.08 * exp(-v / 11)
 

@@ -49,8 +49,8 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         i_y(t) = 0.07192
     end
 
-    V = vm * inv(mV)  # Convert voltage to mV
-    vk1 = vm - E_K - 6.1373mV
+    V = vm  # mV is the base unit now
+    vk1 = V - E_K - 6.1373
 
     # PKA-dependent phosphoregulation of Ik,slow1 (increases Gkur1)
     fracIKurp0 = 0.437635       # Derived quantity (IKur_PKAp(baseline)/IKurtot)
@@ -61,12 +61,12 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
 
     # IKr
-    alphaa0 = 0.022348kHz * exp(0.01176 * V)
-    betaa0 = 0.047002kHz * exp(-0.0631 * V)
-    alphaa1 = 0.013733kHz * exp(0.038198 * V)
-    betaa1 = 0.0000689kHz * exp(-0.04178 * V)
-    alphai_mERG = 0.090821kHz * exp(0.023391 * V)
-    betai_mERG = 0.006497kHz * exp(-0.03268 * V)
+    alphaa0 = 0.022348/ms * exp(0.01176 * V)
+    betaa0 = 0.047002/ms * exp(-0.0631 * V)
+    alphaa1 = 0.013733/ms * exp(0.038198 * V)
+    betaa1 = 0.0000689/ms * exp(-0.04178 * V)
+    alphai_mERG = 0.090821/ms * exp(0.023391 * V)
+    betai_mERG = 0.006497/ms * exp(-0.03268 * V)
 
     rc0c1 = alphaa0 * CK0 - betaa0 * i_CK1
     rc1c2 = kf * i_CK1 - kb * i_CK2
@@ -78,13 +78,13 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     return ODESystem([
             E_Na ~ nernst(na_o, na_i),
             E_K ~ nernst(k_o, k_i),
-            IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 / mV * vk1)),
+            IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 * vk1)),
             sinf ~ expit((V + 31.97156) / -4.64291),
             rinf ~ expit((V - 3.55716) / 14.61299),
             slowinf ~ sinf,
-            taur ~ 1 / (45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
-            taus ~ (0.35 * exp(-(((V + 70) / 15)^2)) + 0.035) - 26.9ms,
-            tausslow ~ (3.7 * exp(-(((V + 70) / 30)^2)) + 0.035) + 37.4ms,
+            taur ~ 1000ms / (45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
+            taus ~ (350 * exp(-(((V + 70) / 15)^2)) + 35 - 26.9) * ms,
+            tausslow ~ (3700 * exp(-(((V + 70) / 30)^2)) + 35 + 37.4) * ms,
             Ito ~ gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
             D(i_r) ~ (rinf - i_r) / taur,
             D(i_s) ~ (sinf - i_s) / taus,
@@ -99,11 +99,10 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
             D(i_OK) ~ rc2o - roi,
             D(i_IK) ~ roi,
             yinf ~ expit(-(V + 78.65) / 6.33),
-            tauy ~ 1 / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
+            tauy ~ 1000ms / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
             IfNa ~ gf * fNa * i_y * (vm - E_Na),
             IfK ~ gf * fK * i_y * (vm - E_K),
             If ~ IfNa + IfK,
             D(i_y) ~ (yinf - i_y) / tauy
         ], t; name)
 end
-# Ito: Where does this come from? Perhaps here: https://modeldb.science/262081

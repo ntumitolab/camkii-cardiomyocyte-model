@@ -1,36 +1,41 @@
 # Units
-const second = 1           # second
+const ms = 1               # millisecond
+const second = 1000ms      # second is the SI unit
 const minute = 60second    # minute
-const ms =  0.001second    # millisecond
-const Hz =  inv(second)    # Herz
-const kHz = 1000Hz         # kilohertz
+const Hz = inv(second)     # herz
+const kHz = inv(second)    # kilohertz
 const metre = 1            # meter
 const cm = 0.01metre       # centimeter
 const cm² = cm^2           # square centimeter
-const μm = 1E-6metre       # Micrometer
+const μm = metre / 10^6    # Micrometer
 const mL = cm^3            # milliliter = cubic centimeter
 const Liter = 1000mL       # liter
-const μL = 1E-6Liter
-const pL = 1E-12Liter
-const mM = 1               # the SI units is mM
-const Molar = 1000mM       # molar
-const μM = 1E-6Molar       # micromolar
-const nM = 1E-9Molar       # nanomolar
-const Amp = 1              # ampere
-const mA = 0.001Amp        # milliampere
-const μA = 1E-6Amp         # micropampere
-const Volt = 1             # volt
-const mV = 1E-3Volt       # millivolt
-const mS = mA / Volt        # milliseimens
-const Farad = Amp * second / Volt
-const μF = 1E-6Farad
-const T₀ = 310                 # Default temp (37C)
-const Faraday = 96485          # Faraday constant (columb / mol)
-const RGAS = 8.314             # Ideal gas constant (J/K⋅mol)
+const μL = μm^3            #
+const pL = Liter / 10^12   # picoliter
+const mmol = 1
+const mol = 1000mmol
+const μM = mmol/metre^3    # micromolar
+const mM = 1000μM          # mM is the SI unit
+const Molar = 1000mM       # Molar is used in equilibrium constants
+const nM = μM / 10^3       # nanomolar
+const Ampere = 1           # current unit Ampere
+const mA = Ampere / 10^3   # milliampere
+const μA = Ampere / 10^6   # micropampere
+const Joule = 10^6         # energy unit Joule
+const Kelvin = 1           # temperature unit Kelvin
+const Columb = Ampere * second # unit of electric charge
+const Volt = Joule / Columb # voltage
+const mV = Volt / 10^3     # millivolt
+const milliseimens = Ampere / Volt / 10^3 # milliseimens
+const Farad = Columb / Volt
+const μF = Farad / 10^6
+const T₀ = 310Kelvin           # Default temp (37C)
+const Faraday = 96485Columb / mol # Faraday constant (columb / mol)
+const RGAS = 8.314Joule/Kelvin/mol # Ideal gas constant (J/K⋅mol)
 const VT = RGAS * T₀ / Faraday # Thermal voltage (@37C), about 26.7 mV
-const iVT = inv(VT)            # Reciprocal of thermal voltage
+const iVT = inv(VT)            # Reciprocal of therm al voltage
 const μAμF = μA / μF           # Common unit for current density, normalized by capacitance
-const mSμF = ms / μF           # Common unit for conductance, normalized by capacitance
+const mSμF = milliseimens / μF # Common unit for conductance, normalized by capacitance
 
 """
 Regular Hill/MM function
