@@ -170,18 +170,19 @@ end
 function get_camkii_simp_sys(Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0,
+    binding_To_OCaMK=0,
     name=:camkii_sys,
     simplify=false
 )
 
     @parameters begin
-        kb_CaMK = 3Hz           ## Dissociation rate of CaMKB --> CaMK (adjustable)
+        r_CaMK = 3Hz           ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
         kb_CaMKP = inv(3second) ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa_CaMK = 0.7677       ## Activated forward rate CaMK --> CaMKB (adjustable)
-        kfb_CaMK = 0.0275       ## Basal forward rate of CaMK --> CaMKB (adjustable)
-        kmCa_CaMK = 1.265μM     ## Half-activation conc of calcium
-        nCa_CaMK = 2.398        ## Hill coefficient of calcium
-        kphos_CaMK = 10Hz       ## Phosphorylation rate (originally 30Hz)
+        kfa_CaMK = 0.42176      ## Activated forward rate CaMK --> CaMKB (adjustable)
+        kfb_CaMK = 0.025        ## Basal forward rate of CaMK --> CaMKB (adjustable)
+        kmCa_CaMK = 1.01338μM   ## Half-activation concentration of calcium
+        nCa_CaMK = 2.277        ## Hill coefficient of calcium
+        kphos_CaMK = 6Hz       ## Phosphorylation rate (originally 30Hz)
         kdeph_CaMK = inv(6second)  ## Dephosphorylation rate
         k_P1_P2 = inv(60second)
         k_P2_P1 = inv(15second)
@@ -192,22 +193,16 @@ function get_camkii_simp_sys(Ca=0μM;
     end
 
     #==
-    States: bound/unbound, phosphorylated/dephosphorylated, oxidized/reduced
-
-    I <--> B <--> P <--> A <--> I
-           ^      ^      ^      ^
-           |      |      |      |
-           v      v      |      |
-         BOX <-> POX <-> AOX -> OX
-
+    States: bound/unbound, autophosphorylated/dephosphorylated, oxidized/reduced
     ==#
     sts = @variables begin
         CaMKB(t) = 0        ## Bound to CaMCa
         CaMKBOX(t) = 0      ## Bound to CaMCa, oxidized
-        CaMKP(t) = 0        ## Bound to CaMCa, phosphorylated
-        CaMKPOX(t) = 0      ## Bound to CaMCa, phosphorylated, oxidized
-        CaMKA(t) = 0        ## Unbound, phosphorylated
-        CaMKAOX(t) = 0      ## Unbound, phosphorylated, oxidized
+        CaMKP(t) = 0        ## Bound to CaMCa, autophosphorylated
+        CaMKPOX(t) = 0      ## Bound to CaMCa, autophosphorylated, oxidized
+        CaMKA(t) = 0        ## Unbound, autophosphorylated
+        CaMKA2(t) = 0       ## Unbound, doublely phosphorylated
+        CaMKAOX(t) = 0      ## Unbound, autophosphorylated, oxidized
         CaMKOX(t) = 0       ## Unbound, oxidized
     end
 
@@ -220,27 +215,31 @@ function get_camkii_simp_sys(Ca=0μM;
     # Observables
     @variables CaMKAct(t)
     eqs = [
-        CaMKAct ~ (1 - CaMK),
+        CaMKAct ~ 1 - CaMK,
+        1 ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
     ]
 
     ## CaMK(OX) <--CaM,Ca--> CaMKB(OX)
-    kf = kb_CaMK * (kfa_CaMK * hil(Ca, kmCa_CaMK, nCa_CaMK) + kfb_CaMK)
+    ## Calc the steady-state bound fraction (binf) for forward / backward reaction rates
+    binf = kfa_CaMK * hil(Ca, kmCa_CaMK, nCa_CaMK) + kfb_CaMK
+    kf = r_CaMK * binf
+    kb = r_CaMK * (1 - binf)
     add_rate!(rates, kf, [CaMK], kb, [CaMKB])
-    add_rate!(rates, kf, [CaMKOX], kb, [CaMKBOX])
+    add_rate!(rates, kf * binding_To_OCaMK, [CaMKOX], kb, [CaMKBOX])
 
     ## CaMKA(OX) <-CaM,Ca-> CaMKP(OX)
     add_rate!(rates, kf * binding_To_PCaMK, [CaMKA], kb_CaMKP, [CaMKP])
-    add_rate!(rates, kf * binding_To_PCaM, [CaMKAOX], kb_CaMKP, [CaMKPOX])
-
+    add_rate!(rates, kf * binding_To_PCaMK, [CaMKAOX], kb_CaMKP, [CaMKPOX])
 
     ## Auto-phosphorylation of CaMKII
     ## B(OX) <--> P(OX)
-    add_rate!(rates, kphos_CaMK * CaMKAct, [CaMKB], kdeph_CaMK, [CaMKP])
-    add_rate!(rates, kphos_CaMK * CaMKAct, [CaMKBOX], kdeph_CaMK, [CaMKPOX])
+    kphos = kphos_CaMK * CaMKAct
+    add_rate!(rates, kphos, [CaMKB], kdeph_CaMK, [CaMKP])
+    add_rate!(rates, kphos, [CaMKBOX], kdeph_CaMK, [CaMKPOX])
 
     ## Second phosphorylation of Apo CaMKII-P
     # CaMKA <--> CaMKA2
-    # add_rate!(rates, k_P1_P2, [CaMKA], k_P2_P1, [CaMKA2])
+    add_rate!(rates, k_P1_P2, [CaMKA], k_P2_P1, [CaMKA2])
 
     ## Dephosphorylation of Apo CaMK-P
     ## CaMKA(OX) --> CaMK(OX)
