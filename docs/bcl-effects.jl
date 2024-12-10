@@ -10,7 +10,7 @@ Plots.default(lw=1.5)
 
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 seconds and ends at `t`=300 seconds.
-sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 tend = 500.0second
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
@@ -29,10 +29,13 @@ plot(sol, idxs=sys.vm, title="Action potential", ylabel="mV", xlabel="Time (ms)"
 plot(sol, idxs=sys.vm, title="Action potential", tspan=(299second, 300second), ylabel="mV", xlabel="Time (ms)", label=false)
 
 #---
-plot(sol, idxs=[sys.IK1, sys.Ito, sys.IKs, sys.IKr, sys.If], tspan=(299second, 300second), xlabel="Time (ms)")
+plot(sol, idxs=[sys.IK1, sys.Ito, sys.IKs, sys.IKr, sys.If], tspan=(299second, 300second), ylabel="μA/μF", xlabel="Time (ms)")
 
 #---
-plot(sol, idxs=[sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000], tspan=(299second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (ms)", label=["CaSR" "CaSL" "CaAvg"])
+plot(sol, idxs=[sys.ICaL, sys.INaCa, sys.ICaT, sys.ICab], tspan=(299second, 300second), ylabel="μA/μF", xlabel="Time (ms)")
+
+#---
+plot(sol, idxs=[sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000], tspan=(298second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (ms)", label=["CaSR" "CaSL" "CaAvg"])
 
 #---
 plot(sol, idxs=sys.CaMKAct * 100, title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (ms)", label=false)
@@ -143,4 +146,4 @@ idx = sys.CaMKAct * 100
 
 plot(sol1, idxs=idx, lab="1 Hz", color=:blue)
 plot!(sol2, idxs=idx, lab="2 Hz", color=:red)
-plot!(title="Pacing frequency", xlabel="Time (ms)", ylabel="CaMKII activity (%)", ylims=(5, 70))
+plot!(title="Pacing frequency", xlabel="Time (ms)", ylabel="CaMKII activity (%)", ylims=(0, 70))

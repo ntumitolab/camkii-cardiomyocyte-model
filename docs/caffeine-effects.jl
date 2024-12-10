@@ -10,7 +10,7 @@ using CaMKIIModel: second, metre, Farad
 Plots.default(lw=1.5)
 
 #---
-sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 tend = 500.0second
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
@@ -59,6 +59,7 @@ plot!(sol_caf, idxs=sys.CaMKAct*100, lab="Caf", ylabel="CaMKII activity (%)", xl
 
 # Add caffeine in the beginning of the simulation
 # Add caffeine and nifedipine in the beginning of the simulation (nifedipine blocks 90% of L-type calcium channel)
+prob = ODEProblem(sys, [], tend)
 prob_caf = ODEProblem(sys, [sys.RyRsensitivity => 10], tend)
 prob_nif_caf = ODEProblem(sys, [sys.RyRsensitivity => 10, sys.GCaL => 6.3e-6 * (metre^3 / second / Farad)], tend)
 @time sol = solve(prob, alg; callback)
@@ -87,6 +88,6 @@ plot!(sol_caf, idxs=sys.CaJSR, lab="Caf")
 plot!(sol_nif_caf, idxs=sys.CaJSR, tspan=(198second, 205second), lab="Caf + Nif", ylims=(0, 850), xlabel="Time (ms)")
 
 #---
-plot(sol, idxs=sys.CaMKAct*100, title="Active CaMKII", lab="Ctl")
+plot(sol, idxs=sys.CaMKAct*100, title="CaMKII", lab="Ctl")
 plot!(sol_caf, idxs=sys.CaMKAct*100, lab="Caf")
-plot!(sol_nif_caf, idxs=sys.CaMKAct*100, lab="Caf + Nif", ylabel="CaMKII activity (%)", xlabel="Time (ms)")
+plot!(sol_nif_caf, idxs=sys.CaMKAct*100, lab="Caf + Nif", ylabel="Active fraction (%)", xlabel="Time (ms)")
