@@ -6,7 +6,7 @@ using Plots
 using CaMKIIModel
 Plots.default(lw=2)
 
-sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 prob = SteadyStateProblem(sys, [])
 alg = DynamicSS(Rodas5P())
 

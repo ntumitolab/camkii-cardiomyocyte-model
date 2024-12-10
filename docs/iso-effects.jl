@@ -7,12 +7,12 @@ using CaMKIIModel: second, μM
 Plots.default(lw=1.5)
 
 #---
-sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 tend = 500.0second
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
-alg = TRBDF2()
+alg = FBDF()
 
 # ## Without isoproterenol
 @unpack Istim = sys

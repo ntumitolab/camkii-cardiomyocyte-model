@@ -176,34 +176,32 @@ function get_camkii_simp_sys(Ca=0μM;
 )
 
     @parameters begin
-        r_CaMK = 3Hz           ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
-        kb_CaMKP = inv(3second) ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa_CaMK = 0.42176      ## Activated forward rate CaMK --> CaMKB (adjustable)
-        kfb_CaMK = 0.025        ## Basal forward rate of CaMK --> CaMKB (adjustable)
-        kmCa_CaMK = 1.01338μM   ## Half-activation concentration of calcium
-        nCa_CaMK = 2.277        ## Hill coefficient of calcium
-        kphos_CaMK = 6Hz       ## Phosphorylation rate (originally 30Hz)
-        kdeph_CaMK = inv(6second)  ## Dephosphorylation rate
-        k_P1_P2 = inv(60second)
-        k_P2_P1 = inv(15second)
-
-        ## Oxidation / reduction
-        kox_CaMK = 291Hz / mM
-        krd_CaMK = inv(45second)
+        r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
+        kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
+        kfa_CaMK = 0.4393           ## Activated forward rate CaMK --> CaMKB (adjustable)
+        kfb_CaMK = 0.0056           ## Basal forward rate of CaMK --> CaMKB (adjustable)
+        kmCa_CaMK = 0.9716μM        ## Half-activation concentration of calcium
+        nCa_CaMK = 2.293            ## Hill coefficient of calcium
+        kphos_CaMK = 10Hz           ## Phosphorylation rate (originally 30Hz)
+        kdeph_CaMK = inv(6second)   ## Dephosphorylation rate
+        k_P1_P2 = inv(60second)     ## Second autophosphorylation rate
+        k_P2_P1 = inv(15second)     ## Second dephosphorylation rate
+        kox_CaMK = 291Hz / mM       ## Oxidation rate
+        krd_CaMK = inv(45second)    ## Reduction rate
     end
 
     #==
     States: bound/unbound, autophosphorylated/dephosphorylated, oxidized/reduced
     ==#
     sts = @variables begin
-        CaMKB(t) = 0        ## Bound to CaMCa
-        CaMKBOX(t) = 0      ## Bound to CaMCa, oxidized
-        CaMKP(t) = 0        ## Bound to CaMCa, autophosphorylated
-        CaMKPOX(t) = 0      ## Bound to CaMCa, autophosphorylated, oxidized
-        CaMKA(t) = 0        ## Unbound, autophosphorylated
-        CaMKA2(t) = 0       ## Unbound, doublely phosphorylated
-        CaMKAOX(t) = 0      ## Unbound, autophosphorylated, oxidized
-        CaMKOX(t) = 0       ## Unbound, oxidized
+        CaMKB(t) = 0.008728     ## Bound to CaMCa
+        CaMKBOX(t) = 0          ## Bound to CaMCa, oxidized
+        CaMKP(t) = 0.003916     ## Bound to CaMCa, autophosphorylated
+        CaMKPOX(t) = 0          ## Bound to CaMCa, autophosphorylated, oxidized
+        CaMKA(t) = 0.007833     ## Unbound, autophosphorylated
+        CaMKA2(t) = 0.001958    ## Unbound, doublely phosphorylated
+        CaMKAOX(t) = 0          ## Unbound, autophosphorylated, oxidized
+        CaMKOX(t) = 0           ## Unbound, oxidized
     end
 
     conservedvars = @variables begin
