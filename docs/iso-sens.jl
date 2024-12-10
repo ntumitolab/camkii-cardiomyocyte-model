@@ -13,8 +13,9 @@ Plots.default(lw=1.5)
 sys = get_bar_sys(ATP, ISO; simplify=true)
 
 #---
-prob = SteadyStateProblem(sys, [])
-alg = DynamicSS(Rodas5P())
+tend = 5000second
+prob = ODEProblem(sys, [], tend)
+alg = Rodas5P()
 
 # Log scale for ISO concentration
 iso = logrange(1e-4μM, 1μM, length=1001)
@@ -24,12 +25,12 @@ prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[ISO => iso[i]])
 end
 trajectories = length(iso)
-sol = solve(prob, alg, abstol=1e-10, reltol=1e-10) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10)
+sol = solve(prob, alg, abstol=1e-10, reltol=1e-10, save_everystep=false, save_start=false) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10, save_everystep=false, save_start=false)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k], sim)
+extract(sim, k) = map(s -> s[k][end], sim)
 """Calculate Root Mean Square Error (RMSE)"""
 rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
@@ -38,8 +39,13 @@ xopts = (xlims=(iso[begin], iso[end]), minorgrid=true, xscale=:log10, xlabel="IS
 plot(iso, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
 
 #---
+
+plot(iso, extract(sim, sys.I1), legend=:topleft; xopts...)
+
+#---
 plot(iso, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation fraction")
-plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII", legend=:topleft; xopts...)
+plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII")
+plot!(iso, extract(sim, sys.PP1 / sys.PP1totBA), lab="PP1", legend=:topleft; xopts...)
 
 # ## Least-square fitting of PKACI activity
 @. model(x, p) = p[1] * x / (x + p[2]) + p[3]
