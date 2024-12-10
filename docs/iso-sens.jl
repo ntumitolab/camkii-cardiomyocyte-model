@@ -9,7 +9,7 @@ using CaMKIIModel: μM, hil, Hz, hilr, second
 Plots.default(lw=1.5)
 
 # ## Setup b1AR system
-@parameters ATP = 5000μM ISO = 0μM
+@parameters (ATP = 5000μM, ISO = 0μM)
 sys = get_bar_sys(ATP, ISO; simplify=true)
 
 #---
@@ -17,7 +17,7 @@ prob = SteadyStateProblem(sys, [])
 alg = DynamicSS(Rodas5P())
 
 # Log scale for ISO concentration
-iso = logrange(1e-4μM, 1μM, length=101)
+iso = logrange(1e-4μM, 1μM, length=1001)
 
 #---
 prob_func = (prob, i, repeat) -> begin

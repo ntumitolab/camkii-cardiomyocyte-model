@@ -301,13 +301,13 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         Km_pp1_RyR = 7μM
         kcat_pp2a_RyR = 10.1Hz
         Km_pp2a_RyR = 4.1μM
-        ## Fitted PKACI, CII, and PP1 parameters
-        PKACI_basal = 0.0831  ## basal activity
-        PKACI_activated = 0.25603
-        PKACI_KM = 0.0144μM
-        PKACII_basal = 0.2063  ## basal activity
-        PKACII_activated = 0.397
-        PKACII_KM = 0.009755μM
+        ## Fitted PKACI, PKACII, and PP1 parameters
+        PKACI_basal = 0.0734  ## basal activity
+        PKACI_activated = 0.2728
+        PKACI_KM = 0.0139μM
+        PKACII_basal = 0.1840  ## basal activity
+        PKACII_activated = 0.5284
+        PKACII_KM = 0.0103μM
         PP1_basal = 0.82365
         PP1_activated = 0.1025
         PP1_KI = 0.008465μM
