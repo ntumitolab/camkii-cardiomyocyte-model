@@ -1,7 +1,7 @@
 # # Sensitivity to ISO
 using ModelingToolkit
 using OrdinaryDiffEq
-using SteadyStateDiffEq
+using DiffEqCallbacks
 using Plots
 using LsqFit
 using CaMKIIModel
@@ -9,7 +9,7 @@ using CaMKIIModel: μM, hil, Hz, hilr, second
 Plots.default(lw=1.5)
 
 # ## Setup b1AR system
-@parameters (ATP = 5000μM, ISO = 0μM)
+@parameters ATP = 5000μM ISO = 0μM
 sys = get_bar_sys(ATP, ISO; simplify=true)
 
 #---
@@ -18,15 +18,16 @@ prob = ODEProblem(sys, [], tend)
 alg = Rodas5P()
 
 # Log scale for ISO concentration
-iso = logrange(1e-4μM, 1μM, length=1001)
+iso = logrange(1e-4μM, 1μM, length=101)
 
 #---
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[ISO => iso[i]])
 end
 trajectories = length(iso)
-sol = solve(prob, alg, abstol=1e-10, reltol=1e-10, save_everystep=false, save_start=false) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10, save_everystep=false, save_start=false)
+callback = TerminateSteadyState(1e-8, 1e-8)
+sol = solve(prob, alg; callback) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, callback)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
@@ -35,12 +36,15 @@ extract(sim, k) = map(s -> s[k][end], sim)
 rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
 #---
+plot(sol, idxs=[sys.I1, sys.I1p, sys.I1p_PP1, sys.PP1], tspan=(0, 200))
+
+#---
 xopts = (xlims=(iso[begin], iso[end]), minorgrid=true, xscale=:log10, xlabel="ISO (μM)",)
 plot(iso, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
 
 #---
 
-plot(iso, extract(sim, sys.I1), legend=:topleft; xopts...)
+plot(iso, [extract(sim, sys.I1) extract(sim, sys.I1p) extract(sim, sys.I1p_PP1) extract(sim, sys.PP1)], legend=:topleft, lab=["I1" "I1p" "I1p_PP1" "PP1"]; xopts...)
 
 #---
 plot(iso, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation fraction")
