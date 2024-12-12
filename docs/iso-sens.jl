@@ -1,7 +1,7 @@
 # # Sensitivity to ISO
 using ModelingToolkit
 using OrdinaryDiffEq
-using SteadyStateDiffEq
+using DiffEqCallbacks
 using Plots
 using LsqFit
 using CaMKIIModel
@@ -13,23 +13,25 @@ Plots.default(lw=1.5)
 sys = get_bar_sys(ATP, ISO; simplify=true)
 
 #---
-prob = SteadyStateProblem(sys, [])
-alg = DynamicSS(Rodas5P())
+tend = 5000second
+prob = ODEProblem(sys, [], tend)
+alg = Rodas5P()
 
 # Log scale for ISO concentration
-iso = logrange(1e-4μM, 1μM, length=101)
+iso = logrange(1e-4μM, 3μM, length=1001)
 
 #---
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[ISO => iso[i]])
 end
 trajectories = length(iso)
-sol = solve(prob, alg, abstol=1e-10, reltol=1e-10) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10)
+callback = TerminateSteadyState(1e-10, 1e-10)
+sol = solve(prob, alg; callback) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, callback)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k], sim)
+extract(sim, k) = map(s -> s[k][end], sim)
 """Calculate Root Mean Square Error (RMSE)"""
 rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
@@ -38,8 +40,15 @@ xopts = (xlims=(iso[begin], iso[end]), minorgrid=true, xscale=:log10, xlabel="IS
 plot(iso, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
 
 #---
+plot(iso, [extract(sim, sys.PKACI) extract(sim, sys.PKACII)], legend=:topleft, lab=["PKACI" "PKACII"]; xopts...)
+
+#---
+plot(iso, [extract(sim, sys.I1) extract(sim, sys.I1p) extract(sim, sys.I1p_PP1)], legend=:topleft, lab=["I1" "I1p" "I1p_PP1"]; xopts...)
+
+#---
 plot(iso, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation fraction")
-plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII", legend=:topleft; xopts...)
+plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII")
+plot!(iso, extract(sim, sys.PP1 / sys.PP1totBA), lab="PP1", legend=:topleft; xopts...)
 
 # ## Least-square fitting of PKACI activity
 @. model(x, p) = p[1] * x / (x + p[2]) + p[3]
@@ -53,7 +62,7 @@ pkac1_coef = coef(pkac1_fit)
 #---
 println("PKACI")
 println("Basal activity: ", pkac1_coef[3])
-println("Maximal activity: ", pkac1_coef[1] + pkac1_coef[3])
+println("Activated activity: ", pkac1_coef[1])
 println("Michaelis constant: ", pkac1_coef[2], " μM")
 println("RMSE: ", rmse(pkac1_fit))
 
@@ -74,7 +83,7 @@ pkac2_coef = coef(pkac2_fit)
 #---
 println("PKACII")
 println("Basal activity: ", pkac2_coef[3])
-println("Maximal activity: ", pkac2_coef[1] + pkac2_coef[3])
+println("Activated activity: ", pkac2_coef[1])
 println("Michaelis constant: ", pkac2_coef[2], " μM")
 println("RMSE: ", rmse(pkac2_fit))
 
@@ -95,7 +104,7 @@ pp1_coef = coef(pp1_fit)
 
 #---
 println("PP1")
-println("Basal activity: ", pp1_coef[1] + pp1_coef[3])
+println("Repressible activity: ", pp1_coef[1])
 println("Minimal activity: ", pp1_coef[3])
 println("Repressive Michaelis constant: ", pp1_coef[2], " μM")
 println("RMSE: ", rmse(pp1_fit))
@@ -109,7 +118,7 @@ plot(p1, p2, layout=(2, 1), size=(600, 600))
 # ## Least-square fitting of PLBp
 xdata = iso
 ydata = extract(sim, sys.PLBp / sys.PLBtotBA)
-plot(xdata, ydata, title="PLBp activity", lab=false; xopts...)
+plot(xdata, ydata, title="PLBp fraction", lab=false; xopts...)
 
 # First try: Hill function
 @. model_plb(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
@@ -132,16 +141,16 @@ function plbp_analytic(iso)
     PLBtot = 106μM
     PKACItot = 1.18μM
     PP1tot = 0.89μM
-    k_PKA_PLB = 54Hz
+    k_PKA_PLB = 54Hz / μM
     Km_PKA_PLB = 21μM
-    k_PP1_PLB = 8.5Hz
+    k_PP1_PLB = 8.5Hz / μM
     Km_PP1_PLB = 7.0μM
-    PKACI_basal = 0.0831  ## basal activity
-    PKACI_activated = 0.25603
-    PKACI_KM = 0.0144μM
-    PP1_basal = 0.82365
-    PP1_activated = 0.1025
-    PP1_KI = 0.008465μM
+    PKACI_basal = 0.0734  ## basal activity
+    PKACI_activated = 0.1995
+    PKACI_KM = 0.0139μM
+    PP1_basal = 0.8927
+    PP1_activated = 0.0492
+    PP1_KI = 0.00637μM
 
     ## Solve for Vf * x / (x + k1) = Vr * (1 - x) / (1 - x + k2)
     PKACI = PKACItot * (PKACI_basal + PKACI_activated * hil(iso, PKACI_KM))
