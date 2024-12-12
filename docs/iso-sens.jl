@@ -62,7 +62,7 @@ pkac1_coef = coef(pkac1_fit)
 #---
 println("PKACI")
 println("Basal activity: ", pkac1_coef[3])
-println("Maximal activity: ", pkac1_coef[1] + pkac1_coef[3])
+println("Activated activity: ", pkac1_coef[1])
 println("Michaelis constant: ", pkac1_coef[2], " μM")
 println("RMSE: ", rmse(pkac1_fit))
 
@@ -83,7 +83,7 @@ pkac2_coef = coef(pkac2_fit)
 #---
 println("PKACII")
 println("Basal activity: ", pkac2_coef[3])
-println("Maximal activity: ", pkac2_coef[1] + pkac2_coef[3])
+println("Activated activity: ", pkac2_coef[1])
 println("Michaelis constant: ", pkac2_coef[2], " μM")
 println("RMSE: ", rmse(pkac2_fit))
 
@@ -104,7 +104,7 @@ pp1_coef = coef(pp1_fit)
 
 #---
 println("PP1")
-println("Basal activity: ", pp1_coef[1])
+println("Repressible activity: ", pp1_coef[1])
 println("Minimal activity: ", pp1_coef[3])
 println("Repressive Michaelis constant: ", pp1_coef[2], " μM")
 println("RMSE: ", rmse(pp1_fit))
@@ -146,11 +146,11 @@ function plbp_analytic(iso)
     k_PP1_PLB = 8.5Hz / μM
     Km_PP1_PLB = 7.0μM
     PKACI_basal = 0.0734  ## basal activity
-    PKACI_activated = 0.2728
+    PKACI_activated = 0.1995
     PKACI_KM = 0.0139μM
     PP1_basal = 0.8927
-    PP1_activated = 0.1840
-    PP1_KI = 0.01026μM
+    PP1_activated = 0.0492
+    PP1_KI = 0.00637μM
 
     ## Solve for Vf * x / (x + k1) = Vr * (1 - x) / (1 - x + k2)
     PKACI = PKACItot * (PKACI_basal + PKACI_activated * hil(iso, PKACI_KM))

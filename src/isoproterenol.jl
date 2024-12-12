@@ -311,14 +311,14 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         Km_pp2a_RyR = 4.1μM
         ## Fitted PKACI, PKACII, and PP1 parameters
         PKACI_basal = 0.0734  ## basal activity
-        PKACI_activated = 0.2728
+        PKACI_activated = 0.1995
         PKACI_KM = 0.0139μM
         PKACII_basal = 0.1840  ## basal activity
-        PKACII_activated = 0.5285
+        PKACII_activated = 0.3444
         PKACII_KM = 0.0103μM
         PP1_basal = 0.8927
-        PP1_activated = 0.1840
-        PP1_KI = 0.01026μM
+        PP1_activated = 0.0492
+        PP1_KI = 0.00637μM
     end
 
     vs = @variables begin
