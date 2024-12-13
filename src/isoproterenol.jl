@@ -316,7 +316,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
     ## Fitted activities
     eqs = [
         fracPKACI ~ PKACI_basal + PKACI_activated * hil(ISO, PKACI_KM),
-        fracPKACII ~ PPKACII_basal + PKACII_activated * hil(ISO, PKACII_KM),
+        fracPKACII ~ PKACII_basal + PKACII_activated * hil(ISO, PKACII_KM),
         fracPP1 ~ PP1_basal + PP1_activated * hilr(ISO, PP1_KI),
         fracPLBp ~ PLBp_basal + PLBp_activated * hil(ISO, PLBp_KM, PLBp_nHill),
         fracPLMp ~ PLMp_basal + PLMp_activated * hil(ISO, PLMp_KM, PLMp_nHill),
