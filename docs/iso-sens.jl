@@ -1,7 +1,7 @@
 # # Sensitivity to ISO
 using ModelingToolkit
 using OrdinaryDiffEq
-using DiffEqCallbacks
+using SteadyStateDiffEq
 using Plots
 using LsqFit
 using CaMKIIModel
@@ -13,9 +13,8 @@ Plots.default(lw=1.5)
 sys = get_bar_sys(ATP, ISO; simplify=true)
 
 #---
-tend = 5000second
-prob = ODEProblem(sys, [], tend)
-alg = Rodas5P()
+prob = SteadyStateProblem(sys, [])
+alg = DynamicSS(Rodas5P())
 
 # Log scale for ISO concentration
 iso = logrange(1e-4μM, 3μM, length=1001)
@@ -25,13 +24,12 @@ prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[ISO => iso[i]])
 end
 trajectories = length(iso)
-callback = TerminateSteadyState(1e-10, 1e-10)
-sol = solve(prob, alg; callback) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, callback)
+sol = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k][end], sim)
+extract(sim, k) = map(s -> s[k], sim)
 """Calculate Root Mean Square Error (RMSE)"""
 rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
@@ -173,7 +171,7 @@ function plbp_analytic(iso)
 end
 
 ypred = plbp_analytic.(xdata)
-fit = (resid= (ypred .- ydata) ./ ydata,)
+fit = (resid=(ypred .- ydata) ./ ydata,)
 
 p1 = plot(xdata, [ydata ypred], lab=["Full model" "Quadratic"], line=[:dash :dot], title="PLBp", legend=:topleft; xopts...)
 p2 = plot(xdata, fit.resid .* 100; title="PLBp error (%)", lab=false, xopts...)

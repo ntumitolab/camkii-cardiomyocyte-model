@@ -22,8 +22,8 @@ prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end
 trajectories = length(ca)
-sol0 = solve(prob, alg) ## warmup
-sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories)
+sol0 = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
+sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10)
 
 #---
 """Extract values from ensemble simulations by a symbol"""
