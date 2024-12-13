@@ -50,7 +50,7 @@ plot(iso, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation f
 plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII")
 plot!(iso, extract(sim, sys.PP1 / sys.PP1totBA), lab="PP1", legend=:topleft; xopts...)
 
-# ## Least-square fitting of PKACI activity
+# ## Fitting active PKACI
 @. model(x, p) = p[1] * x / (x + p[2]) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PKACI / sys.RItot)
@@ -72,7 +72,7 @@ p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], 
 p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PKACI error (%)", lab=false, xopts...)
 plot(p1, p2, layout=(2, 1), size=(600, 600))
 
-# ## Least-square fitting of PKACII activity
+# ## Fitting active PKACII
 xdata = iso
 ydata = extract(sim, sys.PKACII / sys.RIItot)
 p0 = [0.4, 0.01μM, 0.2]
@@ -115,7 +115,7 @@ p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], 
 p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PP1 error (%)", lab=false, xopts...)
 plot(p1, p2, layout=(2, 1), size=(600, 600))
 
-# ## Least-square fitting of PLBp
+# ## Fitting PLBp
 xdata = iso
 ydata = extract(sim, sys.PLBp / sys.PLBtotBA)
 plot(xdata, ydata, title="PLBp fraction", lab=false; xopts...)
@@ -128,6 +128,11 @@ fit = curve_fit(model_plb, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
 pestim = coef(fit)
 
 #---
+println("PLBp")
+println("Basal activity: ", pestim[4])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("Hill coefficient: ", pestim[3])
 println("RMSE: ", rmse(fit))
 
 #---
@@ -176,3 +181,158 @@ plot(p1, p2, layout=(2, 1), size=(600, 600))
 
 #---
 println("RMSE: ", rmse(fit))
+
+# ## Fitting PLMp
+xdata = iso
+ydata = extract(sim, sys.PLMp / sys.PLMtotBA)
+plot(xdata, ydata, title="PLMp fraction", lab=false; xopts...)
+
+#---
+@. model_plm(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+p0 = [0.8, 1e-2μM, 1.0, 0.1]
+lb = [0.5, 1e-9μM, 1.0, 0.0]
+fit = curve_fit(model_plm, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+pestim = coef(fit)
+
+#---
+println("PLMp")
+println("Basal activity: ", pestim[4])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("Hill coefficient: ", pestim[3])
+println("RMSE: ", rmse(fit))
+
+#---
+ypred = model_plm.(xdata, Ref(pestim))
+p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PLMp", legend=:topleft; xopts...)
+p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PLMp error (%)", lab=false, xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
+
+# ## Fitting TnIp
+xdata = iso
+ydata = extract(sim, sys.TnIp / sys.TnItotBA)
+plot(xdata, ydata, title="TnIp fraction", lab=false; xopts...)
+
+#---
+@. model_tni(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+p0 = [0.8, 1e-2μM, 1.0, 0.1]
+lb = [0.1, 1e-9μM, 1.0, 0.0]
+fit = curve_fit(model_tni, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+pestim = coef(fit)
+
+#---
+println("TnIp")
+println("Basal activity: ", pestim[4])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("Hill coefficient: ", pestim[3])
+println("RMSE: ", rmse(fit))
+
+#---
+ypred = model_tni.(xdata, Ref(pestim))
+p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="TnIp", legend=:topleft; xopts...)
+p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="TnIp error (%)", lab=false, xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
+
+# ## Fitting LCCap
+xdata = iso
+ydata = extract(sim, sys.LCCap / sys.LCCtotBA)
+plot(xdata, ydata, title="LCCap fraction", lab=false; xopts...)
+
+#---
+@. model_lcc(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+p0 = [0.8, 1e-2μM, 1.0, 0.1]
+lb = [0.1, 1e-9μM, 0.5, 0.0]
+fit = curve_fit(model_lcc, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+pestim = coef(fit)
+
+#---
+println("LCCap")
+println("Basal activity: ", pestim[4])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("Hill coefficient: ", pestim[3])
+println("RMSE: ", rmse(fit))
+
+#---
+ypred = model_lcc.(xdata, Ref(pestim))
+p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="LCCap", legend=:topleft; xopts...)
+p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="LCCap error (%)", lab=false, xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
+
+# ## Fitting LCCbp
+xdata = iso
+ydata = extract(sim, sys.LCCbp / sys.LCCtotBA)
+plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
+
+#---
+@. model_lcc(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+p0 = [0.8, 1e-2μM, 1.0, 0.1]
+lb = [0.1, 1e-9μM, 0.5, 0.0]
+fit = curve_fit(model_lcc, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+pestim = coef(fit)
+
+#---
+println("LCCbp")
+println("Basal activity: ", pestim[4])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("Hill coefficient: ", pestim[3])
+println("RMSE: ", rmse(fit))
+
+#---
+ypred = model_lcc.(xdata, Ref(pestim))
+p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="LCCbp", legend=:topleft; xopts...)
+p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="LCCbp error (%)", lab=false, xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
+
+# ## Fitting KURp
+xdata = iso
+ydata = extract(sim, sys.KURp / sys.IKurtotBA)
+plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
+
+#---
+@. model_kur(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+p0 = [0.8, 1e-2μM, 1.0, 0.1]
+lb = [0.1, 1e-9μM, 0.5, 0.0]
+fit = curve_fit(model_kur, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+pestim = coef(fit)
+
+#---
+println("KURp")
+println("Basal activity: ", pestim[4])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("Hill coefficient: ", pestim[3])
+println("RMSE: ", rmse(fit))
+
+#---
+ypred = model_lcc.(xdata, Ref(pestim))
+p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="KURp", legend=:topleft; xopts...)
+p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="KURp error (%)", lab=false, xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
+
+# ## Fitting RyRp
+xdata = iso
+ydata = extract(sim, sys.RyR_PKAp)
+plot(xdata, ydata, title="RyRp fraction", lab=false; xopts...)
+
+#---
+@. model(x, p) = p[1] * x / (x + p[2]) + p[3]
+p0 = [0.3, 1e-2μM, 0.1]
+lb = [0.0, 1e-9μM, 0.0]
+fit = curve_fit(model, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
+pestim = coef(fit)
+
+#---
+println("RyRp")
+println("Basal activity: ", pestim[3])
+println("Activated activity: ", pestim[1])
+println("Michaelis constant: ", pestim[2], " μM")
+println("RMSE: ", rmse(fit))
+
+#---
+ypred = model.(xdata, Ref(pestim))
+p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="RyRp", legend=:topleft; xopts...)
+p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="RyRp error (%)", lab=false, xopts...)
+plot(p1, p2, layout=(2, 1), size=(600, 600))
