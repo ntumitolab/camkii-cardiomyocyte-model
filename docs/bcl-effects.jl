@@ -51,7 +51,7 @@ plot(sol, idxs=(sys.t/1000, [sys.ICaL, sys.INaCa, sys.ICaT, sys.ICab]), tspan=(2
 plot(sol, idxs=(sys.t/1000, [sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000]), tspan=(298second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (s)", label=["CaSR" "CaSL" "CaAvg"])
 
 #---
-plot(sol, idxs=sys.CaMKAct * 100, title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (ms)", label=false)
+plot(sol, idxs=(sys.t/1000, sys.CaMKAct * 100), title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (s)", label=false)
 
 # ### 3D surface plot
 xx = 1:44
@@ -59,7 +59,8 @@ yy = range(299second, 300second, length=100)
 zz = [sol(t, idxs=sys.Cai[u]) for t in yy, u in xx]
 
 surface(xx, yy./1000, zz, colorbar=:none, yguide="sec.", zguide="Conc. (μM)", xticks=false, size=(600, 600))
-annotate!()
+annotate!(3, 299, 0.65, "SL")
+annotate!(41, 299.25, 0.58, "SR")
 
 ## savefig("3d-surface.pdf")
 
@@ -68,26 +69,25 @@ callback = build_stim_callbacks(Istim, stimend; period=1 / 2 * second, starttime
 @time sol2 = solve(prob, alg; callback)
 
 #---
-plot(sol2, idxs=sys.vm, title="Action potential", ylabel="mV", xlabel="Time (ms)", label=false)
+plot(sol2, idxs=(sys.t/1000, sys.vm), title="Action potential", ylabel="mV", xlabel="Time (s)", label=false)
 
 #---
-plot(sol2, idxs=sys.vm, title="Action potential", tspan=(299second, 300second), ylabel="mV", xlabel="Time (ms)", label=false)
+plot(sol2, idxs=(sys.t/1000, sys.vm), title="Action potential", tspan=(299second, 300second), ylabel="mV", xlabel="Time (s)", label=false)
 
 #---
-plot(sol2, idxs=[sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000], tspan=(299second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (ms)", label=["CaSR" "CaSL" "CaAvg"])
+plot(sol2, idxs=(sys.t/1000, [sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000]), tspan=(299second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (s)", label=["CaSR" "CaSL" "CaAvg"])
 
 #---
-plot(sol2, idxs=sys.CaMKAct * 100, title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (ms)", label=false)
+plot(sol2, idxs=(sys.t/1000, sys.CaMKAct * 100), title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (s)", label=false)
 
 # ## Comparing 1 and 2 Hz pacing
-plot(sol, idxs=sys.vm, title="Action potential", lab="1Hz")
-plot!(sol2, idxs=sys.vm, lab="2Hz")
-plot!(sol3, idxs=sys.vm, lab="3Hz", tspan=(299second, 300second), xlabel="Time (ms)", ylabel="Voltage (mV)")
+plot(sol, idxs=(sys.t/1000, sys.vm), title="Action potential", lab="1Hz",  tspan=(299second, 300second))
+plot!(sol2, idxs=(sys.t/1000, sys.vm), lab="2Hz", tspan=(299second, 300second), xlabel="Time (s)", ylabel="Voltage (mV)")
 
 #---
-plot(sol, idxs=sys.CaMKAct * 100, title="CaMKII", lab="1Hz")
-plot!(sol2, idxs=sys.CaMKAct * 100, lab="2Hz")
-plot!(sol3, idxs=sys.CaMKAct * 100, lab="3Hz", xlabel="Time (ms)", ylabel="Active fraction (%)")
+idxs=(sys.t/1000, sys.CaMKAct * 100)
+plot(sol, idxs=idxs, title="CaMKII", lab="1Hz")
+plot!(sol2, idxs=idxs, lab="2Hz", xlabel="Time (s)", ylabel="Active fraction (%)")
 
 # ## Data fitting
 ### Pacing duration and CaMKII activity
@@ -118,13 +118,13 @@ callback60 = build_stim_callbacks(Istim, stimstart + 60second; period=1second, s
 sol60 = solve(prob, alg; callback=callback60)
 callback90 = build_stim_callbacks(Istim, stimstart + 90second; period=1second, starttime=stimstart)
 sol90 = solve(prob, alg; callback=callback90)
-idx = sys.CaMKAct * 100
+idxs=(sys.t/1000, sys.CaMKAct * 100)
 
-plot(sol15, idxs=idx, tspan=(0second, 205second), lab="15 sec", color=:blue)
-plot!(sol30, idxs=idx, tspan=(0second, 205second), lab="30 sec", color=:red)
-plot!(sol60, idxs=idx, tspan=(0second, 205second), lab="60 sec", color=:orange)
-plot!(sol90, idxs=idx, tspan=(0second, 205second), lab="90 sec", color=:green)
-plot!(title="Pacing duration", xlabel="Time (ms)", ylabel="CaMKII activity (%)")
+plot(sol15, idxs=idxs, tspan=(0second, 205second), lab="15 sec", color=:blue)
+plot!(sol30, idxs=idxs, tspan=(0second, 205second), lab="30 sec", color=:red)
+plot!(sol60, idxs=idxs, tspan=(0second, 205second), lab="60 sec", color=:orange)
+plot!(sol90, idxs=idxs, tspan=(0second, 205second), lab="90 sec", color=:green)
+plot!(title="Pacing duration", xlabel="Time (s)", ylabel="CaMKII activity (%)")
 
 # ### Pacing frequency and CaMKII activity
 freqdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-freq.csv"), DataFrame)
@@ -136,7 +136,7 @@ twohz_error = freqdf[!, "2Hz (SD)"] ./ sqrt.(freqdf[!, "2Hz (N)"])
 
 plot(ts, onehz, yerr=onehz_error, lab="1 Hz", color=:blue, markerstrokecolor=:blue)
 plot!(ts, twohz, yerr=twohz_error, lab="2 Hz", color=:red, markerstrokecolor=:red)
-plot!(title="Pacing frequency", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
+plot!(title="Pacing frequency", xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 
 #---
 tend = 205.0second
@@ -148,8 +148,8 @@ sol1 = solve(prob, alg; callback)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5second, starttime=stimstart)
 sol2 = solve(prob, alg; callback=callback2)
-idx = sys.CaMKAct * 100
+idxs=(sys.t/1000, sys.CaMKAct * 100)
 
-plot(sol1, idxs=idx, lab="1 Hz", color=:blue)
-plot!(sol2, idxs=idx, lab="2 Hz", color=:red)
-plot!(title="Pacing frequency", xlabel="Time (ms)", ylabel="CaMKII activity (%)")
+plot(sol1, idxs=idxs, lab="1 Hz", color=:blue)
+plot!(sol2, idxs=idxs, lab="2 Hz", color=:red)
+plot!(title="Pacing frequency", xlabel="Time (s)", ylabel="CaMKII activity (%)")
