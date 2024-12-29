@@ -1,4 +1,4 @@
-# # Pacing frequency Effects
+# # Pacing frequency response
 using ModelingToolkit
 using OrdinaryDiffEq
 using Plots
@@ -16,29 +16,52 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
 @unpack Istim = sys
-alg = FBDF()
+alg = TRBDF2()
+
+# ## Single pulse
+callback = build_stim_callbacks(Istim, stimstart + 1second; period=10second, starttime=stimstart)
+
+@time sol = solve(prob, alg; callback)
+
+#---
+plot(sol, idxs=(sys.t/1000, sys.vm), title="Action potential (single pulse)", ylabel="mV", xlabel="Time (s)", label=false, tspan=(100second, 103second))
+
+#---
+plot(sol, idxs=(sys.t/1000, sys.Cai_mean), tspan=(100second, 103second), title="Calcium transient", ylabel="Conc. (μM)", xlabel="Time (s)", label="Avg Ca (Model)")
+
+## savefig("single-cat.pdf")
 
 # ## 1Hz
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time sol = solve(prob, alg; callback)
 
 #---
-plot(sol, idxs=sys.vm, title="Action potential", ylabel="mV", xlabel="Time (ms)", label=false)
+plot(sol, idxs=(sys.t/1000, sys.vm), title="Action potential", ylabel="mV", xlabel="Time (s)", label=false)
 
 #---
-plot(sol, idxs=sys.vm, title="Action potential", tspan=(299second, 300second), ylabel="mV", xlabel="Time (ms)", label=false)
+plot(sol, idxs=(sys.t/1000, sys.vm), title="Action potential", tspan=(299second, 300second), ylabel="mV", xlabel="Time (s)", label=false)
 
 #---
-plot(sol, idxs=[sys.IK1, sys.Ito, sys.IKs, sys.IKr, sys.If], tspan=(299second, 300second), ylabel="μA/μF", xlabel="Time (ms)")
+plot(sol, idxs=(sys.t/1000, [sys.IK1, sys.Ito, sys.IKs, sys.IKr, sys.If]), tspan=(299second, 300second), ylabel="μA/μF", xlabel="Time (s)", label=["IK1" "Ito" "IKs" "IKr" "If"])
 
 #---
-plot(sol, idxs=[sys.ICaL, sys.INaCa, sys.ICaT, sys.ICab], tspan=(299second, 300second), ylabel="μA/μF", xlabel="Time (ms)")
+plot(sol, idxs=(sys.t/1000, [sys.ICaL, sys.INaCa, sys.ICaT, sys.ICab]), tspan=(299second, 300second), ylabel="μA/μF", xlabel="Time (s)", label=["ICaL" "INaCa" "ICaT" "ICab"])
 
 #---
-plot(sol, idxs=[sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000], tspan=(298second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (ms)", label=["CaSR" "CaSL" "CaAvg"])
+plot(sol, idxs=(sys.t/1000, [sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000]), tspan=(298second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (s)", label=["CaSR" "CaSL" "CaAvg"])
 
 #---
 plot(sol, idxs=sys.CaMKAct * 100, title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (ms)", label=false)
+
+# ### 3D surface plot
+xx = 1:44
+yy = range(299second, 300second, length=100)
+zz = [sol(t, idxs=sys.Cai[u]) for t in yy, u in xx]
+
+surface(xx, yy./1000, zz, colorbar=:none, yguide="sec.", zguide="Conc. (μM)", xticks=false, size=(600, 600))
+annotate!()
+
+## savefig("3d-surface.pdf")
 
 # ## 2Hz
 callback = build_stim_callbacks(Istim, stimend; period=1 / 2 * second, starttime=stimstart)
@@ -56,24 +79,7 @@ plot(sol2, idxs=[sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 10
 #---
 plot(sol2, idxs=sys.CaMKAct * 100, title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (ms)", label=false)
 
-# ## 3Hz
-# AP not stable
-callback = build_stim_callbacks(Istim, stimend; period=1 / 3 * second, starttime=stimstart)
-@time sol3 = solve(prob, alg; callback)
-
-#---
-plot(sol3, idxs=sys.vm, title="Action potential", ylabel="mV", xlabel="Time (ms)", label=false)
-
-#---
-plot(sol3, idxs=sys.vm, title="Action potential", tspan=(299second, 300second), ylabel="mV", xlabel="Time (ms)", label=false)
-
-#---
-plot(sol3, idxs=[sys.Cai_sub_SR * 1000, sys.Cai_sub_SL * 1000, sys.Cai_mean * 1000], tspan=(299second, 300second), title="Calcium transient", ylabel="nM", xlabel="Time (ms)", label=["CaSR" "CaSL" "CaAvg"])
-
-#---
-plot(sol3, idxs=sys.CaMKAct * 100, title="Active CaMKII", ylabel="Active CaMKII (%)", xlabel="Time (ms)", label=false)
-
-# ## Comparing 1-3 Hz
+# ## Comparing 1 and 2 Hz pacing
 plot(sol, idxs=sys.vm, title="Action potential", lab="1Hz")
 plot!(sol2, idxs=sys.vm, lab="2Hz")
 plot!(sol3, idxs=sys.vm, lab="3Hz", tspan=(299second, 300second), xlabel="Time (ms)", ylabel="Voltage (mV)")
@@ -146,4 +152,4 @@ idx = sys.CaMKAct * 100
 
 plot(sol1, idxs=idx, lab="1 Hz", color=:blue)
 plot!(sol2, idxs=idx, lab="2 Hz", color=:red)
-plot!(title="Pacing frequency", xlabel="Time (ms)", ylabel="CaMKII activity (%)", ylims=(0, 70))
+plot!(title="Pacing frequency", xlabel="Time (ms)", ylabel="CaMKII activity (%)")

@@ -89,7 +89,7 @@ alg = FBDF()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 prob = ODEProblem(sys, [], tend)
-prob_simp = ODEProblem(sys_simp, [sys_simp.kphos_CaMK => 10Hz], tend)
+prob_simp = ODEProblem(sys_simp, [sys_simp.kphos_CaMK => 5Hz], tend)
 
 #---
 @time sol = solve(prob, alg; callback)
