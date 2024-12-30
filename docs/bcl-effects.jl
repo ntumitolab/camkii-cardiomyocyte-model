@@ -1,4 +1,4 @@
-# # Pacing frequency response
+# # Pacing response
 using ModelingToolkit
 using OrdinaryDiffEq
 using Plots
