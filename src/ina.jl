@@ -29,7 +29,7 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
     jαhi = 0
     jβhi = 0.3 * exp(-2.535e-7v) * expit(0.1 * (v + 32))
     jαlo = (-127140 * exp(0.2444v) - 3.474e-5 * exp(-0.04391v)) * (v + 37.78) * expit(-0.311 * (v + 79.23))
-    jβlo = 0.212 * exp(-0.01052v) * expit(0.1378 * (v + 40.14))
+    jβlo = 0.1212 * exp(-0.01052v) * expit(0.1378 * (v + 40.14))
     jα = ishigh * jαhi + (1 - ishigh) * jαlo
     jβ = ishigh * jβhi + (1 - ishigh) * jβlo
 
