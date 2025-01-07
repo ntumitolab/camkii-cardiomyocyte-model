@@ -4,7 +4,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         # IK1: time-independent
         gK1 = 0.0515mSμF * hil(k_o, 210μM)
         # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
-        gt = 0.1mSμF
+        Gt = 0.1mSμF
         f_is = 0.706
         # IKs (and IKur)
         GKs = 0.05mSμF
@@ -14,7 +14,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         kf = 0.023761 / ms
         kb = 0.036778 / ms
         # Hyperpolarization activated current (Funny current, If)
-        gf = 0.021mSμF
+        Gf = 0.021mSμF
         fNa = 0.2
     end
 
@@ -85,7 +85,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
             taur ~ 1000ms / (45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
             taus ~ (350 * exp(-(((V + 70) / 15)^2)) + 35 - 26.9) * ms,
             tausslow ~ (3700 * exp(-(((V + 70) / 30)^2)) + 35 + 37.4) * ms,
-            Ito ~ gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
+            Ito ~ Gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
             D(i_r) ~ (rinf - i_r) / taur,
             D(i_s) ~ (sinf - i_s) / taus,
             D(i_sslow) ~ (slowinf - i_sslow) / tausslow,
@@ -100,8 +100,8 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
             D(i_IK) ~ roi,
             yinf ~ expit(-(V + 78.65) / 6.33),
             tauy ~ 1000ms / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
-            IfNa ~ gf * fNa * i_y * (vm - E_Na),
-            IfK ~ gf * fK * i_y * (vm - E_K),
+            IfNa ~ Gf * fNa * i_y * (vm - E_Na),
+            IfK ~ Gf * fK * i_y * (vm - E_K),
             If ~ IfNa + IfK,
             D(i_y) ~ (yinf - i_y) / tauy
         ], t; name)

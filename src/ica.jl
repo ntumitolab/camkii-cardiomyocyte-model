@@ -39,7 +39,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
     end
 
     # Calcium flux scaled by LCC (phosphorylated beta subunit)
-    a_favail = (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1)         # fracLCCbp ISO (x1.56 o.1 ISO)
+    a_favail = (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1)         # fracLCCbp ISO (x1.56 0.1um ISO)
     favail = (1 - a_favail) + a_favail * (LCCb_PKAp / fracLCCbp0)   # Test (max x2.52 100# phosph)
 
     # Na-Ca exchanger (NCX)
