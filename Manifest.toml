@@ -1258,10 +1258,9 @@ uuid = "d8e11817-5142-5d16-987a-aa16d5891078"
 version = "0.4.17"
 
 [[deps.MacroTools]]
-deps = ["Markdown", "Random"]
-git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
+git-tree-sha1 = "72aebe0b5051e5143a079a4685a46da330a40472"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.13"
+version = "0.5.15"
 
 [[deps.ManualMemory]]
 git-tree-sha1 = "bcaef4fc7a0cfe2cba636d84cda54b5e4e4ca3cd"
@@ -1311,9 +1310,9 @@ version = "1.11.0"
 
 [[deps.ModelingToolkit]]
 deps = ["AbstractTrees", "ArrayInterface", "BlockArrays", "Combinatorics", "CommonSolve", "Compat", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffEqNoiseProcess", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "DomainSets", "DynamicQuantities", "EnumX", "ExprTools", "Expronicon", "FindFirstFunctions", "ForwardDiff", "FunctionWrappers", "FunctionWrappersWrappers", "Graphs", "InteractiveUtils", "JuliaFormatter", "JumpProcesses", "Latexify", "Libdl", "LinearAlgebra", "MLStyle", "NaNMath", "NonlinearSolve", "OffsetArrays", "OrderedCollections", "PrecompileTools", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SCCNonlinearSolve", "SciMLBase", "SciMLStructures", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "URIs", "UnPack", "Unitful"]
-git-tree-sha1 = "c497ca1ba15722a5009cd6571a7a618c60b98dc3"
+git-tree-sha1 = "4a64a7dfd9130591536adf723bb79038b02351c0"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "9.59.0"
+version = "9.60.0"
 
     [deps.ModelingToolkit.extensions]
     MTKBifurcationKitExt = "BifurcationKit"
@@ -2322,9 +2321,9 @@ version = "7.7.0+0"
 
 [[deps.SymbolicIndexingInterface]]
 deps = ["Accessors", "ArrayInterface", "RuntimeGeneratedFunctions", "StaticArraysCore"]
-git-tree-sha1 = "8db233b54917e474165d582bef2244fa040e0a56"
+git-tree-sha1 = "fd2d4f0499f6bb4a0d9f5030f5c7d61eed385e03"
 uuid = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
-version = "0.3.36"
+version = "0.3.37"
 
 [[deps.SymbolicLimits]]
 deps = ["SymbolicUtils"]
