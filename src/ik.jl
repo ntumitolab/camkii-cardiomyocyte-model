@@ -34,6 +34,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         tausslow(t)
         IKs(t)
         i_nKs(t) = 0.09243
+        nksinf(t)
         IKr(t)
         E_Kr(t)
         CK0(t)
@@ -90,7 +91,8 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
             D(i_s) ~ (sinf - i_s) / taus,
             D(i_sslow) ~ (slowinf - i_sslow) / tausslow,
             IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
-            D(i_nKs) ~ (alphan / (alphan + betan) - i_nKs) / nKstau,
+            nksinf ~ alphan / (alphan + betan),
+            D(i_nKs) ~ (nksinf - i_nKs) / nKstau,
             E_Kr ~ nernst(0.98 * k_o + 0.02 * na_o, 0.98 * k_i + 0.02 * na_i),
             IKr ~ GKr * i_OK * (vm - E_Kr),
             1 ~ CK0 + i_CK1 + i_CK2 + i_OK + i_IK,

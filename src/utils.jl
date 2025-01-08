@@ -53,7 +53,7 @@ hilr(x, k, n) = hil(k, x, n)
 """
 Logistic sigmoid function.
 """
-expit(x) = inv(1 + exp(-x))
+expit(x, a=1, b=1) = a / (b + exp(-x))
 
 """
     exprel(x, em1 = expm1(x))
