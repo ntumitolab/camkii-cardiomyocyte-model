@@ -4,7 +4,7 @@
 format: jb-book
 root: index
 chapters:
-  - file: runtime
+  - file: modeldesc
   - file: u0
   - file: iso-sens
   - file: camk-sens
@@ -12,3 +12,4 @@ chapters:
   - file: iso-effects
   - file: ros-effects
   - file: caffeine-effects
+  - file: runtime
