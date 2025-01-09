@@ -1,5 +1,4 @@
 # Pacing data fitting
-
 using ModelingToolkit
 using OrdinaryDiffEq
 using Plots
@@ -8,6 +7,15 @@ using DataFrames
 using CaMKIIModel
 using CaMKIIModel: second
 Plots.default(lw=1.5)
+
+#---
+sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
+tend = 500.0second
+prob = ODEProblem(sys, [], tend)
+stimstart = 100.0second
+stimend = 300.0second
+@unpack Istim = sys
+alg = TRBDF2()
 
 ## Pacing duration and CaMKII activity
 durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)
