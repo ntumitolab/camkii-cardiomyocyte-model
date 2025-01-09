@@ -1,5 +1,14 @@
 # Pacing data fitting
 
+using ModelingToolkit
+using OrdinaryDiffEq
+using Plots
+using CSV
+using DataFrames
+using CaMKIIModel
+using CaMKIIModel: second
+Plots.default(lw=1.5)
+
 ## Pacing duration and CaMKII activity
 durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)
 ts = durationdf[!, "Time(sec)"]
