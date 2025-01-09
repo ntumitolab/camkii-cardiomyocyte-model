@@ -9,7 +9,7 @@ $$
 Relative exponential function. The definition here is reciprocal to the Python one.
 
 $$
-exprel(x) := \frac{x}{e^x - 1} \approx \frac{ln(1 + 2^{-x})}{ln2}
+exprel(x) := \frac{x}{e^x - 1}
 $$
 
 GHK flux equation
