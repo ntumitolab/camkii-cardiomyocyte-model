@@ -2,7 +2,7 @@
 function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     @parameters begin
         # IK1: time-independent
-        gK1 = 0.0515mSμF * hil(k_o, 210μM)
+        GK1 = 0.0515mSμF * hil(k_o, 210μM)
         # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
         Gt = 0.1mSμF
         f_is = 0.706
@@ -58,7 +58,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     fracIKurpISO = 0.718207     # Derived quantity (IKur_PKAp(ISO)/IKurtot)
     a_Kur = (1.20 - 1) / (fracIKurpISO / fracIKurp0 - 1)
     fracIKuravail = (1 - a_Kur) + a_Kur * (IKUR_PKAp / fracIKurp0)  # +20# with 0.1 uM ISO
-    alphan = 0.00000481333 * (V + 26.5) / (-expm1(-0.128 * (V + 26.5)))
+    alphan = 0.00000481333 / 0.128 * exprel(-0.128 * (V + 26.5))
     betan = 0.0000953333 * exp(-0.038 * (V + 26.5))
 
     # IKr
@@ -79,7 +79,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     return ODESystem([
             E_Na ~ nernst(na_o, na_i),
             E_K ~ nernst(k_o, k_i),
-            IK1 ~ gK1 * vk1 / (0.1653 + exp(0.0319 * vk1)),
+            IK1 ~ GK1 * expit(-0.0319 * vk1, vk1, 0.1653),
             sinf ~ expit((V + 31.97156) / -4.64291),
             rinf ~ expit((V - 3.55716) / 14.61299),
             slowinf ~ sinf,

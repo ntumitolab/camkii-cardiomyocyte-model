@@ -286,15 +286,12 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         LCCap_basal = 0.2205
         LCCap_activated = 0.2339
         LCCap_KM = 0.00726μM
-        LCCap_nHill = 0.9932
         LCCbp_basal = 0.2517
         LCCbp_activated = 0.2461
         LCCbp_KM = 0.00695μM
-        LCCbp_nHill = 0.9934
         KURp_basal = 0.4390
         KURp_activated = 0.2563
         KURp_KM = 0.00557μM
-        KURp_nHill = 0.9931
         RyRp_basal = 0.2054
         RyRp_activated = 0.2399
         RyRp_KM = 0.0075135μM
@@ -321,9 +318,9 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         fracPLBp ~ PLBp_basal + PLBp_activated * hil(ISO, PLBp_KM, PLBp_nHill),
         fracPLMp ~ PLMp_basal + PLMp_activated * hil(ISO, PLMp_KM, PLMp_nHill),
         TnI_PKAp ~ TnIp_basal + TnIp_activated * hil(ISO, TnIp_KM, TnIp_nHill),
-        LCCa_PKAp ~ LCCap_basal + LCCap_activated * hil(ISO, LCCap_KM, LCCap_nHill),
-        LCCb_PKAp ~ LCCbp_basal + LCCbp_activated * hil(ISO, LCCbp_KM, LCCbp_nHill),
-        IKUR_PKAp ~ KURp_basal + KURp_activated * hil(ISO, KURp_KM, KURp_nHill),
+        LCCa_PKAp ~ LCCap_basal + LCCap_activated * hil(ISO, LCCap_KM),
+        LCCb_PKAp ~ LCCbp_basal + LCCbp_activated * hil(ISO, LCCbp_KM),
+        IKUR_PKAp ~ KURp_basal + KURp_activated * hil(ISO, KURp_KM),
         RyR_PKAp ~ RyRp_basal + RyRp_activated * hil(ISO, RyRp_KM),
     ]
 
