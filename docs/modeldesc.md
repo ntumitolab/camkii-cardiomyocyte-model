@@ -57,6 +57,17 @@ $$
 
 ## Calcium diffusion
 
+Cytosolic calcium is diffused between sub-sarcolemma (SL) and sub-sarcoplasmic (SR) spaces.
+
+Calcium buffering in each compartment:
+
+$$
+\beta_{Ca,x} = (1 + \Sigma Trpn \cdot Km_{Trpn, 2} / (ca_x + Km_{Trpn, 2})^2 + \Sigma Cmdn \cdot Km_{Cmdn} / (ca_x + Km_{Cmdn, 2})^2 )^{-1}
+$$
+
+
+
+
 ## Endoplasmic reticulum
 
 ### Ryanodine receptor (Jrel)
