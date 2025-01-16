@@ -55,24 +55,88 @@ E_{Kr}  &= V_T \ln\left( \frac{0.98 \mathrm{k_o} + \mathrm{na_o}}{0.98 \mathrm{k
 \end{align}
 $$
 
-## Calcium diffusion
+## General parameters
+
+| Parameter   | Value        | Units  | Description                      |
+| ----------- | ------------ | ------ | -------------------------------- |
+| $r_{SR}$    | 6            | μm     | Radius of SR                     |
+| $r_{SL}$    | 10.5         | μm     | Radius of sarcolemma             |
+| $V_{SR}$    | 0.0903       | pL     | SR volume                        |
+| $V_{NSR}$   | 0.9$V_{SR}$  | pL     | Network SR volume                |
+| $V_{JSR}$   | 0.1$V_{JSR}$ | pL     | Junctional SR volume             |
+| $V_{subSR}$ | 0.046        | pL     | Sub-SR volume                    |
+| $V_{subSL}$ | 0.137        | pL     | Sub-sarcolemma volume            |
+| $V_{myo}$   | 3.944        | pL     | Cytosolic volume                 |
+| $C_m$       | 1            | μFcm⁻² | Cell membrane capacitance        |
+| $ca_o$      | 1.796        | mM     | External calcium concentration   |
+| $na_o$      | 154.578      | mM     | External sodium concentration    |
+| $k_o$       | 5.366        | mM     | External potassium concentration |
+| $ATP$       | 5            | mM     | ATP concentration                |
+
+## Cytosolic calcium diffusion
 
 Cytosolic calcium is diffused between sub-sarcolemma (SL) and sub-sarcoplasmic (SR) spaces.
 
 Calcium buffering in each compartment:
 
 $$
-\beta_{Ca,x} = (1 + \Sigma Trpn \cdot Km_{Trpn, 2} / (ca_x + Km_{Trpn, 2})^2 + \Sigma Cmdn \cdot Km_{Cmdn} / (ca_x + Km_{Cmdn, 2})^2 )^{-1}
+\begin{align}
+\beta_{Ca,x} &= (1 + \Sigma Trpn \cdot Km_{Trpn, 2} / (ca_x + Km_{Trpn, 2})^2 + \Sigma Cmdn \cdot Km_{Cmdn} / (ca_x + Km_{Cmdn, 2})^2 )^{-1} \\
+Km_{Trpn, 2} &= Km_{Trpn} / fPKA_{TnI} \\
+fPKA_{TnI} &= 1.61 - 0.61 (1 - TnI_{PKAp}) / (1 - fracTnIp_0)
+\end{align}
 $$
 
+Calcium diffusion space is divided into $(r_{SL} - r_{SR}) / dx$ compartments.
 
+For i = 2 to $(r_{SL} - r_{SR}) / dx - 1$
 
+$$
+\begin{align}
+\frac{d}{dt}ca_i &= \frac{D_{ca} \cdot \beta_{Ca,i}}{dx^2 \cdot j_i} ((j_i + 1)ca_{i+1} - 2j_i \cdot ca_{i} + (j_i - 1)ca_{i-1}) \\
+j_i &= r_{SR} / dx + i - 1
+\end{align}
+$$
+
+Otherwise,
+
+$$
+\begin{align}
+\frac{d}{dt}ca_1 &= \frac{D_{ca} \cdot \beta_{Ca,1}}{dx^2 \cdot j_1} ((j_1 + 1)ca_{2} - 2j_1 \cdot ca_{1} + (j_1 - 1)ca_{1} + J_{CaSR})  \\
+\frac{d}{dt}ca_n &= \frac{D_{ca} \cdot \beta_{Ca,n}}{dx^2 \cdot j_n} ((j_n + 1)ca_{n} - 2j_n \cdot ca_{n} + (j_n - 1)ca_{n-1} + J_{CaSL})  \\
+j_1 &= r_{SR} / dx \\
+j_n &= r_{SL} / dx \\
+ca_{sr} &= ca_1 \\
+ca_{sl} &= ca_n \\
+\end{align}
+$$
+
+| Parameter     | Value    | Units   | Description                        |
+| ------------- | -------- | ------- | ---------------------------------- |
+| $\Sigma Trpn$ | 35       | μM      | Total troponin content             |
+| $Km_{Trpn}$   | 0.5      | μM      | Half-saturation Ca concentration   |
+| $\Sigma Cmdn$ | 30       | μM      | Total calmodulin content           |
+| $Km_{Cmdn}$   | 2.38     | μM      | Half-saturation Ca concentration   |
+| $D_{ca}$      | 7        | μm²ms⁻¹ | Calcium diffusion rate             |
+| $dx$          | 0.1      | μm      | Discretization distance            |
+| $fracTnIp_0$  | 0.062698 | -       | Baseline effect of PKA on Troponin |
 
 ## Endoplasmic reticulum
 
-### Ryanodine receptor (Jrel)
+Including ryanodine receptor (RyR) flux (Jrel), SERCA flux (Jup), SR leakage (Jleak), and calcium diffusion from NSR to JSR (Jtr).
 
-### SERCA (Jup)
+| Parameter     | Value          | Units | Description                                             |
+| ------------- | -------------- | ----- | ------------------------------------------------------- |
+| $k_{RyR}$     | 20             | Hz    | RyR permeability                                        |
+| $kapos_{RyR}$ | 1000           | Hz    | RyR state transition rate                               |
+| $kaneg_{RyR}$ | 160            | Hz    | RyR state transition rate                               |
+| $Vmax_{SR}$   | 0.9996         | μM/ms | SERCA rate                                              |
+| $Kmf_{SR}$    | 0.5            | μM    | SERCA calcium half saturation concentration             |
+| $Kmr_{SR}$    | 7000$Kmf_{SR}$ | μM    | SERCA calcium half saturation concentration             |
+| $kSR_{leak}$  | 0.005          | Hz    | SR leak rate                                            |
+| $ktrCa_{SR}$  | 50             | Hz    | Calcium dissusion rate from NSR to JSR                  |
+| $\Sigma Csqn$ | 24.750         | mM    | Calsequestrin concentration                             |
+| $Km_{csqn}$   | 0.8            | mM    | Calcium half saturation concentration for calsequestrin |
 
 ## Sarcolemmal ion channels
 
