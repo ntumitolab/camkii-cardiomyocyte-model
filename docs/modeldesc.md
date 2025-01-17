@@ -38,9 +38,9 @@ Ion concentrations:
 
 $$
 \begin{align}
-\mathrm{na_x} &= \mathrm{[Na^+]_x} \\
-\mathrm{k_x} &= \mathrm{[K^+]_x} \\
-\mathrm{ca_x} &= \mathrm{[Ca^{2+}]_x} \\
+na_x &= \mathrm{[Na^+]_x} \\
+k_x &= \mathrm{[K^+]_x} \\
+ca_x &= \mathrm{[Ca^{2+}]_x} \\
 \end{align}
 $$
 
@@ -48,30 +48,31 @@ Reversal potentials:
 
 $$
 \begin{align}
-E_{Na} &= V_T \ln \frac{\mathrm{na_o}}{\mathrm{na_i}} \\
-E_{K } &= V_T \ln\frac{\mathrm{k_o}}{\mathrm{k_i}}  \\
-E_{Ca} &= 0.5V_T \ln \frac{\mathrm{ca_o}}{\mathrm{ca_{sl}}} \\
-E_{Kr}  &= V_T \ln\left( \frac{0.98 \mathrm{k_o} + \mathrm{na_o}}{0.98 \mathrm{k_i} + 0.02\mathrm{na_i}} \right) \\
+E_{Na} &= V_T \ln \frac{na_o}{na_i} \\
+E_{K } &= V_T \ln\frac{k_o}{k_i}  \\
+E_{Ca} &= 0.5V_T \ln \frac{ca_o}{ca_{sl}} \\
+E_{Kr}  &= V_T \ln\left( \frac{0.98 k_o + 0.02na_o}{0.98 k_i + 0.02a_i} \right) \\
 \end{align}
 $$
 
 ## General parameters
 
-| Parameter   | Value        | Units  | Description                      |
-| ----------- | ------------ | ------ | -------------------------------- |
-| $r_{SR}$    | 6            | μm     | Radius of SR                     |
-| $r_{SL}$    | 10.5         | μm     | Radius of sarcolemma             |
-| $V_{SR}$    | 0.0903       | pL     | SR volume                        |
-| $V_{NSR}$   | 0.9$V_{SR}$  | pL     | Network SR volume                |
-| $V_{JSR}$   | 0.1$V_{JSR}$ | pL     | Junctional SR volume             |
-| $V_{subSR}$ | 0.046        | pL     | Sub-SR volume                    |
-| $V_{subSL}$ | 0.137        | pL     | Sub-sarcolemma volume            |
-| $V_{myo}$   | 3.944        | pL     | Cytosolic volume                 |
-| $C_m$       | 1            | μFcm⁻² | Cell membrane capacitance        |
-| $ca_o$      | 1.796        | mM     | External calcium concentration   |
-| $na_o$      | 154.578      | mM     | External sodium concentration    |
-| $k_o$       | 5.366        | mM     | External potassium concentration |
-| $ATP$       | 5            | mM     | ATP concentration                |
+| Parameter        | Value        | Units  | Description                      |
+| ---------------- | ------------ | ------ | -------------------------------- |
+| $r_{SR}$         | 6            | μm     | Radius of SR                     |
+| $r_{SL}$         | 10.5         | μm     | Radius of sarcolemma             |
+| $V_{SR}$         | 0.0903       | pL     | SR volume                        |
+| $V_{NSR}$        | 0.9$V_{SR}$  | pL     | Network SR volume                |
+| $V_{JSR}$        | 0.1$V_{JSR}$ | pL     | Junctional SR volume             |
+| $V_{subSR}$      | 0.046        | pL     | Sub-SR volume                    |
+| $V_{subSL}$      | 0.137        | pL     | Sub-sarcolemma volume            |
+| $V_{myo}$        | 3.944        | pL     | Cytosolic volume                 |
+| $A_{cap}$        | 1385.44      | μm²    | Cell membrane area               |
+| $C_m$            | 1            | μFcm⁻² | Cell membrane capacitance        |
+| $ca_o$           | 1.796        | mM     | External calcium concentration   |
+| $na_o$           | 154.578      | mM     | External sodium concentration    |
+| $k_o$            | 5.366        | mM     | External potassium concentration |
+| $\mathrm{[ATP]}$ | 5            | mM     | ATP concentration                |
 
 ## Cytosolic calcium diffusion
 
@@ -81,9 +82,9 @@ Calcium buffering in each compartment:
 
 $$
 \begin{align}
-\beta_{Ca,x} &= (1 + \Sigma Trpn \cdot Km_{Trpn, 2} / (ca_x + Km_{Trpn, 2})^2 + \Sigma Cmdn \cdot Km_{Cmdn} / (ca_x + Km_{Cmdn, 2})^2 )^{-1} \\
-Km_{Trpn, 2} &= Km_{Trpn} / fPKA_{TnI} \\
-fPKA_{TnI} &= 1.61 - 0.61 (1 - TnI_{PKAp}) / (1 - fracTnIp_0)
+\beta_{Ca,x} &= \left(1 + \frac{\Sigma Trpn \cdot Km_{Trpn, 2}}{(ca_x + Km_{Trpn, 2})^2}  + \frac{\Sigma Cmdn \cdot Km_{Cmdn}}{(ca_x + Km_{Cmdn, 2})^2} \right)^{-1} \\
+Km_{Trpn, 2} &= \frac{Km_{Trpn}}{fPKA_{TnI}}  \\
+fPKA_{TnI} &= 1.61 - 0.61 \frac{1 - TnI_{PKAp}}{1 - fracTnIp_0}
 \end{align}
 $$
 
@@ -125,18 +126,40 @@ $$
 
 Including ryanodine receptor (RyR) flux (Jrel), SERCA flux (Jup), SR leakage (Jleak), and calcium diffusion from NSR to JSR (Jtr).
 
-| Parameter     | Value          | Units | Description                                             |
-| ------------- | -------------- | ----- | ------------------------------------------------------- |
-| $k_{RyR}$     | 20             | Hz    | RyR permeability                                        |
-| $kapos_{RyR}$ | 1000           | Hz    | RyR state transition rate                               |
-| $kaneg_{RyR}$ | 160            | Hz    | RyR state transition rate                               |
-| $Vmax_{SR}$   | 0.9996         | μM/ms | SERCA rate                                              |
-| $Kmf_{SR}$    | 0.5            | μM    | SERCA calcium half saturation concentration             |
-| $Kmr_{SR}$    | 7000$Kmf_{SR}$ | μM    | SERCA calcium half saturation concentration             |
-| $kSR_{leak}$  | 0.005          | Hz    | SR leak rate                                            |
-| $ktrCa_{SR}$  | 50             | Hz    | Calcium dissusion rate from NSR to JSR                  |
-| $\Sigma Csqn$ | 24.750         | mM    | Calsequestrin concentration                             |
-| $Km_{csqn}$   | 0.8            | mM    | Calcium half saturation concentration for calsequestrin |
+$$
+\begin{align}
+J_{CaSR} &= \frac{V_{NSR}}{V_{subSR}} (J_{leak} - J_{up}) + J_{rel} \\
+J_{rel} &= k_{RyR} \cdot PO1_{RyR} \cdot (ca_{JSR} - ca_{sr}) \\
+J_{tr} &= ktrCa_{SR} (ca_{JSR} - ca_{NSR}) \\
+J_{leak} &= 0.5 (1 + 5 RyR_{CKp}) kSR_{leak} \\
+J_{up} &= Vmax_{SR} \frac{fSR - rSR}{1 + fSR + rSR} \\
+\frac{d}{dt} PO1_{RyR} &= kapos_{RyR} \cdot H(ca_{sr}, Km_{RyR}, 4) \cdot PC1_{RyR} - kaneg_{RyR} \cdot PO1_{RyR} \\
+\frac{d}{dt} ca_{JSR} &= \beta_{SR} (-J_{rel} V_{subSR} + J_{tr} V_{NSR}) / V_{JSR} \\
+\frac{d}{dt} ca_{NSR} &= J_{up} - J_{leak} - J_{tr} \\
+\beta_{SR} &= \frac{1}{1 + \frac{\Sigma Csqn Km_{csqn}}{(ca_{JSR} + Km_{csqn})^2}} \\
+fSR &= \left( \frac{ca_{sr}}{Kmfp} \right)^2 \\
+rSR &= \left( \frac{ca_{NSR}}{Kmr_{SR}} \right)^2 \\
+KmRyR &= 3.51 \cdot expit(-\frac{ca_{JSR} - 530}{200}) + 0.25 \\
+PC1_{RyR} &= 1 - PO1_{RyR}  \\
+Kmfp &= \min(fCKII_{PLB}, fPKA_{PLB}) \\
+fCKII_{PLB} &= (1 - 0.5531) \frac{1 - fracPLBp}{fracPKA_PLBo} + 0.5531 \\
+fCKII_{PLB} &= (1 - 0.5 * fracPLB_{CKp})  \\
+\end{align}
+$$
+
+| Parameter        | Value          | Units | Description                            |
+| ---------------- | -------------- | ----- | -------------------------------------- |
+| $k_{RyR}$        | 20             | Hz    | RyR permeability                       |
+| $kapos_{RyR}$    | 1000           | Hz    | RyR state transition rate              |
+| $kaneg_{RyR}$    | 160            | Hz    | RyR state transition rate              |
+| $Vmax_{SR}$      | 0.9996         | μM/ms | SERCA reaction rate                    |
+| $Kmf_{SR}$       | 0.5            | μM    | Calcium affinity for SERCA             |
+| $Kmr_{SR}$       | 7000$Kmf_{SR}$ | μM    | Calcium affinity for SERCA             |
+| $kSR_{leak}$     | 0.005          | Hz    | SR leak rate                           |
+| $ktrCa_{SR}$     | 50             | Hz    | Calcium dissusion rate from NSR to JSR |
+| $\Sigma Csqn$    | 24.750         | mM    | Calsequestrin concentration            |
+| $Km_{csqn}$      | 0.8            | mM    | Calcium affinity for calsequestrin     |
+| $fracPKA_{PLBo}$ | 1 - 0.079755   | -     |                                        |
 
 ## Sarcolemmal ion channels
 
@@ -229,6 +252,7 @@ L-type calcium channels, T-type calcium channels, and background calcium current
 
 $$
 \begin{align}
+J_{CaSL} &= (2 I_{NaCa} - I_{CaL} - I_{CaT} - I_{Cab}) \frac{A_{CAP} C_m}{2 F V_{subSL}} \\
 \mathrm{I_{CaL}}  &= \mathrm{ICa_{scale}} \cdot G_{CaL} \cdot i_d \cdot i_f \cdot i_fca \cdot GHK(G_{CaL}, 2, V_m, \mathrm{ca_{sl}}, 0.341 \mathrm{ca_o}) \\
 \mathrm{I_{CaT}} &= \mathrm{gCaT} \cdot i_b \cdot i_g ( V_m + 106.5 - \mathrm{E_Ca}) \\
 \mathrm{I_{Cab}} &= \mathrm{gCab} (V_m - \mathrm{E_Ca}) \\
