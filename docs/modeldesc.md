@@ -159,7 +159,7 @@ $$
 | $ktrCa_{SR}$     | 50             | Hz    | Calcium dissusion rate from NSR to JSR |
 | $\Sigma Csqn$    | 24.750         | mM    | Calsequestrin concentration            |
 | $Km_{csqn}$      | 0.8            | mM    | Calcium affinity for calsequestrin     |
-| $fracPKA_{PLBo}$ | 1 - 0.079755   | -     |                                        |
+| $fracPKA_{PLBo}$ | 0.920245       | -     |                                        |
 
 ## Sarcolemmal ion channels
 
@@ -366,7 +366,45 @@ $$
 
 ## CaMKII system
 
+$$
+\begin{align}
+\mathrm{ca_{avg}} &= \frac{\sum^N_{i=1} \mathrm{ca_i}}{N} \\
+CaMK_{act} &= 1 - CaMK \\
+v_{IB} &= k_f \cdot CaMK - k_b \cdot CaMKB \\
+v_{IoBo} &= k_f \cdot r_{CaMKO} \cdot CaMKOX - k_b \cdot CaMKBOX \\
+v_{AP} &= k_f \cdot r_{CaMKP} \cdot CaMKA - k_b \cdot CaMKP \\
+v_{AoPo} &= k_f \cdot r_{CaMKP} \cdot CaMKAOX - k_b \cdot CaMKPOX \\
+kph &= kphos_{CaMK} \cdot aMK_{act}  \\
+v_{BP} &= kph \cdot CaMKB - kdeph_{CaMK} \cdot CaMKP \\
+v_{BoPo} &= kph \cdot CaMKBOX - kdeph_{CaMK} \cdot CaMKPOX \\
+v_{P1P2} &= k_{P1P2} \cdot CaMKA - k_{P2P1} \cdot CaMKA2 \\
+v_{AI} &= kdeph_{CaMK} \cdot CaMKA \\
+v_{AoIo} &= kdeph_{CaMK} \cdot CaMKAOX \\
+v_{BBo} &= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKB - krd_{CaMK} \cdot  CaMKBOX \\
+v_{PPo} &= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKP - krd_{CaMK} \cdot  CaMKPOX \\
+v_{IoI} &= krd_{CaMK} \cdot CaMKOX \\
+v_{AoA} &= krd_{CaMK} \cdot CaMKAOX \\
+camkb_\infty &= kfa_{CaMK} H(\mathrm{ca_{avg}}, kmCa_{CaMK}, nCa_{CaMK}) + kfb_{CaMK} \\
+CaMK &= 1 - (CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX) \\
+\end{align}
+$$
 
+| Parameter      | Value  | Units | Description                           |
+| -------------- | ------ | ----- | ------------------------------------- |
+| $r_{CaMK}$     | 3      | Hz    | CaMK-CaM binding rate                 |
+| $r_{CaMKO}$    | 0      | -     | Oxidized CaMK-CaM binding ratio       |
+| $r_{CaMKP}$    | 0      | -     | Phosphorylated CaMK-CaM binding ratio |
+| $kb_{CaMKP}$   | 1/3    | Hz    | Dissociation rate of CaMKP            |
+| $kfa_{CaMK}$   | 0.4393 | -     | Activated CaMK-CaM binding ratio      |
+| $kfb_{CaMK}$   | 0.0056 | -     | Basal CaMK-CaM binding ratio          |
+| $kmCa_{CaMK}$  | 0.9716 | μM    | Calcium affinity to CaMK-CaM          |
+| $nCa_{CaMK}$   | 2.293  | -     | Hill coefficient for calcium          |
+| $kphos_{CaMK}$ | 5      | Hz    | Autophosphorylation rate              |
+| $kdeph_{CaMK}$ | 1/6    | Hz    | Dephosphorylation rate                |
+| $k_{P1P2}$     | 1/60   | Hz    | Second autophosphorylation rate       |
+| $k_{P2P1}$     | 1/15   | Hz    | Second dephosphorylation rate         |
+| $kox_{CaMK}$   | 291    | Hz/mM | Oxidation rate                        |
+| $krd_{CaMK}$   | 1/45   | Hz    | Reduction rate                        |
 
 ## ODE system
 
