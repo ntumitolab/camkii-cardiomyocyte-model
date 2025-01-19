@@ -2,7 +2,7 @@
 function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     @parameters begin
         # IK1: time-independent
-        GK1 = 0.0515mSμF * hil(k_o, 210μM)
+        GK1 = 0.0515mSμF
         # Ito: Where does this come from? Perhaps here: https://modeldb.science/262081
         Gt = 0.1mSμF
         f_is = 0.706
@@ -37,7 +37,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
         nksinf(t)
         IKr(t)
         E_Kr(t)
-        CK0(t)
+        i_CK0(t)
         i_CK1(t) = 0.00188
         i_CK2(t) = 0.00977
         i_OK(t) = 0.26081
@@ -69,7 +69,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     alphai_mERG = 0.090821/ms * exp(0.023391 * V)
     betai_mERG = 0.006497/ms * exp(-0.03268 * V)
 
-    rc0c1 = alphaa0 * CK0 - betaa0 * i_CK1
+    rc0c1 = alphaa0 * i_CK0 - betaa0 * i_CK1
     rc1c2 = kf * i_CK1 - kb * i_CK2
     rc2o = alphaa1 * i_CK2 - betaa1 * i_OK
     roi = alphai_mERG * i_OK - betai_mERG * i_IK
@@ -79,7 +79,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     return ODESystem([
             E_Na ~ nernst(na_o, na_i),
             E_K ~ nernst(k_o, k_i),
-            IK1 ~ GK1 * expit(-0.0319 * vk1, vk1, 0.1653),
+            IK1 ~ GK1 * hil(k_o, 210μM) * expit(-0.0319 * vk1, vk1, 0.1653),
             sinf ~ expit((V + 31.97156) / -4.64291),
             rinf ~ expit((V - 3.55716) / 14.61299),
             slowinf ~ sinf,
@@ -95,7 +95,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
             D(i_nKs) ~ (nksinf - i_nKs) / nKstau,
             E_Kr ~ nernst(0.98 * k_o + 0.02 * na_o, 0.98 * k_i + 0.02 * na_i),
             IKr ~ GKr * i_OK * (vm - E_Kr),
-            1 ~ CK0 + i_CK1 + i_CK2 + i_OK + i_IK,
+            1 ~ i_CK0 + i_CK1 + i_CK2 + i_OK + i_IK,
             D(i_CK1) ~ rc0c1 - rc1c2,
             D(i_CK2) ~ rc1c2 - rc2o,
             D(i_OK) ~ rc2o - roi,
