@@ -163,6 +163,14 @@ $$
 
 ## Sarcolemmal ion channels
 
+$$
+\begin{align}
+C_m \frac{d}{dt} \mathrm{V_m} &= -(I_{Nab} + I_{NaCa} + I_{CaL} + I_{CaT} + I_{f} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{Na} + I_{NaK} + I_{Cab} + I_{stim}) \\
+\frac{d}{dt} \mathrm{na_i} &= -(I_{fNa} + I_{Nab} + I_{Na} + 3 I_{NaCa} + 3 I_{NaK}) \frac{A_{cap} C_m}{ F V_{myo}} \\
+\frac{d}{dt} \mathrm{k_i} &= -(I_{fK} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{stim} - 2 I_{NaK})\\
+\end{align}
+$$
+
 ### Sodium channels
 
 Including fast sodium ($\mathrm{I_{Na}}$) and background sodium ($\mathrm{I_{Na,b}}$) currents.
@@ -370,28 +378,38 @@ $$
 \begin{align}
 \mathrm{ca_{avg}} &= \frac{\sum^N_{i=1} \mathrm{ca_i}}{N} \\
 CaMK_{act} &= 1 - CaMK \\
+CaMK &= 1 - (CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX) \\
+\frac{d}{dt} CaMKB &= -v_{IB} - v_{BP} - v_{BBo} \\
+\frac{d}{dt} CaMKP &= v_{AP} + v_{BP} - v_{PPo} \\
+\frac{d}{dt} CaMKA &= -v_{AP} - v_{AI} - v_{A1A2} + v_{AoA} \\
+\frac{d}{dt} CaMKA2 &= v_{A1A2} \\
+\frac{d}{dt} CaMKBOX &= v_{IoBo} - v_{BoPo} + v_{BBo} \\
+\frac{d}{dt} CaMKPOX &= v_{AoPo} + v_{BoPo} + v_{PPo} \\
+\frac{d}{dt} CaMKAOX &= -v_{AoPo} - v_{AoA} - v_{AoIo} \\
+\frac{d}{dt} CaMKOX &= -v_{IoBo} + v_{AoIo} - v_{IoI} \\
 v_{IB} &= k_f \cdot CaMK - k_b \cdot CaMKB \\
 v_{IoBo} &= k_f \cdot r_{CaMKO} \cdot CaMKOX - k_b \cdot CaMKBOX \\
 v_{AP} &= k_f \cdot r_{CaMKP} \cdot CaMKA - k_b \cdot CaMKP \\
 v_{AoPo} &= k_f \cdot r_{CaMKP} \cdot CaMKAOX - k_b \cdot CaMKPOX \\
+camkb_\infty &= kfa_{CaMK} H(\mathrm{ca_{avg}}, kmCa_{CaMK}, nCa_{CaMK}) + kfb_{CaMK} \\
+k_f &= v_{CaMK} \cdot binf \\
+k_b &= v_{CaMK} \cdot (1 - binf) \\
 kph &= kphos_{CaMK} \cdot aMK_{act}  \\
 v_{BP} &= kph \cdot CaMKB - kdeph_{CaMK} \cdot CaMKP \\
 v_{BoPo} &= kph \cdot CaMKBOX - kdeph_{CaMK} \cdot CaMKPOX \\
-v_{P1P2} &= k_{P1P2} \cdot CaMKA - k_{P2P1} \cdot CaMKA2 \\
+v_{A1A2} &= k_{P1P2} \cdot CaMKA - k_{P2P1} \cdot CaMKA2 \\
 v_{AI} &= kdeph_{CaMK} \cdot CaMKA \\
 v_{AoIo} &= kdeph_{CaMK} \cdot CaMKAOX \\
-v_{BBo} &= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKB - krd_{CaMK} \cdot  CaMKBOX \\
-v_{PPo} &= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKP - krd_{CaMK} \cdot  CaMKPOX \\
+v_{BBo} &= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKB - krd_{CaMK} \cdot CaMKBOX \\
+v_{PPo} &= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKP - krd_{CaMK} \cdot CaMKPOX \\
 v_{IoI} &= krd_{CaMK} \cdot CaMKOX \\
 v_{AoA} &= krd_{CaMK} \cdot CaMKAOX \\
-camkb_\infty &= kfa_{CaMK} H(\mathrm{ca_{avg}}, kmCa_{CaMK}, nCa_{CaMK}) + kfb_{CaMK} \\
-CaMK &= 1 - (CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX) \\
 \end{align}
 $$
 
 | Parameter      | Value  | Units | Description                           |
 | -------------- | ------ | ----- | ------------------------------------- |
-| $r_{CaMK}$     | 3      | Hz    | CaMK-CaM binding rate                 |
+| $v_{CaMK}$     | 3      | Hz    | CaMK-CaM binding rate                 |
 | $r_{CaMKO}$    | 0      | -     | Oxidized CaMK-CaM binding ratio       |
 | $r_{CaMKP}$    | 0      | -     | Phosphorylated CaMK-CaM binding ratio |
 | $kb_{CaMKP}$   | 1/3    | Hz    | Dissociation rate of CaMKP            |
@@ -406,16 +424,4 @@ $$
 | $kox_{CaMK}$   | 291    | Hz/mM | Oxidation rate                        |
 | $krd_{CaMK}$   | 1/45   | Hz    | Reduction rate                        |
 
-## ODE system
-
-$$
-\begin{align}
-\frac{d\mathrm{na_i}}{dt} &= -(I_{Na} + 3I_{NaCa} + 3I_{NaK})\frac{A_{cap}}{V_{myo}F} + (V_{NHE} - 3V_{NaCa}) \frac{V_{mito}}{V_{myo}} \\
-\frac{d[K^+]_i}{dt} &= -(I_{Ks} + I_{Kr} + I_{K1} + I_{Kp} + I_{Ca,K}-2I_{NaK})\frac{A_{cap}}{V_{myo}F} \\
-C_m\frac{dV_m}{dt} &= -(I_{Na} + I_{CaL} + I_{Kr} + I_{Ks} + I_{K1} + I_{Kp} + I_{NaCa} + I_{NaK} + I_{pCa} + I_{Ca, b} + I_{K_{ATP}} + I_{stim}) \\
-β_i &= \frac{(K_m^{CMDN} + [Ca^{2+}]_i)^2}{ (K_m^{CMDN} + [Ca^{2+}]_i)^2 + K_m^{CMDN}  \cdot  [CMDN]_{tot}} \\
-β_{SR} &= \frac{(K_m^{CSQN} + [Ca^{2+}]_{SR})^2}{(K_m^{CSQN} + [Ca^{2+}]_{SR})^2 + K_m^{CSQN}  \cdot  [CSQN]_{tot}} \\
-\frac{d[Ca^{2+}]_i}{dt} &= \beta_i(J_{xfer}\frac{V_{ss}}{V_{myo}} - J_{up} - J_{trpn} - (I_{Ca,b} -2I_{NaCa} + I_{pCa})\frac{A_{cap}}{2V_{myo}F} + (V_{NaCa} - V_{uni})\frac{V_{mito}}{V_{myo}}) \\
-\frac{d[Ca^{2+}]_{SR}}{dt} &= \beta_{SR}(J_{up}\frac{V_{myo}}{V_{SR}} - J_{rel}\frac{V_{ss}}{V_{SR}}) \\
-\end{align}
-$$
+## Initial conditions
