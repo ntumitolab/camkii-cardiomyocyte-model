@@ -184,17 +184,10 @@ $$
 \frac{dj_{Na}}{dt} &= \alpha_{j} - m_{Na}(\alpha_{j} + \beta_{j}) \\
 \alpha_{m} &= 3.2 \mathrm{ms}^{-1} exprel(-(V_m + 47.13) / 10)  \\
 \beta_{m} &= 0.08 \mathrm{ms}^{-1} \exp(-V_m / 11) \\
-\\
-\text{For} \ V_m & \ge -40\text{mV} \\
-\alpha_{h} &= \alpha_{j} = 0 \\
-\beta_{h} &= 7.6923 \mathrm{ms}^{-1} expit((V_m+10.66)/11.1) \\
-\beta_{j} &= 0.3 \mathrm{ms}^{-1} \exp(-2.535 \cdot 10^{-7}V_m) expit(0.1(V_m + 32)) \\
-\\
-\text{For} \ V_m & < -40\text{mV} \\
 \alpha_{h} &= 0.135 \text{ms}^{-1} \exp(-(V_m+80)/6.8) \\
+\beta_{h} &= 7.6923 \mathrm{ms}^{-1} expit((V_m+10.66)/11.1) \\
 \alpha_{j} &= (-127140 \exp(0.2444 V_m)-3.474 \cdot 10^{-5}\exp(-0.04391 V_m))\frac{V_m + 37.78}{1 + \exp(0.311( V_m + 79.23))} / \text{ms} \\
-\beta_{h} &= (3.56\exp(0.079 V_m) + 3.1 \cdot 10^{5} \exp(0.35 V_m)) / \text{ms} \\
-\beta_{j} &= \frac{0.1212 \mathrm{ms}^{-1} \exp(-0.01052 V_m)}{1 + \exp(-0.1378(V_m + 40.14))} \\
+\beta_{j} &= 0.3 \mathrm{ms}^{-1} \exp(-2.535 \cdot 10^{-7}V_m) expit(0.1(V_m + 32)) \\
 \end{align}
 $$
 
@@ -213,7 +206,7 @@ $$
 \mathrm{I_{Ks}}  &= 2 G_{Ks} \cdot i_{nKs}^{2}( 0.68804 + 0.71283 \mathrm{IKUR_{PKAp}}) (V_m - E_K) \\
 \mathrm{I_{Kr}}  &= G_{Kr} \cdot i_{OK} (V_m - E_{Kr})   \\
 \mathrm{I_{fNa}} &= f_{Na} \cdot G_f \cdot i_y \cdot ( V_m - E_{Na}) \\
-\mathrm{I_{fK}}  &= ( 1 - f_{Na}) \cdot G_f \cdot i_y \cdot ( V_m - E_K ) \\
+\mathrm{I_{fK}}  &= (1 - f_{Na}) \cdot G_f \cdot i_y \cdot ( V_m - E_K ) \\
 \mathrm{I_{f}}  &= \mathrm{I_{fK}} + \mathrm{I_{fNa}} \\
 \frac{d i_r }{dt} &= \frac{ r_∞  - i_r }{τ_r} \\
 \frac{d i_s }{dt} &= \frac{ s_∞  - i_s }{τ_s} \\
@@ -225,6 +218,11 @@ $$
 \frac{d i_{OK} }{dt} &= 0.006497 i_{IK} e^{-0.03268 V_m} + 0.013733 i_{CK2}  e^{0.038198 V_m} - 6.89 \cdot 10^{-5} e^{-0.04178 V_m} i_{OK} - 0.090821 e^{0.023391 V_m} i_{OK}  \\
 \frac{d i_{IK} }{dt} &=  - 0.006497 i_{IK}  e^{ - 0.03268 V_m } + 0.090821 e^{0.023391 V_m } i_{OK}  \\
 \frac{d i_y}{dt} &= \frac{y_∞ - i_y}{τ_y} \\
+\end{align}
+$$
+
+$$
+\begin{align}
 s_∞ &= expit((V_m + 31.97156) / -4.64291) \\
 r_∞ &= expit((V_m - 3.55716) / 14.61299) \\
 slow_∞ &= s_∞  \\
