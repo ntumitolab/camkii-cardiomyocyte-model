@@ -161,3 +161,6 @@ LocalPreferences.toml
 
 # Local VSCode config
 .vscode/
+
+# Generated files
+*.odt
