@@ -25,7 +25,7 @@ $$
 Thermal voltage.
 
 $$
-V_T = \frac{RT}{F}
+V_T = \frac{RT}{F} \approx 26.7 \text{mV}
 $$
 
 GHK flux equation.
