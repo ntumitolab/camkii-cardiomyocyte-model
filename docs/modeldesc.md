@@ -142,7 +142,7 @@ rSR &= \left( \frac{ca_{NSR}}{Kmr_{SR}} \right)^2 \\
 KmRyR &= 3.51 \cdot expit(-\frac{ca_{JSR} - 530}{200}) + 0.25 \\
 PC1_{RyR} &= 1 - PO1_{RyR}  \\
 Kmfp &= \min(fCKII_{PLB}, fPKA_{PLB}) \\
-fCKII_{PLB} &= (1 - 0.5531) \frac{1 - fracPLBp}{fracPKA_PLBo} + 0.5531 \\
+fPKA_{PLB} &= (1 - 0.5531) \frac{1 - fracPLBp}{fracPKA_PLBo} + 0.5531 \\
 fCKII_{PLB} &= (1 - 0.5 * fracPLB_{CKp})  \\
 \end{align}
 $$
