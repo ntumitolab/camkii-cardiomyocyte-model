@@ -284,9 +284,6 @@ b_∞ &= expit((V_m + 37.49098) / 5.40634) \\
 τ_b &= 0.6 + 5.4 expit(-0.03 (V_m + 100)) \\
 g_∞ &= expit(-(V_m + 66) / 6) \\
 τ_g &= 1 + 40 expit(-0.08 (V_m + 65)) \\
-ICascale &= ICascale_0 favail \\
-favail &= (1 - a_favail) + a_favail (LCCb_{PKAp} / fracLCCbp_0) \\
-a_{favail} &= (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1)
 \end{align}
 $$
 
