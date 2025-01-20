@@ -167,7 +167,7 @@ $$
 \begin{align}
 C_m \frac{d}{dt} \mathrm{V_m} &= -(I_{Nab} + I_{NaCa} + I_{CaL} + I_{CaT} + I_{f} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{Na} + I_{NaK} + I_{Cab} + I_{stim}) \\
 \frac{d}{dt} \mathrm{na_i} &= -(I_{fNa} + I_{Nab} + I_{Na} + 3 I_{NaCa} + 3 I_{NaK}) \frac{A_{cap} C_m}{ F V_{myo}} \\
-\frac{d}{dt} \mathrm{k_i} &= -(I_{fK} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{stim} - 2 I_{NaK})\\
+\frac{d}{dt} \mathrm{k_i} &= -(I_{fK} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{stim} - 2 I_{NaK}) \frac{A_{cap} C_m}{ F V_{myo}}  \\
 \end{align}
 $$
 
