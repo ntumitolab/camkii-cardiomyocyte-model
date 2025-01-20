@@ -164,3 +164,4 @@ LocalPreferences.toml
 
 # Generated files
 *.odt
+*.docx
