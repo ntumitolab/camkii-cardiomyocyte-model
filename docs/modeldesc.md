@@ -286,19 +286,25 @@ b_∞ &= expit((V_m + 37.49098) / 5.40634) \\
 τ_b &= 0.6 + 5.4 expit(-0.03 (V_m + 100)) \\
 g_∞ &= expit(-(V_m + 66) / 6) \\
 τ_g &= 1 + 40 expit(-0.08 (V_m + 65)) \\
+ICascale &= ICascale_0 favail \\
+favail &= (1 - a_favail) + a_favail (LCCb_{PKAp} / fracLCCbp_0) \\
+a_{favail} &= (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1)
 \end{align}
 $$
 
-| Parameter | Value         | Units      | Description |
-| --------- | ------------- | ---------- | ----------- |
-| fNaCa     | 1             | -          |             |
-| kNaCa     | 2.268 * 10⁻¹⁶ | μAμF⁻¹μM⁻⁴ |             |
-| dNaCa     | 10⁻¹⁶         | μM⁻⁴       |             |
-| gNaCa     | 0.5           | -          |             |
-| $G_{CaL}$ | 6.3 * 10⁻⁵    | m³s⁻¹F⁻¹   |             |
-| $τ_{fca}$ | 10            | ms         |             |
-| $g_{CaT}$ | 0.2           | mSμF⁻¹     |             |
-| $g_{Cab}$ | 0.0008        | mSμF⁻¹     |             |
+| Parameter      | Value         | Units      | Description |
+| -------------- | ------------- | ---------- | ----------- |
+| fNaCa          | 1             | -          |             |
+| kNaCa          | 2.268 * 10⁻¹⁶ | μAμF⁻¹μM⁻⁴ |             |
+| dNaCa          | 10⁻¹⁶         | μM⁻⁴       |             |
+| gNaCa          | 0.5           | -          |             |
+| $G_{CaL}$      | 6.3 * 10⁻⁵    | m³s⁻¹F⁻¹   |             |
+| $τ_{fca}$      | 10            | ms         |             |
+| $g_{CaT}$      | 0.2           | mSμF⁻¹     |             |
+| $g_{Cab}$      | 0.0008        | mSμF⁻¹     |             |
+| $ICascale_0$   | 0.95          | -          |             |
+| $fracLCCbp_0$  | 0.250657      | -          |             |
+| $fracLCCbpISO$ | 0.525870      | -          |             |
 
 ### Na-K pump
 
