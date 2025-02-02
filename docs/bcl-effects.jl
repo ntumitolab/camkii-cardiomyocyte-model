@@ -24,10 +24,10 @@ callback = build_stim_callbacks(Istim, stimstart + 1second; period=10second, sta
 @time sol = solve(prob, alg; callback)
 
 #---
-plot(sol, idxs=(sys.t/1000, sys.vm), title="Action potential (single pulse)", ylabel="mV", xlabel="Time (s)", label=false, tspan=(100second, 103second))
+plot(sol, idxs=(sys.t/1000-100, sys.vm), title="Action potential (single pulse)", ylabel="mV", xlabel="Time (s)", label=false, tspan=(100second, 103second))
 
 #---
-plot(sol, idxs=(sys.t/1000, sys.Cai_mean), tspan=(100second, 103second), title="Calcium transient", ylabel="Conc. (μM)", xlabel="Time (s)", label="Avg Ca (Model)")
+plot(sol, idxs=(sys.t/1000-100, sys.Cai_mean), tspan=(100second, 103second), title="Calcium transient", ylabel="Conc. (μM)", xlabel="Time (s)", label="Avg Ca (Model)")
 
 ## savefig("single-cat.pdf")
 
