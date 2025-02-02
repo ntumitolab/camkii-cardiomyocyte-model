@@ -29,11 +29,14 @@ sixty_error = durationdf[!, "1Hz 60sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 60sec 
 ninety = durationdf[!, "1Hz 90sec (Mean)"] .- 0.25
 ninety_error = durationdf[!, "1Hz 90sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 90sec (N)"])
 
+# 30 sec timeseries +0.25 and 90 sec timeseries -0.25 for a consistent baseline before pacing.
 plot(ts, fifteen, yerr=fifteen_error, lab="15 sec", color=:blue, markerstrokecolor=:blue)
-plot!(ts, thirty, yerr=thirty_error, lab="30 sec (+0.25)", color=:red, markerstrokecolor=:red)
+plot!(ts, thirty, yerr=thirty_error, lab="30 sec", color=:red, markerstrokecolor=:red)
 plot!(ts, sixty, yerr=sixty_error, lab="60 sec", color=:orange, markerstrokecolor=:orange)
-plot!(ts, ninety, yerr=ninety_error, lab="90 sec (-0.25)", color=:green, markerstrokecolor=:green)
+plot!(ts, ninety, yerr=ninety_error, lab="90 sec", color=:green, markerstrokecolor=:green)
 plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
+
+## savefig("pacing-duartion-exp.pdf")
 
 # Simulation
 stimstart = 30.0second
