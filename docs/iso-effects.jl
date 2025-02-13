@@ -9,7 +9,7 @@ using CaMKIIModel
 using CaMKIIModel: second, μM
 Plots.default(lw=1.5)
 
-#---
+# ## Setup model
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 tend = 205second
 prob = ODEProblem(sys, [], tend)
@@ -79,4 +79,4 @@ plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blu
 plot!(ts, iso, yerr=iso_error, lab="ISO 100nM", color=:red, markerstrokecolor=:red)
 plot!(xlabel="Time (sec.)", ylabel="CaMKII activity (A.U.)")
 
-savefig("iso-exp.pdf")
+## savefig("iso-exp.pdf")
