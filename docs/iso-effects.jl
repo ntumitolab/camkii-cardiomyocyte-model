@@ -70,10 +70,10 @@ plot!(sol2, idxs=i, lab="ISO (0.1uM)", xlabel="Time (ms)", ylabel="Voltage (mV)"
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
 ts = Dates.value.(chemicaldf[!, "Time"]) ./ 10^9
 ctl = chemicaldf[!, "Ctrl Mean"]
-ctl_error = chemicaldf[!, "Ctrl SD"] ./ sqrt.(durationdf[!, "Ctrl N"])
+ctl_error = chemicaldf[!, "Ctrl SD"] ./ sqrt.(chemicaldf[!, "Ctrl N"])
 
 iso = chemicaldf[!, "isoproterenol 100nM Mean"]
-iso_error = chemicaldf[!, "isoproterenol 100nM SD"] ./ sqrt.(durationdf[!, "isoproterenol 100nM N"])
+iso_error = chemicaldf[!, "isoproterenol 100nM SD"] ./ sqrt.(chemicaldf[!, "isoproterenol 100nM N"])
 
 plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blue)
 plot!(ts, iso, yerr=iso_error, lab="ISO 100nM", color=:red, markerstrokecolor=:red)

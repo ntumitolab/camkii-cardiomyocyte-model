@@ -84,12 +84,12 @@ plot!(sol3, idxs=i, lab="ROS 1uM", xlabel="Time (s)", ylabel="Active fraction (%
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
 ts = Dates.value.(chemicaldf[!, "Time"]) ./ 10^9
 ctl = chemicaldf[!, "Ctrl Mean"]
-ctl_error = chemicaldf[!, "Ctrl SD"] ./ sqrt.(durationdf[!, "Ctrl N"])
+ctl_error = chemicaldf[!, "Ctrl SD"] ./ sqrt.(chemicaldf[!, "Ctrl N"])
 
 ros50 = chemicaldf[!, "H2O2 50uM Mean"]
-ros50_error = chemicaldf[!, "H2O2 50uM SD"] ./ sqrt.(durationdf[!, "H2O2 50uM N"])
+ros50_error = chemicaldf[!, "H2O2 50uM SD"] ./ sqrt.(chemicaldf[!, "H2O2 50uM N"])
 ros200 = chemicaldf[!, "H2O2 200uM Mean"]
-ros200_error = chemicaldf[!, "H2O2 200uM SD"] ./ sqrt.(durationdf[!, "H2O2 200uM N"])
+ros200_error = chemicaldf[!, "H2O2 200uM SD"] ./ sqrt.(chemicaldf[!, "H2O2 200uM N"])
 
 plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blue)
 plot!(ts, ros50, yerr=ros50_error, lab="H2O2 50uM", color=:red, markerstrokecolor=:red)
