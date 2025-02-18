@@ -51,14 +51,16 @@ tspan = (100second, 101second)
 plot(sol, idxs=i, title="Calcium transcient", lab="ISO (-)"; tspan)
 plot!(sol2, idxs=i, lab="ISO (0.1uM)", xlabel="Time (s)", ylabel="Concentration (μM)"; tspan)
 
-## savefig("iso-caT.pdf")
+#---
+savefig("iso-caT.pdf")
 
 #---
 i = (sys.t/1000, sys.CaMKAct*100)
 plot(sol, idxs=i, title="Active CaMKII", lab="ISO (-)")
 plot!(sol2, idxs=i, lab="ISO (0.1uM)", ylabel="Active fraction (%)" , xlabel="Time (s)")
 
-## savefig("iso-camkact.pdf")
+#---
+savefig("iso-camkact.pdf")
 
 #---
 i = (sys.t/1000, sys.vm)
@@ -79,4 +81,5 @@ plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blu
 plot!(ts, iso, yerr=iso_error, lab="ISO 100nM", color=:red, markerstrokecolor=:red)
 plot!(xlabel="Time (sec.)", ylabel="CaMKII activity (A.U.)")
 
-## savefig("iso-exp.pdf")
+#---
+savefig("iso-exp.pdf")

@@ -36,7 +36,8 @@ plot!(ts, sixty, yerr=sixty_error, lab="60 sec", color=:orange, markerstrokecolo
 plot!(ts, ninety, yerr=ninety_error, lab="90 sec", color=:green, markerstrokecolor=:green)
 plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
 
-## savefig("pacing-duartion-exp.pdf")
+#---
+savefig("pacing-duartion-exp.pdf")
 
 # Simulation
 stimstart = 30.0second

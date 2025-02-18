@@ -29,7 +29,8 @@ plot(sol, idxs=(sys.t/1000-100, sys.vm), title="Action potential (single pulse)"
 #---
 plot(sol, idxs=(sys.t/1000-100, sys.Cai_mean), tspan=(100second, 103second), title="Calcium transient", ylabel="Conc. (μM)", xlabel="Time (s)", label="Avg Ca (Model)")
 
-## savefig("single-cat.pdf")
+#---
+savefig("single-cat.pdf")
 
 # ## 1Hz
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
@@ -62,7 +63,8 @@ surface(xx, yy./1000, zz, colorbar=:none, yguide="sec.", zguide="Conc. (μM)", x
 annotate!(3, 299, 0.65, "SL")
 annotate!(41, 299.25, 0.58, "SR")
 
-## savefig("3d-surface.pdf")
+#---
+savefig("3d-surface.pdf")
 
 # ## 2Hz
 callback = build_stim_callbacks(Istim, stimend; period=1 / 2 * second, starttime=stimstart)
@@ -85,18 +87,21 @@ idxs = (sys.t/1000-299, sys.vm)
 plot(sol, idxs=idxs, title="Action potential", lab="1Hz",  tspan=(299second, 300second))
 plot!(sol2, idxs=idxs, lab="2Hz", tspan=(299second, 300second), xlabel="Time (s)", ylabel="Voltage (mV)")
 
-## savefig("bcl-ap.pdf")
+#---
+savefig("bcl-ap.pdf")
 
 #---
 idxs = (sys.t/1000-299, sys.Cai_mean)
 plot(sol, idxs=idxs, title="Calcium transient", lab="1Hz",  tspan=(299second, 300second))
 plot!(sol2, idxs=idxs, lab="2Hz", tspan=(299second, 300second), xlabel="Time (s)", ylabel="Concentration (μM)")
 
-## savefig("bcl-cat.pdf")
+#---
+savefig("bcl-cat.pdf")
 
 #---
 idxs=(sys.t/1000, sys.CaMKAct * 100)
 plot(sol, idxs=idxs, title="CaMKII", lab="1Hz")
 plot!(sol2, idxs=idxs, lab="2Hz", xlabel="Time (s)", ylabel="Active fraction (%)")
 
-## savefig("bcl-camkact.pdf")
+#---
+savefig("bcl-camkact.pdf")

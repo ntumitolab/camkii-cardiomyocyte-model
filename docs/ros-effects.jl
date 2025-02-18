@@ -78,7 +78,8 @@ plot(sol, idxs=i, title="Active CaMKII", lab="ROS (-)")
 plot!(sol2, idxs=i, lab="ROS 0.1uM")
 plot!(sol3, idxs=i, lab="ROS 1uM", xlabel="Time (s)", ylabel="Active fraction (%)")
 
-## savefig("ros-camkii.pdf")
+#---
+savefig("ros-camkii.pdf")
 
 # ## Experimental data
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
@@ -96,4 +97,5 @@ plot!(ts, ros50, yerr=ros50_error, lab="H2O2 50uM", color=:red, markerstrokecolo
 plot!(ts, ros200, yerr=ros200_error, lab="H2O2 200uM", color=:green, markerstrokecolor=:green)
 plot!(xlabel="Time (s)", ylabel="CaMKII activity (A.U.)")
 
-## savefig("ros-exp.pdf")
+#---
+savefig("ros-exp.pdf")
