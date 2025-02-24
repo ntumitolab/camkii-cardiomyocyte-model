@@ -39,7 +39,7 @@ plot!(ca, extract(sim, sys.CaMK), lab="CaMK")
 plot!(ca, extract(sim, sys.CaM0_CaMK), lab="CaM0_CaMK")
 plot!(ca, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
 plot!(ca, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
-plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft, size=(600, 600))
+plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft)
 
 # We excluded CaM0_CaMK (bound but lost all calcium) from the active CaMKII fraction
 CaMKAct = 1 - (sys.CaMK + sys.CaM0_CaMK) / sys.CAMKII_T
@@ -86,14 +86,13 @@ stimend = 300.0second
 alg = FBDF()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-prob = ODEProblem(sys, [], tend)
-prob_simp = ODEProblem(sys_simp, [sys_simp.kphos_CaMK => 5Hz], tend)
+prob = ODEProblem(sys, [], tend);
+prob_simp = ODEProblem(sys_simp, [sys_simp.kphos_CaMK => 5Hz], tend);
 
 #---
 @time sol = solve(prob, alg; callback)
 @time sol_simp = solve(prob_simp, alg; callback)
 
-#---
 plot(sol, idxs=sys.CaMKAct, label= "Full model", title="Active CaMKII")
 plot!(sol_simp, idxs=sys_simp.CaMKAct, label= "Simplified model", xlabel="Time (ms)")
 
