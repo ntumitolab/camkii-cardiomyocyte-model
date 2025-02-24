@@ -1,8 +1,6 @@
 # # CaMKII system analysis
 using ModelingToolkit
-using OrdinaryDiffEq
-using SteadyStateDiffEq
-using DiffEqCallbacks
+using DifferentialEquations
 using Plots
 using LsqFit
 using CaMKIIModel

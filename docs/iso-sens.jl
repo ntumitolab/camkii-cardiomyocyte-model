@@ -1,7 +1,6 @@
 # # Sensitivity to ISO
 using ModelingToolkit
-using OrdinaryDiffEq
-using SteadyStateDiffEq
+using DifferentialEquations
 using Plots
 using LsqFit
 using CaMKIIModel
