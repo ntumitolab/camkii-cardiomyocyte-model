@@ -1,6 +1,6 @@
 # # ROS effects
 using ModelingToolkit
-using OrdinaryDiffEq
+using DifferentialEquations
 using Plots
 using CSV
 using DataFrames

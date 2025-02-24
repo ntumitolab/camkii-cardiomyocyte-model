@@ -160,7 +160,7 @@ docs/site/
 LocalPreferences.toml
 
 # Local VSCode config
-.vscode/
+# .vscode/
 
 # Generated files
 *.odt
