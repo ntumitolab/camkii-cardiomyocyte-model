@@ -16,7 +16,7 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
 @unpack Istim = sys
-alg = TRBDF2()
+alg = FBDF()
 
 # ## Single pulse
 callback = build_stim_callbacks(Istim, stimstart + 1second; period=10second, starttime=stimstart)
@@ -35,6 +35,7 @@ savefig("single-cat.pdf")
 # ## 1Hz
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time sol = solve(prob, alg; callback)
+
 
 #---
 plot(sol, idxs=(sys.t/1000, sys.vm), title="Action potential", ylabel="mV", xlabel="Time (s)", label=false)

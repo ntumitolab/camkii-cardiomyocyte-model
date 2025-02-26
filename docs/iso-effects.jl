@@ -15,7 +15,7 @@ tend = 205second
 prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
-alg = TRBDF2()
+alg = FBDF()
 
 # ## Without isoproterenol
 @unpack Istim = sys
