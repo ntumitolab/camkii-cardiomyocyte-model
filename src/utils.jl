@@ -45,7 +45,6 @@ const iVT = inv(VT)             # Reciprocal of thermal voltage (0.037 per mV)
 Regular Hill/MM function
 """
 hil(x, k=one(x)) = x / (x + k)
-hil(x, k, n::Int) = hil(x^n, k^n)
 hil(x, k, n) = hil(NaNMath.pow(x, n), NaNMath.pow(k, n))
 
 """
