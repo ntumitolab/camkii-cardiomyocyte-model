@@ -12,11 +12,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NBCONVERT_JOBS: '8'
-  LITERATE_PROC: '8'
-  JULIA_NUM_THREADS: '1'
-  OPENBLAS_NUM_THREADS: '1'
-  MKL_NUM_THREADS: '1'
+  NBCONVERT_JOBS: '6'
+  LITERATE_PROC: '6'
+  JULIA_NUM_THREADS: '2'
   ALLOWERRORS: 'false'
   NBCACHE: '.cache'
   JULIA_CONDAPKG_BACKEND: 'Null'
@@ -33,6 +31,7 @@ jobs:
       id: setup-python
       with:
         python-version: '3.x'
+        check-latest: true
     - name: Setup uv
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
     - name: Install Python dependencies
@@ -73,7 +72,7 @@ jobs:
       shell: julia --color=yes {0}
       run: |
         using Pkg
-        Pkg.add(["Literate", "Tables", "MarkdownTables", "JSON"])
+        Pkg.add(["Literate", "Tables", "MarkdownTables", "JSON", "IJulia"])
         Pkg.activate(".")
         Pkg.instantiate()
         Pkg.precompile()
@@ -91,10 +90,7 @@ jobs:
         key: ${{ steps.cache-julia.outputs.cache-primary-key }}
     - name: Run notebooks
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' }}
-      run: |
-        mkdir -p ${{ env.NBCACHE }}/docs
-        cp -r docs/data ${{ env.NBCACHE }}/docs/
-        julia --project=@. --color=yes -p ${{ env.LITERATE_PROC }} .github/ci.jl
+      run: julia --project=@. --color=yes -p ${{ env.LITERATE_PROC }} .github/ci.jl
     - name: Copy back built notebooks
       run: cp --verbose -rf ${{ env.NBCACHE }}/docs/* docs/
     - name: Build website
