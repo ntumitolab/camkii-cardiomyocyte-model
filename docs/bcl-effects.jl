@@ -1,6 +1,6 @@
 # # Pacing response
 using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq
+using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using DataFrames
