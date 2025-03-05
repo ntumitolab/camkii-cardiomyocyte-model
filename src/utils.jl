@@ -55,8 +55,10 @@ hilr(x, k, n) = hil(k, x, n)
 
 """
 Logistic sigmoid function.
+
+    expit(x[, a=1, b=1]) = a / (b + exp(-x))
 """
-expit(x, a=1, b=1) = a / (b + exp(-x))
+expit(x, a=one(x), b=one(x)) = a / (b + exp(-x))
 
 """
     exprel(x, em1 = expm1(x))
@@ -67,15 +69,24 @@ exprel(x, em1=expm1(x)) = x / em1
 nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
 nernst(x_out, x_in, z) = nernst(x_out, x_in) / z
 
-"GHK flux equation"
-ghk(px, x_i, x_o, zvfrt, ezvfrtm1=expm1(zvfrt), z=1) = px * z * Faraday * ((ezvfrtm1 + 1) * x_i - x_o) * exprel(zvfrt, ezvfrtm1)
+"""
+GHK flux equation
 
-"GHK flux equation from voltage across the membrane"
-function ghkVm(px, vm, x_i, x_o, z=1)
+    ghk(px, vm, x_i, x_o, z = 1)
+
+https://en.wikipedia.org/wiki/Goldman%E2%80%93Hodgkin%E2%80%93Katz_flux_equation
+
+- px: the permeability of the membrane for ion x measured in m·Hz
+- vm: the transmembrane potential in volts
+- x_i: the intracellular concentration of ion (mM)
+- x_o: the extracellular concentration of ion (mM)
+- z: the valence of ion x
+"""
+function ghk(px, vm, x_i, x_o, z=1)
     zvfrt = z * vm * iVT
-    em1 = expm1(zvfrt)
-    return ghk(px, x_i, x_o, zvfrt, em1, z)
+    return px * z * Faraday * exprel(zvfrt) * (exp(zvfrt) * x_i - x_o)
 end
+const ghkVm = ghk
 
 "Accumulate chemical reaction rates into a look-up table"
 function add_raw_rate!(lut, rate, substrates, products)

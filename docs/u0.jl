@@ -1,6 +1,6 @@
 # # Initial conditions
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq, SteadyStateDiffEq
 using Plots
 using CaMKIIModel
 Plots.default(lw=2)

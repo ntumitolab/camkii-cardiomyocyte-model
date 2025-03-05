@@ -1,6 +1,6 @@
 # # Effects of isoproterenol
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq, SteadyStateDiffEq
 using Plots
 using CSV
 using DataFrames

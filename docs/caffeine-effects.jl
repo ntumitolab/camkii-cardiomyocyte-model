@@ -2,7 +2,7 @@
 # Caffeine increase RyR opening sensitivity to luminal and subspace calcium
 # In this model, we decrease the mid saturation sub-SR calcium concentration for the opening rate
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq, SteadyStateDiffEq
 using Plots
 using CaMKIIModel
 using CaMKIIModel: second, metre, Farad
