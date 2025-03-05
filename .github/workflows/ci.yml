@@ -91,6 +91,7 @@ jobs:
     - name: Run notebooks
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' }}
       run: |
+        mkdir -p ${{ env.NBCACHE }}/docs
         cp -r docs/data ${{ env.NBCACHE }}/docs
         julia --project=@. --color=yes -p ${{ env.LITERATE_PROC }} .github/ci.jl
     - name: Copy back built notebooks
