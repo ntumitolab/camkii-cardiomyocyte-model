@@ -93,13 +93,13 @@ prob_simp = ODEProblem(sys_simp, [sys_simp.kphos_CaMK => 5Hz], tend);
 @time sol = solve(prob, alg; callback)
 @time sol_simp = solve(prob_simp, alg; callback)
 
-plot(sol, idxs=sys.CaMKAct, label= "Full model", title="Active CaMKII")
-plot!(sol_simp, idxs=sys_simp.CaMKAct, label= "Simplified model", xlabel="Time (ms)")
+plot(sol, idxs=sys.CaMKAct, label="Full model", title="Active CaMKII")
+plot!(sol_simp, idxs=sys_simp.CaMKAct, label="Simplified model", xlabel="Time (ms)")
 
 #---
 @unpack CaMKB, CaMKP, CaMKA, CaMKA2, CaMK = sys_simp
 plot(sol_simp, idxs=[CaMKB, CaMKP, CaMKA, CaMKA2, CaMK], legend=:right)
 
 #---
-plot(sol, idxs=sys.CaMKAct, label= "Full model", title="Active CaMKII")
-plot!(sol_simp, idxs=sys_simp.CaMKAct, label= "Simplified model", xlabel="Time (ms)", tspan=(295second,300.0second))
+plot(sol, idxs=sys.CaMKAct, label="Full model", title="Active CaMKII")
+plot!(sol_simp, idxs=sys_simp.CaMKAct, label="Simplified model", xlabel="Time (ms)", tspan=(295second, 300.0second))

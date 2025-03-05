@@ -49,7 +49,7 @@ callback60 = build_stim_callbacks(Istim, stimstart + 60second; period=1second, s
 sol60 = solve(prob, alg; callback=callback60)
 callback90 = build_stim_callbacks(Istim, stimstart + 90second; period=1second, starttime=stimstart)
 sol90 = solve(prob, alg; callback=callback90)
-idxs=(sys.t/1000, sys.CaMKAct * 100)
+idxs = (sys.t / 1000, sys.CaMKAct * 100)
 
 plot(sol15, idxs=idxs, tspan=(0second, 205second), lab="15 sec", color=:blue)
 plot!(sol30, idxs=idxs, tspan=(0second, 205second), lab="30 sec", color=:red)
@@ -79,7 +79,7 @@ sol1 = solve(prob, alg; callback)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5second, starttime=stimstart)
 sol2 = solve(prob, alg; callback=callback2)
-idxs=(sys.t/1000, sys.CaMKAct * 100)
+idxs = (sys.t / 1000, sys.CaMKAct * 100)
 
 plot(sol1, idxs=idxs, lab="1 Hz", color=:blue)
 plot!(sol2, idxs=idxs, lab="2 Hz", color=:red)
