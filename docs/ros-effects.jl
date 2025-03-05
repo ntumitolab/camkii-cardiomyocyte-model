@@ -1,6 +1,6 @@
 # # ROS effects
 using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
+using OrdinaryDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using DataFrames
@@ -16,70 +16,41 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
 @unpack Istim = sys
+callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 alg = KenCarp4()
 
-# ## No ROS
-callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
+# ## Comparisons
 @time sol = solve(prob, alg; callback)
 
-#---
-i = (sys.t / 1000, sys.vm)
-tspan = (100second, 101second)
-plot(sol, idxs=i, title="Action potential"; tspan)
-
-#---
-i = (sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean])
-tspan = (100second, 101second)
-plot(sol, idxs=i, title="Calcium transcient", label=["Ca (Sub SR)" "Ca (Sub SL)" "Ca (avg)"]; tspan)
-
-#---
-i = (sys.t / 1000, sys.CaMKAct * 100)
-plot(sol, idxs=i, title="CaMKII", xlabel="Time (s)", ylabel="Active fraction (%)", label=false)
-
-# ## ROS 0.1uM
+# ROS 0.1uM
 prob2 = remake(prob, p=[sys.ROS => 0.1μM])
 @time sol2 = solve(prob2, alg; callback)
 
-#---
-i = (sys.t / 1000, sys.vm)
-tspan = (100second, 101second)
-plot(sol2, idxs=i, title="Action potential"; tspan)
-
-#---
-i = (sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean])
-tspan = (100second, 101second)
-plot(sol2, idxs=i, title="Calcium transcient", label=["Ca (Sub SR)" "Ca (Sub SL)" "Ca (avg)"]; tspan)
-
-#---
-i = (sys.t / 1000, sys.CaMKAct * 100)
-plot(sol2, idxs=i, title="CaMKII", xlabel="Time (s)", ylabel="Active fraction (%)", label=false)
-
-# ## ROS 1uM
-prob3 = remake(prob, p=[sys.ROS => 1μM])
+# ROS 0.5uM
+prob3 = remake(prob, p=[sys.ROS => 0.5μM])
 @time sol3 = solve(prob3, alg; callback)
-
-#---
-i = (sys.t / 1000, sys.vm)
-tspan = (100second, 101second)
-plot(sol3, idxs=i, title="Action potential"; tspan)
-
-#---
-i = (sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean])
-tspan = (100second, 101second)
-plot(sol3, idxs=i, title="Calcium transcient", label=["Ca (SR)" "Ca (SL)" "Ca (avg)"]; tspan)
-
-#---
-i = (sys.t / 1000, sys.CaMKAct * 100)
-plot(sol3, idxs=i, title="CaMKII", xlabel="Time (s)", ylabel="Active fraction (%)", label=false)
 
 # ## Comparisons
 i = (sys.t / 1000, sys.CaMKAct * 100)
-plot(sol, idxs=i, title="Active CaMKII", lab="ROS (-)")
+plot(sol, idxs=i, lab="ROS (-)")
 plot!(sol2, idxs=i, lab="ROS 0.1uM")
-plot!(sol3, idxs=i, lab="ROS 1uM", xlabel="Time (s)", ylabel="Active fraction (%)")
+plot!(sol3, idxs=i, lab="ROS 0.5uM")
+plot!(xlabel="Time (s)", ylabel="Active fraction (%)", title="Simulation")
 
 #---
 savefig("ros-camkii.pdf")
+savefig("ros-camkii.png")
+
+# Oxidized fraction
+i = (sys.t / 1000, 100 * (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX ))
+plot(sol, idxs=i, lab="ROS (-)")
+plot!(sol2, idxs=i, lab="ROS 0.1uM")
+plot!(sol3, idxs=i, lab="ROS 0.5uM")
+plot!(xlabel="Time (s)", ylabel="Oxidized fraction (%)", title="Simulation")
+
+#---
+savefig("ros-camkiiox.pdf")
+savefig("ros-camkiiox.png")
 
 # ## Experimental data
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
@@ -95,7 +66,8 @@ ros200_error = chemicaldf[!, "H2O2 200uM SD"] ./ sqrt.(chemicaldf[!, "H2O2 200uM
 plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blue)
 plot!(ts, ros50, yerr=ros50_error, lab="H2O2 50uM", color=:red, markerstrokecolor=:red)
 plot!(ts, ros200, yerr=ros200_error, lab="H2O2 200uM", color=:green, markerstrokecolor=:green)
-plot!(xlabel="Time (s)", ylabel="CaMKII activity (A.U.)")
+plot!(xlabel="Time (s)", ylabel="CaMKII activity (A.U.)", title="Experiment")
 
 #---
 savefig("ros-exp.pdf")
+savefig("ros-exp.png")
