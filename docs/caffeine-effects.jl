@@ -14,7 +14,7 @@ tend = 500.0second
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
-alg = FBDF()
+alg = KenCarp4()
 function add_coffee_affect!(integrator)
     integrator.ps[sys.RyRsensitivity] = 10
 end

@@ -15,7 +15,7 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
 @unpack Istim = sys
-alg = FBDF()
+alg = KenCarp4()
 
 ## Pacing duration and CaMKII activity
 durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)

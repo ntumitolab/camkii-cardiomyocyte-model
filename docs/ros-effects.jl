@@ -16,7 +16,7 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
 @unpack Istim = sys
-alg = FBDF()
+alg = KenCarp4()
 
 # ## No ROS
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
