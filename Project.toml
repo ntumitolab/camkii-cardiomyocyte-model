@@ -1,29 +1,23 @@
 name = "CaMKIIModel"
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
 authors = ["Wen-Wei Tseng <sosiristseng@gmail.com>"]
-version = "0.5.0"
+version = "0.6.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
 Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 LsqFit = "2fda8390-95c7-5789-9bda-21331edee243"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
 NaNMath = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
+SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
 [compat]
-DifferentialEquations = "7.16.0"
-
-[preferences.BoundaryValueDiffEq]
-PrecompileAscher = false
-PrecompileAscherNLLS = false
-PrecompileFIRK = false
-PrecompileFIRKNLLS = false
-PrecompileMIRK = false
-PrecompileMIRKNLLS = false
-PrecompileMultipleShooting = false
-PrecompileMultipleShootingNLLS = false
-PrecompileShooting = false
-PrecompileShootingNLLS = false
+DiffEqCallbacks = "4.3.0"
+OrdinaryDiffEq = "6.91.0"
+SciMLBase = "2.75.1"
+SteadyStateDiffEq = "2.4.1"

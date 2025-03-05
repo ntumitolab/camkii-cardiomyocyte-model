@@ -1,6 +1,6 @@
 # # ROS effects
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using DataFrames
@@ -16,7 +16,7 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
 @unpack Istim = sys
-alg = FBDF()
+alg = KenCarp4()
 
 # ## No ROS
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
@@ -24,16 +24,16 @@ callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimst
 
 #---
 i = (sys.t / 1000, sys.vm)
-tspan=(100second, 101second)
+tspan = (100second, 101second)
 plot(sol, idxs=i, title="Action potential"; tspan)
 
 #---
 i = (sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean])
-tspan=(100second, 101second)
+tspan = (100second, 101second)
 plot(sol, idxs=i, title="Calcium transcient", label=["Ca (Sub SR)" "Ca (Sub SL)" "Ca (avg)"]; tspan)
 
 #---
-i = (sys.t / 1000,sys.CaMKAct*100)
+i = (sys.t / 1000, sys.CaMKAct * 100)
 plot(sol, idxs=i, title="CaMKII", xlabel="Time (s)", ylabel="Active fraction (%)", label=false)
 
 # ## ROS 0.1uM
@@ -42,16 +42,16 @@ prob2 = remake(prob, p=[sys.ROS => 0.1μM])
 
 #---
 i = (sys.t / 1000, sys.vm)
-tspan=(100second, 101second)
+tspan = (100second, 101second)
 plot(sol2, idxs=i, title="Action potential"; tspan)
 
 #---
 i = (sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean])
-tspan=(100second, 101second)
+tspan = (100second, 101second)
 plot(sol2, idxs=i, title="Calcium transcient", label=["Ca (Sub SR)" "Ca (Sub SL)" "Ca (avg)"]; tspan)
 
 #---
-i = (sys.t / 1000,sys.CaMKAct*100)
+i = (sys.t / 1000, sys.CaMKAct * 100)
 plot(sol2, idxs=i, title="CaMKII", xlabel="Time (s)", ylabel="Active fraction (%)", label=false)
 
 # ## ROS 1uM
@@ -60,20 +60,20 @@ prob3 = remake(prob, p=[sys.ROS => 1μM])
 
 #---
 i = (sys.t / 1000, sys.vm)
-tspan=(100second, 101second)
+tspan = (100second, 101second)
 plot(sol3, idxs=i, title="Action potential"; tspan)
 
 #---
 i = (sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean])
-tspan=(100second, 101second)
+tspan = (100second, 101second)
 plot(sol3, idxs=i, title="Calcium transcient", label=["Ca (SR)" "Ca (SL)" "Ca (avg)"]; tspan)
 
 #---
-i = (sys.t / 1000,sys.CaMKAct*100)
+i = (sys.t / 1000, sys.CaMKAct * 100)
 plot(sol3, idxs=i, title="CaMKII", xlabel="Time (s)", ylabel="Active fraction (%)", label=false)
 
 # ## Comparisons
-i = (sys.t / 1000,sys.CaMKAct*100)
+i = (sys.t / 1000, sys.CaMKAct * 100)
 plot(sol, idxs=i, title="Active CaMKII", lab="ROS (-)")
 plot!(sol2, idxs=i, lab="ROS 0.1uM")
 plot!(sol3, idxs=i, lab="ROS 1uM", xlabel="Time (s)", ylabel="Active fraction (%)")
