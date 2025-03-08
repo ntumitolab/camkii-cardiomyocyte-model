@@ -16,7 +16,7 @@ prob = SteadyStateProblem(sys, [])
 alg = DynamicSS(Rodas5P())
 
 # Log scale for ISO concentration
-iso = exp10.(log10(1e-4μM), log10(1μM), length=1001)
+iso = exp10.(range(log10(1e-4μM), log10(1μM), length=1001))
 
 #---
 prob_func = (prob, i, repeat) -> remake(prob, p=[ISO => iso[i]])
