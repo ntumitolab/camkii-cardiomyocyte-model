@@ -17,7 +17,4 @@ SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
 [compat]
-DiffEqCallbacks = "4.3.0"
-OrdinaryDiffEq = "6.91.0"
-SciMLBase = "2.75.1"
-SteadyStateDiffEq = "2.4.1"
+julia = "~1.10"
