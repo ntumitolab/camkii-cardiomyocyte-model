@@ -15,7 +15,8 @@ sys = get_camkii_sys(Ca; ROS, simplify=true)
 #---
 prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 alg = DynamicSS(Rodas5P())
-ca = logrange(0.03μM, 10μM, length=1001)
+
+ca = exp10.(range(log10(0.03μM), log10(10μM), 1001))
 prob_func = (prob, i, repeat) -> begin
     remake(prob, p=[Ca => ca[i]])
 end
