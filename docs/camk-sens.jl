@@ -84,7 +84,7 @@ println("# of state variable in the simplified model: ", length(unknowns(sys_sim
 tend = 500.0second
 stimstart = 100.0second
 stimend = 300.0second
-alg = KenCarp4()
+alg = KenCarp47()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 prob = ODEProblem(sys, [], tend);

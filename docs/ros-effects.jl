@@ -17,7 +17,7 @@ stimstart = 30second
 stimend = 120second
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-alg = KenCarp4()
+alg = KenCarp47()
 
 # ## Comparisons
 @time sol = solve(prob, alg; callback)

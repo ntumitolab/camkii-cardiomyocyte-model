@@ -17,7 +17,7 @@ tend = 500.0second
 prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
-alg = KenCarp4()
+alg = KenCarp47()
 function add_coffee_affect!(integrator)
     integrator.ps[sys.RyRsensitivity] = 10
 end
@@ -73,7 +73,7 @@ sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 tend = 205second
 stimstart = 30second
 stimend = 120second
-alg = KenCarp4()
+alg = KenCarp47()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 

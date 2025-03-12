@@ -16,7 +16,7 @@ prob = ODEProblem(sys, [], tend)
 stimstart = 100.0second
 stimend = 300.0second
 @unpack Istim = sys
-alg = KenCarp4()
+alg = KenCarp47()
 
 # ## Single pulse
 callback = build_stim_callbacks(Istim, stimstart + 1second; period=10second, starttime=stimstart)
