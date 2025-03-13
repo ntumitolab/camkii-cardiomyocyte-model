@@ -1,0 +1,1363 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sensitivity to ISO &#8212; CaMKII model</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"loader": {"load": ["[tex]/mhchem"]}, "tex": {"packages": {"[+]": ["mhchem"]}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'iso-sens';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CaMKII system analysis" href="camk-sens.html" />
+    <link rel="prev" title="Initial conditions" href="u0.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CaMKII model</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    CaMKII cardiomyocyte model
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="modeldesc.html">Model descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="u0.html">Initial conditions</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Sensitivity to ISO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camk-sens.html">CaMKII system analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bcl-effects.html">Pacing response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bcl-data-fit.html">Pacing frequency and CaMKII activity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iso-effects.html">Effects of isoproterenol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ros-effects.html">ROS effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caffeine-effects.html">Caffeine Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime.html">Runtime information</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/ntumitolab/camkii-cardiomyocyte-model/gh-pages?urlpath=lab/tree/_sources/iso-sens.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/ntumitolab/camkii-cardiomyocyte-model/blob/gh-pages/_sources/iso-sens.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+<a href="https://github.com/ntumitolab/camkii-cardiomyocyte-model" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/iso-sens.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Sensitivity to ISO</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-b1ar-system">Setup b1AR system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-active-pkaci">Fitting active PKACI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-active-pkacii">Fitting active PKACII</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#least-square-fitting-of-pp1-activity">Least-square fitting of PP1 activity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-plbp">Fitting PLBp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-plmp">Fitting PLMp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-tnip">Fitting TnIp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-lccap">Fitting LCCap</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-lccbp">Fitting LCCbp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-kurp">Fitting KURp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-ryrp">Fitting RyRp</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="sensitivity-to-iso">
+<h1>Sensitivity to ISO<a class="headerlink" href="#sensitivity-to-iso" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">ModelingToolkit</span>
+<span class="k">using</span><span class="w"> </span><span class="n">OrdinaryDiffEq</span><span class="p">,</span><span class="w"> </span><span class="n">SteadyStateDiffEq</span><span class="p">,</span><span class="w"> </span><span class="n">DiffEqCallbacks</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Plots</span>
+<span class="k">using</span><span class="w"> </span><span class="n">LsqFit</span>
+<span class="k">using</span><span class="w"> </span><span class="n">CaMKIIModel</span>
+<span class="k">using</span><span class="w"> </span><span class="n">CaMKIIModel</span><span class="o">:</span><span class="w"> </span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="n">hil</span><span class="p">,</span><span class="w"> </span><span class="n">Hz</span><span class="p">,</span><span class="w"> </span><span class="n">hilr</span><span class="p">,</span><span class="w"> </span><span class="n">second</span>
+<span class="n">Plots</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="setup-b1ar-system">
+<h2>Setup b1AR system<a class="headerlink" href="#setup-b1ar-system" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@parameters</span><span class="w"> </span><span class="n">ATP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="n">μM</span><span class="w"> </span><span class="n">ISO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">μM</span>
+<span class="n">sys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_bar_sys</span><span class="p">(</span><span class="n">ATP</span><span class="p">,</span><span class="w"> </span><span class="n">ISO</span><span class="p">;</span><span class="w"> </span><span class="n">simplify</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\begin{split} \begin{align}
+\frac{\mathrm{d} \mathtt{LR}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kf\_bARK} \mathtt{LR}\left( t \right) - \mathtt{kr\_LR} \mathtt{LR}\left( t \right) + \mathtt{kr\_LRG} \mathtt{LRG}\left( t \right) + \mathtt{kr\_bARK} \mathtt{b1AR\_S464}\left( t \right) + \mathtt{ISO} \mathtt{kf\_LR} \mathtt{b1AR}\left( t \right) - \mathtt{kf\_LRG} \mathtt{LR}\left( t \right) \mathtt{Gs}\left( t \right) - \mathtt{kf\_PKA} \mathtt{PKACI}\left( t \right) \mathtt{LR}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{LRG}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{k\_G\_act} \mathtt{LRG}\left( t \right) - \mathtt{kf\_bARK} \mathtt{LRG}\left( t \right) - \mathtt{kr\_LRG} \mathtt{LRG}\left( t \right) + \mathtt{kf\_LRG} \mathtt{LR}\left( t \right) \mathtt{Gs}\left( t \right) - \mathtt{kf\_PKA} \mathtt{PKACI}\left( t \right) \mathtt{LRG}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{RG}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{k\_G\_act} \mathtt{RG}\left( t \right) - \mathtt{kr\_RG} \mathtt{RG}\left( t \right) + \mathtt{kf\_RG} \mathtt{Gs}\left( t \right) \mathtt{b1AR}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{GsaGTP}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{k\_G\_act} \mathtt{RG}\left( t \right) + \mathtt{k\_G\_act} \mathtt{LRG}\left( t \right) - \mathtt{k\_G\_hyd} \mathtt{GsaGTP}\left( t \right) + \mathtt{kr\_AC\_Gsa} \mathtt{AC\_GsaGTP}\left( t \right) - \mathtt{kf\_AC\_Gsa} \mathtt{AC}\left( t \right) \mathtt{GsaGTP}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{GsaGDP}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{k\_G\_hyd} \mathtt{AC\_GsaGTP}\left( t \right) + \mathtt{k\_G\_hyd} \mathtt{GsaGTP}\left( t \right) - \mathtt{k\_G\_reassoc} \mathtt{Gsby}\left( t \right) \mathtt{GsaGDP}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{b1AR\_S464}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kf\_bARK} \mathtt{LR}\left( t \right) + \mathtt{kf\_bARK} \mathtt{LRG}\left( t \right) - \mathtt{kr\_bARK} \mathtt{b1AR\_S464}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{b1AR\_S301}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kr\_PKA} \mathtt{b1AR\_S301}\left( t \right) + \mathtt{kf\_PKA} \mathtt{PKACI}\left( t \right) \mathtt{LR}\left( t \right) + \mathtt{kf\_PKA} \mathtt{PKACI}\left( t \right) \mathtt{LRG}\left( t \right) + \mathtt{kf\_PKA} \mathtt{PKACI}\left( t \right) \mathtt{b1AR}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{AC\_GsaGTP}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{k\_G\_hyd} \mathtt{AC\_GsaGTP}\left( t \right) - \mathtt{kr\_AC\_Gsa} \mathtt{AC\_GsaGTP}\left( t \right) + \mathtt{kf\_AC\_Gsa} \mathtt{AC}\left( t \right) \mathtt{GsaGTP}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{PDEp}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{k\_PP\_PDE} \mathtt{PDEp}\left( t \right) + \mathtt{k\_PKA\_PDE} \mathtt{PDE}\left( t \right) \mathtt{PKACII}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{cAMP}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{ATP} \mathtt{k\_AC\_basal} \mathtt{AC}\left( t \right)}{\mathtt{ATP} + \mathtt{Km\_AC\_basal}} + \frac{\mathtt{ATP} \mathtt{k\_AC\_Gsa} \mathtt{AC\_GsaGTP}\left( t \right)}{\mathtt{ATP} + \mathtt{Km\_AC\_Gsa}} + \frac{\left(  - \mathtt{k\_cAMP\_PDE} \mathtt{PDE}\left( t \right) - \mathtt{k\_cAMP\_PDEp} \mathtt{PDEp}\left( t \right) \right) \mathtt{cAMP}\left( t \right)}{\mathtt{Km\_PDE\_cAMP} + \mathtt{cAMP}\left( t \right)} + \mathtt{kr\_RC\_cAMP} \mathtt{RCcAMP\_I}\left( t \right) + \mathtt{kr\_RC\_cAMP} \mathtt{RCcAMP\_II}\left( t \right) + \mathtt{kr\_RCcAMP\_cAMP} \mathtt{RCcAMPcAMP\_II}\left( t \right) + \mathtt{kr\_RCcAMP\_cAMP} \mathtt{RCcAMPcAMP\_I}\left( t \right) - \mathtt{kf\_RC\_cAMP} \mathtt{RC\_II}\left( t \right) \mathtt{cAMP}\left( t \right) - \mathtt{kf\_RC\_cAMP} \mathtt{RC\_I}\left( t \right) \mathtt{cAMP}\left( t \right) - \mathtt{kf\_RCcAMP\_cAMP} \mathtt{RCcAMP\_I}\left( t \right) \mathtt{cAMP}\left( t \right) - \mathtt{kf\_RCcAMP\_cAMP} \mathtt{RCcAMP\_II}\left( t \right) \mathtt{cAMP}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{RCcAMP\_I}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kr\_RC\_cAMP} \mathtt{RCcAMP\_I}\left( t \right) + \mathtt{kr\_RCcAMP\_cAMP} \mathtt{RCcAMPcAMP\_I}\left( t \right) + \mathtt{kf\_RC\_cAMP} \mathtt{RC\_I}\left( t \right) \mathtt{cAMP}\left( t \right) - \mathtt{kf\_RCcAMP\_cAMP} \mathtt{RCcAMP\_I}\left( t \right) \mathtt{cAMP}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{RCcAMP\_II}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kr\_RC\_cAMP} \mathtt{RCcAMP\_II}\left( t \right) + \mathtt{kr\_RCcAMP\_cAMP} \mathtt{RCcAMPcAMP\_II}\left( t \right) + \mathtt{kf\_RC\_cAMP} \mathtt{RC\_II}\left( t \right) \mathtt{cAMP}\left( t \right) - \mathtt{kf\_RCcAMP\_cAMP} \mathtt{RCcAMP\_II}\left( t \right) \mathtt{cAMP}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{RCcAMPcAMP\_I}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kf\_RcAMPcAMP\_C} \mathtt{RCcAMPcAMP\_I}\left( t \right) - \mathtt{kr\_RCcAMP\_cAMP} \mathtt{RCcAMPcAMP\_I}\left( t \right) + \mathtt{kf\_RCcAMP\_cAMP} \mathtt{RCcAMP\_I}\left( t \right) \mathtt{cAMP}\left( t \right) + \mathtt{kr\_RcAMPcAMP\_C} \mathtt{PKACI}\left( t \right) \mathtt{RcAMPcAMP\_I}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{RCcAMPcAMP\_II}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kf\_RcAMPcAMP\_C} \mathtt{RCcAMPcAMP\_II}\left( t \right) - \mathtt{kr\_RCcAMP\_cAMP} \mathtt{RCcAMPcAMP\_II}\left( t \right) + \mathtt{kf\_RCcAMP\_cAMP} \mathtt{RCcAMP\_II}\left( t \right) \mathtt{cAMP}\left( t \right) + \mathtt{kr\_RcAMPcAMP\_C} \mathtt{PKACII}\left( t \right) \mathtt{RcAMPcAMP\_II}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{PKACI}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kf\_RcAMPcAMP\_C} \mathtt{RCcAMPcAMP\_I}\left( t \right) + \mathtt{kr\_PKA\_PKI} \mathtt{PKACI\_PKI}\left( t \right) - \mathtt{kf\_PKA\_PKI} \mathtt{PKACI}\left( t \right) \mathtt{PKI}\left( t \right) - \mathtt{kr\_RcAMPcAMP\_C} \mathtt{PKACI}\left( t \right) \mathtt{RcAMPcAMP\_I}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{PKACII}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kf\_RcAMPcAMP\_C} \mathtt{RCcAMPcAMP\_II}\left( t \right) + \mathtt{kr\_PKA\_PKI} \mathtt{PKACII\_PKI}\left( t \right) - \mathtt{kf\_PKA\_PKI} \mathtt{PKI}\left( t \right) \mathtt{PKACII}\left( t \right) - \mathtt{kr\_RcAMPcAMP\_C} \mathtt{PKACII}\left( t \right) \mathtt{RcAMPcAMP\_II}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{PKACI\_PKI}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kr\_PKA\_PKI} \mathtt{PKACI\_PKI}\left( t \right) + \mathtt{kf\_PKA\_PKI} \mathtt{PKACI}\left( t \right) \mathtt{PKI}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{PKACII\_PKI}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kr\_PKA\_PKI} \mathtt{PKACII\_PKI}\left( t \right) + \mathtt{kf\_PKA\_PKI} \mathtt{PKI}\left( t \right) \mathtt{PKACII}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{I1p}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{k\_PKA\_I1} \mathtt{PKACI}\left( t \right) \mathtt{I1}\left( t \right)}{\mathtt{Km\_PKA\_I1} + \mathtt{I1}\left( t \right)} + \frac{ - \mathtt{Vmax\_PP2A\_I1} \mathtt{I1p}\left( t \right)}{\mathtt{Km\_PP2A\_I1} + \mathtt{I1p}\left( t \right)} + \mathtt{kr\_PP1\_I1} \mathtt{I1p\_PP1}\left( t \right) - \mathtt{kf\_PP1\_I1} \mathtt{PP1}\left( t \right) \mathtt{I1p}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{I1p\_PP1}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kr\_PP1\_I1} \mathtt{I1p\_PP1}\left( t \right) + \mathtt{kf\_PP1\_I1} \mathtt{PP1}\left( t \right) \mathtt{I1p}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{PLBp}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{k\_PP1\_PLB} \mathtt{PP1}\left( t \right) \mathtt{PLBp}\left( t \right)}{\mathtt{Km\_PP1\_PLB} + \mathtt{PLBp}\left( t \right)} + \frac{\mathtt{k\_PKA\_PLB} \mathtt{PLB}\left( t \right) \mathtt{PKACI}\left( t \right)}{\mathtt{Km\_PKA\_PLB} + \mathtt{PLB}\left( t \right)} \\
+\frac{\mathrm{d} \mathtt{PLMp}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{k\_PKA\_PLM} \mathtt{PKACI}\left( t \right) \mathtt{PLM}\left( t \right)}{\mathtt{Km\_PKA\_PLM} + \mathtt{PLM}\left( t \right)} + \frac{ - \mathtt{k\_PP1\_PLM} \mathtt{PP1}\left( t \right) \mathtt{PLMp}\left( t \right)}{\mathtt{Km\_PP1\_PLM} + \mathtt{PLMp}\left( t \right)} \\
+\frac{\mathrm{d} \mathtt{TnIp}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{PP2A\_TnI} \mathtt{k\_PP2A\_TnI} \mathtt{TnIp}\left( t \right)}{\mathtt{Km\_PP2A\_TnI} + \mathtt{TnIp}\left( t \right)} + \frac{\mathtt{k\_PKA\_TnI} \mathtt{PKACI}\left( t \right) \mathtt{TnI}\left( t \right)}{\mathtt{Km\_PKA\_TnI} + \mathtt{TnI}\left( t \right)} \\
+\frac{\mathrm{d} \mathtt{LCCap}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{PKACII\_LCCtotBA} \mathtt{epsilon} \mathtt{k\_PKA\_LCC} \mathtt{PKACII}\left( t \right) \mathtt{LCCa}\left( t \right)}{\mathtt{PKAIItot} \left( \mathtt{Km\_PKA\_LCC} + \mathtt{epsilon} \mathtt{LCCa}\left( t \right) \right)} + \frac{ - \mathtt{PP2A\_LCC} \mathtt{epsilon} \mathtt{k\_PP2A\_LCC} \mathtt{LCCap}\left( t \right)}{\mathtt{Km\_PP2A\_LCC} + \mathtt{epsilon} \mathtt{LCCap}\left( t \right)} \\
+\frac{\mathrm{d} \mathtt{LCCbp}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{PKACII\_LCCtotBA} \mathtt{epsilon} \mathtt{k\_PKA\_LCC} \mathtt{LCCb}\left( t \right) \mathtt{PKACII}\left( t \right)}{\mathtt{PKAIItot} \left( \mathtt{Km\_PKA\_LCC} + \mathtt{epsilon} \mathtt{LCCb}\left( t \right) \right)} + \frac{ - \mathtt{PP1\_LCC} \mathtt{epsilon} \mathtt{k\_PP1\_LCC} \mathtt{LCCbp}\left( t \right)}{\mathtt{Km\_PP1\_LCC} + \mathtt{epsilon} \mathtt{LCCbp}\left( t \right)} \\
+\frac{\mathrm{d} \mathtt{KURp}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{PP1\_KURtot} \mathtt{epsilon} \mathtt{k\_pp1\_KUR} \mathtt{KURp}\left( t \right)}{\mathtt{Km\_pp1\_KUR} + \mathtt{epsilon} \mathtt{KURp}\left( t \right)} + \frac{\mathtt{PKAII\_KURtot} \mathtt{epsilon} \mathtt{k\_pka\_KUR} \mathtt{KURn}\left( t \right) \mathtt{PKACII}\left( t \right)}{\mathtt{PKAIItot} \left( \mathtt{Km\_pka\_KUR} + \mathtt{epsilon} \mathtt{KURn}\left( t \right) \right)} \\
+\frac{\mathrm{d} \mathtt{RyRp}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{PP1\_RyR} \mathtt{epsilon} \mathtt{kcat\_pp1\_RyR} \mathtt{RyRp}\left( t \right)}{\mathtt{Km\_pp1\_RyR} + \mathtt{epsilon} \mathtt{RyRp}\left( t \right)} + \frac{\mathtt{PKAII\_RyRtot} \mathtt{epsilon} \mathtt{kcat\_pka\_RyR} \mathtt{PKACII}\left( t \right) \mathtt{RyRn}\left( t \right)}{\mathtt{PKAIItot} \left( \mathtt{Km\_pka\_RyR} + \mathtt{epsilon} \mathtt{RyRn}\left( t \right) \right)} + \frac{ - \mathtt{PP2A\_RyR} \mathtt{epsilon} \mathtt{kcat\_pp2a\_RyR} \mathtt{RyRp}\left( t \right)}{\mathtt{Km\_pp2a\_RyR} + \mathtt{epsilon} \mathtt{RyRp}\left( t \right)}
+\end{align}
+ \end{split}\]</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SteadyStateProblem</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="w"> </span><span class="p">[])</span>
+<span class="n">alg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DynamicSS</span><span class="p">(</span><span class="n">Rodas5P</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>SteadyStateDiffEq.DynamicSS{OrdinaryDiffEqRosenbrock.Rodas5P{0, ADTypes.AutoForwardDiff{nothing, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, Float64}(OrdinaryDiffEqRosenbrock.Rodas5P{0, ADTypes.AutoForwardDiff{nothing, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}(nothing, OrdinaryDiffEqCore.DEFAULT_PRECS, OrdinaryDiffEqCore.trivial_limiter!, OrdinaryDiffEqCore.trivial_limiter!, ADTypes.AutoForwardDiff()), Inf)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Log scale for ISO concentration</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">iso</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">exp10</span><span class="o">.</span><span class="p">(</span><span class="n">range</span><span class="p">(</span><span class="n">log10</span><span class="p">(</span><span class="mf">1e-4</span><span class="n">μM</span><span class="p">),</span><span class="w"> </span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span><span class="n">μM</span><span class="p">),</span><span class="w"> </span><span class="n">length</span><span class="o">=</span><span class="mi">1001</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1001-element Vector{Float64}:
+ 0.0001
+ 0.00010092528860766844
+ 0.00010185913880541169
+ 0.00010280162981264735
+ 0.00010375284158180127
+ 0.00010471285480508996
+ 0.00010568175092136585
+ 0.0001066596121230258
+ 0.0001076465213629835
+ 0.00010864256236170655
+ ⋮
+ 0.9289663867799364
+ 0.9375620069258802
+ 0.9462371613657931
+ 0.954992586021436
+ 0.9638290236239705
+ 0.9727472237769651
+ 0.9817479430199844
+ 0.9908319448927676
+ 1.0
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">prob_func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">repeat</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">remake</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="n">ISO</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">iso</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+<span class="n">trajectories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">iso</span><span class="p">)</span>
+<span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">alg</span><span class="p">;</span><span class="w"> </span><span class="n">abstol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span><span class="w"> </span><span class="n">reltol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span><span class="w"> </span><span class="c">## warmup</span>
+<span class="n">sim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">EnsembleProblem</span><span class="p">(</span><span class="n">prob</span><span class="p">;</span><span class="w"> </span><span class="n">prob_func</span><span class="p">,</span><span class="w"> </span><span class="n">safetycopy</span><span class="o">=</span><span class="nb">false</span><span class="p">),</span><span class="w"> </span><span class="n">alg</span><span class="p">;</span><span class="w"> </span><span class="n">trajectories</span><span class="p">,</span><span class="w"> </span><span class="n">abstol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span><span class="w"> </span><span class="n">reltol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>EnsembleSolution Solution of length 1001 with uType:
+SciMLBase.NonlinearSolution{Float64, 1, Vector{Float64}, Vector{Float64}, SciMLBase.SteadyStateProblem{Vector{Float64}, true, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xac9d0a7c, 0x3b97c590, 0x0495d39d, 0x16a414e5, 0xdcc082c3), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb904fe62, 0x521f0fd2, 0x3c5b34ee, 0x69314a32, 0xeb3748a1), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}}, SteadyStateDiffEq.DynamicSS{OrdinaryDiffEqRosenbrock.Rodas5P{9, ADTypes.AutoForwardDiff{9, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, Float64}, SciMLBase.ODESolution{Float64, 2, Vector{Vector{Float64}}, Nothing, Nothing, Vector{Float64}, Vector{Vector{Vector{Float64}}}, Nothing, SciMLBase.ODEProblem{Vector{Float64}, Tuple{Float64, Float64}, true, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xac9d0a7c, 0x3b97c590, 0x0495d39d, 0x16a414e5, 0xdcc082c3), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb904fe62, 0x521f0fd2, 0x3c5b34ee, 0x69314a32, 0xeb3748a1), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, SciMLBase.StandardODEProblem}, OrdinaryDiffEqRosenbrock.Rodas5P{9, ADTypes.AutoForwardDiff{9, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, OrdinaryDiffEqCore.InterpolationData{SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xac9d0a7c, 0x3b97c590, 0x0495d39d, 0x16a414e5, 0xdcc082c3), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb904fe62, 0x521f0fd2, 0x3c5b34ee, 0x69314a32, 0xeb3748a1), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, Vector{Vector{Float64}}, Vector{Float64}, Vector{Vector{Vector{Float64}}}, Nothing, OrdinaryDiffEqRosenbrock.RosenbrockCache{Vector{Float64}, Vector{Float64}, Vector{Float64}, Matrix{Float64}, Matrix{Float64}, OrdinaryDiffEqRosenbrock.RodasTableau{Float64, Float64}, SciMLBase.TimeGradientWrapper{true, SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xac9d0a7c, 0x3b97c590, 0x0495d39d, 0x16a414e5, 0xdcc082c3), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb904fe62, 0x521f0fd2, 0x3c5b34ee, 0x69314a32, 0xeb3748a1), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, Vector{Float64}, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}}, SciMLBase.UJacobianWrapper{true, SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xac9d0a7c, 0x3b97c590, 0x0495d39d, 0x16a414e5, 0xdcc082c3), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb904fe62, 0x521f0fd2, 0x3c5b34ee, 0x69314a32, 0xeb3748a1), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x50bee392, 0x890e6a26, 0x752bab69, 0xdc63c426, 0x6c9da2fb), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x53e98f80, 0x7973a15e, 0x09e73468, 0x48b03509, 0x2609fbf6), Nothing}}}}, Nothing}, Nothing}, Float64, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}}, LinearSolve.LinearCache{Matrix{Float64}, Vector{Float64}, Vector{Float64}, SciMLBase.NullParameters, LinearSolve.DefaultLinearSolver, LinearSolve.DefaultLinearSolverInit{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, LinearAlgebra.QRCompactWY{Float64, Matrix{Float64}, Matrix{Float64}}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, Tuple{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, Vector{Int64}}, Nothing, Nothing, Nothing, LinearAlgebra.SVD{Float64, Float64, Matrix{Float64}, Vector{Float64}}, LinearAlgebra.Cholesky{Float64, Matrix{Float64}}, LinearAlgebra.Cholesky{Float64, Matrix{Float64}}, Tuple{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int32}}, Base.RefValue{Int32}}, Tuple{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, Base.RefValue{Int64}}, LinearAlgebra.QRPivoted{Float64, Matrix{Float64}, Vector{Float64}, Vector{Int64}}, Nothing, Nothing}, LinearSolve.InvPreconditioner{LinearAlgebra.Diagonal{Float64, Vector{Float64}}}, LinearAlgebra.Diagonal{Float64, Vector{Float64}}, Float64, Bool, LinearSolve.LinearSolveAdjoint{Missing}}, SparseDiffTools.ForwardColorJacCache{Vector{ForwardDiff.Dual{ForwardDiff.Tag{DiffEqBase.OrdinaryDiffEqTag, Float64}, Float64, 9}}, Vector{ForwardDiff.Dual{ForwardDiff.Tag{DiffEqBase.OrdinaryDiffEqTag, Float64}, Float64, 9}}, Vector{Float64}, Vector{Vector{NTuple{9, Float64}}}, UnitRange{Int64}, Nothing}, Vector{ForwardDiff.Dual{ForwardDiff.Tag{DiffEqBase.OrdinaryDiffEqTag, Float64}, Float64, 1}}, Float64, OrdinaryDiffEqRosenbrock.Rodas5P{9, ADTypes.AutoForwardDiff{9, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, Nothing}, SciMLBase.DEStats, Nothing, Nothing, Nothing, Nothing}, Nothing, Nothing, Nothing}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;&quot;&quot;Extract values from ensemble simulations by a symbol&quot;&quot;&quot;</span>
+<span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">map</span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="w"> </span><span class="n">sim</span><span class="p">)</span>
+<span class="s">&quot;&quot;&quot;Calculate Root Mean Square Error (RMSE)&quot;&quot;&quot;</span>
+<span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">abs2</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">.</span><span class="n">resid</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">resid</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Main.var&quot;##230&quot;.rmse
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xopts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">xlims</span><span class="o">=</span><span class="p">(</span><span class="n">iso</span><span class="p">[</span><span class="k">begin</span><span class="p">],</span><span class="w"> </span><span class="n">iso</span><span class="p">[</span><span class="k">end</span><span class="p">]),</span><span class="w"> </span><span class="n">minorgrid</span><span class="o">=</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">xscale</span><span class="o">=</span><span class="ss">:log10</span><span class="p">,</span><span class="w"> </span><span class="n">xlabel</span><span class="o">=</span><span class="s">&quot;ISO (μM)&quot;</span><span class="p">,)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">iso</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">cAMP</span><span class="p">);</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;cAMP&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ylabel</span><span class="o">=</span><span class="s">&quot;Conc. (μM)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/38835116e61bb2a6706788700897cfeec799bec6e9815469e8f3a5c958e68cf7.png" src="_images/38835116e61bb2a6706788700897cfeec799bec6e9815469e8f3a5c958e68cf7.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">iso</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PKACI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">RItot</span><span class="p">);</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;PKACI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ylabel</span><span class="o">=</span><span class="s">&quot;Activation fraction&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">iso</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PKACII</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">RIItot</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;PKACII&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">iso</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PP1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PP1totBA</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;PP1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/5ebcb684a650fda49d38cf35825248459492219d04d882540a8d02575e44eaed.png" src="_images/5ebcb684a650fda49d38cf35825248459492219d04d882540a8d02575e44eaed.png" />
+</div>
+</div>
+</section>
+<section id="fitting-active-pkaci">
+<h2>Fitting active PKACI<a class="headerlink" href="#fitting-active-pkaci" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PKACI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">RItot</span><span class="p">)</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.08</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">pkac1_fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pkac1_coef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">pkac1_fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.19937293764079625
+ 0.01390617687954668
+ 0.07340271607767374
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;PKACI&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pkac1_coef</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pkac1_coef</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pkac1_coef</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">pkac1_fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PKACI
+Basal activity: 0.07340271607767374
+Activated activity: 0.19937293764079625
+Michaelis constant: 0.01390617687954668 μM
+RMSE: 0.000326933550132299
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pkac1_coef</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PKACI&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PKACI error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/d2a4721b3d42cdd732f9710f98173be1a2033c37eacb30c1ceba1f9d219e162c.png" src="_images/d2a4721b3d42cdd732f9710f98173be1a2033c37eacb30c1ceba1f9d219e162c.png" />
+</div>
+</div>
+</section>
+<section id="fitting-active-pkacii">
+<h2>Fitting active PKACII<a class="headerlink" href="#fitting-active-pkacii" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PKACII</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">RIItot</span><span class="p">)</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">pkac2_fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pkac2_coef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">pkac2_fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.3443707798304218
+ 0.010251025301118936
+ 0.18399255075380827
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;PKACII&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pkac2_coef</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pkac2_coef</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pkac2_coef</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">pkac2_fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PKACII
+Basal activity: 0.18399255075380827
+Activated activity: 0.3443707798304218
+Michaelis constant: 0.010251025301118936 μM
+RMSE: 0.00024371222189781725
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pkac2_coef</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PKACII&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PKACII error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/ae13374c676f8e9be2e9897f8ea56c61c86d59308529a8e2a753315b823211fc.png" src="_images/ae13374c676f8e9be2e9897f8ea56c61c86d59308529a8e2a753315b823211fc.png" />
+</div>
+</div>
+</section>
+<section id="least-square-fitting-of-pp1-activity">
+<h2>Least-square fitting of PP1 activity<a class="headerlink" href="#least-square-fitting-of-pp1-activity" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_pp1</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PP1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PP1totBA</span><span class="p">)</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">3e-3</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">pp1_fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_pp1</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pp1_coef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">pp1_fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.049191952461111785
+ 0.006361898234866831
+ 0.892713119276668
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;PP1&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Repressible activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pp1_coef</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Minimal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pp1_coef</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Repressive Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pp1_coef</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">pp1_fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PP1
+Repressible activity: 0.049191952461111785
+Minimal activity: 0.892713119276668
+Repressive Michaelis constant: 0.006361898234866831 μM
+RMSE: 3.5405233556999936e-5
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_pp1</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pp1_coef</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PP1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topright</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PP1 error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/07c40cf088d1cdf26930454918832092d8f0f763049ef1ffdf2a684be94ad942.png" src="_images/07c40cf088d1cdf26930454918832092d8f0f763049ef1ffdf2a684be94ad942.png" />
+</div>
+</div>
+</section>
+<section id="fitting-plbp">
+<h2>Fitting PLBp<a class="headerlink" href="#fitting-plbp" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PLBp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PLBtotBA</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PLBp fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/d0cc79998b17d7e4e1e9db1e01a051a762a14c17feeeae61aa4e2fbf09b605a2.png" src="_images/d0cc79998b17d7e4e1e9db1e01a051a762a14c17feeeae61aa4e2fbf09b605a2.png" />
+</div>
+</div>
+<p>First try: Hill function</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_plb</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hil</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_plb</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4-element Vector{Float64}:
+ 0.7923203662040967
+ 0.005936643968064003
+ 1.838668097371868
+ 0.08301221919922296
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;PLBp&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Hill coefficient: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PLBp
+Basal activity: 0.08301221919922296
+Activated activity: 0.7923203662040967
+Michaelis constant: 0.005936643968064003 μM
+Hill coefficient: 1.838668097371868
+RMSE: 0.008419222006247033
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_plb</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PLBp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PLBp error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8bed967b649c0a56e7085abe8ce371ff7e3197661123e4598b3090e0d0ba2a2c.png" src="_images/8bed967b649c0a56e7085abe8ce371ff7e3197661123e4598b3090e0d0ba2a2c.png" />
+</div>
+</div>
+</section>
+<section id="fitting-plmp">
+<h2>Fitting PLMp<a class="headerlink" href="#fitting-plmp" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PLMp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">PLMtotBA</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PLMp fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/9e49db74b301ec10ad0f938b20a70bbeb55aa6587c40b59c464ef314a322e76b.png" src="_images/9e49db74b301ec10ad0f938b20a70bbeb55aa6587c40b59c464ef314a322e76b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_plm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hil</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_plm</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4-element Vector{Float64}:
+ 0.661718959957796
+ 0.008181712259423272
+ 1.3710344582362946
+ 0.1177272479802758
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;PLMp&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Hill coefficient: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PLMp
+Basal activity: 0.1177272479802758
+Activated activity: 0.661718959957796
+Michaelis constant: 0.008181712259423272 μM
+Hill coefficient: 1.3710344582362946
+RMSE: 0.0032738668487186902
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_plm</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PLMp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;PLMp error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/e8a96b84d308db9b2272a6a65e9bb2b5d3ab85080813872025c1c0cecda3bab2.png" src="_images/e8a96b84d308db9b2272a6a65e9bb2b5d3ab85080813872025c1c0cecda3bab2.png" />
+</div>
+</div>
+</section>
+<section id="fitting-tnip">
+<h2>Fitting TnIp<a class="headerlink" href="#fitting-tnip" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">TnIp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">TnItotBA</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;TnIp fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/ee22be8988624d6b615c036ec9ffde79a7b7592ef060f8fca9acca506205cc2c.png" src="_images/ee22be8988624d6b615c036ec9ffde79a7b7592ef060f8fca9acca506205cc2c.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_tni</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hil</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_tni</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4-element Vector{Float64}:
+ 0.7481955048227596
+ 0.007856339604983276
+ 1.6973362451230387
+ 0.06752960258346302
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;TnIp&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Hill coefficient: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>TnIp
+Basal activity: 0.06752960258346302
+Activated activity: 0.7481955048227596
+Michaelis constant: 0.007856339604983276 μM
+Hill coefficient: 1.6973362451230387
+RMSE: 0.007437139678750001
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_tni</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;TnIp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;TnIp error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/5884385bf1c0676451d36ea9010d19612495fc321dfe128c403ebcb62969e807.png" src="_images/5884385bf1c0676451d36ea9010d19612495fc321dfe128c403ebcb62969e807.png" />
+</div>
+</div>
+</section>
+<section id="fitting-lccap">
+<h2>Fitting LCCap<a class="headerlink" href="#fitting-lccap" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">LCCap</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">LCCtotBA</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCap fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/0a4ab67e6032d64d4fe3dc4420096ad056bbb2c6219ee295da1abc4215b2f027.png" src="_images/0a4ab67e6032d64d4fe3dc4420096ad056bbb2c6219ee295da1abc4215b2f027.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_lcc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hil</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_lcc</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.23338203470462332
+ 0.007263353843108377
+ 0.2208194668956709
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;LCCap&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>LCCap
+Basal activity: 0.2208194668956709
+Activated activity: 0.23338203470462332
+Michaelis constant: 0.007263353843108377 μM
+RMSE: 0.00013472586289951688
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_lcc</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCap&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCap error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/b438b39cc0de94a067bbc495e7fa8a703c11b8e8132fc83deb154aa60c407407.png" src="_images/b438b39cc0de94a067bbc495e7fa8a703c11b8e8132fc83deb154aa60c407407.png" />
+</div>
+</div>
+</section>
+<section id="fitting-lccbp">
+<h2>Fitting LCCbp<a class="headerlink" href="#fitting-lccbp" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">LCCbp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">LCCtotBA</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCbp fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/c3589d79b4c910fbdbc8da2ac7eaf0d12e1e00ba302b88e73053b7850ecc5aca.png" src="_images/c3589d79b4c910fbdbc8da2ac7eaf0d12e1e00ba302b88e73053b7850ecc5aca.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_lcc</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.2455890307864609
+ 0.006961128884553168
+ 0.2520079943281469
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;LCCbp&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>LCCbp
+Basal activity: 0.2520079943281469
+Activated activity: 0.2455890307864609
+Michaelis constant: 0.006961128884553168 μM
+RMSE: 0.00013805944672658452
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_lcc</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCbp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCbp error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/dc64749764cd0a4830de5d536957d079f58830acf9559f3c7bc80bf391fecac1.png" src="_images/dc64749764cd0a4830de5d536957d079f58830acf9559f3c7bc80bf391fecac1.png" />
+</div>
+</div>
+</section>
+<section id="fitting-kurp">
+<h2>Fitting KURp<a class="headerlink" href="#fitting-kurp" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">KURp</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">IKurtotBA</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;LCCbp fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/bce4e5f36ac5c09bc27823bc6e5fd686ff6c054df2621271c9450168e2f1c671.png" src="_images/bce4e5f36ac5c09bc27823bc6e5fd686ff6c054df2621271c9450168e2f1c671.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_kur</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hil</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_kur</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.25565724721886424
+ 0.005578158691641229
+ 0.43936401862491953
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;KURp&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>KURp
+Basal activity: 0.43936401862491953
+Activated activity: 0.25565724721886424
+Michaelis constant: 0.005578158691641229 μM
+RMSE: 0.0001484852469948616
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_lcc</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;KURp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;KURp error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/4b2798ab598a4a150dab5d92be013c26dc5d693f9aabe2dea3cd16fc7e7186d9.png" src="_images/4b2798ab598a4a150dab5d92be013c26dc5d693f9aabe2dea3cd16fc7e7186d9.png" />
+</div>
+</div>
+</section>
+<section id="fitting-ryrp">
+<h2>Fitting RyRp<a class="headerlink" href="#fitting-ryrp" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iso</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">RyR_PKAp</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;RyRp fraction&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/22604c511601362de5a7072728b84a736b0e6b68268cd1959326445aa60b667f.png" src="_images/22604c511601362de5a7072728b84a736b0e6b68268cd1959326445aa60b667f.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-2</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+<span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3-element Vector{Float64}:
+ 0.23988671301945835
+ 0.0075098746671775985
+ 0.20539804560868438
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;RyRp&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Michaelis constant: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>RyRp
+Basal activity: 0.20539804560868438
+Activated activity: 0.23988671301945835
+Michaelis constant: 0.0075098746671775985 μM
+RMSE: 7.686883892119039e-5
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ypred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">ypred</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;RyRp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ypred</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="n">ydata</span><span class="p">)</span><span class="w"> </span><span class="o">./</span><span class="w"> </span><span class="n">ydata</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;RyRp error (%)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">layout</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span><span class="w"> </span><span class="mi">600</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/136a54bea33025e4a7a5161bb790ef13679669fb03c67bb006699b8ab649edb4.png" src="_images/136a54bea33025e4a7a5161bb790ef13679669fb03c67bb006699b8ab649edb4.png" />
+</div>
+</div>
+<hr class="docutils" />
+<p><em>This notebook was generated using <a class="reference external" href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "julia-1.11"
+        },
+        kernelOptions: {
+            name: "julia-1.11",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'julia-1.11'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="u0.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Initial conditions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="camk-sens.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">CaMKII system analysis</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-b1ar-system">Setup b1AR system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-active-pkaci">Fitting active PKACI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-active-pkacii">Fitting active PKACII</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#least-square-fitting-of-pp1-activity">Least-square fitting of PP1 activity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-plbp">Fitting PLBp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-plmp">Fitting PLMp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-tnip">Fitting TnIp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-lccap">Fitting LCCap</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-lccbp">Fitting LCCbp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-kurp">Fitting KURp</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fitting-ryrp">Fitting RyRp</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Wen-Wei Tseng
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

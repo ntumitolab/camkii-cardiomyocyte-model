@@ -1,0 +1,1438 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model descriptions &#8212; CaMKII model</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"loader": {"load": ["[tex]/mhchem"]}, "tex": {"packages": {"[+]": ["mhchem"]}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'modeldesc';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Initial conditions" href="u0.html" />
+    <link rel="prev" title="CaMKII cardiomyocyte model" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CaMKII model</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    CaMKII cardiomyocyte model
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Model descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="u0.html">Initial conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iso-sens.html">Sensitivity to ISO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camk-sens.html">CaMKII system analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bcl-effects.html">Pacing response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bcl-data-fit.html">Pacing frequency and CaMKII activity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iso-effects.html">Effects of isoproterenol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ros-effects.html">ROS effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caffeine-effects.html">Caffeine Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime.html">Runtime information</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/ntumitolab/camkii-cardiomyocyte-model" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/modeldesc.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Model descriptions</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-parameters">General parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cytosolic-calcium-diffusion">Cytosolic calcium diffusion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#endoplasmic-reticulum">Endoplasmic reticulum</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sarcolemmal-ion-channels">Sarcolemmal ion channels</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sodium-channels">Sodium channels</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#potassium-currents">Potassium currents</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calcium-currents">Calcium currents</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#na-k-pump">Na-K pump</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#beta-adrenergic-system">Beta-adrenergic system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#camkii-system">CaMKII system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-conditions">Initial conditions</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="model-descriptions">
+<h1>Model descriptions<a class="headerlink" href="#model-descriptions" title="Link to this heading">#</a></h1>
+<p>Hill equation.</p>
+<div class="math notranslate nohighlight">
+\[
+H(x, k) := \frac{x}{x + k}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+H(x, k, n) := \frac{x^n}{x^n + k^n}
+\]</div>
+<p>Relative exponential function. The definition here is reciprocal to the Python one.</p>
+<div class="math notranslate nohighlight">
+\[
+exprel(x) := \frac{x}{ \exp(x) - 1}
+\]</div>
+<p>Logistic function</p>
+<div class="math notranslate nohighlight">
+\[
+expit(x) := \frac{1}{1 + \exp(-x)}
+\]</div>
+<p>Thermal voltage.</p>
+<div class="math notranslate nohighlight">
+\[
+V_T = \frac{RT}{F} \approx 26.7 \text{mV}
+\]</div>
+<p>GHK flux equation.</p>
+<div class="math notranslate nohighlight">
+\[
+GHK(p, z, V_m, S_i, S_o) := pzF \cdot exprel(-zV_m/V_T) \cdot (S_i - S_o \exp(-zV_m/V_T))
+\]</div>
+<p>Ion concentrations:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+na_x &amp;= \mathrm{[Na^+]_x} \\
+k_x &amp;= \mathrm{[K^+]_x} \\
+ca_x &amp;= \mathrm{[Ca^{2+}]_x} \\
+\end{align}
+\end{split}\]</div>
+<p>Reversal potentials:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+E_{Na} &amp;= V_T \ln \frac{na_o}{na_i} \\
+E_{K } &amp;= V_T \ln\frac{k_o}{k_i}  \\
+E_{Ca} &amp;= 0.5V_T \ln \frac{ca_o}{ca_{sl}} \\
+E_{Kr}  &amp;= V_T \ln\left( \frac{0.98 k_o + 0.02na_o}{0.98 k_i + 0.02a_i} \right) \\
+\end{align}
+\end{split}\]</div>
+<section id="general-parameters">
+<h2>General parameters<a class="headerlink" href="#general-parameters" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(r_{SR}\)</span></p></td>
+<td><p>6</p></td>
+<td><p>μm</p></td>
+<td><p>Radius of SR</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(r_{SL}\)</span></p></td>
+<td><p>10.5</p></td>
+<td><p>μm</p></td>
+<td><p>Radius of sarcolemma</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(V_{SR}\)</span></p></td>
+<td><p>0.0903</p></td>
+<td><p>pL</p></td>
+<td><p>SR volume</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(V_{NSR}\)</span></p></td>
+<td><p>0.9<span class="math notranslate nohighlight">\(V_{SR}\)</span></p></td>
+<td><p>pL</p></td>
+<td><p>Network SR volume</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(V_{JSR}\)</span></p></td>
+<td><p>0.1<span class="math notranslate nohighlight">\(V_{JSR}\)</span></p></td>
+<td><p>pL</p></td>
+<td><p>Junctional SR volume</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(V_{subSR}\)</span></p></td>
+<td><p>0.046</p></td>
+<td><p>pL</p></td>
+<td><p>Sub-SR volume</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(V_{subSL}\)</span></p></td>
+<td><p>0.137</p></td>
+<td><p>pL</p></td>
+<td><p>Sub-sarcolemma volume</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(V_{myo}\)</span></p></td>
+<td><p>3.944</p></td>
+<td><p>pL</p></td>
+<td><p>Cytosolic volume</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(A_{cap}\)</span></p></td>
+<td><p>1385.44</p></td>
+<td><p>μm²</p></td>
+<td><p>Cell membrane area</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(C_m\)</span></p></td>
+<td><p>1</p></td>
+<td><p>μFcm⁻²</p></td>
+<td><p>Cell membrane capacitance</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(ca_o\)</span></p></td>
+<td><p>1.796</p></td>
+<td><p>mM</p></td>
+<td><p>External calcium concentration</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(na_o\)</span></p></td>
+<td><p>154.578</p></td>
+<td><p>mM</p></td>
+<td><p>External sodium concentration</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(k_o\)</span></p></td>
+<td><p>5.366</p></td>
+<td><p>mM</p></td>
+<td><p>External potassium concentration</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\mathrm{[ATP]}\)</span></p></td>
+<td><p>5</p></td>
+<td><p>mM</p></td>
+<td><p>ATP concentration</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="cytosolic-calcium-diffusion">
+<h2>Cytosolic calcium diffusion<a class="headerlink" href="#cytosolic-calcium-diffusion" title="Link to this heading">#</a></h2>
+<p>Cytosolic calcium is diffused between sub-sarcolemma (SL) and sub-sarcoplasmic (SR) spaces.</p>
+<p>Calcium buffering in each compartment:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\beta_{Ca,x} &amp;= \left(1 + \frac{\Sigma Trpn \cdot Km_{Trpn, 2}}{(ca_x + Km_{Trpn, 2})^2}  + \frac{\Sigma Cmdn \cdot Km_{Cmdn}}{(ca_x + Km_{Cmdn, 2})^2} \right)^{-1} \\
+Km_{Trpn, 2} &amp;= \frac{Km_{Trpn}}{fPKA_{TnI}}  \\
+fPKA_{TnI} &amp;= 1.61 - 0.61 \frac{1 - TnI_{PKAp}}{1 - fracTnIp_0}
+\end{align}
+\end{split}\]</div>
+<p>Calcium diffusion space is divided into <span class="math notranslate nohighlight">\((r_{SL} - r_{SR}) / dx\)</span> compartments.</p>
+<p>For i = 2 to <span class="math notranslate nohighlight">\((r_{SL} - r_{SR}) / dx - 1\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\frac{d}{dt}ca_i &amp;= \frac{D_{ca} \cdot \beta_{Ca,i}}{dx^2 \cdot j_i} ((j_i + 1)ca_{i+1} - 2j_i \cdot ca_{i} + (j_i - 1)ca_{i-1}) \\
+j_i &amp;= r_{SR} / dx + i - 1
+\end{align}
+\end{split}\]</div>
+<p>Otherwise,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\frac{d}{dt}ca_1 &amp;= \frac{D_{ca} \cdot \beta_{Ca,1}}{dx^2 \cdot j_1} ((j_1 + 1)ca_{2} - 2j_1 \cdot ca_{1} + (j_1 - 1)ca_{1} + J_{CaSR})  \\
+\frac{d}{dt}ca_n &amp;= \frac{D_{ca} \cdot \beta_{Ca,n}}{dx^2 \cdot j_n} ((j_n + 1)ca_{n} - 2j_n \cdot ca_{n} + (j_n - 1)ca_{n-1} + J_{CaSL})  \\
+j_1 &amp;= r_{SR} / dx \\
+j_n &amp;= r_{SL} / dx \\
+ca_{sr} &amp;= ca_1 \\
+ca_{sl} &amp;= ca_n \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\Sigma Trpn\)</span></p></td>
+<td><p>35</p></td>
+<td><p>μM</p></td>
+<td><p>Total troponin content</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Km_{Trpn}\)</span></p></td>
+<td><p>0.5</p></td>
+<td><p>μM</p></td>
+<td><p>Half-saturation Ca concentration</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\Sigma Cmdn\)</span></p></td>
+<td><p>30</p></td>
+<td><p>μM</p></td>
+<td><p>Total calmodulin content</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Km_{Cmdn}\)</span></p></td>
+<td><p>2.38</p></td>
+<td><p>μM</p></td>
+<td><p>Half-saturation Ca concentration</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(D_{ca}\)</span></p></td>
+<td><p>7</p></td>
+<td><p>μm²ms⁻¹</p></td>
+<td><p>Calcium diffusion rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(dx\)</span></p></td>
+<td><p>0.1</p></td>
+<td><p>μm</p></td>
+<td><p>Discretization distance</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(fracTnIp_0\)</span></p></td>
+<td><p>0.062698</p></td>
+<td><p>-</p></td>
+<td><p>Baseline effect of PKA on Troponin</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="endoplasmic-reticulum">
+<h2>Endoplasmic reticulum<a class="headerlink" href="#endoplasmic-reticulum" title="Link to this heading">#</a></h2>
+<p>Including ryanodine receptor (RyR) flux (Jrel), SERCA flux (Jup), SR leakage (Jleak), and calcium diffusion from NSR to JSR (Jtr).</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+J_{CaSR} &amp;= \frac{V_{NSR}}{V_{subSR}} (J_{leak} - J_{up}) + J_{rel} \\
+J_{rel} &amp;= k_{RyR} \cdot PO1_{RyR} \cdot (ca_{JSR} - ca_{sr}) \\
+J_{tr} &amp;= ktrCa_{SR} (ca_{JSR} - ca_{NSR}) \\
+J_{leak} &amp;= 0.5 (1 + 5 RyR_{CKp}) kSR_{leak} \\
+J_{up} &amp;= Vmax_{SR} \frac{fSR - rSR}{1 + fSR + rSR} \\
+\frac{d}{dt} PO1_{RyR} &amp;= kapos_{RyR} \cdot H(ca_{sr}, Km_{RyR}, 4) \cdot PC1_{RyR} - kaneg_{RyR} \cdot PO1_{RyR} \\
+\frac{d}{dt} ca_{JSR} &amp;= \beta_{SR} (-J_{rel} V_{subSR} + J_{tr} V_{NSR}) / V_{JSR} \\
+\frac{d}{dt} ca_{NSR} &amp;= J_{up} - J_{leak} - J_{tr} \\
+\beta_{SR} &amp;= \frac{1}{1 + \frac{\Sigma Csqn Km_{csqn}}{(ca_{JSR} + Km_{csqn})^2}} \\
+fSR &amp;= \left( \frac{ca_{sr}}{Kmfp} \right)^2 \\
+rSR &amp;= \left( \frac{ca_{NSR}}{Kmr_{SR}} \right)^2 \\
+KmRyR &amp;= 3.51 \cdot expit(-\frac{ca_{JSR} - 530}{200}) + 0.25 \\
+PC1_{RyR} &amp;= 1 - PO1_{RyR}  \\
+Kmfp &amp;= \min(fCKII_{PLB}, fPKA_{PLB}) \\
+fPKA_{PLB} &amp;= (1 - 0.5531) \frac{1 - fracPLBp}{fracPKA_PLBo} + 0.5531 \\
+fCKII_{PLB} &amp;= (1 - 0.5 * fracPLB_{CKp})  \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(k_{RyR}\)</span></p></td>
+<td><p>20</p></td>
+<td><p>Hz</p></td>
+<td><p>RyR permeability</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(kapos_{RyR}\)</span></p></td>
+<td><p>1000</p></td>
+<td><p>Hz</p></td>
+<td><p>RyR state transition rate</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(kaneg_{RyR}\)</span></p></td>
+<td><p>160</p></td>
+<td><p>Hz</p></td>
+<td><p>RyR state transition rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Vmax_{SR}\)</span></p></td>
+<td><p>0.9996</p></td>
+<td><p>μM/ms</p></td>
+<td><p>SERCA reaction rate</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(Kmf_{SR}\)</span></p></td>
+<td><p>0.5</p></td>
+<td><p>μM</p></td>
+<td><p>Calcium affinity for SERCA</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Kmr_{SR}\)</span></p></td>
+<td><p>7000<span class="math notranslate nohighlight">\(Kmf_{SR}\)</span></p></td>
+<td><p>μM</p></td>
+<td><p>Calcium affinity for SERCA</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(kSR_{leak}\)</span></p></td>
+<td><p>0.005</p></td>
+<td><p>Hz</p></td>
+<td><p>SR leak rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(ktrCa_{SR}\)</span></p></td>
+<td><p>50</p></td>
+<td><p>Hz</p></td>
+<td><p>Calcium dissusion rate from NSR to JSR</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\Sigma Csqn\)</span></p></td>
+<td><p>24.750</p></td>
+<td><p>mM</p></td>
+<td><p>Calsequestrin concentration</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Km_{csqn}\)</span></p></td>
+<td><p>0.8</p></td>
+<td><p>mM</p></td>
+<td><p>Calcium affinity for calsequestrin</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(fracPKA_{PLBo}\)</span></p></td>
+<td><p>0.920245</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="sarcolemmal-ion-channels">
+<h2>Sarcolemmal ion channels<a class="headerlink" href="#sarcolemmal-ion-channels" title="Link to this heading">#</a></h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+C_m \frac{d}{dt} \mathrm{V_m} &amp;= -(I_{Nab} + I_{NaCa} + I_{CaL} + I_{CaT} + I_{f} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{Na} + I_{NaK} + I_{Cab} + I_{stim}) \\
+\frac{d}{dt} \mathrm{na_i} &amp;= -(I_{fNa} + I_{Nab} + I_{Na} + 3 I_{NaCa} + 3 I_{NaK}) \frac{A_{cap} C_m}{ F V_{myo}} \\
+\frac{d}{dt} \mathrm{k_i} &amp;= -(I_{fK} + I_{to} + I_{K1} + I_{Ks} + I_{Kr} + I_{stim} - 2 I_{NaK}) \frac{A_{cap} C_m}{ F V_{myo}}  \\
+\end{align}
+\end{split}\]</div>
+<section id="sodium-channels">
+<h3>Sodium channels<a class="headerlink" href="#sodium-channels" title="Link to this heading">#</a></h3>
+<p>Including fast sodium (<span class="math notranslate nohighlight">\(\mathrm{I_{Na}}\)</span>) and background sodium (<span class="math notranslate nohighlight">\(\mathrm{I_{Na,b}}\)</span>) currents.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\mathrm{I_{Na}} &amp;= \bar G_{Na} \cdot m_{Na}^{3} \cdot h_{Na} \cdot j_{Na} (V_m-E_{Na}) \\
+\mathrm{I_{Na,b}} &amp;= \bar G_{Na,b} (V_m - E_{Na}) \\
+\frac{dm_{Na}}{dt} &amp;= \alpha_{m} - m_{Na}(\alpha_{m} + \beta_{m}) \\
+\frac{dh_{Na}}{dt} &amp;= \alpha_{h} - h_{Na}(\alpha_{h} + \beta_{h}) \\
+\frac{dj_{Na}}{dt} &amp;= \alpha_{j} - m_{Na}(\alpha_{j} + \beta_{j}) \\
+\alpha_{m} &amp;= 3.2 \mathrm{ms}^{-1} exprel(-(V_m + 47.13) / 10)  \\
+\beta_{m} &amp;= 0.08 \mathrm{ms}^{-1} \exp(-V_m / 11) \\
+\alpha_{h} &amp;= 0.135 \text{ms}^{-1} \exp(-(V_m+80)/6.8) \\
+\beta_{h} &amp;= 7.6923 \mathrm{ms}^{-1} expit((V_m+10.66)/11.1) \\
+\alpha_{j} &amp;= (-127140 \exp(0.2444 V_m)-3.474 \cdot 10^{-5}\exp(-0.04391 V_m))\frac{V_m + 37.78}{1 + \exp(0.311( V_m + 79.23))} / \text{ms} \\
+\beta_{j} &amp;= 0.3 \mathrm{ms}^{-1} \exp(-2.535 \cdot 10^{-7}V_m) expit(0.1(V_m + 32)) \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(G_{Na}\)</span></p></td>
+<td><p>12.8</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Fast sodium channels conductance</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(G_{Na,b}\)</span></p></td>
+<td><p>0.0026</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Background sodium channels conductance</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="potassium-currents">
+<h3>Potassium currents<a class="headerlink" href="#potassium-currents" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\mathrm{I_{K1}}  &amp;= \mathrm{G_{K1}} \cdot H(\mathrm{k_o}, 210)  \frac{ ( V_m - 6.1373 - E_K )}{0.1653 + \exp(0.0319 (V_m - 6.1373 - E_K))} \\
+\mathrm{I_{to}}  &amp;= G_t \cdot i_r (( 1 - f_{is} ) i_{s,slow} + f_{is} i_s )(
+ V_m - E_K) \\
+\mathrm{I_{Ks}}  &amp;= 2 G_{Ks} \cdot i_{nKs}^{2}( 0.68804 + 0.71283 \mathrm{IKUR_{PKAp}}) (V_m - E_K) \\
+\mathrm{I_{Kr}}  &amp;= G_{Kr} \cdot i_{OK} (V_m - E_{Kr})   \\
+\mathrm{I_{fNa}} &amp;= f_{Na} \cdot G_f \cdot i_y \cdot ( V_m - E_{Na}) \\
+\mathrm{I_{fK}}  &amp;= (1 - f_{Na}) \cdot G_f \cdot i_y \cdot ( V_m - E_K ) \\
+\mathrm{I_{f}}  &amp;= \mathrm{I_{fK}} + \mathrm{I_{fNa}} \\
+\frac{d i_r }{dt} &amp;= \frac{ r_∞  - i_r }{τ_r} \\
+\frac{d i_s }{dt} &amp;= \frac{ s_∞  - i_s }{τ_s} \\
+\frac{d i_{s,slow} }{dt} &amp;= \frac{ slow_∞ - i_{s,slow} }{τ_{s,slow} }
+\\
+\frac{d i_{nKs} }{dt} &amp;= \frac{ nks_∞ - i_{nKs} }{τ_{nKs}} \\
+\frac{d i_{CK1} }{dt} &amp;= k_{b, IKr} i_{CK2}  - k_{f, IKr} i_{CK1}  + 0.022348 e^{0.01176 V_m } i_{CK0}  - 0.047002 e^{ - 0.0631 V_m } i_{CK1}  \\
+\frac{d i_{CK2} }{dt} &amp;= - k_{b, IKr} i_{CK2}  + k_{f, IKr} i_{CK1}  - 0.013733 i_{CK2}  e^{0.038198 V_m} + 6.89 \cdot 10^{-5} e^{ - 0.04178 V_m} i_{OK}  \\
+\frac{d i_{OK} }{dt} &amp;= 0.006497 i_{IK} e^{-0.03268 V_m} + 0.013733 i_{CK2}  e^{0.038198 V_m} - 6.89 \cdot 10^{-5} e^{-0.04178 V_m} i_{OK} - 0.090821 e^{0.023391 V_m} i_{OK}  \\
+\frac{d i_{IK} }{dt} &amp;=  - 0.006497 i_{IK}  e^{ - 0.03268 V_m } + 0.090821 e^{0.023391 V_m } i_{OK}  \\
+\frac{d i_y}{dt} &amp;= \frac{y_∞ - i_y}{τ_y} \\
+\end{align}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+s_∞ &amp;= expit((V_m + 31.97156) / -4.64291) \\
+r_∞ &amp;= expit((V_m - 3.55716) / 14.61299) \\
+slow_∞ &amp;= s_∞  \\
+nks_∞ &amp;= \frac{\alpha_{nks}}{\alpha_{nks} + \beta_{nks}} \\
+\alpha_{nks} &amp;= 0.00000481333 / 0.128 * exprel(-0.128 * (V + 26.5)) \\
+\beta_{nks} &amp;= 0.0000953333 * \exp(-0.038 * (V + 26.5)) \\
+τ_r &amp;= \frac{1000 \text{ms}}{45.16 \exp(0.03577( V_m + 50)) + 98.9 \exp( - 0.1 ( V_m + 38))}
+\\
+τ_s &amp;= 8.1\text{ms} + 350\text{ms} \cdot \exp( - \frac{1}{225}(V_m + 70)^{2}) \\
+τ_{s,slow} &amp;= 72.4\text{ms} + 3700\text{ms} \cdot \exp( - \frac{1}{900}( V_m + 70 )^{2}) \\
+1 &amp;= i_{IK}  + i_{CK2}  + i_{OK}  + i_{CK0}  + i_{CK1}  \\
+y_∞ &amp;= expit(-0.15798 (V_m + 78.65)) \\
+τ_y  &amp;= \frac{1000 \text{ms}}{0.56236 \exp(-0.070472 (V_m + 75)) + 0.11885 \exp(0.035249 ( V_m + 75))} \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(G_{K1}\)</span></p></td>
+<td><p>0.0515</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Potassium channels conductance</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(G_t\)</span></p></td>
+<td><p>0.1</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Transient outward potassium channels conductance</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(G_{Ks}\)</span></p></td>
+<td><p>0.05</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Potassium channels conductance</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(τ_{nKs}\)</span></p></td>
+<td><p>750</p></td>
+<td><p>ms</p></td>
+<td><p>Potassium channels time scale</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(G_{Kr}\)</span></p></td>
+<td><p>0.06</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Potassium channels conductance</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(k_{f, IKr}\)</span></p></td>
+<td><p>0.023761</p></td>
+<td><p>1/ms</p></td>
+<td><p>Potassium channels transition rate</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(k_{b, IKr}\)</span></p></td>
+<td><p>0.036778</p></td>
+<td><p>1/ms</p></td>
+<td><p>Potassium channels transition rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(G_f\)</span></p></td>
+<td><p>0.021</p></td>
+<td><p>mS/μF</p></td>
+<td><p>Funny current conductance</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(f_{Na}\)</span></p></td>
+<td><p>0.021</p></td>
+<td><p>-</p></td>
+<td><p>Funny current sodium fraction</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(f_{is}\)</span></p></td>
+<td><p>0.706</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="calcium-currents">
+<h3>Calcium currents<a class="headerlink" href="#calcium-currents" title="Link to this heading">#</a></h3>
+<p>L-type calcium channels, T-type calcium channels, and background calcium currents.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+J_{CaSL} &amp;= (2 I_{NaCa} - I_{CaL} - I_{CaT} - I_{Cab}) \frac{A_{CAP} C_m}{2 F V_{subSL}} \\
+\mathrm{I_{CaL}}  &amp;= \mathrm{ICa_{scale}} \cdot G_{CaL} \cdot i_d \cdot i_f \cdot i_fca \cdot GHK(G_{CaL}, 2, V_m, \mathrm{ca_{sl}}, 0.341 \mathrm{ca_o}) \\
+\mathrm{I_{CaT}} &amp;= \mathrm{gCaT} \cdot i_b \cdot i_g ( V_m + 106.5 - \mathrm{E_Ca}) \\
+\mathrm{I_{Cab}} &amp;= \mathrm{gCab} (V_m - \mathrm{E_Ca}) \\
+\frac{d i_d }{dt} &amp;= \frac{d_∞  - i_d}{τ_d} \\
+\frac{d i_f }{dt} &amp;= \frac{f_∞  - i_f}{τ_f} \\
+\frac{d i_{fca} }{dt} &amp;= \frac{(fca_∞ - i_{fca}) \left( 1 - \left( fca_∞  &gt; i_{fca}  \right) \left( V_m  &gt; -60 \text{mV} \right) \right)}{τ_{fca}} \\
+\frac{d i_b }{dt} &amp;= \frac{b_∞ - i_b}{τ_b} \\
+\frac{d i_g }{dt} &amp;= \frac{g_∞ - i_g}{τ_g} \\
+\mathrm{ICa_{scale}}  &amp;= \mathrm{ICa_{scale, 0}} \left( 1 + \frac{0.56}{1 - \frac{\mathrm{fracLCCbpISO}}{\mathrm{fracLCCbp0}}} \right) \\
+\mathrm{I_{NaCa}}  &amp;= \mathrm{kNaCa} \cdot \mathrm{ICa_{scale}} \frac{\mathrm{na_i}^{3} \mathrm{ca_o} \exp( \mathrm{gNaCa} V_m /V_T ) - \mathrm{na_o}^{3} \mathrm{ca_{sl}} \mathrm{fNaCa} \exp (( \mathrm{gNaCa} - 1 ) V_m F /RT )} {1 + \left(\mathrm{na_i}^3 \mathrm{ca_o} + \mathrm{na_o}^{3} \mathrm{ca_{sl}} \mathrm{fNaCa} \right) \mathrm{dNaCa}} \\
+d_∞ &amp;= expit((V + 11.1) / 7.2) \\
+τ_d &amp;= (\alpha_d \beta_d + \gamma_d) \\
+\alpha_d &amp;= 1.4 expit((V_m + 35) / 13) + 0.25 \\
+\beta_d &amp;= 1.4 expit(-(V_m + 5) / 5) \\
+\gamma_d &amp;= expit((V_m - 50) / 20) \\
+f_∞ &amp;= expit(-(V_m + 23.3) / 5.4) \\
+τ_f &amp;= 120 + 165 * expit((V_m - 25) / 10) + 1125 \exp( -(V_m + 27)^{2} / 240) \\
+fca_∞  &amp;= (\alpha_{fca} + \beta_{fca} + \gamma_{fca} + 0.23) / 1.46 \\
+\alpha_{fca} &amp;= H(0.4875, \mathrm{ca_{sl}}, 8) \\
+\beta_{fca} &amp;= 0.1 expit(-(\mathrm{ca_{sl}} - 0.5) / 0.1) \\
+\gamma_{fca} &amp;= 0.2 expit(-(\mathrm{ca_{sl}} - 0.75) / 0.8) \\
+b_∞ &amp;= expit((V_m + 37.49098) / 5.40634) \\
+τ_b &amp;= 0.6 + 5.4 expit(-0.03 (V_m + 100)) \\
+g_∞ &amp;= expit(-(V_m + 66) / 6) \\
+τ_g &amp;= 1 + 40 expit(-0.08 (V_m + 65)) \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>fNaCa</p></td>
+<td><p>1</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>kNaCa</p></td>
+<td><p>2.268 * 10⁻¹⁶</p></td>
+<td><p>μAμF⁻¹μM⁻⁴</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>dNaCa</p></td>
+<td><p>10⁻¹⁶</p></td>
+<td><p>μM⁻⁴</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>gNaCa</p></td>
+<td><p>0.5</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(G_{CaL}\)</span></p></td>
+<td><p>6.3 * 10⁻⁵</p></td>
+<td><p>m³s⁻¹F⁻¹</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(τ_{fca}\)</span></p></td>
+<td><p>10</p></td>
+<td><p>ms</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(g_{CaT}\)</span></p></td>
+<td><p>0.2</p></td>
+<td><p>mSμF⁻¹</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(g_{Cab}\)</span></p></td>
+<td><p>0.0008</p></td>
+<td><p>mSμF⁻¹</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(ICascale_0\)</span></p></td>
+<td><p>0.95</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(fracLCCbp_0\)</span></p></td>
+<td><p>0.250657</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(fracLCCbpISO\)</span></p></td>
+<td><p>0.525870</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="na-k-pump">
+<h3>Na-K pump<a class="headerlink" href="#na-k-pump" title="Link to this heading">#</a></h3>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\mathrm{I_{NaK}} &amp;= I_{NaK}^{max} fNaK \frac{\mathrm{k_o}}{ \mathrm{k_o} + KmKo_{NaK} } \frac{\mathrm{na_i}^{nNaK}}{ \mathrm{na_i}^{nNaK} + KmNai_{NaK}^{nNaK} } \\
+fNaK &amp;= (1 + 0.1245 \exp(-0.1 V_m/ V_T) + 0.0365 \sigma_{NaK} \exp(V_m/V_T))^{-1} \\
+\sigma_{NaK} &amp;= (\exp(\mathrm{na_i} / 67.3 \text{mM}) - 1) / 7
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(I_{NaK}^{max}\)</span></p></td>
+<td><p>2.7</p></td>
+<td><p>μA/μF</p></td>
+<td><p>Maximal rate of Na-K pump</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(KmNai_{NaK}\)</span></p></td>
+<td><p>18.6</p></td>
+<td><p>mM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(KmKo_{NaK}\)</span></p></td>
+<td><p>1.5</p></td>
+<td><p>mM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(nNaK\)</span></p></td>
+<td><p>3.2</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="beta-adrenergic-system">
+<h2>Beta-adrenergic system<a class="headerlink" href="#beta-adrenergic-system" title="Link to this heading">#</a></h2>
+<p>Activities are fitted to the steady-state activities in the Morroti model.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+f_{PKACI} &amp;= PKACI_0 + PKACI_{act} H(ISO, PKACI_{KM}) \\
+f_{PKACII} &amp;= PKACII_0 + PKACII_{act} H(ISO, PKACII_{KM}) \\
+f_{PP1} &amp;= PP1_0 + PP1_{act} H(PP1_{KI}, ISO) \\
+f_{PLBp} &amp;= PLBp_0 + PLBp_{act} H(ISO, PLBp_{KM}, PLBp_{nHill}) \\
+f_{PLMp} &amp;= PLMp_0 + PLMp_{act} H(ISO, PLMp_{KM}, PLMp_{nHill}) \\
+TnI_{PKAp} &amp;= TnIp_0 + TnIp_{act} H(ISO, TnIp_{KM}, TnIp_{nHill}) \\
+LCCa_{PKAp} &amp;= LCCap_0 + LCCap_{act} H(ISO, LCCap_{KM}) \\
+LCCb_{PKAp} &amp;= LCCbp_0 + LCCbp_{act} H(ISO, LCCbp_{KM}) \\
+KUR_{PKAp} &amp;= KURp_0 + KURp_{act} H(ISO, KURp_{KM}) \\
+RyR_{PKAp} &amp;= RyRp_0 + RyRp_{act} H(ISO, RyRp_{KM}) \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PKACI_0\)</span></p></td>
+<td><p>0.0734</p></td>
+<td><p>-</p></td>
+<td><p>Basal PKACI activity</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PKACI_{act}\)</span></p></td>
+<td><p>0.1995</p></td>
+<td><p>-</p></td>
+<td><p>Activated PKACI activity</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PKACI_{KM}\)</span></p></td>
+<td><p>0.0139</p></td>
+<td><p>μM</p></td>
+<td><p>PKACI sesitivity to iso</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PKACII_0\)</span></p></td>
+<td><p>0.1840</p></td>
+<td><p>-</p></td>
+<td><p>Basal PKACII activity</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PKACII_{act}\)</span></p></td>
+<td><p>0.3444</p></td>
+<td><p>-</p></td>
+<td><p>Activated PKACII activity</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PKACII_{KM}\)</span></p></td>
+<td><p>0.0103</p></td>
+<td><p>μM</p></td>
+<td><p>PKACII sesitivity to iso</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PP1_0\)</span></p></td>
+<td><p>0.8927</p></td>
+<td><p>-</p></td>
+<td><p>Basal PP1 activity</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PP1_{act}\)</span></p></td>
+<td><p>0.0492</p></td>
+<td><p>-</p></td>
+<td><p>Activated PP1 activity</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PP1_{KI}\)</span></p></td>
+<td><p>0.00637</p></td>
+<td><p>μM</p></td>
+<td><p>PP1 sesitivity to iso</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PLBp_0\)</span></p></td>
+<td><p>0.0824</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PLBp_{act}\)</span></p></td>
+<td><p>0.7961</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PLBp_{KM}\)</span></p></td>
+<td><p>0.00597</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PLBp_{nHill}\)</span></p></td>
+<td><p>1.8167</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PLMp_0\)</span></p></td>
+<td><p>0.1172</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PLMp_{act}\)</span></p></td>
+<td><p>0.6645</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(PLMp_{KM}\)</span></p></td>
+<td><p>0.00823</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(PLMp_{nHill}\)</span></p></td>
+<td><p>1.35784</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(TnIp_0\)</span></p></td>
+<td><p>0.0669</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(TnIp_{act}\)</span></p></td>
+<td><p>0.7524</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(TnIp_{KM}\)</span></p></td>
+<td><p>0.007913</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(TnIp_{nHill}\)</span></p></td>
+<td><p>1.6736</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(LCCap_0\)</span></p></td>
+<td><p>0.2205</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(LCCap_{act}\)</span></p></td>
+<td><p>0.2339</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(LCCap_{KM}\)</span></p></td>
+<td><p>0.00726</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(LCCbp_0\)</span></p></td>
+<td><p>0.2517</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(LCCbp_{act}\)</span></p></td>
+<td><p>0.2461</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(LCCbp_{KM}\)</span></p></td>
+<td><p>0.00695</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(KURp_0\)</span></p></td>
+<td><p>0.4390</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(KURp_{act}\)</span></p></td>
+<td><p>0.2563</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(KURp_{KM}\)</span></p></td>
+<td><p>0.00557</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(RyRp_0\)</span></p></td>
+<td><p>0.2054</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(RyRp_{act}\)</span></p></td>
+<td><p>0.2399</p></td>
+<td><p>-</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(RyRp_{KM}\)</span></p></td>
+<td><p>0.0075135</p></td>
+<td><p>μM</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="camkii-system">
+<h2>CaMKII system<a class="headerlink" href="#camkii-system" title="Link to this heading">#</a></h2>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{align}
+\mathrm{ca_{avg}} &amp;= \frac{\sum^N_{i=1} \mathrm{ca_i}}{N} \\
+CaMK_{act} &amp;= 1 - CaMK \\
+CaMK &amp;= 1 - (CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX) \\
+\frac{d}{dt} CaMKB &amp;= -v_{IB} - v_{BP} - v_{BBo} \\
+\frac{d}{dt} CaMKP &amp;= v_{AP} + v_{BP} - v_{PPo} \\
+\frac{d}{dt} CaMKA &amp;= -v_{AP} - v_{AI} - v_{A1A2} + v_{AoA} \\
+\frac{d}{dt} CaMKA2 &amp;= v_{A1A2} \\
+\frac{d}{dt} CaMKBOX &amp;= v_{IoBo} - v_{BoPo} + v_{BBo} \\
+\frac{d}{dt} CaMKPOX &amp;= v_{AoPo} + v_{BoPo} + v_{PPo} \\
+\frac{d}{dt} CaMKAOX &amp;= -v_{AoPo} - v_{AoA} - v_{AoIo} \\
+\frac{d}{dt} CaMKOX &amp;= -v_{IoBo} + v_{AoIo} - v_{IoI} \\
+v_{IB} &amp;= k_f \cdot CaMK - k_b \cdot CaMKB \\
+v_{IoBo} &amp;= k_f \cdot r_{CaMKO} \cdot CaMKOX - k_b \cdot CaMKBOX \\
+v_{AP} &amp;= k_f \cdot r_{CaMKP} \cdot CaMKA - k_b \cdot CaMKP \\
+v_{AoPo} &amp;= k_f \cdot r_{CaMKP} \cdot CaMKAOX - k_b \cdot CaMKPOX \\
+camkb_\infty &amp;= kfa_{CaMK} H(\mathrm{ca_{avg}}, kmCa_{CaMK}, nCa_{CaMK}) + kfb_{CaMK} \\
+k_f &amp;= v_{CaMK} \cdot binf \\
+k_b &amp;= v_{CaMK} \cdot (1 - binf) \\
+kph &amp;= kphos_{CaMK} \cdot aMK_{act}  \\
+v_{BP} &amp;= kph \cdot CaMKB - kdeph_{CaMK} \cdot CaMKP \\
+v_{BoPo} &amp;= kph \cdot CaMKBOX - kdeph_{CaMK} \cdot CaMKPOX \\
+v_{A1A2} &amp;= k_{P1P2} \cdot CaMKA - k_{P2P1} \cdot CaMKA2 \\
+v_{AI} &amp;= kdeph_{CaMK} \cdot CaMKA \\
+v_{AoIo} &amp;= kdeph_{CaMK} \cdot CaMKAOX \\
+v_{BBo} &amp;= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKB - krd_{CaMK} \cdot CaMKBOX \\
+v_{PPo} &amp;= kox_{CaMK} \cdot \mathtt{ROS} \cdot CaMKP - krd_{CaMK} \cdot CaMKPOX \\
+v_{IoI} &amp;= krd_{CaMK} \cdot CaMKOX \\
+v_{AoA} &amp;= krd_{CaMK} \cdot CaMKAOX \\
+\end{align}
+\end{split}\]</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Units</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(v_{CaMK}\)</span></p></td>
+<td><p>3</p></td>
+<td><p>Hz</p></td>
+<td><p>CaMK-CaM binding rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(r_{CaMKO}\)</span></p></td>
+<td><p>0</p></td>
+<td><p>-</p></td>
+<td><p>Oxidized CaMK-CaM binding ratio</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(r_{CaMKP}\)</span></p></td>
+<td><p>0</p></td>
+<td><p>-</p></td>
+<td><p>Phosphorylated CaMK-CaM binding ratio</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(kb_{CaMKP}\)</span></p></td>
+<td><p>1/3</p></td>
+<td><p>Hz</p></td>
+<td><p>Dissociation rate of CaMKP</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(kfa_{CaMK}\)</span></p></td>
+<td><p>0.4393</p></td>
+<td><p>-</p></td>
+<td><p>Activated CaMK-CaM binding ratio</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(kfb_{CaMK}\)</span></p></td>
+<td><p>0.0056</p></td>
+<td><p>-</p></td>
+<td><p>Basal CaMK-CaM binding ratio</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(kmCa_{CaMK}\)</span></p></td>
+<td><p>0.9716</p></td>
+<td><p>μM</p></td>
+<td><p>Calcium affinity to CaMK-CaM</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(nCa_{CaMK}\)</span></p></td>
+<td><p>2.293</p></td>
+<td><p>-</p></td>
+<td><p>Hill coefficient for calcium</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(kphos_{CaMK}\)</span></p></td>
+<td><p>5</p></td>
+<td><p>Hz</p></td>
+<td><p>Autophosphorylation rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(kdeph_{CaMK}\)</span></p></td>
+<td><p>1/6</p></td>
+<td><p>Hz</p></td>
+<td><p>Dephosphorylation rate</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(k_{P1P2}\)</span></p></td>
+<td><p>1/60</p></td>
+<td><p>Hz</p></td>
+<td><p>Second autophosphorylation rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(k_{P2P1}\)</span></p></td>
+<td><p>1/15</p></td>
+<td><p>Hz</p></td>
+<td><p>Second dephosphorylation rate</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(kox_{CaMK}\)</span></p></td>
+<td><p>291</p></td>
+<td><p>Hz/mM</p></td>
+<td><p>Oxidation rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(krd_{CaMK}\)</span></p></td>
+<td><p>1/45</p></td>
+<td><p>Hz</p></td>
+<td><p>Reduction rate</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="initial-conditions">
+<h2>Initial conditions<a class="headerlink" href="#initial-conditions" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">CaMKII cardiomyocyte model</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="u0.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Initial conditions</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-parameters">General parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cytosolic-calcium-diffusion">Cytosolic calcium diffusion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#endoplasmic-reticulum">Endoplasmic reticulum</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sarcolemmal-ion-channels">Sarcolemmal ion channels</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sodium-channels">Sodium channels</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#potassium-currents">Potassium currents</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calcium-currents">Calcium currents</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#na-k-pump">Na-K pump</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#beta-adrenergic-system">Beta-adrenergic system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#camkii-system">CaMKII system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-conditions">Initial conditions</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Wen-Wei Tseng
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

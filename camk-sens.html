@@ -1,0 +1,835 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CaMKII system analysis &#8212; CaMKII model</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"loader": {"load": ["[tex]/mhchem"]}, "tex": {"packages": {"[+]": ["mhchem"]}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'camk-sens';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pacing response" href="bcl-effects.html" />
+    <link rel="prev" title="Sensitivity to ISO" href="iso-sens.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">CaMKII model</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    CaMKII cardiomyocyte model
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="modeldesc.html">Model descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="u0.html">Initial conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iso-sens.html">Sensitivity to ISO</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">CaMKII system analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bcl-effects.html">Pacing response</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bcl-data-fit.html">Pacing frequency and CaMKII activity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="iso-effects.html">Effects of isoproterenol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ros-effects.html">ROS effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="caffeine-effects.html">Caffeine Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime.html">Runtime information</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/ntumitolab/camkii-cardiomyocyte-model/gh-pages?urlpath=lab/tree/_sources/camk-sens.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/ntumitolab/camkii-cardiomyocyte-model/blob/gh-pages/_sources/camk-sens.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Colab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Colab logo" src="_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+<a href="https://github.com/ntumitolab/camkii-cardiomyocyte-model" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/camk-sens.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>CaMKII system analysis</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#camkii-sensitivity-to-calcium">CaMKII sensitivity to calcium</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#least-square-fitting-of-steady-state-camkii-activity">Least-square fitting of steady state CaMKII activity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-simplified-camkii-system">The simplified CaMKII system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-original-and-simplified-model">Comparing original and simplified model</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="camkii-system-analysis">
+<h1>CaMKII system analysis<a class="headerlink" href="#camkii-system-analysis" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">ModelingToolkit</span>
+<span class="k">using</span><span class="w"> </span><span class="n">OrdinaryDiffEq</span><span class="p">,</span><span class="w"> </span><span class="n">SteadyStateDiffEq</span><span class="p">,</span><span class="w"> </span><span class="n">DiffEqCallbacks</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Plots</span>
+<span class="k">using</span><span class="w"> </span><span class="n">LsqFit</span>
+<span class="k">using</span><span class="w"> </span><span class="n">CaMKIIModel</span>
+<span class="k">using</span><span class="w"> </span><span class="n">CaMKIIModel</span><span class="o">:</span><span class="w"> </span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="n">hil</span><span class="p">,</span><span class="w"> </span><span class="n">second</span><span class="p">,</span><span class="w"> </span><span class="n">Hz</span>
+<span class="n">Plots</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="camkii-sensitivity-to-calcium">
+<h2>CaMKII sensitivity to calcium<a class="headerlink" href="#camkii-sensitivity-to-calcium" title="Link to this heading">#</a></h2>
+<p>Model CaM/Calcium binding only. No phosphorylation or oxidation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@parameters</span><span class="w"> </span><span class="n">Ca</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">μM</span><span class="w"> </span><span class="n">ROS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="n">μM</span>
+<span class="n">sys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_camkii_sys</span><span class="p">(</span><span class="n">Ca</span><span class="p">;</span><span class="w"> </span><span class="n">ROS</span><span class="p">,</span><span class="w"> </span><span class="n">simplify</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\begin{split} \begin{align}
+\frac{\mathrm{d} \mathtt{Ca2CaM\_C}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_1N\_on} \mathtt{k\_2N\_on} \mathtt{Ca2CaM\_C}\left( t \right)}{\mathtt{k\_1N\_off} + \mathtt{Ca} \mathtt{k\_2N\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_1C\_on} \mathtt{k\_2C\_on} \mathtt{CaM0}\left( t \right)}{\mathtt{k\_1C\_off} + \mathtt{Ca} \mathtt{k\_2C\_on}} + \mathtt{kCaM2CP\_off} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) + \mathtt{kCaM2C\_off} \mathtt{Ca2CaM\_C\_CaMK}\left( t \right) - \mathtt{kCaM2CP\_on} \mathtt{Ca2CaM\_C}\left( t \right) \mathtt{CaMKP}\left( t \right) - \mathtt{kCaM2C\_on} \mathtt{Ca2CaM\_C}\left( t \right) \mathtt{CaMK}\left( t \right) - \mathtt{k\_2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_2C\_on}}{\mathtt{k\_1C\_off} + \mathtt{Ca} \mathtt{k\_2C\_on}} \right) \mathtt{Ca2CaM\_C}\left( t \right) + \mathtt{k\_2N\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_2N\_on}}{\mathtt{k\_1N\_off} + \mathtt{Ca} \mathtt{k\_2N\_on}} \right) \mathtt{Ca4CaM}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca2CaM\_N}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_1C\_on} \mathtt{k\_2C\_on} \mathtt{Ca2CaM\_N}\left( t \right)}{\mathtt{k\_1C\_off} + \mathtt{Ca} \mathtt{k\_2C\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_1N\_on} \mathtt{k\_2N\_on} \mathtt{CaM0}\left( t \right)}{\mathtt{k\_1N\_off} + \mathtt{Ca} \mathtt{k\_2N\_on}} + \mathtt{kCaM2NP\_off} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) + \mathtt{kCaM2N\_off} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right) - \mathtt{kCaM2NP\_on} \mathtt{CaMKP}\left( t \right) \mathtt{Ca2CaM\_N}\left( t \right) - \mathtt{kCaM2N\_on} \mathtt{CaMK}\left( t \right) \mathtt{Ca2CaM\_N}\left( t \right) + \mathtt{k\_2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_2C\_on}}{\mathtt{k\_1C\_off} + \mathtt{Ca} \mathtt{k\_2C\_on}} \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{k\_2N\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_2N\_on}}{\mathtt{k\_1N\_off} + \mathtt{Ca} \mathtt{k\_2N\_on}} \right) \mathtt{Ca2CaM\_N}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca4CaM}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{Ca}^{2} \mathtt{k\_1C\_on} \mathtt{k\_2C\_on} \mathtt{Ca2CaM\_N}\left( t \right)}{\mathtt{k\_1C\_off} + \mathtt{Ca} \mathtt{k\_2C\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_1N\_on} \mathtt{k\_2N\_on} \mathtt{Ca2CaM\_C}\left( t \right)}{\mathtt{k\_1N\_off} + \mathtt{Ca} \mathtt{k\_2N\_on}} + \mathtt{kCaM4P\_off} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) + \mathtt{kCaM4P\_off} \mathtt{Ca4CaM\_CaMKP}\left( t \right) + \mathtt{kCaM4\_off} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) + \mathtt{kCaM4\_off} \mathtt{Ca4CaM\_CaMK}\left( t \right) - \mathtt{kCaM4P\_on} \mathtt{CaMKPOX}\left( t \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{kCaM4P\_on} \mathtt{CaMKP}\left( t \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{kCaM4\_on} \mathtt{CaMKOX}\left( t \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{kCaM4\_on} \mathtt{CaMK}\left( t \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{k\_2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_2C\_on}}{\mathtt{k\_1C\_off} + \mathtt{Ca} \mathtt{k\_2C\_on}} \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{k\_2N\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_2N\_on}}{\mathtt{k\_1N\_off} + \mathtt{Ca} \mathtt{k\_2N\_on}} \right) \mathtt{Ca4CaM}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaM0\_CaMK}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{CaM0\_CaMK}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} + \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{CaM0\_CaMK}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} - \mathtt{kCaM0\_off} \mathtt{CaM0\_CaMK}\left( t \right) + \mathtt{kCaM0\_on} \mathtt{CaM0}\left( t \right) \mathtt{CaMK}\left( t \right) + \mathtt{k\_K2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) \mathtt{Ca2CaM\_C\_CaMK}\left( t \right) + \mathtt{k\_K2N\_off} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right) \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) \\
+\frac{\mathrm{d} \mathtt{Ca2CaM\_C\_CaMK}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{Ca2CaM\_C\_CaMK}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{CaM0\_CaMK}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} - \mathtt{kCaM2C\_off} \mathtt{Ca2CaM\_C\_CaMK}\left( t \right) + \mathtt{k\_dephospho} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) + \mathtt{kCaM2C\_on} \mathtt{Ca2CaM\_C}\left( t \right) \mathtt{CaMK}\left( t \right) + \mathtt{k\_K2C\_off} \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) \mathtt{Ca2CaM\_C\_CaMK}\left( t \right) + \mathtt{k\_K2N\_off} \mathtt{Ca4CaM\_CaMK}\left( t \right) \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) - \mathtt{k\_phosCaM} \mathtt{CaMKAct}\left( t \right) \mathtt{Ca2CaM\_C\_CaMK}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{CaM0\_CaMK}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} - \mathtt{kCaM2N\_off} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right) + \mathtt{k\_dephospho} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) + \mathtt{kCaM2N\_on} \mathtt{CaMK}\left( t \right) \mathtt{Ca2CaM\_N}\left( t \right) + \mathtt{k\_K2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) \mathtt{Ca4CaM\_CaMK}\left( t \right) + \mathtt{k\_K2N\_off} \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) \mathtt{Ca2CaM\_N\_CaMK}\left( t \right) - \mathtt{k\_phosCaM} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca4CaM\_CaMK}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{Ca2CaM\_C\_CaMK}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} - \mathtt{kCaM4\_off} \mathtt{Ca4CaM\_CaMK}\left( t \right) + \mathtt{k\_OXB} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) + \mathtt{k\_dephospho} \mathtt{Ca4CaM\_CaMKP}\left( t \right) - \mathtt{ROS} \mathtt{k\_BOX} \mathtt{Ca4CaM\_CaMK}\left( t \right) + \mathtt{kCaM4\_on} \mathtt{CaMK}\left( t \right) \mathtt{Ca4CaM}\left( t \right) + \mathtt{k\_K2C\_off} \mathtt{Ca4CaM\_CaMK}\left( t \right) \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) + \mathtt{k\_K2N\_off} \mathtt{Ca4CaM\_CaMK}\left( t \right) \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) - \mathtt{k\_phosCaM} \mathtt{Ca4CaM\_CaMK}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaM0\_CaMKP}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{CaM0\_CaMKP}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} + \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{CaM0\_CaMKP}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} - \mathtt{kCaM0P\_off} \mathtt{CaM0\_CaMKP}\left( t \right) + \mathtt{kCaM0P\_on} \mathtt{CaM0}\left( t \right) \mathtt{CaMKP}\left( t \right) + \mathtt{k\_K2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) + \mathtt{k\_K2N\_off} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) \\
+\frac{\mathrm{d} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{CaM0\_CaMKP}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} + \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} - \mathtt{kCaM2CP\_off} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) - \mathtt{k\_dephospho} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) + \mathtt{kCaM2CP\_on} \mathtt{Ca2CaM\_C}\left( t \right) \mathtt{CaMKP}\left( t \right) + \mathtt{k\_K2C\_off} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) + \mathtt{k\_K2N\_off} \mathtt{Ca4CaM\_CaMKP}\left( t \right) \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) + \mathtt{k\_phosCaM} \mathtt{CaMKAct}\left( t \right) \mathtt{Ca2CaM\_C\_CaMK}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{CaM0\_CaMKP}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} - \mathtt{kCaM2NP\_off} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) - \mathtt{k\_dephospho} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) + \mathtt{kCaM2NP\_on} \mathtt{CaMKP}\left( t \right) \mathtt{Ca2CaM\_N}\left( t \right) + \mathtt{k\_K2C\_off} \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) \mathtt{Ca4CaM\_CaMKP}\left( t \right) - \mathtt{k\_K2N\_off} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) \left( 1 + \frac{ - \mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) + \mathtt{k\_phosCaM} \mathtt{Ca2CaM\_N\_CaMK}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca4CaM\_CaMKP}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{Ca}^{2} \mathtt{k\_K1N\_on} \mathtt{k\_K2N\_on} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right)}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} + \frac{\mathtt{Ca}^{2} \mathtt{k\_K1C\_on} \mathtt{k\_K2C\_on} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right)}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} - \mathtt{kCaM4P\_off} \mathtt{Ca4CaM\_CaMKP}\left( t \right) + \mathtt{k\_OXPP} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) - \mathtt{k\_dephospho} \mathtt{Ca4CaM\_CaMKP}\left( t \right) - \mathtt{ROS} \mathtt{k\_POXP} \mathtt{Ca4CaM\_CaMKP}\left( t \right) + \mathtt{kCaM4P\_on} \mathtt{CaMKP}\left( t \right) \mathtt{Ca4CaM}\left( t \right) + \mathtt{k\_K2C\_off} \mathtt{Ca4CaM\_CaMKP}\left( t \right) \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2C\_on}}{\mathtt{k\_K1C\_off} + \mathtt{Ca} \mathtt{k\_K2C\_on}} \right) + \mathtt{k\_K2N\_off} \mathtt{Ca4CaM\_CaMKP}\left( t \right) \left( -1 + \frac{\mathtt{Ca} \mathtt{k\_K2N\_on}}{\mathtt{k\_K1N\_off} + \mathtt{Ca} \mathtt{k\_K2N\_on}} \right) + \mathtt{k\_phosCaM} \mathtt{Ca4CaM\_CaMK}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca4CaM\_CaMKOX}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kCaM4\_off} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) - \mathtt{k\_OXB} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) + \mathtt{k\_dephospho} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) + \mathtt{ROS} \mathtt{k\_BOX} \mathtt{Ca4CaM\_CaMK}\left( t \right) + \mathtt{kCaM4\_on} \mathtt{CaMKOX}\left( t \right) \mathtt{Ca4CaM}\left( t \right) - \mathtt{k\_phosCaM} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kCaM4P\_off} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) - \mathtt{k\_OXPP} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) - \mathtt{k\_dephospho} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) + \mathtt{ROS} \mathtt{k\_POXP} \mathtt{Ca4CaM\_CaMKP}\left( t \right) + \mathtt{kCaM4P\_on} \mathtt{CaMKPOX}\left( t \right) \mathtt{Ca4CaM}\left( t \right) + \mathtt{k\_phosCaM} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKP}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kCaM0P\_off} \mathtt{CaM0\_CaMKP}\left( t \right) + \mathtt{kCaM2CP\_off} \mathtt{Ca2CaM\_C\_CaMKP}\left( t \right) + \mathtt{kCaM2NP\_off} \mathtt{Ca2CaM\_N\_CaMKP}\left( t \right) + \mathtt{kCaM4P\_off} \mathtt{Ca4CaM\_CaMKP}\left( t \right) + \mathtt{k\_OXPP} \mathtt{CaMKPOX}\left( t \right) - \mathtt{k\_P1\_P2} \mathtt{CaMKP}\left( t \right) + \mathtt{k\_P2\_P1} \mathtt{CaMKP2}\left( t \right) - \mathtt{k\_dephospho} \mathtt{CaMKP}\left( t \right) - \mathtt{kCaM0P\_on} \mathtt{CaM0}\left( t \right) \mathtt{CaMKP}\left( t \right) - \mathtt{kCaM2CP\_on} \mathtt{Ca2CaM\_C}\left( t \right) \mathtt{CaMKP}\left( t \right) - \mathtt{kCaM2NP\_on} \mathtt{CaMKP}\left( t \right) \mathtt{Ca2CaM\_N}\left( t \right) - \mathtt{kCaM4P\_on} \mathtt{CaMKP}\left( t \right) \mathtt{Ca4CaM}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKP2}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{k\_P1\_P2} \mathtt{CaMKP}\left( t \right) - \mathtt{k\_P2\_P1} \mathtt{CaMKP2}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKPOX}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kCaM4P\_off} \mathtt{Ca4CaM\_CaMKPOX}\left( t \right) - \mathtt{k\_OXPP} \mathtt{CaMKPOX}\left( t \right) - \mathtt{k\_dephospho} \mathtt{CaMKPOX}\left( t \right) - \mathtt{kCaM4P\_on} \mathtt{CaMKPOX}\left( t \right) \mathtt{Ca4CaM}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKOX}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kCaM4\_off} \mathtt{Ca4CaM\_CaMKOX}\left( t \right) - \mathtt{k\_OXB} \mathtt{CaMKOX}\left( t \right) + \mathtt{k\_dephospho} \mathtt{CaMKPOX}\left( t \right) - \mathtt{kCaM4\_on} \mathtt{CaMKOX}\left( t \right) \mathtt{Ca4CaM}\left( t \right)
+\end{align}
+ \end{split}\]</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SteadyStateProblem</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">k_phosCaM</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span>
+<span class="n">alg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DynamicSS</span><span class="p">(</span><span class="n">Rodas5P</span><span class="p">())</span>
+
+<span class="n">ca</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">exp10</span><span class="o">.</span><span class="p">(</span><span class="n">range</span><span class="p">(</span><span class="n">log10</span><span class="p">(</span><span class="mf">0.03</span><span class="n">μM</span><span class="p">),</span><span class="w"> </span><span class="n">log10</span><span class="p">(</span><span class="mi">10</span><span class="n">μM</span><span class="p">),</span><span class="w"> </span><span class="mi">1001</span><span class="p">))</span>
+<span class="n">prob_func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">repeat</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">begin</span>
+<span class="w">    </span><span class="n">remake</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="n">Ca</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ca</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+<span class="k">end</span>
+<span class="n">trajectories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">ca</span><span class="p">)</span>
+<span class="n">sol0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">alg</span><span class="p">;</span><span class="w"> </span><span class="n">abstol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span><span class="w"> </span><span class="n">reltol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span><span class="w"> </span><span class="c">## warmup</span>
+<span class="n">sim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">EnsembleProblem</span><span class="p">(</span><span class="n">prob</span><span class="p">;</span><span class="w"> </span><span class="n">prob_func</span><span class="p">,</span><span class="w"> </span><span class="n">safetycopy</span><span class="o">=</span><span class="nb">false</span><span class="p">),</span><span class="w"> </span><span class="n">alg</span><span class="p">;</span><span class="w"> </span><span class="n">trajectories</span><span class="p">,</span><span class="w"> </span><span class="n">abstol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span><span class="w"> </span><span class="n">reltol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>EnsembleSolution Solution of length 1001 with uType:
+SciMLBase.NonlinearSolution{Float64, 1, Vector{Float64}, Vector{Float64}, SciMLBase.SteadyStateProblem{Vector{Float64}, true, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x57e65267, 0x0da70c6f, 0xa1146a00, 0x48f08f41, 0xc064fda9), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xcd706e2f, 0x88a68fe7, 0x2a5f60f5, 0xd960013d, 0x1e3f7725), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}}, SteadyStateDiffEq.DynamicSS{OrdinaryDiffEqRosenbrock.Rodas5P{9, ADTypes.AutoForwardDiff{9, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, Float64}, SciMLBase.ODESolution{Float64, 2, Vector{Vector{Float64}}, Nothing, Nothing, Vector{Float64}, Vector{Vector{Vector{Float64}}}, Nothing, SciMLBase.ODEProblem{Vector{Float64}, Tuple{Float64, Float64}, true, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x57e65267, 0x0da70c6f, 0xa1146a00, 0x48f08f41, 0xc064fda9), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xcd706e2f, 0x88a68fe7, 0x2a5f60f5, 0xd960013d, 0x1e3f7725), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, SciMLBase.StandardODEProblem}, OrdinaryDiffEqRosenbrock.Rodas5P{9, ADTypes.AutoForwardDiff{9, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, OrdinaryDiffEqCore.InterpolationData{SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x57e65267, 0x0da70c6f, 0xa1146a00, 0x48f08f41, 0xc064fda9), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xcd706e2f, 0x88a68fe7, 0x2a5f60f5, 0xd960013d, 0x1e3f7725), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, Vector{Vector{Float64}}, Vector{Float64}, Vector{Vector{Vector{Float64}}}, Nothing, OrdinaryDiffEqRosenbrock.RosenbrockCache{Vector{Float64}, Vector{Float64}, Vector{Float64}, Matrix{Float64}, Matrix{Float64}, OrdinaryDiffEqRosenbrock.RodasTableau{Float64, Float64}, SciMLBase.TimeGradientWrapper{true, SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x57e65267, 0x0da70c6f, 0xa1146a00, 0x48f08f41, 0xc064fda9), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xcd706e2f, 0x88a68fe7, 0x2a5f60f5, 0xd960013d, 0x1e3f7725), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, Vector{Float64}, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}}, SciMLBase.UJacobianWrapper{true, SciMLBase.ODEFunction{true, true, SciMLBase.ODEFunction{true, SciMLBase.AutoSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 3, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x57e65267, 0x0da70c6f, 0xa1146a00, 0x48f08f41, 0xc064fda9), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___, :t), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xcd706e2f, 0x88a68fe7, 0x2a5f60f5, 0xd960013d, 0x1e3f7725), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.ODESystem}, Nothing, ModelingToolkit.ODESystem, SciMLBase.OverrideInitData{SciMLBase.NonlinearProblem{Nothing, true, ModelingToolkit.MTKParameters{Vector{Float64}, StaticArraysCore.SizedVector{0, Float64, Vector{Float64}}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}, SciMLBase.NonlinearFunction{true, SciMLBase.FullSpecialize, ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xaf4a1a0e, 0x9397bcf0, 0x24729aaf, 0x972d96f2, 0x8dc45ab8), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0xb49e3b77, 0x9eef1ec0, 0x2f0bd1a2, 0x352b1bb8, 0x783d8810), Nothing}}, LinearAlgebra.UniformScaling{Bool}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, ModelingToolkit.ObservedFunctionCache{ModelingToolkit.NonlinearSystem}, Nothing, ModelingToolkit.NonlinearSystem, Nothing, Nothing}, Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, ModelingToolkit.InitializationSystemMetadata}, ModelingToolkit.UpdateInitializeprob{SymbolicIndexingInterface.MultipleParametersGetter{SymbolicIndexingInterface.IndexerNotTimeseries, Vector{SymbolicIndexingInterface.GetParameterIndex}, Nothing}, SymbolicIndexingInterface.MultipleSetters{Vector{SymbolicIndexingInterface.ParameterHookWrapper{SymbolicIndexingInterface.SetParameterIndex{ModelingToolkit.ParameterIndex{SciMLStructures.Tunable, Int64}}, SymbolicUtils.BasicSymbolic{Real}}}}}, ComposedFunction{typeof(identity), SymbolicIndexingInterface.TimeIndependentObservedFunction{ModelingToolkit.GeneratedFunctionWrapper{(2, 2, true), RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x1c982f78, 0xc61e1e4f, 0xc30e4e13, 0xed3d5e78, 0xd208e516), Nothing}, RuntimeGeneratedFunctions.RuntimeGeneratedFunction{(:ˍ₋out, :__mtk_arg_1, :___mtkparameters___), ModelingToolkit.var&quot;#_RGF_ModTag&quot;, ModelingToolkit.var&quot;#_RGF_ModTag&quot;, (0x6b12abb2, 0x5ab2e0fa, 0x9ad8cf19, 0x7447a88e, 0x2c406501), Nothing}}}}, Nothing}, Nothing}, Float64, ModelingToolkit.MTKParameters{Vector{Float64}, Vector{Float64}, Tuple{}, Tuple{}, Tuple{}, Tuple{}}}, LinearSolve.LinearCache{Matrix{Float64}, Vector{Float64}, Vector{Float64}, SciMLBase.NullParameters, LinearSolve.DefaultLinearSolver, LinearSolve.DefaultLinearSolverInit{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, LinearAlgebra.QRCompactWY{Float64, Matrix{Float64}, Matrix{Float64}}, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, Tuple{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, Vector{Int64}}, Nothing, Nothing, Nothing, LinearAlgebra.SVD{Float64, Float64, Matrix{Float64}, Vector{Float64}}, LinearAlgebra.Cholesky{Float64, Matrix{Float64}}, LinearAlgebra.Cholesky{Float64, Matrix{Float64}}, Tuple{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int32}}, Base.RefValue{Int32}}, Tuple{LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}, Base.RefValue{Int64}}, LinearAlgebra.QRPivoted{Float64, Matrix{Float64}, Vector{Float64}, Vector{Int64}}, Nothing, Nothing}, LinearSolve.InvPreconditioner{LinearAlgebra.Diagonal{Float64, Vector{Float64}}}, LinearAlgebra.Diagonal{Float64, Vector{Float64}}, Float64, Bool, LinearSolve.LinearSolveAdjoint{Missing}}, SparseDiffTools.ForwardColorJacCache{Vector{ForwardDiff.Dual{ForwardDiff.Tag{DiffEqBase.OrdinaryDiffEqTag, Float64}, Float64, 9}}, Vector{ForwardDiff.Dual{ForwardDiff.Tag{DiffEqBase.OrdinaryDiffEqTag, Float64}, Float64, 9}}, Vector{Float64}, Vector{Vector{NTuple{9, Float64}}}, UnitRange{Int64}, Nothing}, Vector{ForwardDiff.Dual{ForwardDiff.Tag{DiffEqBase.OrdinaryDiffEqTag, Float64}, Float64, 1}}, Float64, OrdinaryDiffEqRosenbrock.Rodas5P{9, ADTypes.AutoForwardDiff{9, Nothing}, Nothing, typeof(OrdinaryDiffEqCore.DEFAULT_PRECS), Val{:forward}(), true, nothing, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, typeof(OrdinaryDiffEqCore.trivial_limiter!), typeof(OrdinaryDiffEqCore.trivial_limiter!)}, Nothing}, SciMLBase.DEStats, Nothing, Nothing, Nothing, Nothing}, Nothing, Nothing, Nothing}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;&quot;&quot;Extract values from ensemble simulations by a symbol&quot;&quot;&quot;</span>
+<span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">map</span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="w"> </span><span class="n">sim</span><span class="p">)</span>
+<span class="s">&quot;&quot;&quot;Calculate Root Mean Square Error (RMSE)&quot;&quot;&quot;</span>
+<span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">abs2</span><span class="p">,</span><span class="w"> </span><span class="n">fit</span><span class="o">.</span><span class="n">resid</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">resid</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Main.var&quot;##230&quot;.rmse
+</pre></div>
+</div>
+</div>
+</div>
+<p>Components</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">xopts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s">&quot;Ca (μM)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xscale</span><span class="o">=</span><span class="ss">:log10</span><span class="p">,</span><span class="w"> </span><span class="n">minorgrid</span><span class="o">=</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">xlims</span><span class="o">=</span><span class="p">(</span><span class="n">ca</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">ca</span><span class="p">[</span><span class="k">end</span><span class="p">]))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">CaM0</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;CaM0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ylabel</span><span class="o">=</span><span class="s">&quot;Conc. (μM)&quot;</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">Ca2CaM_C</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;Ca2CaM_C&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">Ca2CaM_N</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;Ca2CaM_N&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">Ca4CaM</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;Ca4CaM&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">CaMK</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;CaMK&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">CaM0_CaMK</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;CaM0_CaMK&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">Ca2CaM_C_CaMK</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;Ca2CaM_C_CaMK&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">Ca2CaM_N_CaMK</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;Ca2CaM_N_CaMK&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">ca</span><span class="p">,</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">Ca4CaM_CaMK</span><span class="p">),</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="s">&quot;Ca4CaM_CaMK&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8ee06ad8fe94b74d0be02f23621373026f2021677c5a7f480a8636f0c9848846.png" src="_images/8ee06ad8fe94b74d0be02f23621373026f2021677c5a7f480a8636f0c9848846.png" />
+</div>
+</div>
+<p>We excluded CaM0_CaMK (bound but lost all calcium) from the active CaMKII fraction</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">CaMKAct</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">CaMK</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">CaM0_CaMK</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">sys</span><span class="o">.</span><span class="n">CAMKII_T</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity without ca is &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sol0</span><span class="p">[</span><span class="n">CaMKAct</span><span class="p">][</span><span class="k">end</span><span class="p">])</span>
+<span class="n">xdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ca</span>
+<span class="n">ydata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extract</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKAct</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">label</span><span class="o">=</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;Active CaMKII&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ylims</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Basal activity without ca is 4.7190264362839685e-8
+</pre></div>
+</div>
+<img alt="_images/bf4f796ecbcff380f9ccb0fc34647f2ddeaf8bf78f00fb2ffdacd9926f6a0894.png" src="_images/bf4f796ecbcff380f9ccb0fc34647f2ddeaf8bf78f00fb2ffdacd9926f6a0894.png" />
+</div>
+</div>
+</section>
+<section id="least-square-fitting-of-steady-state-camkii-activity">
+<h2>Least-square fitting of steady state CaMKII activity<a class="headerlink" href="#least-square-fitting-of-steady-state-camkii-activity" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@.</span><span class="w"> </span><span class="n">model_camk</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hil</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">p0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">]</span>
+<span class="n">lb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.001</span><span class="n">μM</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">]</span>
+<span class="n">fit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curve_fit</span><span class="p">(</span><span class="n">model_camk</span><span class="p">,</span><span class="w"> </span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="n">ydata</span><span class="p">,</span><span class="w"> </span><span class="n">p0</span><span class="p">;</span><span class="w"> </span><span class="n">lower</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span><span class="w"> </span><span class="n">autodiff</span><span class="o">=</span><span class="ss">:forwarddiff</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>LsqFit.LsqFitResult{Vector{Float64}, Vector{Float64}, Matrix{Float64}, Vector{Float64}, Vector{LsqFit.LMState{LsqFit.LevenbergMarquardt}}}([0.42985864901855403, 0.9629481840627955, 0.005187220691454256, 2.2985815431214025], [0.004766880016269715, 0.004762305827564668, 0.004757683251840647, 0.004753011581095032, 0.004748290553895919, 0.004743519511493798, 0.004738697910478312, 0.004733825405363892, 0.004728901435690406, 0.004723925357757465  …  0.006155558529901961, 0.006173872671347169, 0.006192167337247534, 0.006210317422071565, 0.006228218522397688, 0.00624551299057019, 0.006262963129796406, 0.006280201254696083, 0.006297177846306401, 0.006313695586499135], [0.00034441293217246996 -0.0003532746817559725 1.0 -0.0005133754019680895; 0.00034904103038528583 -0.0003580202034696147 1.0 -0.0005194002591627495; … ; 0.9953494635010501 -0.004749646742822832 1.0 0.004645196337508179; 0.9954108653036408 -0.004687225502245434 1.0 0.0045955548008200005], true, Iter     Function value   Gradient norm 
+------   --------------   --------------
+, Float64[])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Parameters</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">pestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coef</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4-element Vector{Float64}:
+ 0.42985864901855403
+ 0.9629481840627955
+ 0.005187220691454256
+ 2.2985815431214025
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Basal activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Maximal activated activity: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Half-saturation Ca concentration: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="s">&quot; μM&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Hill coefficient: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pestim</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;RMSE: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rmse</span><span class="p">(</span><span class="n">fit</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Basal activity: 0.005187220691454256
+Maximal activated activity: 0.42985864901855403
+Half-saturation Ca concentration: 0.9629481840627955 μM
+Hill coefficient: 2.2985815431214025
+RMSE: 0.004825704888897066
+</pre></div>
+</div>
+</div>
+</div>
+<p>Fit result and the original model</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">yestim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model_camk</span><span class="o">.</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="kt">Ref</span><span class="p">(</span><span class="n">pestim</span><span class="p">))</span>
+
+<span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">plot</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">ydata</span><span class="w"> </span><span class="n">yestim</span><span class="p">],</span><span class="w"> </span><span class="n">lab</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Full model&quot;</span><span class="w"> </span><span class="s">&quot;Fitted&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">line</span><span class="o">=</span><span class="p">[</span><span class="ss">:dash</span><span class="w"> </span><span class="ss">:dot</span><span class="p">],</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;CaMKII activity&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:topleft</span><span class="p">;</span><span class="w"> </span><span class="n">xopts</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/fe0ec6ee651e10ccbdf7b5344dbdadf091ffb8029fd4487d1716dd251582c5be.png" src="_images/fe0ec6ee651e10ccbdf7b5344dbdadf091ffb8029fd4487d1716dd251582c5be.png" />
+</div>
+</div>
+</section>
+<section id="the-simplified-camkii-system">
+<h2>The simplified CaMKII system<a class="headerlink" href="#the-simplified-camkii-system" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">simpsys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CaMKIIModel</span><span class="o">.</span><span class="n">get_camkii_simp_sys</span><span class="p">(</span><span class="n">Ca</span><span class="p">;</span><span class="w"> </span><span class="n">ROS</span><span class="p">,</span><span class="w"> </span><span class="n">simplify</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\begin{split} \begin{align}
+\frac{\mathrm{d} \mathtt{CaMKB}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kdeph\_CaMK} \mathtt{CaMKP}\left( t \right) + \mathtt{krd\_CaMK} \mathtt{CaMKBOX}\left( t \right) - \mathtt{ROS} \mathtt{kox\_CaMK} \mathtt{CaMKB}\left( t \right) + \left( \mathtt{kfb\_CaMK} + \frac{\mathtt{kfa\_CaMK} pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)}{pow\left( \mathtt{kmCa\_CaMK}, \mathtt{nCa\_CaMK} \right) + pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)} \right) \mathtt{r\_CaMK} \mathtt{CaMK}\left( t \right) + \left( -1 + \mathtt{kfb\_CaMK} + \frac{\mathtt{kfa\_CaMK} pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)}{pow\left( \mathtt{kmCa\_CaMK}, \mathtt{nCa\_CaMK} \right) + pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)} \right) \mathtt{r\_CaMK} \mathtt{CaMKB}\left( t \right) - \mathtt{kphos\_CaMK} \mathtt{CaMKAct}\left( t \right) \mathtt{CaMKB}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKBOX}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kdeph\_CaMK} \mathtt{CaMKPOX}\left( t \right) - \mathtt{krd\_CaMK} \mathtt{CaMKBOX}\left( t \right) + \mathtt{ROS} \mathtt{kox\_CaMK} \mathtt{CaMKB}\left( t \right) + \left( -1 + \mathtt{kfb\_CaMK} + \frac{\mathtt{kfa\_CaMK} pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)}{pow\left( \mathtt{kmCa\_CaMK}, \mathtt{nCa\_CaMK} \right) + pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)} \right) \mathtt{r\_CaMK} \mathtt{CaMKBOX}\left( t \right) - \mathtt{kphos\_CaMK} \mathtt{CaMKBOX}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKP}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kb\_CaMKP} \mathtt{CaMKP}\left( t \right) - \mathtt{kdeph\_CaMK} \mathtt{CaMKP}\left( t \right) + \mathtt{krd\_CaMK} \mathtt{CaMKPOX}\left( t \right) - \mathtt{ROS} \mathtt{kox\_CaMK} \mathtt{CaMKP}\left( t \right) + \mathtt{kphos\_CaMK} \mathtt{CaMKAct}\left( t \right) \mathtt{CaMKB}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKPOX}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{kb\_CaMKP} \mathtt{CaMKPOX}\left( t \right) - \mathtt{kdeph\_CaMK} \mathtt{CaMKPOX}\left( t \right) - \mathtt{krd\_CaMK} \mathtt{CaMKPOX}\left( t \right) + \mathtt{ROS} \mathtt{kox\_CaMK} \mathtt{CaMKP}\left( t \right) + \mathtt{kphos\_CaMK} \mathtt{CaMKBOX}\left( t \right) \mathtt{CaMKAct}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKA}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{k\_P1\_P2} \mathtt{CaMKA}\left( t \right) + \mathtt{k\_P2\_P1} \mathtt{CaMKA2}\left( t \right) + \mathtt{kb\_CaMKP} \mathtt{CaMKP}\left( t \right) - \mathtt{kdeph\_CaMK} \mathtt{CaMKA}\left( t \right) + \mathtt{krd\_CaMK} \mathtt{CaMKAOX}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKA2}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{k\_P1\_P2} \mathtt{CaMKA}\left( t \right) - \mathtt{k\_P2\_P1} \mathtt{CaMKA2}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKAOX}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kb\_CaMKP} \mathtt{CaMKPOX}\left( t \right) - \mathtt{kdeph\_CaMK} \mathtt{CaMKAOX}\left( t \right) - \mathtt{krd\_CaMK} \mathtt{CaMKAOX}\left( t \right) \\
+\frac{\mathrm{d} \mathtt{CaMKOX}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{kdeph\_CaMK} \mathtt{CaMKAOX}\left( t \right) - \mathtt{krd\_CaMK} \mathtt{CaMKOX}\left( t \right) + \left( 1 - \mathtt{kfb\_CaMK} + \frac{ - \mathtt{kfa\_CaMK} pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)}{pow\left( \mathtt{kmCa\_CaMK}, \mathtt{nCa\_CaMK} \right) + pow\left( \mathtt{Ca}, \mathtt{nCa\_CaMK} \right)} \right) \mathtt{r\_CaMK} \mathtt{CaMKBOX}\left( t \right)
+\end{align}
+ \end{split}\]</div>
+</div>
+</div>
+</section>
+<section id="comparing-original-and-simplified-model">
+<h2>Comparing original and simplified model<a class="headerlink" href="#comparing-original-and-simplified-model" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">sys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">build_neonatal_ecc_sys</span><span class="p">(</span><span class="n">simplify</span><span class="o">=</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">reduce_iso</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+<span class="n">sys_simp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">build_neonatal_ecc_sys</span><span class="p">(</span><span class="n">simplify</span><span class="o">=</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">reduce_iso</span><span class="o">=</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">reduce_camk</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;# of state variable in the original model: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">unknowns</span><span class="p">(</span><span class="n">sys</span><span class="p">)))</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;# of state variable in the simplified model: &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">unknowns</span><span class="p">(</span><span class="n">sys_simp</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span># of state variable in the original model: 84
+# of state variable in the simplified model: 75
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">tend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">500.0</span><span class="n">second</span>
+<span class="n">stimstart</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">100.0</span><span class="n">second</span>
+<span class="n">stimend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">300.0</span><span class="n">second</span>
+<span class="n">alg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KenCarp47</span><span class="p">()</span>
+<span class="nd">@unpack</span><span class="w"> </span><span class="n">Istim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sys</span>
+<span class="n">callback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">build_stim_callbacks</span><span class="p">(</span><span class="n">Istim</span><span class="p">,</span><span class="w"> </span><span class="n">stimend</span><span class="p">;</span><span class="w"> </span><span class="n">period</span><span class="o">=</span><span class="mi">1</span><span class="n">second</span><span class="p">,</span><span class="w"> </span><span class="n">starttime</span><span class="o">=</span><span class="n">stimstart</span><span class="p">)</span>
+<span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ODEProblem</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span><span class="w"> </span><span class="p">[],</span><span class="w"> </span><span class="n">tend</span><span class="p">);</span>
+<span class="n">prob_simp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ODEProblem</span><span class="p">(</span><span class="n">sys_simp</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">sys_simp</span><span class="o">.</span><span class="n">kphos_CaMK</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">5</span><span class="n">Hz</span><span class="p">],</span><span class="w"> </span><span class="n">tend</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@time</span><span class="w"> </span><span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">alg</span><span class="p">;</span><span class="w"> </span><span class="n">callback</span><span class="p">)</span>
+<span class="nd">@time</span><span class="w"> </span><span class="n">sol_simp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">prob_simp</span><span class="p">,</span><span class="w"> </span><span class="n">alg</span><span class="p">;</span><span class="w"> </span><span class="n">callback</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="p">,</span><span class="w"> </span><span class="n">idxs</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">CaMKAct</span><span class="p">,</span><span class="w"> </span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Full model&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;Active CaMKII&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">sol_simp</span><span class="p">,</span><span class="w"> </span><span class="n">idxs</span><span class="o">=</span><span class="n">sys_simp</span><span class="o">.</span><span class="n">CaMKAct</span><span class="p">,</span><span class="w"> </span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Simplified model&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xlabel</span><span class="o">=</span><span class="s">&quot;Time (ms)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9.885484 seconds (24.27 M allocations: 1.118 GiB, 2.76% gc time, 77.40% compilation time)
+  7.482301 seconds (16.50 M allocations: 761.318 MiB, 3.23% gc time, 67.93% compilation time)
+</pre></div>
+</div>
+<img alt="_images/42d8101baddc1bb77acaf0f67978fe696d40579ea67770ae96c0edd3cb5262d2.png" src="_images/42d8101baddc1bb77acaf0f67978fe696d40579ea67770ae96c0edd3cb5262d2.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@unpack</span><span class="w"> </span><span class="n">CaMKB</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKP</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKA</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKA2</span><span class="p">,</span><span class="w"> </span><span class="n">CaMK</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sys_simp</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">sol_simp</span><span class="p">,</span><span class="w"> </span><span class="n">idxs</span><span class="o">=</span><span class="p">[</span><span class="n">CaMKB</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKP</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKA</span><span class="p">,</span><span class="w"> </span><span class="n">CaMKA2</span><span class="p">,</span><span class="w"> </span><span class="n">CaMK</span><span class="p">],</span><span class="w"> </span><span class="n">legend</span><span class="o">=</span><span class="ss">:right</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/584006d6b49f7d5e7f42cc535536771039d35447b745eddcb6b740a3f6190c84.png" src="_images/584006d6b49f7d5e7f42cc535536771039d35447b745eddcb6b740a3f6190c84.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="p">,</span><span class="w"> </span><span class="n">idxs</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">CaMKAct</span><span class="p">,</span><span class="w"> </span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Full model&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="o">=</span><span class="s">&quot;Active CaMKII&quot;</span><span class="p">)</span>
+<span class="n">plot!</span><span class="p">(</span><span class="n">sol_simp</span><span class="p">,</span><span class="w"> </span><span class="n">idxs</span><span class="o">=</span><span class="n">sys_simp</span><span class="o">.</span><span class="n">CaMKAct</span><span class="p">,</span><span class="w"> </span><span class="n">label</span><span class="o">=</span><span class="s">&quot;Simplified model&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">xlabel</span><span class="o">=</span><span class="s">&quot;Time (ms)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tspan</span><span class="o">=</span><span class="p">(</span><span class="mi">295</span><span class="n">second</span><span class="p">,</span><span class="w"> </span><span class="mf">300.0</span><span class="n">second</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/32a0be60b80b8b330b07e9a9512bd7e1adfb55138447aef096a9b0469650ffad.png" src="_images/32a0be60b80b8b330b07e9a9512bd7e1adfb55138447aef096a9b0469650ffad.png" />
+</div>
+</div>
+<hr class="docutils" />
+<p><em>This notebook was generated using <a class="reference external" href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "julia-1.11"
+        },
+        kernelOptions: {
+            name: "julia-1.11",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'julia-1.11'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="iso-sens.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Sensitivity to ISO</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="bcl-effects.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Pacing response</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#camkii-sensitivity-to-calcium">CaMKII sensitivity to calcium</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#least-square-fitting-of-steady-state-camkii-activity">Least-square fitting of steady state CaMKII activity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-simplified-camkii-system">The simplified CaMKII system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-original-and-simplified-model">Comparing original and simplified model</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Wen-Wei Tseng
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
