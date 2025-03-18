@@ -10,10 +10,10 @@ Plots.default(lw=1.5)
 
 #---
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
-tend = 500.0second
+tend = 500second
 prob = ODEProblem(sys, [], tend)
-stimstart = 100.0second
-stimend = 300.0second
+stimstart = 100second
+stimend = 300second
 @unpack Istim = sys
 alg = KenCarp47()
 
@@ -34,13 +34,14 @@ plot(ts, fifteen, yerr=fifteen_error, lab="15 sec", color=:blue, markerstrokecol
 plot!(ts, thirty, yerr=thirty_error, lab="30 sec", color=:red, markerstrokecolor=:red)
 plot!(ts, sixty, yerr=sixty_error, lab="60 sec", color=:orange, markerstrokecolor=:orange)
 plot!(ts, ninety, yerr=ninety_error, lab="90 sec", color=:green, markerstrokecolor=:green)
-plot!(title="Pacing duration", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
+plot!(title="Experiment", xlabel="Time (sec.)", ylabel="CaMKII activity (AU)")
 
 #---
-savefig("pacing-duartion-exp.pdf")
+savefig("pacing-duration-exp.pdf")
+savefig("pacing-duration-exp.png")
 
 # Simulation
-stimstart = 30.0second
+stimstart = 30second
 callback15 = build_stim_callbacks(Istim, stimstart + 15second; period=1second, starttime=stimstart)
 sol15 = solve(prob, alg; callback=callback15)
 callback30 = build_stim_callbacks(Istim, stimstart + 30second; period=1second, starttime=stimstart)
@@ -55,7 +56,22 @@ plot(sol15, idxs=idxs, tspan=(0second, 205second), lab="15 sec", color=:blue)
 plot!(sol30, idxs=idxs, tspan=(0second, 205second), lab="30 sec", color=:red)
 plot!(sol60, idxs=idxs, tspan=(0second, 205second), lab="60 sec", color=:orange)
 plot!(sol90, idxs=idxs, tspan=(0second, 205second), lab="90 sec", color=:green)
-plot!(title="Pacing duration", xlabel="Time (s)", ylabel="CaMKII activity (%)")
+plot!(title="Simulation", xlabel="Time (s)", ylabel="CaMKII activity (%)")
+
+#---
+savefig("pacing-duration-sim.pdf")
+savefig("pacing-duration-sim.png")
+
+# Phosphorylated fraction
+idxs = (sys.t / 1000, (sys.CaMKP + sys.CaMKA + sys.CaMKA2) * 100)
+plot(sol15, idxs=idxs, tspan=(0second, 205second), lab="15 sec", color=:blue)
+plot!(sol30, idxs=idxs, tspan=(0second, 205second), lab="30 sec", color=:red)
+plot!(sol60, idxs=idxs, tspan=(0second, 205second), lab="60 sec", color=:orange)
+plot!(sol90, idxs=idxs, tspan=(0second, 205second), lab="90 sec", color=:green)
+plot!(title="Simulation", xlabel="Time (s)", ylabel="Phosphorylated CaMKII (%)")
+
+savefig("pacing-duration-phos.pdf")
+savefig("pacing-duration-phos.png")
 
 # ## Pacing frequency and CaMKII activity
 freqdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-freq.csv"), DataFrame)
