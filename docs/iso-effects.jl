@@ -51,8 +51,16 @@ tspan = (100second, 101second)
 plot(sol, idxs=i, title="Calcium transcient", lab="ISO (-)"; tspan)
 plot!(sol2, idxs=i, lab="ISO (0.1uM)", xlabel="Time (s)", ylabel="Concentration (μM)"; tspan)
 
+# Compare the numbers
+ca_ctl = sol(tspan[1]:1:tspan[2], idxs=sys.Cai_mean)
+println(extrema(ca_ctl))
+#---
+ca_iso = sol2(tspan[1]:1:tspan[2], idxs=sys.Cai_mean)
+println(extrema(ca_iso))
+
 #---
 savefig("iso-caT.pdf")
+savefig("iso-caT.png")
 
 #---
 i = (sys.t / 1000, sys.CaMKAct * 100)
@@ -61,6 +69,7 @@ plot!(sol2, idxs=i, lab="ISO (0.1uM)", ylabel="Active fraction (%)", xlabel="Tim
 
 #---
 savefig("iso-camkact.pdf")
+savefig("iso-camkact.png")
 
 #---
 i = (sys.t / 1000, sys.vm)
