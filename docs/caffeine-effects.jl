@@ -13,10 +13,10 @@ Plots.default(lw=1.5)
 
 #---
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
-tend = 500.0second
+tend = 500second
 prob = ODEProblem(sys, [], tend)
-stimstart = 100.0second
-stimend = 300.0second
+stimstart = 100second
+stimend = 300second
 alg = KenCarp47()
 function add_coffee_affect!(integrator)
     integrator.ps[sys.RyRsensitivity] = 10
@@ -80,6 +80,8 @@ callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimst
 prob = ODEProblem(sys, [], tend)
 prob_caf = ODEProblem(sys, [sys.RyRsensitivity => 10], tend)
 gCaL = prob.ps[sys.GCaL]
+prob_nif_caf = ODEProblem(sys, [sys.RyRsensitivity => 10, sys.GCaL => 0.1 * gCaL], tend)
+
 ssalg = DynamicSS(alg)
 sprob_caf = SteadyStateProblem(prob_caf)
 sssol = solve(sprob_caf, ssalg; abstol=1e-10, reltol=1e-10)
