@@ -52,6 +52,17 @@ plot!(xlabel="Time (s)", ylabel="Oxidized fraction (%)", title="Simulation")
 savefig("ros-camkiiox.pdf")
 savefig("ros-camkiiox.png")
 
+# Autophosphorylated fraction
+i = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
+plot(sol, idxs=i, lab="ROS (-)")
+plot!(sol2, idxs=i, lab="ROS 0.1uM")
+plot!(sol3, idxs=i, lab="ROS 0.5uM")
+plot!(xlabel="Time (s)", ylabel="Phosphorylated fraction (%)", title="Simulation")
+
+#---
+savefig("ros-camkiip.pdf")
+savefig("ros-camkiip.png")
+
 # ## Experimental data
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
 ts = Dates.value.(chemicaldf[!, "Time"]) ./ 10^9
