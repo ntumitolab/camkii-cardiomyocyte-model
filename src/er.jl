@@ -10,7 +10,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         kanegRyR = 160Hz
         RyRsensitivity = 1.0
         # SERCA
-        VmaxSR = 0.9996μM/ms
+        VmaxSR = 0.9996mM*Hz
         KmfSR = 0.5μM
         KmrSR = 3.5mM
         kSRleak = 0.005Hz
@@ -40,7 +40,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
     Kmfp = KmfSR * min(fCKII_PLB, fPKA_PLB)  # fCKII_PLB
     fSR = (Cai_sub_SR / Kmfp)^2
     rSR = (CaNSR / KmrSR)^2
-    kleak = (1 + 5 * RyR_CKp) * kSRleak / 2
+    kleak = 0.5 * (1 + 5 * RyR_CKp) * kSRleak
 
     eqs = [
         1 ~ PO1RyR + PC1RyR,

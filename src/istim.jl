@@ -1,4 +1,4 @@
-function build_stim_callbacks(sym, endtime; period=1second, duty=0.5ms, starttime=zero(endtime), strength=-80μAμF, baseline=0μAμF, proposeddt=1ms)
+function build_stim_callbacks(sym, endtime; period=1second, duty=0.5ms, starttime=zero(endtime), strength=-80μAμF⁻¹, baseline=0μAμF⁻¹, proposeddt=1ms)
     rise! = (integrator) -> begin
         integrator.ps[sym] = strength
         set_proposed_dt!(integrator, proposeddt)

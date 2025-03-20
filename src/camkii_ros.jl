@@ -178,16 +178,16 @@ function get_camkii_simp_sys(Ca=0μM;
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
         kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa_CaMK = 0.4393           ## Activated forward ratio CaMK --> CaMKB (adjustable)
-        kfb_CaMK = 0.0056           ## Basal forward ratio of CaMK --> CaMKB (adjustable)
-        kmCa_CaMK = 0.9716μM        ## Half-activation concentration of calcium
+        kfa_CaMK = 0.4393           ## Activated forward ratio CaMK --> CaMKB (fitted)
+        kfb_CaMK = 0.0056           ## Basal forward ratio of CaMK --> CaMKB (fitted)
+        kmCa_CaMK = 0.9716μM        ## Half-activation concentration of calcium (fitted)
         nCa_CaMK = 2.293            ## Hill coefficient of calcium
-        kphos_CaMK = 5Hz           ## Phosphorylation rate (originally 30Hz)
+        kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz)
         kdeph_CaMK = inv(6second)   ## Dephosphorylation rate
         k_P1_P2 = inv(60second)     ## Second autophosphorylation rate
         k_P2_P1 = inv(15second)     ## Second dephosphorylation rate
-        kox_CaMK = 291Hz / mM       ## Oxidation rate
-        krd_CaMK = inv(45second)    ## Reduction rate
+        kox_CaMK = 291Hz / mM       ## Oxidation rate constant
+        krd_CaMK = inv(45second)    ## Reduction rate constant
     end
 
     #==

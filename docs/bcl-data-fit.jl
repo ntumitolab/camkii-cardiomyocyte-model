@@ -50,7 +50,9 @@ callback60 = build_stim_callbacks(Istim, stimstart + 60second; period=1second, s
 sol60 = solve(prob, alg; callback=callback60)
 callback90 = build_stim_callbacks(Istim, stimstart + 90second; period=1second, starttime=stimstart)
 sol90 = solve(prob, alg; callback=callback90)
-idxs = (sys.t / 1000, sys.CaMKAct * 100)
+idxs = sys.CaMKAct * 100
+
+plot(sol15, idxs=[sys.i_Nam, sys.i_Nah, sys.i_Naj])
 
 plot(sol15, idxs=idxs, tspan=(0second, 205second), lab="15 sec", color=:blue)
 plot!(sol30, idxs=idxs, tspan=(0second, 205second), lab="30 sec", color=:red)

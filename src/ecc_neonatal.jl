@@ -6,7 +6,7 @@
 # https://pmc.ncbi.nlm.nih.gov/articles/PMC2716686/
 function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
     @parameters begin
-        INaKmax = 2.7μAμF
+        INaKmax = 2.7μAμF⁻¹
         KmNaiNaK = 18.6mM
         nNaK = 3.2
         KmKoNaK = 1.5mM
@@ -14,9 +14,8 @@ function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
 
     @variables INaK(t)
     sigma = 1 / 7 * expm1(na_o / 67.3mM)
-    fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365 * sigma * exp(-vm * iVT))
-    inak = INaKmax * fNaK * hil(k_o, KmKoNaK) * hil(na_i, KmNaiNaK, nNaK)
-    return ODESystem([INaK ~ inak], t; name)
+    fNaK = inv(1 + 0.1245 * _bf(-0.1vm) + 0.0365 * sigma * _bf(-vm))
+    return ODESystem([INaK ~ INaKmax * fNaK * hil(k_o, KmKoNaK) * hil(na_i, KmNaiNaK, nNaK)], t; name)
 end
 
 function build_neonatal_ecc_sys(;
@@ -36,20 +35,20 @@ function build_neonatal_ecc_sys(;
         ROS = 0μM
         ISO = 0μM
         ATP = 5mM
-        Istim = 0μAμF
+        Istim = 0μAμF⁻¹
         # cell geometry
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
         Vmyo = 4 / 3 * π * (rSL_true^3 - rSR_true^3) # 3.944 pL
         ACAP_F = Acap * Cm / Faraday
-        V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
-        V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
+        V_sub_SR = 4 / 3 * π * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
+        V_sub_SL = 4 / 3 * π * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
     end
 
     @variables begin
-        na_i(t) = 13.83837602mM
-        k_i(t) = 150.95275035mM
-        vm(t) = -68.79268mV
+        na_i(t) = 13.84mM
+        k_i(t) = 151mM
+        vm(t) = -68.79mV
         JCa_SL(t)
         JCa_SR(t)
     end
@@ -71,8 +70,8 @@ function build_neonatal_ecc_sys(;
 
     eqs = [
         D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), # Currents are normalized by capacitance
-        D(na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_F / Vmyo,
-        D(k_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_F / Vmyo,
+        D(na_i) ~ -(IfNa + INab + INa + 3INaCa + 3INaK) * ACAP_F / Vmyo,
+        D(k_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2INaK) * ACAP_F / Vmyo,
         JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_F / 2 / V_sub_SL,
     ]
 
