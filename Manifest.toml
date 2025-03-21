@@ -139,14 +139,16 @@ version = "0.1.6"
 
 [[deps.BlockArrays]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra"]
-git-tree-sha1 = "1ded9033f6067573314b27cd4b9ff01a1ba92cff"
+git-tree-sha1 = "c633e7cea8a6eb9bed5d67e8fb184df5789b82e6"
 uuid = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
-version = "1.4.0"
+version = "1.5.0"
 
     [deps.BlockArrays.extensions]
+    BlockArraysAdaptExt = "Adapt"
     BlockArraysBandedMatricesExt = "BandedMatrices"
 
     [deps.BlockArrays.weakdeps]
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
     BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
 
 [[deps.BracketingNonlinearSolve]]
@@ -446,9 +448,9 @@ version = "1.15.1"
 
 [[deps.DifferentiationInterface]]
 deps = ["ADTypes", "LinearAlgebra"]
-git-tree-sha1 = "73dbc965e39a9475dde841a57b0309e9cec194d0"
+git-tree-sha1 = "cf6dcb4b21bdd893fd45be70791d6dc89ca16506"
 uuid = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
-version = "0.6.47"
+version = "0.6.48"
 
     [deps.DifferentiationInterface.extensions]
     DifferentiationInterfaceChainRulesCoreExt = "ChainRulesCore"
@@ -1852,9 +1854,9 @@ version = "2.4.0"
 
 [[deps.Primes]]
 deps = ["IntegerMathUtils"]
-git-tree-sha1 = "cb420f77dc474d23ee47ca8d14c90810cafe69e7"
+git-tree-sha1 = "25cdd1d20cd005b52fc12cb6be3f75faaf59bb9b"
 uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
-version = "0.5.6"
+version = "0.5.7"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -2022,9 +2024,9 @@ version = "0.1.0"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "Accessors", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Moshi", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "SciMLStructures", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface"]
-git-tree-sha1 = "c779c485f384cc824dac44ab1ef1440209027016"
+git-tree-sha1 = "796073854427ce00c1cb454911bf52b76523c44c"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "2.76.0"
+version = "2.77.1"
 
     [deps.SciMLBase.extensions]
     SciMLBaseChainRulesCoreExt = "ChainRulesCore"
@@ -2323,9 +2325,9 @@ version = "3.20.0"
 
 [[deps.Symbolics]]
 deps = ["ADTypes", "ArrayInterface", "Bijections", "CommonWorldInvalidations", "ConstructionBase", "DataStructures", "DiffRules", "Distributions", "DocStringExtensions", "DomainSets", "DynamicPolynomials", "LaTeXStrings", "Latexify", "Libdl", "LinearAlgebra", "LogExpFunctions", "MacroTools", "Markdown", "NaNMath", "OffsetArrays", "PrecompileTools", "Primes", "RecipesBase", "Reexport", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArraysCore", "SymbolicIndexingInterface", "SymbolicLimits", "SymbolicUtils", "TermInterface"]
-git-tree-sha1 = "0b28e658bd7edf8a15c932bec1ae832fe1199c9c"
+git-tree-sha1 = "e7ef0402f159f982dad1d26bd7d9c9353d394f1d"
 uuid = "0c5d862f-8b57-4792-8d23-62f2024744c7"
-version = "6.31.0"
+version = "6.31.1"
 
     [deps.Symbolics.extensions]
     SymbolicsForwardDiffExt = "ForwardDiff"
