@@ -76,7 +76,7 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
 
     fK = 1 - fNa
 
-    return ODESystem([
+    return System([
             E_Na ~ nernst(na_o, na_i),
             E_K ~ nernst(k_o, k_i),
             IK1 ~ GK1 * hil(k_o, 210μM) * expit(-0.0319 * vk1, vk1, 0.1653),

@@ -72,7 +72,7 @@ function ina_markov_sys(CKIIOE=0)
         ($(α[8]), $(β[8])), (CNa3, CNa2, CNa1, ONa) <--> (LCNa3, LCNa2, LCNa1, LONa)
     end
 
-    osys = convert(ODESystem, rn, remove_conserved=true)
-    extsys = extend(osys, ODESystem(rate_eqs, name=:rates))
+    osys = convert(System, rn, remove_conserved=true)
+    extsys = extend(osys, System(rate_eqs, name=:rates))
     return extsys
 end

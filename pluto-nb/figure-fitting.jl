@@ -1060,7 +1060,7 @@ end
 eq_morotti = get_Morotti_equations();
 
 # ╔═╡ e9271d60-9abb-49b2-90ea-d5c543834e8e
-@named osys = ODESystem(eq_morotti, t);
+@named osys = System(eq_morotti, t);
 
 # ╔═╡ 34816d55-a8a9-411f-9a03-adeceb6518f9
 function get_camkii_model()
@@ -1100,7 +1100,7 @@ function get_camkii_model()
 	    ##  Dephosphorylation CaMKP -> CaMK
 	    k_dephospho, CaMKP --> CaMK
 	    ## Adjustment for Oxdization
-	
+
 	    (k_phosCaM * (Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca4CaM_CaMK + Ca4CaM_CaMKP + CaMKP + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, k_PB), Ca4CaM_CaMK <--> Ca4CaM_CaMKP #
 	    (k_phosCaM * (Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + Ca4CaM_CaMK + Ca4CaM_CaMKP + CaMKP + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP) / CaMKII_T, k_OXPOX), Ca4CaM_CaMKOX <--> Ca4CaM_CaMKPOX #
 	    #(kbi*kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)/(kbi/kib/(1/(Ca4CaM_CaMKOX+Ca4CaM_CaMKPOX+Ca4CaM_CaMK+Ca4CaM_CaMKP+CaMKP+CaM0_CaMK+Ca2CaM_C_CaMK+Ca2CaM_N_CaMK+Ca4CaM_CaMK+CaM0_CaMKP+Ca2CaM_C_CaMKP+Ca2CaM_N_CaMKP+Ca4CaM_CaMKP)-1)+0.01851e3),k_PB), Ca4CaM_CaMK <--> Ca4CaM_CaMKP #
@@ -1108,11 +1108,11 @@ function get_camkii_model()
 	    (ROS * k_BOX, k_OXB), Ca4CaM_CaMK <--> Ca4CaM_CaMKOX
 	    (ROS * k_POXP, k_OXPP), Ca4CaM_CaMKP <--> Ca4CaM_CaMKPOX
 	end
-	
+
 end
 
 # ╔═╡ fac108bf-63be-4524-8622-71ce4cddab60
-rn_osys = convert(ODESystem, get_camkii_model());
+rn_osys = convert(System, get_camkii_model());
 
 # ╔═╡ a798d3ac-5841-4811-9009-776f6f02b7de
 begin

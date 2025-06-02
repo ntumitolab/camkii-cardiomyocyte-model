@@ -55,5 +55,5 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         D(CaJSR) ~ betaSR * (-Jrel * V_sub_SR + Jtr * VNSR) / VJSR,
         D(CaNSR) ~ Jup - Jleak - Jtr,
     ]
-    return ODESystem(eqs, t; name)
+    return System(eqs, t; name)
 end
