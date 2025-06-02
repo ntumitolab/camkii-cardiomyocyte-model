@@ -44,5 +44,5 @@ function get_ca_pde_sys(;
         push!(defaults, Cai[i] => Cai_default)
     end
 
-    return ODESystem(eqs, t; name, defaults)
+    return System(eqs, t; name, defaults)
 end

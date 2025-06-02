@@ -252,7 +252,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
 
-    sys = ODESystem([rateeqs; conservedeqs; obseqs], t; name)
+    sys = System([rateeqs; conservedeqs; obseqs], t; name)
     if simplify
         sys = structural_simplify(sys)
     end
@@ -324,5 +324,5 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         RyR_PKAp ~ RyRp_basal + RyRp_activated * hil(ISO, RyRp_KM),
     ]
 
-    return ODESystem(eqs, t; name)
+    return System(eqs, t; name)
 end
