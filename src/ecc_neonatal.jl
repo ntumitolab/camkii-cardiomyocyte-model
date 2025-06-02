@@ -16,7 +16,7 @@ function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
     sigma = 1 / 7 * expm1(na_o / 67.3mM)
     fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365 * sigma * exp(-vm * iVT))
     inak = INaKmax * fNaK * hil(k_o, KmKoNaK) * hil(na_i, KmNaiNaK, nNaK)
-    return ODESystem([INaK ~ inak], t; name)
+    return System([INaK ~ inak], t; name)
 end
 
 function build_neonatal_ecc_sys(;
@@ -76,7 +76,7 @@ function build_neonatal_ecc_sys(;
         JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_F / 2 / V_sub_SL,
     ]
 
-    sys = ODESystem(eqs, t; name)
+    sys = System(eqs, t; name)
     for s2 in (barsys, capdesys, camkiisys, icasys, inasys, iksys, sersys, naksys)
         sys = extend(sys, s2; name)
     end

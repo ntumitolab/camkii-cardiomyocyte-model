@@ -30,5 +30,5 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
         INab ~ gNab * (vm - E_Na),
     ]
 
-    return ODESystem(eqs, t; name)
+    return System(eqs, t; name)
 end

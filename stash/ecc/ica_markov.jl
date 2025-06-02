@@ -70,7 +70,7 @@ function lcc_markov_sys(;mode=1)
         ($(k[2]), $(k[1])), I1Ca <--> C1Ca
     end
 
-    osys = convert(ODESystem, rn, remove_conserved=true)
-    lccsys = extend(osys, ODESystem(rateEqs, name=:rates))
+    osys = convert(System, rn, remove_conserved=true)
+    lccsys = extend(osys, System(rateEqs, name=:rates))
     return lccsys
 end

@@ -159,7 +159,7 @@ function get_camkii_sys(Ca=0μM;
     add_rate!(rates, k_OXPP, [CaMKPOX], 0, [CaMKP])
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
-    sys = ODESystem([rateeqs; conservedeqs; obseqs], t; name)
+    sys = System([rateeqs; conservedeqs; obseqs], t; name)
     if simplify
         sys = structural_simplify(sys)
     end
@@ -251,7 +251,7 @@ function get_camkii_simp_sys(Ca=0μM;
     add_rate!(rates, krd_CaMK, [CaMKAOX], 0, [CaMKA])
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
-    sys = ODESystem([rateeqs; eqs], t; name)
+    sys = System([rateeqs; eqs], t; name)
     if simplify
         sys = structural_simplify(sys)
     end

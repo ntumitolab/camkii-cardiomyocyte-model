@@ -56,7 +56,7 @@ function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
     gammafca = 0.2 * expit(-(cai - 0.75μM) / 0.8μM)
     kfca = 1 - (fcainf > i_fca) * (V > -60)
 
-    return ODESystem([
+    return System([
             ICa_scale ~ ICa_scale0 * favail,
             E_Ca ~ nernst(cao, cai, 2),
             INaCa ~ inaca,
