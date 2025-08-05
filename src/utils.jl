@@ -91,10 +91,10 @@ const ghkVm = ghk
 "Accumulate chemical reaction rates into a look-up table"
 function add_raw_rate!(lut, rate, substrates, products)
     for s in substrates
-        lut[s] -= rate
+        lut[s] = get(lut, s, 0) - rate
     end
     for p in products
-        lut[p] += rate
+        lut[p] = get(lut, p, 0) + rate
     end
     return lut
 end

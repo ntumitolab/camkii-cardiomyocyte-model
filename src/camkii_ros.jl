@@ -5,7 +5,8 @@ CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in s
 
 ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Following Myocardial Infarction: A Computational Analysis (Christensen et al. 2009); https://doi.org/10.1371/journal.pcbi.1000583
 """
-function get_camkii_sys(Ca=0μM;
+function get_camkii_sys(
+    Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
     name=:camkii_sys,
@@ -167,7 +168,8 @@ function get_camkii_sys(Ca=0μM;
 end
 
 "Simplified CaMKII system"
-function get_camkii_simp_sys(Ca=0μM;
+function get_camkii_simp_sys(
+    Ca=0μM;
     ROS=0μM,
     binding_To_PCaMK=0,
     binding_To_OCaMK=0,
@@ -181,8 +183,8 @@ function get_camkii_simp_sys(Ca=0μM;
         kfa_CaMK = 0.4393           ## Activated forward ratio CaMK --> CaMKB (adjustable)
         kfb_CaMK = 0.0056           ## Basal forward ratio of CaMK --> CaMKB (adjustable)
         kmCa_CaMK = 0.9716μM        ## Half-activation concentration of calcium
-        nCa_CaMK = 2.293            ## Hill coefficient of calcium
-        kphos_CaMK = 5Hz           ## Phosphorylation rate (originally 30Hz)
+        nCa_CaMK = 2.293            ## Hill coefficient for calcium
+        kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz)
         kdeph_CaMK = inv(6second)   ## Dephosphorylation rate
         k_P1_P2 = inv(60second)     ## Second autophosphorylation rate
         k_P2_P1 = inv(15second)     ## Second dephosphorylation rate
@@ -208,7 +210,7 @@ function get_camkii_simp_sys(Ca=0μM;
         CaMK(t)             ## Inactive CaMKII
     end
 
-    rates = merge(Dict(sts .=> Num(0)), Dict(conservedvars .=> Num(0)))
+    rates = Dict()
 
     # Observables
     @variables CaMKAct(t)
