@@ -5,6 +5,95 @@ CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in s
 
 ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Following Myocardial Infarction: A Computational Analysis (Christensen et al. 2009); https://doi.org/10.1371/journal.pcbi.1000583
 """
+function get_camkii_eqs(
+    Ca=0μM;
+    ROS=0μM,
+    binding_To_PCaMK=0,   ## 0.1 for T287D mutation
+)
+    @parameters begin
+        CAM_T = 30μM            ## Total calmodulin Concentration
+        CAMKII_T = 70μM         ## Total CaMKII Concentration
+        k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1s-1
+        k_1C_off = 50Hz         ## 10-70 s-1
+        k_2C_on = 10Hz / μM     ## 5-25uM-1s-1.
+        k_2C_off = 10Hz         ## 8.5-10s-1.
+        ## N-lobe
+        k_1N_on = 100Hz / μM    ## 25-260uM-1s-1
+        k_1N_off = 2000Hz       ## 1000-4000 s-1
+        k_2N_on = 200Hz / μM    ## 50-300uM-1s-1.
+        k_2N_off = 500Hz        ## 500-1000.s-1
+
+        ## Ca2+ binding to CaM-CAMKII (KCaM)
+        ## C-lobe
+        k_K1C_on = 44Hz / μM
+        k_K1C_off = 33Hz
+        k_K2C_on = 44Hz / μM
+        k_K2C_off = 0.8Hz ## 0.49-4.9Hz
+        ## N-lobe
+        k_K1N_on = 76Hz / μM
+        k_K1N_off = 300Hz
+        k_K2N_on = 76Hz / μM
+        k_K2N_off = 20Hz ## 6-60s-1
+
+        ## CaM binding to CaMKII
+        kCaM0_on = 3.8Hz / mM
+        kCaM0_off = 5.5Hz
+        kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1s-1
+        kCaM2C_off = 6.8Hz
+        kCaM2N_on = 0.12Hz / μM
+        kCaM2N_off = 1.7Hz
+        kCaM4_on = 15Hz / μM  # 14-60 uM-1s-1
+        kCaM4_off = 1.5Hz  # 1.1 - 2.3 s-1
+        kCaM0P_on = kCaM0_on * binding_To_PCaMK
+        kCaM2CP_on = kCaM2C_on * binding_To_PCaMK
+        kCaM2NP_on = kCaM2N_on * binding_To_PCaMK
+        kCaM4P_on = kCaM4_on * binding_To_PCaMK
+        kCaM0P_off = inv(3second)
+        kCaM2CP_off = inv(3second)
+        kCaM2NP_off = inv(3second)
+        kCaM4P_off = inv(3second)
+        k_phosCaM = 5Hz # 30Hz
+        k_dephospho = inv(6second)
+        k_P1_P2 = inv(60second)
+        k_P2_P1 = inv(15second)
+
+        ## Oxidation / reduction of Met
+        k_BOX = 291Hz / mM
+        k_POXP = 291Hz / mM
+        k_OXB = inv(45second)
+        k_OXPP = inv(45second)
+    end
+
+    @variables begin
+        Ca2CaM_C(t) = 84.33nM
+        Ca2CaM_N(t) = 8.578nM
+        Ca4CaM(t) = 0.02nM
+        CaM0_CaMK(t) = 1μM
+        Ca2CaM_C_CaMK(t) = 398.68nM
+        Ca2CaM_N_CaMK(t) = 16.6nM
+        Ca4CaM_CaMK(t) = 6.66nM
+        CaM0_CaMKP(t) = 623.72nM
+        Ca2CaM_C_CaMKP(t) = 1.01μM
+        Ca2CaM_N_CaMKP(t) = 10.75nM
+        Ca4CaM_CaMKP(t) = 15.81nM
+        Ca4CaM_CaMKOX(t) = 0mM
+        Ca4CaM_CaMKPOX(t) = 0mM
+        CaMKP(t) = 3.3μM
+        CaMKP2(t) = 831.43nM
+        CaMKPOX(t) = 0mM
+        CaMKOX(t) = 0mM
+        CaM0(t) ## Conserved
+        CaMK(t) ## Conserved
+    end
+
+    eqs = [
+        CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
+        CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
+    ]
+
+end
+
+
 function get_camkii_sys(
     Ca=0μM;
     ROS=0μM,
