@@ -1,5 +1,5 @@
 "Calcium diffusion between sarcolemma (SL) and sarcoplasmic reticulum (SR)"
-function get_ca_pde_sys(;
+function get_ca_pde_eqs(;
     Cai_default=121.13nM,
     dx=0.1μm,
     rSR_true=6μm,
@@ -7,7 +7,6 @@ function get_ca_pde_sys(;
     TnI_PKAp=0,
     JCa_SR=0,
     JCa_SL=0,
-    name=:capdesys
 )
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
@@ -22,14 +21,14 @@ function get_ca_pde_sys(;
         KmTrpn = 0.5μM
         fracTnIp0 = 0.062698 # Baseline effect
     end
-
-    fPKA_TnI = 1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIp0) # Max effect +61%
+    # Effect 0.96 ~ 1.61
+    fPKA_TnI = 1.61 - 0.61 * (1 - TnI_PKAp) / (1 - fracTnIp0)
     KmTrpnNew = KmTrpn / fPKA_TnI
 
-    "Calcium buffering factor by troponin and calmodulin"
+    "Calcium buffering power by troponin and calmodulin"
     beta_cai(Ca) = inv(1 + TrpnTotal * KmTrpnNew / (Ca + KmTrpnNew)^2 + CmdnTotal * KmCmdn / (Ca + KmCmdn)^2)
 
-    eqs = [
+    eqs_cai = [
         Cai_mean ~ sum(collect(Cai)) / m,
         Cai_sub_SR ~ Cai[1],
         Cai_sub_SL ~ Cai[m],
@@ -37,12 +36,25 @@ function get_ca_pde_sys(;
         D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL) * beta_cai(Cai[m]),
     ]
 
-    defaults = [Cai[1] => Cai_default, Cai[m] => Cai_default]
+    defaults_cai = [Cai[1] => Cai_default, Cai[m] => Cai_default]
 
     for i in 2:m-1
-        push!(eqs, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
-        push!(defaults, Cai[i] => Cai_default)
+        push!(eqs_cai, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
+        push!(defaults_cai, Cai[i] => Cai_default)
     end
+    return (; eqs_cai, defaults_cai)
+end
 
-    return System(eqs, t; name, defaults)
+function get_ca_pde_sys(;
+    Cai_default=121.13nM,
+    dx=0.1μm,
+    rSR_true=6μm,
+    rSL_true=10.5μm,
+    TnI_PKAp=0,
+    JCa_SR=0,
+    JCa_SL=0,
+    name=:capdesys
+)
+    @unpack eqs_cai, defaults_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
+    return System(eqs_cai, t; name, defaults_cai)
 end

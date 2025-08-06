@@ -6,7 +6,7 @@ CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in s
 ROS activation model: Oxidized Calmodulin Kinase II Regulates Conduction Following Myocardial Infarction: A Computational Analysis (Christensen et al. 2009); https://doi.org/10.1371/journal.pcbi.1000583
 """
 function get_camkii_eqs(;
-    Ca=0.1μM,
+    Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
 )
@@ -173,15 +173,14 @@ function get_camkii_sys(;
    return sys
 end
 
-"Simplified CaMKII system"
-function get_camkii_simp_sys(
-    Ca=0μM;
+"""
+Simplified CaMKII system with one-step activation of CaMK
+"""
+function get_camkii_simp_eqs(;
+    Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,
-    binding_To_OCaMK=0,
-    name=:camkii_sys,
-    simplify=false
-)
+    binding_To_OCaMK=0,)
 
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
@@ -198,9 +197,6 @@ function get_camkii_simp_sys(
         krd_CaMK = inv(45second)    ## Reduction rate
     end
 
-    #==
-    States: bound/unbound, autophosphorylated/dephosphorylated, oxidized/reduced
-    ==#
     sts = @variables begin
         CaMKB(t) = 0.008728     ## Bound to CaMCa
         CaMKBOX(t) = 0          ## Bound to CaMCa, oxidized
@@ -212,56 +208,66 @@ function get_camkii_simp_sys(
         CaMKOX(t) = 0           ## Unbound, oxidized
     end
 
-    conservedvars = @variables begin
+    @variables begin
         CaMK(t)             ## Inactive CaMKII
+        CaMKAct(t)          ## Active CaMKII fraction
     end
 
     rates = Dict()
-
-    # Observables
-    @variables CaMKAct(t)
-    eqs = [
-        CaMKAct ~ 1 - CaMK,
-        1 ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
-    ]
-
     ## CaMK(OX) <--CaM,Ca--> CaMKB(OX)
     ## Calc the steady-state bound fraction (binf) for forward / backward reaction rates
     binf = kfa_CaMK * hil(Ca, kmCa_CaMK, nCa_CaMK) + kfb_CaMK
     kf = r_CaMK * binf
     kb = r_CaMK * (1 - binf)
-    add_rate!(rates, kf, [CaMK], kb, [CaMKB])
-    add_rate!(rates, kf * binding_To_OCaMK, [CaMKOX], kb, [CaMKBOX])
+    add_rate!(rates, kf, CaMK, kb, CaMKB)
+    add_rate!(rates, kf * binding_To_OCaMK, CaMKOX, kb, CaMKBOX)
 
     ## CaMKA(OX) <-CaM,Ca-> CaMKP(OX)
-    add_rate!(rates, kf * binding_To_PCaMK, [CaMKA], kb_CaMKP, [CaMKP])
-    add_rate!(rates, kf * binding_To_PCaMK, [CaMKAOX], kb_CaMKP, [CaMKPOX])
+    add_rate!(rates, kf * binding_To_PCaMK, CaMKA, kb_CaMKP, CaMKP)
+    add_rate!(rates, kf * binding_To_PCaMK, CaMKAOX, kb_CaMKP, CaMKPOX)
 
     ## Auto-phosphorylation of CaMKII
     ## B(OX) <--> P(OX)
     kphos = kphos_CaMK * CaMKAct
-    add_rate!(rates, kphos, [CaMKB], kdeph_CaMK, [CaMKP])
-    add_rate!(rates, kphos, [CaMKBOX], kdeph_CaMK, [CaMKPOX])
+    add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
+    add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
 
     ## Second phosphorylation of Apo CaMKII-P
     # CaMKA <--> CaMKA2
-    add_rate!(rates, k_P1_P2, [CaMKA], k_P2_P1, [CaMKA2])
+    add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
 
     ## Dephosphorylation of Apo CaMK-P
     ## CaMKA(OX) --> CaMK(OX)
-    add_rate!(rates, kdeph_CaMK, [CaMKA], 0, [CaMK])
-    add_rate!(rates, kdeph_CaMK, [CaMKAOX], 0, [CaMKOX])
+    add_rate!(rates, kdeph_CaMK, CaMKA, 0, CaMK)
+    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
 
     ## Redox reactions by ROS and reductases
-    add_rate!(rates, kox_CaMK * ROS, [CaMKB], krd_CaMK, [CaMKBOX])
-    add_rate!(rates, kox_CaMK * ROS, [CaMKP], krd_CaMK, [CaMKPOX])
-    add_rate!(rates, krd_CaMK, [CaMKOX], 0, [CaMK])
-    add_rate!(rates, krd_CaMK, [CaMKAOX], 0, [CaMKA])
+    add_rate!(rates, kox_CaMK * ROS, CaMKB, krd_CaMK, CaMKBOX)
+    add_rate!(rates, kox_CaMK * ROS, CaMKP, krd_CaMK, CaMKPOX)
+    add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
+    add_rate!(rates, krd_CaMK, CaMKAOX, 0, CaMKA)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
-    sys = System([rateeqs; eqs], t; name)
+    eqs = [
+        CaMKAct ~ 1 - CaMK,
+        1 ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
+    ]
+    eqs_camkii = [rateeqs; eqs]
+    return (; eqs_camkii, CaMKAct)
+end
+
+function get_camkii_simp_sys(;
+    Ca=0μM,
+    ROS=0μM,
+    binding_To_PCaMK=0,
+    binding_To_OCaMK=0,
+    name=:camkii_sys,
+    simplify=false
+)
+    @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
+    sys = System(eqs_camkii, t; name)
     if simplify
-        sys = structural_simplify(sys)
+        sys = mtkcompile(sys)
     end
     return sys
 end
