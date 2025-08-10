@@ -1,5 +1,4 @@
-"Sarcoplasmic reticulum system"
-function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL, name=:sersys)
+function get_sr_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL)
     @parameters begin
         VSR = 0.0903pL
         VNSR = 0.9 * VSR
@@ -42,7 +41,7 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
     rSR = (CaNSR / KmrSR)^2
     kleak = (1 + 5 * RyR_CKp) * kSRleak / 2
 
-    eqs = [
+    eqs_sr = [
         1 ~ PO1RyR + PC1RyR,
         Jrel ~ kRyR * PO1RyR * (CaJSR - Cai_sub_SR),
         KmRyR ~ (3.51 / (1 + exp((CaJSR - 530μM) / 200μM)) + 0.25) * 1μM,
@@ -55,5 +54,12 @@ function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         D(CaJSR) ~ betaSR * (-Jrel * V_sub_SR + Jtr * VNSR) / VJSR,
         D(CaNSR) ~ Jup - Jleak - Jtr,
     ]
-    return System(eqs, t; name)
+
+    return (; eqs_sr, Jrel, Jup, Jleak, Jtr, JCa_SR)
+end
+
+"Sarcoplasmic reticulum system"
+function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL, name=:sersys)
+    @unpack eqs_sr = get_ser_eqs(Cai_sub_SR; fracPLB_CKp, fracPLBp, RyR_CKp, V_sub_SR)
+    return System(eqs_sr, t; name)
 end
