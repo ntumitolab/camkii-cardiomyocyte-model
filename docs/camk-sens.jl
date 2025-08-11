@@ -10,7 +10,7 @@ Plots.default(lw=1.5)
 # ## CaMKII sensitivity to calcium
 # Model CaM/Calcium binding only. No phosphorylation or oxidation.
 @parameters Ca = 0μM ROS = 0μM
-sys = get_camkii_sys(Ca; ROS, simplify=true)
+sys = get_camkii_sys(; Ca, ROS, simplify=true)
 
 #---
 prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
@@ -71,7 +71,7 @@ yestim = model_camk.(xdata, Ref(pestim))
 p1 = plot(xdata, [ydata yestim], lab=["Full model" "Fitted"], line=[:dash :dot], title="CaMKII activity", legend=:topleft; xopts...)
 
 # ## The simplified CaMKII system
-simpsys = CaMKIIModel.get_camkii_simp_sys(Ca; ROS, simplify=true)
+simpsys = CaMKIIModel.get_camkii_simp_sys(;Ca, ROS, simplify=true)
 
 # ## Comparing original and simplified model
 sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true)
