@@ -1,5 +1,4 @@
-"Fast sodium current (INa) and background sodium current"
-function get_ina_sys(nai, nao, vm; name=:inasys)
+function get_ina_eqs(nai, nao, vm)
     @parameters begin
         gNa = 12.8mSμF
         gNab = 0.0026mSμF
@@ -21,7 +20,7 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
     jα = max((-127140 * exp(0.2444v) - 3.474e-5 * exp(-0.04391v)) * (v + 37.78) / (1 + exp(0.311 * (v + 79.23))), 0)
     jβ = 0.3 * exp(-2.535e-7v) / (1 + exp(-0.1 * (v + 32)))
 
-    eqs = [
+    eqs_ina = [
         INa ~ gNa * i_Nam^3 * i_Nah * i_Naj * (vm - E_Na),
         D(i_Nam) ~ inv(ms) * (mα - i_Nam * (mα + mβ)),
         D(i_Nah) ~ inv(ms) * (hα - i_Nah * (hα + hβ)),
@@ -30,5 +29,11 @@ function get_ina_sys(nai, nao, vm; name=:inasys)
         INab ~ gNab * (vm - E_Na),
     ]
 
-    return System(eqs, t; name)
+    return (; eqs_ina, INa, INab)
+end
+
+"Fast sodium current (INa) and background sodium current"
+function get_ina_sys(nai, nao, vm; name=:inasys)
+    @unpack eqs_ina = get_ina_eqs(nai, nao, vm)
+    return System(eqs_ina, t; name)
 end
