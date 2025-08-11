@@ -56,5 +56,5 @@ function get_ca_pde_sys(;
     name=:capdesys
 )
     @unpack eqs_cai, defaults_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
-    return System(eqs_cai, t; name, defaults_cai)
+    return System(eqs_cai, t; name, defaults=defaults_cai)
 end

@@ -1,4 +1,4 @@
-function get_sr_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL)
+function get_ser_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL)
     @parameters begin
         VSR = 0.0903pL
         VNSR = 0.9 * VSR
