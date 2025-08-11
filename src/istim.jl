@@ -1,4 +1,4 @@
-function build_stim_callbacks(sym, endtime; period=1second, duty=0.5ms, starttime=zero(endtime), strength=-80μAμF, baseline=0μAμF, proposeddt=1ms)
+function build_stim_callbacks(sym, endtime; period=1second, duty=0.5ms, starttime=zero(endtime), strength=-80μAμF, baseline=0μAμF, proposeddt=duty)
     rise! = (integrator) -> begin
         integrator.ps[sym] = strength
         set_proposed_dt!(integrator, proposeddt)
@@ -10,7 +10,6 @@ function build_stim_callbacks(sym, endtime; period=1second, duty=0.5ms, starttim
     end
 
     ts = starttime:period:endtime
-
     riseevents = PresetTimeCallback(ts, rise!)
     fallevents = PresetTimeCallback(ts .+ duty, fall!)
     return CallbackSet(riseevents, fallevents)

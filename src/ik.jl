@@ -1,5 +1,4 @@
-"Potassium currents"
-function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
+function get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0)
     @parameters begin
         # IK1: time-independent
         GK1 = 0.0515mSμF
@@ -76,35 +75,43 @@ function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
 
     fK = 1 - fNa
 
-    return System([
-            E_Na ~ nernst(na_o, na_i),
-            E_K ~ nernst(k_o, k_i),
-            IK1 ~ GK1 * hil(k_o, 210μM) * expit(-0.0319 * vk1, vk1, 0.1653),
-            sinf ~ expit((V + 31.97156) / -4.64291),
-            rinf ~ expit((V - 3.55716) / 14.61299),
-            slowinf ~ sinf,
-            taur ~ 1000ms / (45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
-            taus ~ (350 * exp(-(((V + 70) / 15)^2)) + 35 - 26.9) * ms,
-            tausslow ~ (3700 * exp(-(((V + 70) / 30)^2)) + 35 + 37.4) * ms,
-            Ito ~ Gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
-            D(i_r) ~ (rinf - i_r) / taur,
-            D(i_s) ~ (sinf - i_s) / taus,
-            D(i_sslow) ~ (slowinf - i_sslow) / tausslow,
-            IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
-            nksinf ~ alphan / (alphan + betan),
-            D(i_nKs) ~ (nksinf - i_nKs) / nKstau,
-            E_Kr ~ nernst(0.98 * k_o + 0.02 * na_o, 0.98 * k_i + 0.02 * na_i),
-            IKr ~ GKr * i_OK * (vm - E_Kr),
-            1 ~ i_CK0 + i_CK1 + i_CK2 + i_OK + i_IK,
-            D(i_CK1) ~ rc0c1 - rc1c2,
-            D(i_CK2) ~ rc1c2 - rc2o,
-            D(i_OK) ~ rc2o - roi,
-            D(i_IK) ~ roi,
-            yinf ~ expit(-(V + 78.65) / 6.33),
-            tauy ~ 1000ms / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
-            IfNa ~ Gf * fNa * i_y * (vm - E_Na),
-            IfK ~ Gf * fK * i_y * (vm - E_K),
-            If ~ IfNa + IfK,
-            D(i_y) ~ (yinf - i_y) / tauy
-        ], t; name)
+    eqs_ik = [
+        E_Na ~ nernst(na_o, na_i),
+        E_K ~ nernst(k_o, k_i),
+        IK1 ~ GK1 * hil(k_o, 210μM) * expit(-0.0319 * vk1, vk1, 0.1653),
+        sinf ~ expit((V + 31.97156) / -4.64291),
+        rinf ~ expit((V - 3.55716) / 14.61299),
+        slowinf ~ sinf,
+        taur ~ 1000ms / (45.16 * exp(0.03577 * (V + 50)) + 98.9 * exp(-0.1 * (V + 38))),
+        taus ~ (350 * exp(-(((V + 70) / 15)^2)) + 35 - 26.9) * ms,
+        tausslow ~ (3700 * exp(-(((V + 70) / 30)^2)) + 35 + 37.4) * ms,
+        Ito ~ Gt * i_r * (f_is * i_s + (1 - f_is) * i_sslow) * (vm - E_K),
+        D(i_r) ~ (rinf - i_r) / taur,
+        D(i_s) ~ (sinf - i_s) / taus,
+        D(i_sslow) ~ (slowinf - i_sslow) / tausslow,
+        IKs ~ GKs * i_nKs^2 * (vm - E_K) * fracIKuravail * 2,
+        nksinf ~ alphan / (alphan + betan),
+        D(i_nKs) ~ (nksinf - i_nKs) / nKstau,
+        E_Kr ~ nernst(0.98 * k_o + 0.02 * na_o, 0.98 * k_i + 0.02 * na_i),
+        IKr ~ GKr * i_OK * (vm - E_Kr),
+        1 ~ i_CK0 + i_CK1 + i_CK2 + i_OK + i_IK,
+        D(i_CK1) ~ rc0c1 - rc1c2,
+        D(i_CK2) ~ rc1c2 - rc2o,
+        D(i_OK) ~ rc2o - roi,
+        D(i_IK) ~ roi,
+        yinf ~ expit(-(V + 78.65) / 6.33),
+        tauy ~ 1000ms / (0.11885 * exp((V + 75) / 28.37) + 0.56236 * exp(-(V + 75) / 14.19)),
+        IfNa ~ Gf * fNa * i_y * (vm - E_Na),
+        IfK ~ Gf * fK * i_y * (vm - E_K),
+        If ~ IfNa + IfK,
+        D(i_y) ~ (yinf - i_y) / tauy,
+    ]
+
+    return(; eqs_ik, IK1, Ito, IKs, IKr, If, IfNa, IfK)
+end
+
+"Potassium currents"
+function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
+    @unpack eqs_ik = get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp)
+    return System(eqs_ik, t; name)
 end

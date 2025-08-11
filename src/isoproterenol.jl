@@ -259,8 +259,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     return sys
 end
 
-"Algebraic fitted beta-adrenergic system"
-function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
+function get_bar_eqs_reduced(ISO=0μM)
     @parameters begin
         PKACI_basal = 0.0734  ## basal activity
         PKACI_activated = 0.1994
@@ -311,7 +310,7 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
     end
 
     ## Fitted activities
-    eqs = [
+    eqs_bar = [
         fracPKACI ~ PKACI_basal + PKACI_activated * hil(ISO, PKACI_KM),
         fracPKACII ~ PKACII_basal + PKACII_activated * hil(ISO, PKACII_KM),
         fracPP1 ~ PP1_basal + PP1_activated * hilr(ISO, PP1_KI),
@@ -324,5 +323,11 @@ function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
         RyR_PKAp ~ RyRp_basal + RyRp_activated * hil(ISO, RyRp_KM),
     ]
 
-    return System(eqs, t; name)
+    return (; eqs_bar, fracPKACI, fracPKACII, fracPP1, fracPLBp, fracPLMp, TnI_PKAp, LCCa_PKAp, LCCb_PKAp, IKUR_PKAp, RyR_PKAp)
+end
+
+"Algebraic fitted beta-adrenergic system"
+function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
+    @unpack eqs_bar = get_bar_eqs_reduced(ISO)
+    return ODESystem(eqs_bar, t; name)
 end
