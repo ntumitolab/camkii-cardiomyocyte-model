@@ -1,7 +1,7 @@
 name = "CaMKIIModel"
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
 authors = ["Wen-Wei Tseng <sosiristseng@gmail.com>"]
-version = "0.6.0"
+version = "0.7.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
