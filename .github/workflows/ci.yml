@@ -17,13 +17,13 @@ env:
   JULIA_CONDAPKG_BACKEND: 'Null'
   JULIA_CONDAPKG_OFFLINE: 'true'
   JULIA_NUM_THREADS: '2'
-  LITERATE_PROC: '16'
+  LITERATE_PROC: '2'
   NBCACHE: '.cache'
   UV_SYSTEM_PYTHON: 1
 
 jobs:
   CI:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
@@ -106,8 +106,12 @@ jobs:
         branch: ipynb
         single-commit: true
         commit-message: ${{ github.event.head_commit.message }}
-    - name: Install Jupyter Book
-      run: uv pip install "jupyter-book>=2"
+    - name: Setup NodeJS (required by Jupyter Book 2)
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+    - name: Install Jupyter Book (via myst)
+      run: npm install -g jupyter-book
     - name: Build website
       run: jupyter-book build --html
     - name: Upload pages artifact
