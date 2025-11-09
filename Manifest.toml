@@ -2,7 +2,7 @@
 
 julia_version = "1.12.1"
 manifest_format = "2.0"
-project_hash = "8368ba36bb66d870c0fe5534cbba21a24b0ce596"
+project_hash = "6a0f78a1b65b750bd63f12df5cc7d104fe1990e6"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "27cecae79e5cc9935255f90c53bb831cc3c870d7"
@@ -186,7 +186,7 @@ version = "0.10.15"
 deps = ["CSV", "DataFrames", "DiffEqCallbacks", "Latexify", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "SciMLBase", "SteadyStateDiffEq"]
 path = "."
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
-version = "0.6.0"
+version = "0.7.0"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
