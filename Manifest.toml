@@ -183,7 +183,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CaMKIIModel]]
-deps = ["CSV", "DataFrames", "DiffEqCallbacks", "Latexify", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "SciMLBase", "SteadyStateDiffEq"]
+deps = ["CSV", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "Latexify", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "SciMLBase", "SteadyStateDiffEq"]
 path = "."
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
 version = "0.7.0"
@@ -1455,9 +1455,9 @@ version = "4.12.0"
 
 [[deps.NonlinearSolveBase]]
 deps = ["ADTypes", "Adapt", "ArrayInterface", "CommonSolve", "Compat", "ConcreteStructs", "DifferentiationInterface", "EnzymeCore", "FastClosures", "LinearAlgebra", "Markdown", "MaybeInplace", "Preferences", "Printf", "RecursiveArrayTools", "SciMLBase", "SciMLJacobianOperators", "SciMLLogging", "SciMLOperators", "SciMLStructures", "Setfield", "StaticArraysCore", "SymbolicIndexingInterface", "TimerOutputs"]
-git-tree-sha1 = "6264f0258f674fc1eaed58ecb5fca405c46a04cc"
+git-tree-sha1 = "e74044de4d03576af3955df3de71487a576c13f1"
 uuid = "be0214bd-f91f-a760-ac4e-3421ce2b2da0"
-version = "2.2.0"
+version = "2.3.0"
 
     [deps.NonlinearSolveBase.extensions]
     NonlinearSolveBaseBandedMatricesExt = "BandedMatrices"
@@ -2094,9 +2094,9 @@ version = "0.1.0"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "Accessors", "Adapt", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Moshi", "PreallocationTools", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLLogging", "SciMLOperators", "SciMLPublic", "SciMLStructures", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface"]
-git-tree-sha1 = "3d32e504eab65c1e0fdcca67fc6366723a3d9fa8"
+git-tree-sha1 = "dc93eb05a8101a58c844e0e20a47f8a92be33048"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "2.126.0"
+version = "2.127.0"
 
     [deps.SciMLBase.extensions]
     SciMLBaseChainRulesCoreExt = "ChainRulesCore"
@@ -2151,9 +2151,9 @@ version = "1.5.0"
 
 [[deps.SciMLOperators]]
 deps = ["Accessors", "ArrayInterface", "DocStringExtensions", "LinearAlgebra", "MacroTools"]
-git-tree-sha1 = "18e8ea3fdfca9c3408f1df8fc1d7690b12784338"
+git-tree-sha1 = "5dfddb5e9699a268937a6f2a71c867a2ce3c6458"
 uuid = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
-version = "1.10.0"
+version = "1.11.0"
 weakdeps = ["SparseArrays", "StaticArraysCore"]
 
     [deps.SciMLOperators.extensions]
