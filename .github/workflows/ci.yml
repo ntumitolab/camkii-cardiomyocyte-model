@@ -22,8 +22,6 @@ env:
 jobs:
   CI:
     runs-on: self-hosted
-    env:
-      NBCACHE: /tmp/${{ github.run_id }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
