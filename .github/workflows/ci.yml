@@ -16,8 +16,8 @@ env:
   JULIA_CONDAPKG_OFFLINE: 'true'
   JULIA_CI: 'true'
   NBCACHE: '.cache'
-  # JULIA_NUM_THREADS: '2'
-  LITERATE_PROC: '12'
+  JULIA_NUM_THREADS: '2'
+  LITERATE_PROC: '6'
 
 jobs:
   CI:
@@ -66,6 +66,8 @@ jobs:
     - name: Install Julia packages
       if: ${{ runner.environment == 'self-hosted' || steps.cache-julia.outputs.cache-hit != 'true' }}
       shell: julia --color=yes {0}
+      env:
+        JULIA_DEBUG: loading
       run: |
         using Pkg, Dates
         Pkg.add(["Literate", "JSON", "Tables", "MarkdownTables", "SHA"])
