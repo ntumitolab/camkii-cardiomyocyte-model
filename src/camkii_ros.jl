@@ -1,5 +1,5 @@
 """
-CaMKII system with ROS activation
+CaMKII system with ROS activation (full model)
 
 CaMKII model: "Mechanisms of Ca2+/calmodulin-dependent kinase II activation in single dendritic spines" (Chang et al., 2019, Nature Communications); https://doi.org/10.1038/s41467-019-10694-z
 
@@ -13,15 +13,15 @@ function get_camkii_eqs(;
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
-        k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1s-1
-        k_1C_off = 50Hz         ## 10-70 s-1
-        k_2C_on = 10Hz / μM     ## 5-25uM-1s-1.
-        k_2C_off = 10Hz         ## 8.5-10s-1.
+        k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1Hz
+        k_1C_off = 50Hz         ## 10-70 Hz
+        k_2C_on = 10Hz / μM     ## 5-25uM-1Hz.
+        k_2C_off = 10Hz         ## 8.5-10Hz.
         ## N-lobe
-        k_1N_on = 100Hz / μM    ## 25-260uM-1s-1
-        k_1N_off = 2000Hz       ## 1000-4000 s-1
-        k_2N_on = 200Hz / μM    ## 50-300uM-1s-1.
-        k_2N_off = 500Hz        ## 500-1000.s-1
+        k_1N_on = 100Hz / μM    ## 25-260uM-1Hz
+        k_1N_off = 2000Hz       ## 1000-4000 Hz
+        k_2N_on = 200Hz / μM    ## 50-300uM-1Hz.
+        k_2N_off = 500Hz        ## 500-1000.Hz
 
         ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
@@ -33,17 +33,17 @@ function get_camkii_eqs(;
         k_K1N_on = 76Hz / μM
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
-        k_K2N_off = 20Hz ## 6-60s-1
+        k_K2N_off = 20Hz ## 6-60Hz
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8e-3Hz / μM
         kCaM0_off = 5.5Hz
-        kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1s-1
+        kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1Hz
         kCaM2C_off = 6.8Hz
         kCaM2N_on = 0.12Hz / μM
         kCaM2N_off = 1.7Hz
-        kCaM4_on = 15Hz / μM  # 14-60 uM-1s-1
-        kCaM4_off = 1.5Hz  # 1.1 - 2.3 s-1
+        kCaM4_on = 15Hz / μM  # 14-60 uM-1Hz
+        kCaM4_off = 1.5Hz  # 1.1 - 2.3 Hz
         kCaM0P_off = inv(3second)
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
