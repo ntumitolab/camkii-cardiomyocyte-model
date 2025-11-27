@@ -1,54 +1,31 @@
 # https://quarto.org/docs/projects/quarto-projects.html
 project:
-  type: book
+  type: website
   output-dir: ../_site
 
-# https://quarto.org/docs/books/
-book:
-  title: CaMKII CMC model
-  author: "Wen-Wei Tseng"
-  repo-url: https://github.com/ntumitolab/camkii-cardiomyocyte-model
-  site-url: https://ntumitolab.github.io/camkii-cardiomyocyte-model
-  page-navigation: true
-  bread-crumbs: true
-  chapters:
-    - index.qmd
-    - camk-sens.ipynb
-    - iso-sens.ipynb
-    - bcl-data-fit.ipynb
-    - bcl-effects.ipynb
-    - iso-effects.ipynb
-    - caffeine-effects.ipynb
-    - ros-effects.ipynb
-  appendices:
-    - modeldesc.qmd
-    - runtime.ipynb
-    - u0.ipynb
-
 website:
-  title: Quarto Julia Template
+  title: CaMKII model
   repo-url: https://github.com/ntumitolab/camkii-cardiomyocyte-model
+  site-url: https://ntumitolab.github.io/camkii-cardiomyocyte-model/
   page-navigation: true
   back-to-top-navigation: true
-  navbar:
+  sidebar:
+    style: docked
     search: true
+    contents: auto
     tools:
       - icon: github
         href: https://github.com/ntumitolab/camkii-cardiomyocyte-model
-        text: GitHub repo
-  sidebar:
-    style: docked
-    contents: auto
 
 # bibliography: references.bib
 
 # https://quarto.org/docs/output-formats/html-basics.html
 format:
   html:
-    code-link: true
+    toc: true
     theme:
       light: cosmo
-      dark: cyborg
+      dark: darkly
 
 # Default options
 # notebook-links: true
