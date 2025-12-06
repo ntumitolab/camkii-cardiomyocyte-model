@@ -1,0 +1,16 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: index
+chapters:
+  - file: modeldesc
+  - file: u0
+  - file: iso-sens
+  - file: camk-sens
+  - file: bcl-effects
+  - file: bcl-data-fit
+  - file: iso-effects
+  - file: ros-effects
+  - file: caffeine-effects
+  - file: runtime
