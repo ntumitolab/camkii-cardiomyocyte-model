@@ -43,7 +43,7 @@ plot!(ca, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
 plot!(ca, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
 plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft)
 
-# We excluded CaM0_CaMK (bound but lost all calcium) from the active CaMKII fraction
+# Active CaMKII fraction is defined as CaMKII bound to CaM except CaM0 (no calcium)
 CaMKAct = 1 - (sys.CaMK + sys.CaM0_CaMK) / sys.CAMKII_T
 println("Basal activity with 30nM Ca is ", sol0[CaMKAct][end])
 xdata = ca
@@ -61,10 +61,10 @@ pestim = coef(fit)
 
 #---
 println("Basal activity: ", pestim[5])
-println("Maximal activated activity (2Ca binding): ", pestim[1])
-println("Half-saturation Ca concentration (2Ca binding): ", pestim[2], " μM")
-println("Maximal activated activity (4Ca binding): ", pestim[3])
-println("Half-saturation Ca concentration (4Ca binding): ", pestim[4], " μM")
+println("Maximal activity by 2 Ca binding): ", pestim[1])
+println("Half saturation concentration for 2 Ca binding: ", pestim[2], " μM")
+println("Maximal activity by 4 Ca binding): ", pestim[3])
+println("Half saturation concentration for 4 Ca binding: ", pestim[4], " μM")
 println("RMSE: ", rmse(fit))
 
 # Fit result and the original model
