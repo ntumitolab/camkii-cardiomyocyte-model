@@ -80,21 +80,22 @@ function get_camkii_eqs(;
         CaMKOX(t) = 0mM
     end
 
+    ## Conserved and Observed variables
     @variables begin
-        CaM0(t) ## Conserved
-        CaMK(t) ## Conserved
-        CaMKAct(t) ## Observed
+        CaM0(t)
+        CaMK(t)
+        CaMKAct(t)
     end
 
-    "Ca binding/unbinding reaction rates"
+    ## Ca binding/unbinding reaction rates
     function _ca_cam(ca, k1on, k1off, k2on, k2off)
         fcaon = ca * k2on / (ca * k2on + k1off)
         fcaoff = 1 - fcaon
         return (ca * k1on * fcaon, k2off * fcaoff)
     end
 
+    ## Rates counter
     rates = Dict()
-
     ## Two Ca2+ ions bind to C (high affinity) or N (low affinity)-lobe of CaM
     kon, koff = _ca_cam(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off)
     ## CaM0 <--> Ca2CaM_C
@@ -152,7 +153,7 @@ function get_camkii_eqs(;
     eqs = [
         CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
         CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
-        CaMKAct ~ (1 - CaMK / CAMKII_T)
+        CaMKAct ~ (1 - (CaMK + CaM0_CaMK)  / CAMKII_T)
     ]
     eqs_camkii = [rateeqs; eqs]
     return (; eqs_camkii, CaMKAct)
@@ -185,10 +186,11 @@ function get_camkii_simp_eqs(;
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
         kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa_CaMK = 0.4393           ## Activated forward ratio CaMK --> CaMKB (adjustable)
-        kfb_CaMK = 0.0056           ## Basal forward ratio of CaMK --> CaMKB (adjustable)
-        kmCa_CaMK = 0.9716μM        ## Half-activation concentration of calcium
-        nCa_CaMK = 2.293            ## Hill coefficient for calcium
+        kfa2_CaMK = 0.2650          ## Maximal binding by CaM-Ca2 (adjustable)
+        kfa4_CaMK = 0.1636          ## Maximal binding by CaM-Ca4 (adjustable)
+        kfb_CaMK = 0.001            ## Basal binding by CaM (adjustable)
+        kmCa2_CaMK = 0.7384μM       ## Half-saturation concentration of calcium for CaM-Ca2 binding (adjustable)
+        kmCa4_CaMK = 1.2513μM       ## Half-saturation concentration of calcium for CaM-Ca4 binding (adjustable)
         kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz)
         kdeph_CaMK = inv(6second)   ## Dephosphorylation rate
         k_P1_P2 = inv(60second)     ## Second autophosphorylation rate
@@ -203,7 +205,7 @@ function get_camkii_simp_eqs(;
         CaMKP(t) = 0.003916     ## Bound to CaMCa, autophosphorylated
         CaMKPOX(t) = 0          ## Bound to CaMCa, autophosphorylated, oxidized
         CaMKA(t) = 0.007833     ## Unbound, autophosphorylated
-        CaMKA2(t) = 0.001958    ## Unbound, doublely phosphorylated
+        CaMKA2(t) = 0.001958    ## Unbound, doubly phosphorylated
         CaMKAOX(t) = 0          ## Unbound, autophosphorylated, oxidized
         CaMKOX(t) = 0           ## Unbound, oxidized
     end
@@ -215,8 +217,9 @@ function get_camkii_simp_eqs(;
 
     rates = Dict()
     ## CaMK(OX) <--CaM,Ca--> CaMKB(OX)
-    ## Calc the steady-state bound fraction (binf) for forward / backward reaction rates
-    binf = kfa_CaMK * hil(Ca, kmCa_CaMK, nCa_CaMK) + kfb_CaMK
+    ## Calc the steady-state bound fraction (binf)
+    ## And then the binding/unbinding rates
+    binf = kfb_CaMK + kfa2_CaMK * hil(Ca, kmCa2_CaMK, 2) + kfa4_CaMK * hil(Ca, kmCa4_CaMK, 4)
     kf = r_CaMK * binf
     kb = r_CaMK * (1 - binf)
     add_rate!(rates, kf, CaMK, kb, CaMKB)
