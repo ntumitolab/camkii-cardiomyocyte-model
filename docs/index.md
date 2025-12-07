@@ -1,7 +1,6 @@
 # CaMKII cardiomyocyte model
 
 - https://github.com/drgrandilab/Morotti-et-al-2014-Mouse-Ventricular-Model
-- https://github.com/ntumitolab/Hopkins-CaMKII (private repo)
 
 ---
 
@@ -25,7 +24,7 @@ The activities of PKACI, PKACII, PP1, and their downstream targets (SERCA, LCC, 
 
 ![Image](https://github.com/user-attachments/assets/37a18568-99f4-4b97-b410-f9052f6b58e7)
 
-- Association/dissociation rates of CaMKII and CaM-calcium (kf, kb) is fitted to [Chang(2019)][] model across a range of cytosolic calcium.
+- Association/dissociation rates of CaMKII and CaM-calcium (kf, kb) is fitted to [Chang(2019)][] model across a range of cytosolic calcium concentrations.
 - Autophosphorylation/dephosphorylation rates of CaMKII (kdp, kph) are adapted from [Chang(2019)][] model.
 - Oxidation/reduction rates of CaMKII (kox, krd) are adapted from [Christensen(2019)][] model.
 
@@ -33,4 +32,4 @@ The activities of PKACI, PKACII, PP1, and their downstream targets (SERCA, LCC, 
 
 - Caffeine activation of RyR: increasing sensitivity to Sub-SR Ca instead of constant opening.
 - Compartment corrections for SR Ca and Sub-SR Ca ODEs.
-- Fast sodium channel gating variable recovery rates increased by 3 times to accomodate 2Hz and 3Hz pacing.
+- Fast sodium channel gating variable recovery rates increased by 3 times to accommodate 2Hz and 3Hz pacing.
