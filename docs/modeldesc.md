@@ -51,7 +51,7 @@ $$
 E_{Na} &= V_T \ln \frac{na_o}{na_i} \\
 E_{K } &= V_T \ln\frac{k_o}{k_i}  \\
 E_{Ca} &= 0.5V_T \ln \frac{ca_o}{ca_{sl}} \\
-E_{Kr}  &= V_T \ln\left( \frac{0.98 k_o + 0.02na_o}{0.98 k_i + 0.02a_i} \right) \\
+E_{Kr} &= V_T \ln\left( \frac{0.98 k_o + 0.02na_o}{0.98 k_i + 0.02a_i} \right) \\
 \end{align}
 $$
 
@@ -69,10 +69,10 @@ $$
 | $V_{myo}$        | 3.944        | pL     | Cytosolic volume                 |
 | $A_{cap}$        | 1385.44      | μm²    | Cell membrane area               |
 | $C_m$            | 1            | μFcm⁻² | Cell membrane capacitance        |
-| $ca_o$           | 1.796        | mM     | External calcium concentration   |
-| $na_o$           | 154.578      | mM     | External sodium concentration    |
-| $k_o$            | 5.366        | mM     | External potassium concentration |
-| $\mathrm{[ATP]}$ | 5            | mM     | ATP concentration                |
+| $ca_o$           | 1796         | μM     | External calcium concentration   |
+| $na_o$           | 154578       | μM     | External sodium concentration    |
+| $k_o$            | 5366         | μM     | External potassium concentration |
+| $\mathrm{[ATP]}$ | 5000         | μM     | ATP concentration                |
 
 ## Cytosolic calcium diffusion
 
@@ -88,7 +88,7 @@ fPKA_{TnI} &= 1.61 - 0.61 \frac{1 - TnI_{PKAp}}{1 - fracTnIp_0}
 \end{align}
 $$
 
-Calcium diffusion space is divided into $(r_{SL} - r_{SR}) / dx$ compartments.
+Calcium diffusion space is divided into $(r_{SL} - r_{SR}) / dx$ concentric compartments.
 
 For i = 2 to $(r_{SL} - r_{SR}) / dx - 1$
 
@@ -149,17 +149,17 @@ $$
 
 | Parameter        | Value          | Units | Description                            |
 | ---------------- | -------------- | ----- | -------------------------------------- |
-| $k_{RyR}$        | 20             | Hz    | RyR permeability                       |
-| $kapos_{RyR}$    | 1000           | Hz    | RyR state transition rate              |
-| $kaneg_{RyR}$    | 160            | Hz    | RyR state transition rate              |
-| $Vmax_{SR}$      | 0.9996         | μM/ms | SERCA reaction rate                    |
+| $k_{RyR}$        | 20             | 1/s   | RyR permeability                       |
+| $kapos_{RyR}$    | 1000           | 1/s   | RyR state transition rate              |
+| $kaneg_{RyR}$    | 160            | 1/s   | RyR state transition rate              |
+| $Vmax_{SR}$      | 999.6          | μM/s  | SERCA reaction rate                    |
 | $Kmf_{SR}$       | 0.5            | μM    | Calcium affinity for SERCA             |
 | $Kmr_{SR}$       | 7000$Kmf_{SR}$ | μM    | Calcium affinity for SERCA             |
-| $kSR_{leak}$     | 0.005          | Hz    | SR leak rate                           |
-| $ktrCa_{SR}$     | 50             | Hz    | Calcium dissusion rate from NSR to JSR |
-| $\Sigma Csqn$    | 24.750         | mM    | Calsequestrin concentration            |
-| $Km_{csqn}$      | 0.8            | mM    | Calcium affinity for calsequestrin     |
-| $fracPKA_{PLBo}$ | 0.920245       | -     |                                        |
+| $kSR_{leak}$     | 0.005          | 1/s   | SR leak rate                           |
+| $ktrCa_{SR}$     | 50             | 1/s   | Calcium diffusion rate from NSR to JSR |
+| $\Sigma Csqn$    | 24750          | μM    | Calsequestrin concentration            |
+| $Km_{csqn}$      | 800            | μM    | Calcium affinity for calsequestrin     |
+| $fracPKA_{PLBo}$ | 00.920245      | -     |                                        |
 
 ## Sarcolemmal ion channels
 
@@ -239,18 +239,18 @@ y_∞ &= expit(-0.15798 (V_m + 78.65)) \\
 \end{align}
 $$
 
-| Parameter    | Value    | Units | Description                                      |
-| ------------ | -------- | ----- | ------------------------------------------------ |
-| $G_{K1}$     | 0.0515   | mS/μF | Potassium channels conductance                   |
-| $G_t$        | 0.1      | mS/μF | Transient outward potassium channels conductance |
-| $G_{Ks}$     | 0.05     | mS/μF | Potassium channels conductance                   |
-| $τ_{nKs}$    | 750      | ms    | Potassium channels time scale                    |
-| $G_{Kr}$     | 0.06     | mS/μF | Potassium channels conductance                   |
-| $k_{f, IKr}$ | 0.023761 | 1/ms  | Potassium channels transition rate               |
-| $k_{b, IKr}$ | 0.036778 | 1/ms  | Potassium channels transition rate               |
-| $G_f$        | 0.021    | mS/μF | Funny current conductance                        |
-| $f_{Na}$     | 0.021    | -     | Funny current sodium fraction                    |
-| $f_{is}$      | 0.706    | -     |                                                  |
+| Parameter    | Value  | Units | Description                                      |
+| ------------ | ------ | ----- | ------------------------------------------------ |
+| $G_{K1}$     | 0.0515 | mS/μF | Potassium channels conductance                   |
+| $G_t$        | 0.1    | mS/μF | Transient outward potassium channels conductance |
+| $G_{Ks}$     | 0.05   | mS/μF | Potassium channels conductance                   |
+| $τ_{nKs}$    | 750    | ms    | Potassium channels time scale                    |
+| $G_{Kr}$     | 0.06   | mS/μF | Potassium channels conductance                   |
+| $k_{f, IKr}$ | 23.761 | 1/s   | Potassium channels transition rate               |
+| $k_{b, IKr}$ | 36.778 | 1/s   | Potassium channels transition rate               |
+| $G_f$        | 0.021  | mS/μF | Funny current conductance                        |
+| $f_{Na}$     | 0.021  | -     | Funny current sodium fraction                    |
+| $f_{is}$     | 0.706  | -     | Transient outward gating variable                |
 
 ### Calcium currents
 
@@ -311,12 +311,12 @@ fNaK &= (1 + 0.1245 \exp(-0.1 V_m/ V_T) + 0.0365 \sigma_{NaK} \exp(V_m/V_T))^{-1
 \end{align}
 $$
 
-| Parameter       | Value | Units | Description               |
-| --------------- | ----- | ----- | ------------------------- |
-| $I_{NaK}^{max}$ | 2.7   | μA/μF | Maximal rate of Na-K pump |
-| $KmNai_{NaK}$   | 18.6  | mM    |                           |
-| $KmKo_{NaK}$    | 1.5   | mM    |                           |
-| $nNaK$          | 3.2   | -     |                           |
+| Parameter       | Value | Units | Description                              |
+| --------------- | ----- | ----- | ---------------------------------------- |
+| $I_{NaK}^{max}$ | 2.7   | μA/μF | Maximal rate of Na-K pump                |
+| $KmNai_{NaK}$   | 18600 | μM    |                                          |
+| $KmKo_{NaK}$    | 1500  | μM    |                                          |
+| $nNaK$          | 3.2   | -     | Hill coefficient for sodium of Na-K pump |
 
 ## Beta-adrenergic system
 
@@ -337,41 +337,41 @@ RyR_{PKAp} &= RyRp_0 + RyRp_{act} H(ISO, RyRp_{KM}) \\
 \end{align}
 $$
 
-| Parameter      | Value     | Units | Description               |
-| -------------- | --------- | ----- | ------------------------- |
-| $PKACI_0$      | 0.0734    | -     | Basal PKACI activity      |
-| $PKACI_{act}$  | 0.1995    | -     | Activated PKACI activity  |
-| $PKACI_{KM}$   | 0.0139    | μM    | PKACI sesitivity to iso   |
-| $PKACII_0$     | 0.1840    | -     | Basal PKACII activity     |
-| $PKACII_{act}$ | 0.3444    | -     | Activated PKACII activity |
-| $PKACII_{KM}$  | 0.0103    | μM    | PKACII sesitivity to iso  |
-| $PP1_0$        | 0.8927    | -     | Basal PP1 activity        |
-| $PP1_{act}$    | 0.0492    | -     | Activated PP1 activity    |
-| $PP1_{KI}$     | 0.00637   | μM    | PP1 sesitivity to iso     |
-| $PLBp_0$       | 0.0824    | -     |                           |
-| $PLBp_{act}$   | 0.7961    | -     |                           |
-| $PLBp_{KM}$    | 0.00597   | μM    |                           |
-| $PLBp_{nHill}$ | 1.8167    | -     |                           |
-| $PLMp_0$       | 0.1172    | -     |                           |
-| $PLMp_{act}$   | 0.6645    | -     |                           |
-| $PLMp_{KM}$    | 0.00823   | μM    |                           |
-| $PLMp_{nHill}$ | 1.35784   | -     |                           |
-| $TnIp_0$       | 0.0669    | -     |                           |
-| $TnIp_{act}$   | 0.7524    | -     |                           |
-| $TnIp_{KM}$    | 0.007913  | μM    |                           |
-| $TnIp_{nHill}$ | 1.6736    | -     |                           |
-| $LCCap_0$      | 0.2205    | -     |                           |
-| $LCCap_{act}$  | 0.2339    | -     |                           |
-| $LCCap_{KM}$   | 0.00726   | μM    |                           |
-| $LCCbp_0$      | 0.2517    | -     |                           |
-| $LCCbp_{act}$  | 0.2461    | -     |                           |
-| $LCCbp_{KM}$   | 0.00695   | μM    |                           |
-| $KURp_0$       | 0.4390    | -     |                           |
-| $KURp_{act}$   | 0.2563    | -     |                           |
-| $KURp_{KM}$    | 0.00557   | μM    |                           |
-| $RyRp_0$       | 0.2054    | -     |                           |
-| $RyRp_{act}$   | 0.2399    | -     |                           |
-| $RyRp_{KM}$    | 0.0075135 | μM    |                           |
+| Parameter      | Value     | Units | Description                            |
+| -------------- | --------- | ----- | -------------------------------------- |
+| $PKACI_0$      | 0.0734    | -     | Basal PKACI activity                   |
+| $PKACI_{act}$  | 0.1995    | -     | Activated PKACI activity               |
+| $PKACI_{KM}$   | 0.0139    | μM    | PKACI sensitivity to ISO               |
+| $PKACII_0$     | 0.1840    | -     | Basal PKACII activity                  |
+| $PKACII_{act}$ | 0.3444    | -     | Activated PKACII activity              |
+| $PKACII_{KM}$  | 0.0103    | μM    | PKACII sensitivity to ISO              |
+| $PP1_0$        | 0.8927    | -     | Basal PP1 activity                     |
+| $PP1_{act}$    | 0.0492    | -     | Activated PP1 activity                 |
+| $PP1_{KI}$     | 0.00637   | μM    | PP1 sensitivity to ISO                 |
+| $PLBp_0$       | 0.0824    | -     | Basal PLB phosphorylation              |
+| $PLBp_{act}$   | 0.7961    | -     | Activated PLB phosphorylation          |
+| $PLBp_{KM}$    | 0.00597   | μM    | PLB phosphorylation sensitivity to ISO |
+| $PLBp_{nHill}$ | 1.8167    | -     | Hill coefficient for ISO               |
+| $PLMp_0$       | 0.1172    | -     | Basal PLMp phosphorylation             |
+| $PLMp_{act}$   | 0.6645    | -     | Activated PLMp phosphorylation         |
+| $PLMp_{KM}$    | 0.00823   | μM    | PLM phosphorylation sensitivity to ISO |
+| $PLMp_{nHill}$ | 1.35784   | -     | Hill coefficient for ISO               |
+| $TnIp_0$       | 0.0669    | -     |                                        |
+| $TnIp_{act}$   | 0.7524    | -     |                                        |
+| $TnIp_{KM}$    | 0.007913  | μM    |                                        |
+| $TnIp_{nHill}$ | 1.6736    | -     |                                        |
+| $LCCap_0$      | 0.2205    | -     |                                        |
+| $LCCap_{act}$  | 0.2339    | -     |                                        |
+| $LCCap_{KM}$   | 0.00726   | μM    |                                        |
+| $LCCbp_0$      | 0.2517    | -     |                                        |
+| $LCCbp_{act}$  | 0.2461    | -     |                                        |
+| $LCCbp_{KM}$   | 0.00695   | μM    |                                        |
+| $KURp_0$       | 0.4390    | -     |                                        |
+| $KURp_{act}$   | 0.2563    | -     |                                        |
+| $KURp_{KM}$    | 0.00557   | μM    |                                        |
+| $RyRp_0$       | 0.2054    | -     |                                        |
+| $RyRp_{act}$   | 0.2399    | -     |                                        |
+| $RyRp_{KM}$    | 0.0075135 | μM    |                                        |
 
 ## CaMKII system
 
@@ -392,9 +392,9 @@ v_{IB} &= k_f \cdot CaMK - k_b \cdot CaMKB \\
 v_{IoBo} &= k_f \cdot r_{CaMKO} \cdot CaMKOX - k_b \cdot CaMKBOX \\
 v_{AP} &= k_f \cdot r_{CaMKP} \cdot CaMKA - k_b \cdot CaMKP \\
 v_{AoPo} &= k_f \cdot r_{CaMKP} \cdot CaMKAOX - k_b \cdot CaMKPOX \\
-camkb_\infty &= kfa_{CaMK} H(\mathrm{ca_{avg}}, kmCa_{CaMK}, nCa_{CaMK}) + kfb_{CaMK} \\
-k_f &= v_{CaMK} \cdot binf \\
-k_b &= v_{CaMK} \cdot (1 - binf) \\
+camkb_\infty &=  kfa2_{CaMK} \frac{\mathrm{ca_{avg}}^2}{\mathrm{ca_{avg}}^2 + kmCa2_{CaMK}^2} + kfa4_{CaMK} \frac{\mathrm{ca_{avg}}^4}{\mathrm{ca_{avg}}^4 + kmCa4_{CaMK}^4} + kfb_{CaMK} \\
+k_f &= v_{CaMK} \cdot camkb_\infty \\
+k_b &= v_{CaMK} \cdot (1 - camkb_\infty) \\
 kph &= kphos_{CaMK} \cdot aMK_{act}  \\
 v_{BP} &= kph \cdot CaMKB - kdeph_{CaMK} \cdot CaMKP \\
 v_{BoPo} &= kph \cdot CaMKBOX - kdeph_{CaMK} \cdot CaMKPOX \\
@@ -408,21 +408,24 @@ v_{AoA} &= krd_{CaMK} \cdot CaMKAOX \\
 \end{align}
 $$
 
-| Parameter      | Value  | Units | Description                           |
-| -------------- | ------ | ----- | ------------------------------------- |
-| $v_{CaMK}$     | 3      | Hz    | CaMK-CaM binding rate                 |
-| $r_{CaMKO}$    | 0      | -     | Oxidized CaMK-CaM binding ratio       |
-| $r_{CaMKP}$    | 0      | -     | Phosphorylated CaMK-CaM binding ratio |
-| $kb_{CaMKP}$   | 1/3    | Hz    | Dissociation rate of CaMKP            |
-| $kfa_{CaMK}$   | 0.4393 | -     | Activated CaMK-CaM binding ratio      |
-| $kfb_{CaMK}$   | 0.0056 | -     | Basal CaMK-CaM binding ratio          |
-| $kmCa_{CaMK}$  | 0.9716 | μM    | Calcium affinity to CaMK-CaM          |
-| $nCa_{CaMK}$   | 2.293  | -     | Hill coefficient for calcium          |
-| $kphos_{CaMK}$ | 5      | Hz    | Autophosphorylation rate              |
-| $kdeph_{CaMK}$ | 1/6    | Hz    | Dephosphorylation rate                |
-| $k_{P1P2}$     | 1/60   | Hz    | Second autophosphorylation rate       |
-| $k_{P2P1}$     | 1/15   | Hz    | Second dephosphorylation rate         |
-| $kox_{CaMK}$   | 291    | Hz/mM | Oxidation rate                        |
-| $krd_{CaMK}$   | 1/45   | Hz    | Reduction rate                        |
+| Parameter      | Value  | Units | Description                                              |
+| -------------- | ------ | ----- | -------------------------------------------------------- |
+| $v_{CaMK}$     | 3      | Hz    | CaMK-CaM binding rate                                    |
+| $r_{CaMKO}$    | 0      | -     | Oxidized CaMK-CaM binding ratio                          |
+| $r_{CaMKP}$    | 0      | -     | Phosphorylated CaMK-CaM binding ratio                    |
+| $kb_{CaMKP}$   | 1/3    | Hz    | Dissociation rate of CaMKP                               |
+| $kfa2_{CaMK}$  | 0.2650 | -     | Maximal binding ratio by 2Ca                             |
+| $kfa4_{CaMK}$  | 0.1636 | -     | Maximal binding ratio by 4Ca                             |
+| $kfb_{CaMK}$   | 0.001  | -     | Basal CaMK-CaM binding ratio                             |
+| $kmCa2_{CaMK}$ | 0.7384 | μM    | Half-saturation concentration of calcium for 2Ca binding |
+| $kmCa4_{CaMK}$ | 1.2513 | μM    | Half-saturation concentration of calcium for 4Ca binding |
+| $kphos_{CaMK}$ | 5      | Hz    | Autophosphorylation rate                                 |
+| $kdeph_{CaMK}$ | 1/6    | Hz    | Dephosphorylation rate                                   |
+| $k_{P1P2}$     | 1/60   | Hz    | Second autophosphorylation rate                          |
+| $k_{P2P1}$     | 1/15   | Hz    | Second dephosphorylation rate                            |
+| $kox_{CaMK}$   | 291    | Hz/mM | Oxidation rate                                           |
+| $krd_{CaMK}$   | 1/45   | Hz    | Reduction rate                                           |
 
 ## Initial conditions
+
+See the `Initial conditions` page.
