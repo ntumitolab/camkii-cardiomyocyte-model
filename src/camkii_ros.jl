@@ -186,8 +186,8 @@ function get_camkii_simp_eqs(;
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
         kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa2_CaMK = 0.2650          ## Maximal binding by CaM-Ca2 (adjustable)
-        kfa4_CaMK = 0.1636          ## Maximal binding by CaM-Ca4 (adjustable)
+        kfa2_CaMK = 0.2650          ## Maximal binding ratio by CaM-Ca2 (adjustable)
+        kfa4_CaMK = 0.1636          ## Maximal binding ratio by CaM-Ca4 (adjustable)
         kfb_CaMK = 0.001            ## Basal binding by CaM (adjustable)
         kmCa2_CaMK = 0.7384μM       ## Half-saturation concentration of calcium for CaM-Ca2 binding (adjustable)
         kmCa4_CaMK = 1.2513μM       ## Half-saturation concentration of calcium for CaM-Ca4 binding (adjustable)
