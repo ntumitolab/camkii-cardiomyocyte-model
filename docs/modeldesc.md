@@ -410,21 +410,21 @@ $$
 
 | Parameter    | Value  | Units | Description                                               |
 | ------------ | ------ | ----- | --------------------------------------------------------- |
-| v_{CaMK}     | 3      | Hz    | CaMK-CaM binding rate                                     |
-| r_{CaMKO}    | 0      | -     | Oxidized CaMK-CaM binding ratio                           |
-| r_{CaMKP}    | 0      | -     | Phosphorylated CaMK-CaM binding ratio                     |
-| kb_{CaMKP}   | 1/3    | Hz    | Dissociation rate of CaMKP                                |
-| kfa2_{CaMK}  | 0.2650 | -     | Maximal CaM-Ca2 binding ratio                             |
-| kfa4_{CaMK}  | 0.1636 | -     | Maximal CaM-Ca4 binding ratio                             |
-| kfb_{CaMK}   | 0.001  | -     | Basal CaMK-CaM binding ratio                              |
-| kmCa2_{CaMK} | 0.7384 | μM    | Half-saturation calcium concentration for CaM-Ca2 binding |
-| kmCa4_{CaMK} | 1.2513 | μM    | Half-saturation calcium concentration for CaM-Ca4 binding |
-| kphos_{CaMK} | 5      | Hz    | Autophosphorylation rate                                  |
-| kdeph_{CaMK} | 1/6    | Hz    | Dephosphorylation rate                                    |
-| k_{P1P2}     | 1/60   | Hz    | Second autophosphorylation rate                           |
-| k_{P2P1}     | 1/15   | Hz    | Second dephosphorylation rate                             |
-| kox_{CaMK}   | 291    | Hz/mM | Oxidation rate                                            |
-| krd_{CaMK}   | 1/45   | Hz    | Reduction rate                                            |
+| v_CaMK     | 3      | Hz    | CaMK-CaM binding rate                                     |
+| r_CaMKO    | 0      | -     | Oxidized CaMK-CaM binding ratio                           |
+| r_CaMKP    | 0      | -     | Phosphorylated CaMK-CaM binding ratio                     |
+| kb_CaMKP   | 1/3    | Hz    | Dissociation rate of CaMKP                                |
+| kfa2_CaMK | 0.2650 | -     | Maximal CaM-Ca2 binding ratio                             |
+| kfa4_CaMK  | 0.1636 | -     | Maximal CaM-Ca4 binding ratio                             |
+| kfb_CaMK  | 0.001  | -     | Basal CaMK-CaM binding ratio                              |
+| kmCa2_CaMK | 0.7384 | μM    | Half-saturation calcium concentration for CaM-Ca2 binding |
+| kmCa4_CaMK | 1.2513 | μM    | Half-saturation calcium concentration for CaM-Ca4 binding |
+| kphos_CaMK | 5      | Hz    | Autophosphorylation rate                                  |
+| kdeph_CaMK | 1/6    | Hz    | Dephosphorylation rate                                    |
+| k_P1P2     | 1/60   | Hz    | Second autophosphorylation rate                           |
+| k_P2P1     | 1/15   | Hz    | Second dephosphorylation rate                             |
+| kox_CaMK   | 291    | Hz/mM | Oxidation rate                                            |
+| krd_CaMK   | 1/45   | Hz    | Reduction rate                                            |
 
 ## Initial conditions
 
