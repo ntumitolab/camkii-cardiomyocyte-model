@@ -57,22 +57,22 @@ $$
 
 ## General parameters
 
-| Parameter | Value        | Units  | Description                      |
-| --------- | ------------ | ------ | -------------------------------- |
-| r_SR      | 6            | μm     | Radius of SR                     |
-| r_SL      | 10.5         | μm     | Radius of sarcolemma             |
-| V_SR      | 0.0903       | pL     | SR volume                        |
-| V_NSR     | 0.9$V_{SR}$  | pL     | Network SR volume                |
-| V_JSR     | 0.1$V_{JSR}$ | pL     | Junctional SR volume             |
-| V_subSR   | 0.046        | pL     | Sub-SR volume                    |
-| V_subSL   | 0.137        | pL     | Sub-sarcolemma volume            |
-| V_myo     | 3.944        | pL     | Cytosolic volume                 |
-| A_cap     | 1385.44      | μm²    | Cell membrane area               |
-| C_m       | 1            | μFcm⁻² | Cell membrane capacitance        |
-| ca_o      | 1796         | μM     | External calcium concentration   |
-| na_o      | 154578       | μM     | External sodium concentration    |
-| k_o       | 5366         | μM     | External potassium concentration |
-| [ATP]     | 5000         | μM     | ATP concentration                |
+| Parameter | Value    | Units  | Description                      |
+| --------- | -------- | ------ | -------------------------------- |
+| r_SR      | 6        | μm     | Radius of SR                     |
+| r_SL      | 10.5     | μm     | Radius of sarcolemma             |
+| V_SR      | 0.0903   | pL     | SR volume                        |
+| V_NSR     | 0.9V_SR  | pL     | Network SR volume                |
+| V_JSR     | 0.1V_JSR | pL     | Junctional SR volume             |
+| V_subSR   | 0.046    | pL     | Sub-SR volume                    |
+| V_subSL   | 0.137    | pL     | Sub-sarcolemma volume            |
+| V_myo     | 3.944    | pL     | Cytosolic volume                 |
+| A_cap     | 1385.44  | μm²    | Cell membrane area               |
+| C_m       | 1        | μFcm⁻² | Cell membrane capacitance        |
+| ca_o      | 1796     | μM     | External calcium concentration   |
+| na_o      | 154578   | μM     | External sodium concentration    |
+| k_o       | 5366     | μM     | External potassium concentration |
+| [ATP]     | 5000     | μM     | ATP concentration                |
 
 ## Cytosolic calcium diffusion
 
@@ -408,15 +408,15 @@ v_{AoA} &= krd_{CaMK} \cdot CaMKAOX \\
 \end{align}
 $$
 
-| Parameter    | Value  | Units | Description                                               |
-| ------------ | ------ | ----- | --------------------------------------------------------- |
+| Parameter  | Value  | Units | Description                                               |
+| ---------- | ------ | ----- | --------------------------------------------------------- |
 | v_CaMK     | 3      | Hz    | CaMK-CaM binding rate                                     |
 | r_CaMKO    | 0      | -     | Oxidized CaMK-CaM binding ratio                           |
 | r_CaMKP    | 0      | -     | Phosphorylated CaMK-CaM binding ratio                     |
 | kb_CaMKP   | 1/3    | Hz    | Dissociation rate of CaMKP                                |
-| kfa2_CaMK | 0.2650 | -     | Maximal CaM-Ca2 binding ratio                             |
+| kfa2_CaMK  | 0.2650 | -     | Maximal CaM-Ca2 binding ratio                             |
 | kfa4_CaMK  | 0.1636 | -     | Maximal CaM-Ca4 binding ratio                             |
-| kfb_CaMK  | 0.001  | -     | Basal CaMK-CaM binding ratio                              |
+| kfb_CaMK   | 0.001  | -     | Basal CaMK-CaM binding ratio                              |
 | kmCa2_CaMK | 0.7384 | μM    | Half-saturation calcium concentration for CaM-Ca2 binding |
 | kmCa4_CaMK | 1.2513 | μM    | Half-saturation calcium concentration for CaM-Ca4 binding |
 | kphos_CaMK | 5      | Hz    | Autophosphorylation rate                                  |
