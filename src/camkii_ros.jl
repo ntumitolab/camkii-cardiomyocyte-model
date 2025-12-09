@@ -189,8 +189,8 @@ function get_camkii_simp_eqs(;
         kfa2_CaMK = 0.2650          ## Maximal binding ratio by CaM-Ca2 (adjustable)
         kfa4_CaMK = 0.1636          ## Maximal binding ratio by CaM-Ca4 (adjustable)
         kfb_CaMK = 0.001            ## Basal binding by CaM (adjustable)
-        kmCa2_CaMK = 0.7384μM       ## Half-saturation concentration of calcium for CaM-Ca2 binding (adjustable)
-        kmCa4_CaMK = 1.2513μM       ## Half-saturation concentration of calcium for CaM-Ca4 binding (adjustable)
+        kmCa2_CaMK = 0.7384μM       ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
+        kmCa4_CaMK = 1.2513μM       ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
         kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz)
         kdeph_CaMK = inv(6second)   ## Dephosphorylation rate
         k_P1_P2 = inv(60second)     ## Second autophosphorylation rate
