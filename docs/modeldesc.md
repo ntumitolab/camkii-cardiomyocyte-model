@@ -377,7 +377,7 @@ $$
 
 $$
 \begin{align}
-ca_{avg} &= \frac{\sum^N_{i=1} ca_i}}{N} \\
+ca_{avg} &= \frac{\sum^N_{i=1} ca_i}{N} \\
 CaMK_{act} &= 1 - CaMK \\
 CaMK &= 1 - (CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX) \\
 \frac{d}{dt} CaMKB &= -v_{IB} - v_{BP} - v_{BBo} \\

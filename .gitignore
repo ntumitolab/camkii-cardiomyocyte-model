@@ -163,7 +163,7 @@ LocalPreferences.toml
 # .vscode/
 
 # Generated files
-*.odt
-*.docx
 *.pdf
-*.png
+
+# MyST build outputs
+_build

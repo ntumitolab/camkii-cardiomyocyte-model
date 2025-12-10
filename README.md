@@ -23,7 +23,7 @@ The activities of PKACI, PKACII, PP1, and their downstream targets (SERCA, LCC, 
 
 ### CaMKII system
 
-![Image](https://github.com/user-attachments/assets/37a18568-99f4-4b97-b410-f9052f6b58e7)
+![Image](docs/CaMKII_kinetics.png)
 
 - Association/dissociation rates of CaMKII and CaM-calcium (kf, kb) is fitted to [Chang(2019)][] model across a range of cytosolic calcium.
 - Autophosphorylation/dephosphorylation rates of CaMKII (kdp, kph) are adapted from [Chang(2019)][] model.
