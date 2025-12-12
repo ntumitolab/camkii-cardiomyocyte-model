@@ -27,7 +27,7 @@ website:
     align: left
     contents:
       - index.qmd
-      - "*.ipynb"
+      - auto: "*.ipynb"
       - modeldesc.qmd
 
 # bibliography: references.bib
