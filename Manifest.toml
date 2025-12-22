@@ -183,7 +183,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CaMKIIModel]]
-deps = ["CSV", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "Latexify", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "SteadyStateDiffEq"]
+deps = ["CSV", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "JSON", "Latexify", "Literate", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "SteadyStateDiffEq"]
 path = "."
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
 version = "0.7.0"
