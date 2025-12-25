@@ -5,13 +5,13 @@ project:
 
 # https://quarto.org/docs/websites/
 website:
-  title: Quarto Julia Template
+  title: CaMKII model
   page-navigation: true
   bread-crumbs: true
   back-to-top-navigation: true
   reader-mode: true
   repo-url: https://github.com/ntumitolab/camkii-cardiomyocyte-model/
-  site-url: https://ntumitolab.github.io/camkii-cardiomyocyte-model
+  site-url: https://ntumitolab.github.io/camkii-cardiomyocyte-model/
   search:
     show-item-context: true
     type: overlay
@@ -26,7 +26,10 @@ website:
     style: floating
     collapse-level: 2
     align: left
-    contents: docs/*
+    contents:
+      - docs/index.qmd
+      - docs/modeldesc.qmd
+      - contents: "docs/*.ipynb"
 
 
 # bibliography: references.bib
