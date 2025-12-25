@@ -27,9 +27,9 @@ website:
     collapse-level: 2
     align: left
     contents:
-      - docs/index.qmd
-      - docs/modeldesc.qmd
-      - contents: "docs/*.ipynb"
+      - index.qmd
+      - modeldesc.qmd
+      - contents: "*.ipynb"
 
 
 # bibliography: references.bib
