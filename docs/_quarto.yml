@@ -26,11 +26,7 @@ website:
     style: floating
     collapse-level: 2
     align: left
-    contents:
-      - index.qmd
-      - modeldesc.qmd
-      - contents: "*.ipynb"
-
+    contents: auto
 
 # bibliography: references.bib
 
