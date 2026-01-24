@@ -95,6 +95,9 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         Km_pp2a_RyR = 4.1μM
     end
 
+    @independent_variables t
+    D = Differential(t)
+
     sts = @variables begin
         LR(t) = 6.0e-5μM
         LRG(t) = 0.00294μM
@@ -296,6 +299,8 @@ function get_bar_eqs_reduced(ISO=0μM)
         RyRp_KM = 0.00751μM
     end
 
+    @independent_variables t
+    D = Differential(t)
     vs = @variables begin
         LCCa_PKAp(t)
         LCCb_PKAp(t)
@@ -322,12 +327,12 @@ function get_bar_eqs_reduced(ISO=0μM)
         IKUR_PKAp ~ KURp_basal + KURp_activated * hil(ISO, KURp_KM),
         RyR_PKAp ~ RyRp_basal + RyRp_activated * hil(ISO, RyRp_KM),
     ]
-
     return (; eqs_bar, fracPKACI, fracPKACII, fracPP1, fracPLBp, fracPLMp, TnI_PKAp, LCCa_PKAp, LCCb_PKAp, IKUR_PKAp, RyR_PKAp)
 end
 
 "Algebraic fitted beta-adrenergic system"
 function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
     @unpack eqs_bar = get_bar_eqs_reduced(ISO)
+    @independent_variables t
     return ODESystem(eqs_bar, t; name)
 end

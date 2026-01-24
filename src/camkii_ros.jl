@@ -10,6 +10,8 @@ function get_camkii_eqs(;
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
 )
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
@@ -75,7 +77,7 @@ function get_camkii_eqs(;
         Ca4CaM_CaMKOX(t) = 0mM
         Ca4CaM_CaMKPOX(t) = 0mM
         CaMKP(t) = 3.3μM
-        CaMKP2(t) = 831.43nM
+        CaMKP2(t) = 0mM
         CaMKPOX(t) = 0mM
         CaMKOX(t) = 0mM
     end
@@ -166,12 +168,10 @@ function get_camkii_sys(;
     name=:camkii_sys,
     simplify=false
 )
+   @independent_variables t
    @unpack eqs_camkii = get_camkii_eqs(; Ca, ROS, binding_To_PCaMK)
    sys = System(eqs_camkii, t; name)
-   if simplify
-       sys = mtkcompile(sys)
-   end
-   return sys
+   return simplify ? mtkcompile(sys) : sys
 end
 
 """
@@ -183,6 +183,8 @@ function get_camkii_simp_eqs(;
     binding_To_PCaMK=0,
     binding_To_OCaMK=0,)
 
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
         kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
@@ -205,7 +207,7 @@ function get_camkii_simp_eqs(;
         CaMKP(t) = 0.003916     ## Bound to CaMCa, autophosphorylated
         CaMKPOX(t) = 0          ## Bound to CaMCa, autophosphorylated, oxidized
         CaMKA(t) = 0.007833     ## Unbound, autophosphorylated
-        CaMKA2(t) = 0.001958    ## Unbound, doubly phosphorylated
+        CaMKA2(t) = 0           ## Unbound, doubly phosphorylated
         CaMKAOX(t) = 0          ## Unbound, autophosphorylated, oxidized
         CaMKOX(t) = 0           ## Unbound, oxidized
     end
@@ -267,10 +269,8 @@ function get_camkii_simp_sys(;
     name=:camkii_sys,
     simplify=false
 )
+    @independent_variables t
     @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
     sys = System(eqs_camkii, t; name)
-    if simplify
-        sys = mtkcompile(sys)
-    end
-    return sys
+    return simplify ? mtkcompile(sys) : sys
 end

@@ -12,7 +12,14 @@ function get_ca_pde_eqs(;
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
-    @variables Cai(t)[1:m] Cai_mean(t) Cai_sub_SR(t) Cai_sub_SL(t)
+    @independent_variables t
+    D = Differential(t)
+    @variables begin
+        Cai(t)[1:m] = [Cai_default for _ in 1:m]
+        Cai_mean(t)
+        Cai_sub_SR(t)
+        Cai_sub_SL(t)
+    end
     @parameters begin
         Dca = 7μm^2 / ms
         TrpnTotal = 35μM  # Half of adult rat CMC (70 μM)
@@ -36,13 +43,10 @@ function get_ca_pde_eqs(;
         D(Cai[m]) ~ (Dca / (j[m] * dx^2) * ((1 + j[m]) * Cai[m] - 2 * j[m] * Cai[m] + (j[m] - 1) * Cai[m-1]) + JCa_SL) * beta_cai(Cai[m]),
     ]
 
-    defaults_cai = [Cai[1] => Cai_default, Cai[m] => Cai_default]
-
     for i in 2:m-1
         push!(eqs_cai, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
-        push!(defaults_cai, Cai[i] => Cai_default)
     end
-    return (; eqs_cai, defaults_cai)
+    return eqs_cai
 end
 
 function get_ca_pde_sys(;
@@ -55,6 +59,7 @@ function get_ca_pde_sys(;
     JCa_SL=0,
     name=:capdesys
 )
-    @unpack eqs_cai, defaults_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
-    return System(eqs_cai, t; name, defaults=defaults_cai)
+    eqs_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
+    @independent_variables t
+    return System(eqs_cai, t; name)
 end

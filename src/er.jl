@@ -1,4 +1,6 @@
 function get_ser_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL)
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         VSR = 0.0903pL
         VNSR = 0.9 * VSR
@@ -18,7 +20,6 @@ function get_ser_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         csqntot = 24.750mM
         Kmcsqn = 0.8mM
     end
-
     @variables begin
         CaNSR(t) = 830μM
         CaJSR(t) = 830μM
@@ -61,5 +62,6 @@ end
 "Sarcoplasmic reticulum system"
 function get_ser_sys(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL, name=:sersys)
     @unpack eqs_sr = get_ser_eqs(Cai_sub_SR; fracPLB_CKp, fracPLBp, RyR_CKp, V_sub_SR)
+    @independent_variables t
     return System(eqs_sr, t; name)
 end

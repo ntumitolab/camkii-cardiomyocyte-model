@@ -17,6 +17,9 @@ function get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0)
         fNa = 0.2
     end
 
+    @independent_variables t
+    D = Differential(t)
+
     @variables begin
         E_Na(t)
         E_K(t)
@@ -113,5 +116,6 @@ end
 "Potassium currents"
 function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     @unpack eqs_ik = get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp)
+    @independent_variables t
     return System(eqs_ik, t; name)
 end
