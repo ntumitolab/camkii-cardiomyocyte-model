@@ -30,8 +30,8 @@ function build_neonatal_ecc_sys(;
 )
     @independent_variables t
     D = Differential(t)
-    @discretes Istim(t) = 0μAμF
     @parameters begin
+        Istim(t) = 0μAμF
         ca_o = 1.796mM
         na_o = 154.578mM
         k_o = 5.366mM
