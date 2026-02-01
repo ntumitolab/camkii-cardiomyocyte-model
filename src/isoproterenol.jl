@@ -252,7 +252,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     sys = System([rateeqs; conservedeqs; obseqs], t; name)
-    return simplify ? sys : mtkcompile(sys)
+    return simplify ? mtkcompile(sys) : sys
 end
 
 function get_bar_eqs_reduced(ISO=0μM)

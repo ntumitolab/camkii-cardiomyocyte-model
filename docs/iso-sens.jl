@@ -6,7 +6,7 @@ Fitting sensitivity to ISO.
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
-using LsqFit
+using CurveFit
 using CaMKIIModel
 using CaMKIIModel: μM, hil, Hz, hilr, second
 Plots.default(lw=1.5)
@@ -17,21 +17,15 @@ Plots.default(lw=1.5)
 @time "Build problem" prob = SteadyStateProblem(sys, [])
 
 # Log scale for ISO concentration.
-alg = DynamicSS(TRBDF2())
+alg = DynamicSS(KenCarp47())
 iso = exp10.(range(log10(1e-4μM), log10(1μM), length=1001))
-prob_func = (prob, i, repeat) -> begin
-    prob.ps[ISO] = iso[i]
-    prob
-end
-trajectories = length(iso)
+prob_func = (prob, i, repeat) -> (prob.ps[ISO] = iso[i]; prob)
 sol = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories, abstol=1e-10, reltol=1e-10)
+@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(iso), abstol=1e-10, reltol=1e-10)
 
-#---
+# Convienience functions
 """Extract values from ensemble simulations by a symbol"""
 extract(sim, k) = map(s -> s[k], sim)
-"""Calculate Root Mean Square Error (RMSE)"""
-rmse(fit) = sqrt(sum(abs2, fit.resid) / length(fit.resid))
 
 #---
 xopts = (xlims=(iso[begin], iso[end]), minorgrid=true, xscale=:log10, xlabel="ISO (μM)",)
@@ -43,11 +37,12 @@ plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII")
 plot!(iso, extract(sim, sys.PP1 / sys.PP1totBA), lab="PP1", legend=:topleft; xopts...)
 
 # ## PKACI activity
-@. model(x, p) = p[1] * x / (x + p[2]) + p[3]
+model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PKACI / sys.RItot)
 p0 = [0.3, 0.01μM, 0.08]
 lb = [0.0, 0.0, 0.0]
+prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
 @time pkac1_fit = curve_fit(model, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
 pkac1_coef = coef(pkac1_fit)
 
