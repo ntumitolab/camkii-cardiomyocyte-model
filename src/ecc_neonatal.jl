@@ -11,7 +11,6 @@ function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
         nNaK = 3.2
         KmKoNaK = 1.5mM
     end
-    @independent_variables t
     @variables INaK(t)
     sigma = 1 / 7 * expm1(na_o / 67.3mM)
     fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365 * sigma * exp(-vm * iVT))
@@ -28,8 +27,6 @@ function build_neonatal_ecc_sys(;
     reduce_iso=true,
     reduce_camk=true,
 )
-    @independent_variables t
-    D = Differential(t)
     @parameters begin
         Istim(t) = 0μAμF
         ca_o = 1.796mM

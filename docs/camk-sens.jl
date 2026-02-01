@@ -19,12 +19,13 @@ Modeling CaM-Cax binding to CaMKII only. No phosphorylation or oxidation reactio
 # Physiological cytosolic calcium concentrations ranges from 30nM to 10μM.
 ca = exp10.(range(log10(0.03μM), log10(10μM), 1001))
 prob_func = (prob, i, repeat) -> begin
-    remake(prob, p=[Ca => ca[i]])
+    prob.ps[Ca] = ca[i]
+    prob
 end
 trajectories = length(ca)
 alg = DynamicSS(Rodas5P())
 sol0 = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories, abstol=1e-10, reltol=1e-10)
+@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories, abstol=1e-10, reltol=1e-10)
 
 #---
 """Extract values from ensemble simulations by a symbol"""

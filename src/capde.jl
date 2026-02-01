@@ -12,8 +12,6 @@ function get_ca_pde_eqs(;
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
     m = length(j)
-    @independent_variables t
-    D = Differential(t)
     @variables begin
         Cai(t)[1:m] = [Cai_default for _ in 1:m]
         Cai_mean(t)
@@ -60,6 +58,5 @@ function get_ca_pde_sys(;
     name=:capdesys
 )
     eqs_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
-    @independent_variables t
     return System(eqs_cai, t; name)
 end

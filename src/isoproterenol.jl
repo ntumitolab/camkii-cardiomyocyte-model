@@ -95,9 +95,6 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         Km_pp2a_RyR = 4.1μM
     end
 
-    @independent_variables t
-    D = Differential(t)
-
     sts = @variables begin
         LR(t) = 6.0e-5μM
         LRG(t) = 0.00294μM
@@ -254,12 +251,8 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     add_raw_rate!(rates, vf - vr, [RyRn], [RyRp]) # RyRn <=> RyRp
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
-
     sys = System([rateeqs; conservedeqs; obseqs], t; name)
-    if simplify
-        sys = structural_simplify(sys)
-    end
-    return sys
+    return simplify ? sys : mtkcompile(sys)
 end
 
 function get_bar_eqs_reduced(ISO=0μM)
@@ -299,8 +292,6 @@ function get_bar_eqs_reduced(ISO=0μM)
         RyRp_KM = 0.00751μM
     end
 
-    @independent_variables t
-    D = Differential(t)
     vs = @variables begin
         LCCa_PKAp(t)
         LCCb_PKAp(t)
@@ -333,6 +324,5 @@ end
 "Algebraic fitted beta-adrenergic system"
 function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
     @unpack eqs_bar = get_bar_eqs_reduced(ISO)
-    @independent_variables t
     return ODESystem(eqs_bar, t; name)
 end

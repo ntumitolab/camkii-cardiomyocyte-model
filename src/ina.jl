@@ -3,8 +3,6 @@ function get_ina_eqs(nai, nao, vm)
         gNa = 12.8mSμF
         gNab = 0.0026mSμF
     end
-    @independent_variables t
-    D = Differential(t)
     @variables begin
         INa(t)
         i_Nam(t) = 0.0327    # Fast Na gating (activation)
@@ -37,6 +35,5 @@ end
 "Fast sodium current (INa) and background sodium current"
 function get_ina_sys(nai, nao, vm; name=:inasys)
     @unpack eqs_ina = get_ina_eqs(nai, nao, vm)
-    @independent_variables t
     return System(eqs_ina, t; name)
 end

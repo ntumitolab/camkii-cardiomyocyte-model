@@ -12,8 +12,6 @@ function get_ica_eqs(nai, cai, nao, cao, vm;  LCCb_PKAp=0)
         gCaT = 0.2mSμF
         gCab = 0.0008mSμF
     end
-    @independent_variables t
-    D = Differential(t)
     @variables begin
         ICa_scale(t)
         JCa_SL(t)
@@ -84,6 +82,5 @@ end
 "Plama membrane calcium currents"
 function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
     @unpack eqs_ica = get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp)
-    @independent_variables t
     return System(eqs_ica, t; name)
 end
