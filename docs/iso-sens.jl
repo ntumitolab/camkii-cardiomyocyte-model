@@ -16,12 +16,12 @@ Plots.default(lw=1.5)
 @time "Build system" sys = get_bar_sys(ATP, ISO; simplify=true)
 @time "Build problem" prob = SteadyStateProblem(sys, [])
 
-# Log scale for ISO concentration.
+# Log scale for ISO concentration
 alg = DynamicSS(KenCarp47())
-iso = exp10.(range(log10(1e-4μM), log10(1μM), length=1001))
+iso = logrange(1e-4μM, 1μM, length=1001)
 prob_func = (prob, i, repeat) -> (prob.ps[ISO] = iso[i]; prob)
 sol = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(iso), abstol=1e-10, reltol=1e-10)
+@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(iso), abstol=1e-10, reltol=1e-10);
 
 # Convienience functions
 """Extract values from ensemble simulations by a symbol"""
@@ -41,78 +41,71 @@ model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PKACI / sys.RItot)
 p0 = [0.3, 0.01μM, 0.08]
-lb = [0.0, 0.0, 0.0]
 prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
-@time pkac1_fit = curve_fit(model, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pkac1_coef = coef(pkac1_fit)
+@time "Fit PKACI" fit_pkac1 = solve(prob)
 
 #---
 println("PKACI")
-println("Basal activity: ", pkac1_coef[3])
-println("Activated activity: ", pkac1_coef[1])
-println("Michaelis constant: ", pkac1_coef[2], " μM")
-println("RMSE: ", rmse(pkac1_fit))
+println("Basal activity: ", fit_pkac1.u[3])
+println("Activated activity: ", fit_pkac1.u[1])
+println("Michaelis constant: ", fit_pkac1.u[2], " μM")
+println("RMSE: ", mse(fit_pkac1) |> sqrt)
 
 #---
-ypred = model.(xdata, Ref(pkac1_coef))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PKACI", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_pkac1)], lab=["Full model" "Fitted"], line=[:dash :dot], title="PKACI", legend=:topleft; xopts...)
 
 #---
 savefig("pkaci_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PKACI error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_pkac1) ./ ydata .* 100; title="PKACI error (%)", lab=false, xopts...)
 
 # ## PKACII activity
 xdata = iso
 ydata = extract(sim, sys.PKACII / sys.RIItot)
 p0 = [0.4, 0.01μM, 0.2]
-lb = [0.0, 0.0, 0.0]
-@time pkac2_fit = curve_fit(model, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pkac2_coef = coef(pkac2_fit)
+prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
+@time fit_pkac2 = solve(prob)
 
 #---
 println("PKACII")
-println("Basal activity: ", pkac2_coef[3])
-println("Activated activity: ", pkac2_coef[1])
-println("Michaelis constant: ", pkac2_coef[2], " μM")
-println("RMSE: ", rmse(pkac2_fit))
+println("Basal activity: ", fit_pkac2.u[3])
+println("Activated activity: ", fit_pkac2.u[1])
+println("Michaelis constant: ", fit_pkac2.u[2], " μM")
+println("RMSE: ", mse(fit_pkac2) |> sqrt)
 
 #---
-ypred = model.(xdata, Ref(pkac2_coef))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PKACII", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_pkac2)], lab=["Full model" "Fitted"], line=[:dash :dot], title="PKACII", legend=:topleft; xopts...)
 
 #---
 savefig("pkacii_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PKACII error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_pkac2) ./ ydata .* 100; title="PKACII error (%)", lab=false, xopts...)
 
 # ## PP1 activity
-@. model_pp1(x, p) = p[1] * p[2] / (x + p[2]) + p[3]
+model_pp1(p, x) = @. p[1] * hil(p[2], x) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PP1 / sys.PP1totBA)
 p0 = [0.1, 3e-3μM, 0.8]
-lb = [0.0, 0.0, 0.0]
-@time pp1_fit = curve_fit(model_pp1, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pp1_coef = coef(pp1_fit)
+prob = NonlinearCurveFitProblem(model_pp1, p0, xdata, ydata)
+@time fit_pp1 = solve(prob)
 
 #---
 println("PP1")
-println("Repressible activity: ", pp1_coef[1])
-println("Minimal activity: ", pp1_coef[3])
-println("Repressive Michaelis constant: ", pp1_coef[2], " μM")
-println("RMSE: ", rmse(pp1_fit))
+println("Repressible activity: ", fit_pp1.u[1])
+println("Minimal activity: ", fit_pp1.u[3])
+println("Repressive Michaelis constant: ", fit_pp1.u[2], " μM")
+println("RMSE: ", mse(fit_pp1) |> sqrt)
 
 #---
-ypred = model_pp1.(xdata, Ref(pp1_coef))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PP1", legend=:topright; xopts...)
+p1 = plot(xdata, [ydata predict(fit_pp1)], lab=["Full model" "Fitted"], line=[:dash :dot], title="PP1", legend=:topright; xopts...)
 
 #---
 savefig("pp1_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PP1 error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_pp1) ./ ydata .* 100; title="PP1 error (%)", lab=false, xopts...)
 
 # ## PLBp
 xdata = iso
@@ -120,29 +113,27 @@ ydata = extract(sim, sys.PLBp / sys.PLBtotBA)
 plot(xdata, ydata, title="PLBp fraction", lab=false; xopts...)
 
 #---
-@. model_plb(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+model_plb(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-2μM, 1.0, 0.1]
-lb = [0.5, 1e-9μM, 1.0, 0.0]
-@time fit = curve_fit(model_plb, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
+prob = NonlinearCurveFitProblem(model_plb, p0, xdata, ydata)
+@time fit_plb = solve(prob)
 
 #---
 println("PLBp")
-println("Basal activity: ", pestim[4])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("Hill coefficient: ", pestim[3])
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_plb.u[4])
+println("Activated activity: ", fit_plb.u[1])
+println("Michaelis constant: ", fit_plb.u[2], " μM")
+println("Hill coefficient: ", fit_plb.u[3])
+println("RMSE: ", mse(fit_plb) |> sqrt)
 
 #---
-ypred = model_plb.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PLBp", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_plb)], lab=["Full model" "Fitted"], line=[:dash :dot], title="PLBp", legend=:topleft; xopts...)
 
 #---
 savefig("plbp_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PLBp error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_plb) ./ ydata .* 100; title="PLBp error (%)", lab=false, xopts...)
 
 # ## PLMp
 xdata = iso
@@ -150,29 +141,27 @@ ydata = extract(sim, sys.PLMp / sys.PLMtotBA)
 plot(xdata, ydata, title="PLMp fraction", lab=false; xopts...)
 
 #---
-@. model_plm(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+model_plm(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-2μM, 1.0, 0.1]
-lb = [0.5, 1e-9μM, 1.0, 0.0]
-@time fit = curve_fit(model_plm, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
+prob = NonlinearCurveFitProblem(model_plm, p0, xdata, ydata)
+@time fit_plm = solve(prob)
 
 #---
 println("PLMp")
-println("Basal activity: ", pestim[4])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("Hill coefficient: ", pestim[3])
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_plm.u[4])
+println("Activated activity: ", fit_plm.u[1])
+println("Michaelis constant: ", fit_plm.u[2], " μM")
+println("Hill coefficient: ", fit_plm.u[3])
+println("RMSE: ", mse(fit_plm) |> sqrt)
 
 #---
-ypred = model_plm.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="PLMp", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_plm)], lab=["Full model" "Fitted"], line=[:dash :dot], title="PLMp", legend=:topleft; xopts...)
 
 #---
 savefig("plmp_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="PLMp error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_plm) ./ ydata .* 100; title="PLMp error (%)", lab=false, xopts...)
 
 ## TnIp
 xdata = iso
@@ -180,29 +169,27 @@ ydata = extract(sim, sys.TnIp / sys.TnItotBA)
 plot(xdata, ydata, title="TnIp fraction", lab=false; xopts...)
 
 #---
-@. model_tni(x, p) = p[1] * hil(x, p[2], p[3]) + p[4]
+model_tni(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-2μM, 1.0, 0.1]
 lb = [0.1, 1e-9μM, 1.0, 0.0]
-@time fit = curve_fit(model_tni, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
-
+prob = NonlinearCurveFitProblem(model_tni, p0, xdata, ydata)
+@time fit_tni = solve(prob)
 #---
 println("TnIp")
-println("Basal activity: ", pestim[4])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("Hill coefficient: ", pestim[3])
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_tni.u[4])
+println("Activated activity: ", fit_tni.u[1])
+println("Michaelis constant: ", fit_tni.u[2], " μM")
+println("Hill coefficient: ", fit_tni.u[3])
+println("RMSE: ", mse(fit_tni) |> sqrt)
 
 #---
-ypred = model_tni.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="TnIp", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_tni)], lab=["Full model" "Fitted"], line=[:dash :dot], title="TnIp", legend=:topleft; xopts...)
 
 #---
 savefig("tni_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="TnIp error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_tni) ./ ydata .* 100; title="TnIp error (%)", lab=false, xopts...)
 
 # ## LCCap
 xdata = iso
@@ -210,28 +197,26 @@ ydata = extract(sim, sys.LCCap / sys.LCCtotBA)
 plot(xdata, ydata, title="LCCap fraction", lab=false; xopts...)
 
 #---
-@. model_lcc(x, p) = p[1] * hil(x, p[2]) + p[3]
+model_lcc(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 p0 = [0.8, 1e-2μM, 0.1]
-lb = [0.1, 1e-9μM, 0.0]
-@time fit = curve_fit(model_lcc, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
+prob = NonlinearCurveFitProblem(model_lcc, p0, xdata, ydata)
+@time fit_lcca = solve(prob)
 
 #---
 println("LCCap")
-println("Basal activity: ", pestim[3])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_lcca.u[3])
+println("Activated activity: ", fit_lcca.u[1])
+println("Michaelis constant: ", fit_lcca.u[2], " μM")
+println("RMSE: ", mse(fit_lcca) |> sqrt)
 
 #---
-ypred = model_lcc.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="LCCap", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_lcca)], lab=["Full model" "Fitted"], line=[:dash :dot], title="LCCap", legend=:topleft; xopts...)
 
 #---
 savefig("lcca_fit.pdf")
 
 #---
-plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="LCCap error (%)", lab=false, xopts...)
+plot(xdata, residuals(fit_lcca) ./ ydata .* 100; title="LCCap error (%)", lab=false, xopts...)
 
 # ## LCCbp
 xdata = iso
@@ -241,25 +226,24 @@ plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
 #---
 p0 = [0.8, 1e-2μM, 0.1]
 lb = [0.1, 1e-9μM, 0.0]
-@time fit = curve_fit(model_lcc, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
+prob = NonlinearCurveFitProblem(model_lcc, p0, xdata, ydata)
+@time fit_lccb = solve(prob)
 
 #---
 println("LCCbp")
-println("Basal activity: ", pestim[3])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_lccb.u[3])
+println("Activated activity: ", fit_lccb.u[1])
+println("Michaelis constant: ", fit_lccb.u[2], " μM")
+println("RMSE: ", mse(fit_lccb) |> sqrt)
 
 #---
-ypred = model_lcc.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="LCCbp", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_lccb)], lab=["Full model" "Fitted"], line=[:dash :dot], title="LCCbp", legend=:topleft; xopts...)
 
 #---
 savefig("lccbp_fit.pdf")
 
 #---
-plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="LCCbp error (%)", lab=false, xopts...)
+plot(xdata, residuals(fit_lccb) ./ ydata .* 100; title="LCCbp error (%)", lab=false, xopts...)
 
 # ## KURp
 xdata = iso
@@ -267,28 +251,26 @@ ydata = extract(sim, sys.KURp / sys.IKurtotBA)
 plot(xdata, ydata, title="KURp fraction", lab=false; xopts...)
 
 #---
-@. model_kur(x, p) = p[1] * hil(x, p[2]) + p[3]
+model_kur(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 p0 = [0.8, 1e-2μM, 0.1]
 lb = [0.1, 1e-9μM, 0.0]
-@time fit = curve_fit(model_kur, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
-
+prob = NonlinearCurveFitProblem(model_kur, p0, xdata, ydata)
+@time fit_kur = solve(prob)
 #---
 println("KURp")
-println("Basal activity: ", pestim[3])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_kur.u[3])
+println("Activated activity: ", fit_kur.u[1])
+println("Michaelis constant: ", fit_kur.u[2], " μM")
+println("RMSE: ", mse(fit_kur) |> sqrt)
 
 #---
-ypred = model_kur.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="KURp", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_kur)], lab=["Full model" "Fitted"], line=[:dash :dot], title="KURp", legend=:topleft; xopts...)
 
 #---
 savefig("kurp_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="KURp error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_kur) ./ ydata .* 100; title="KURp error (%)", lab=false, xopts...)
 
 # ## RyRp
 xdata = iso
@@ -296,25 +278,23 @@ ydata = extract(sim, sys.RyR_PKAp)
 plot(xdata, ydata, title="RyRp fraction", lab=false; xopts...)
 
 #---
-@. model(x, p) = p[1] * x / (x + p[2]) + p[3]
+model(p, x) = @. p[1] * x / (x + p[2]) + p[3]
 p0 = [0.3, 1e-2μM, 0.1]
 lb = [0.0, 1e-9μM, 0.0]
-@time fit = curve_fit(model, xdata, ydata, p0; lower=lb, autodiff=:forwarddiff)
-pestim = coef(fit)
-
+prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
+@time fit_ryr = solve(prob)
 #---
 println("RyRp")
-println("Basal activity: ", pestim[3])
-println("Activated activity: ", pestim[1])
-println("Michaelis constant: ", pestim[2], " μM")
-println("RMSE: ", rmse(fit))
+println("Basal activity: ", fit_ryr.u[3])
+println("Activated activity: ", fit_ryr.u[1])
+println("Michaelis constant: ", fit_ryr.u[2], " μM")
+println("RMSE: ", mse(fit_ryr) |> sqrt)
 
 #---
-ypred = model.(xdata, Ref(pestim))
-p1 = plot(xdata, [ydata ypred], lab=["Full model" "Fitted"], line=[:dash :dot], title="RyRp", legend=:topleft; xopts...)
+p1 = plot(xdata, [ydata predict(fit_ryr)], lab=["Full model" "Fitted"], line=[:dash :dot], title="RyRp", legend=:topleft; xopts...)
 
 #---
 savefig("ryrp_fit.pdf")
 
 #---
-p2 = plot(xdata, (ypred .- ydata) ./ ydata .* 100; title="RyRp error (%)", lab=false, xopts...)
+p2 = plot(xdata, residuals(fit_ryr) ./ ydata .* 100; title="RyRp error (%)", lab=false, xopts...)
