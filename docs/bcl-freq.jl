@@ -1,6 +1,15 @@
 # # Pacing frequency
-# ## Experiments
+using ModelingToolkit
+using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
+using Plots
+using CSV
+using DataFrames
+using CurveFit
+using CaMKIIModel
+using CaMKIIModel: second
+Plots.default(lw=1.5)
 
+# ## Experiments
 freqdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-freq.csv"), DataFrame)
 ts = 0:5:205
 onehz = freqdf[!, "1Hz (Mean)"]
@@ -16,17 +25,17 @@ plot!(title="Experiment", xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 savefig("pacing-frequency-exp.pdf")
 
 # ## Simulations
-
-# ### CaMKII activity
+@time "Build system" sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
 tend = 205.0second
-prob = ODEProblem(sys, [], tend)
+@time "Build problem" prob = ODEProblem(sys, [], tend)
+
 stimstart = 30.0second
 stimend = 120.0second
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-sol1 = solve(prob, alg; callback)
+@time "Solve problem" sol1 = solve(prob, alg; callback)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5second, starttime=stimstart)
-sol2 = solve(prob, alg; callback=callback2)
+@time "Solve problem" sol2 = solve(prob, alg; callback=callback2)
 idxs = (sys.t / 1000, sys.CaMKAct * 100)
 
 plot(sol1, idxs=idxs, lab="1 Hz", color=:blue)
