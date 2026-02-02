@@ -11,7 +11,6 @@ function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
         nNaK = 3.2
         KmKoNaK = 1.5mM
     end
-
     @variables INaK(t)
     sigma = 1 / 7 * expm1(na_o / 67.3mM)
     fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365 * sigma * exp(-vm * iVT))
@@ -25,10 +24,11 @@ function build_neonatal_ecc_sys(;
     dx=0.1μm,
     name=:neonataleccsys,
     simplify=true,
-    reduce_iso=false,
-    reduce_camk=false,
+    reduce_iso=true,
+    reduce_camk=true,
 )
     @parameters begin
+        Istim(t) = 0μAμF
         ca_o = 1.796mM
         na_o = 154.578mM
         k_o = 5.366mM
@@ -36,14 +36,13 @@ function build_neonatal_ecc_sys(;
         ROS = 0μM
         ISO = 0μM
         ATP = 5mM
-        Istim = 0μAμF
         # cell geometry
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
-        Vmyo = 4 / 3 * π * (rSL_true^3 - rSR_true^3) # 3.944 pL
+        Vmyo = 4π / 3 * (rSL_true^3 - rSR_true^3) # 3.944 pL
         ACAP_F = Acap * Cm / Faraday
-        V_sub_SR = 4 / 3 * pi * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
-        V_sub_SL = 4 / 3 * pi * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
+        V_sub_SR = 4π / 3 * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
+        V_sub_SL = 4π / 3 * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
     end
 
     @variables begin
@@ -80,5 +79,5 @@ function build_neonatal_ecc_sys(;
     for s2 in (barsys, capdesys, camkiisys, icasys, inasys, iksys, sersys, naksys)
         sys = extend(sys, s2; name)
     end
-    return simplify ? structural_simplify(sys) : sys
+    return simplify ? mtkcompile(sys) : sys
 end

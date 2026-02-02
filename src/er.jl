@@ -1,8 +1,7 @@
 function get_ser_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_SR=0.046pL)
     @parameters begin
-        VSR = 0.0903pL
-        VNSR = 0.9 * VSR
-        VJSR = VSR - VNSR
+        VNSR = 0.9 * 0.0903pL
+        VJSR = 0.1 * 0.0903pL
         # RyR
         kRyR = 20Hz  # 10Hz
         kaposRyR = 1000Hz
@@ -18,7 +17,6 @@ function get_ser_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp=0, RyR_CKp=0.2, V_sub_S
         csqntot = 24.750mM
         Kmcsqn = 0.8mM
     end
-
     @variables begin
         CaNSR(t) = 830μM
         CaJSR(t) = 830μM

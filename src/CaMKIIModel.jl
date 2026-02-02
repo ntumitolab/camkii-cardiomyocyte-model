@@ -6,7 +6,7 @@ using NaNMath
 using OrdinaryDiffEq
 using DiffEqCallbacks
 
-export get_camkii_sys, get_bar_sys, build_neonatal_ecc_sys, build_stim_callbacks, get_bar_sys_reduced
+export get_camkii_sys, get_bar_sys, build_neonatal_ecc_sys, build_stim_callbacks
 
 include("utils.jl")
 include("camkii_ros.jl")

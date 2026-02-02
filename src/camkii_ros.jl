@@ -75,7 +75,7 @@ function get_camkii_eqs(;
         Ca4CaM_CaMKOX(t) = 0mM
         Ca4CaM_CaMKPOX(t) = 0mM
         CaMKP(t) = 3.3μM
-        CaMKP2(t) = 831.43nM
+        CaMKP2(t) = 0mM
         CaMKPOX(t) = 0mM
         CaMKOX(t) = 0mM
     end
@@ -168,10 +168,7 @@ function get_camkii_sys(;
 )
    @unpack eqs_camkii = get_camkii_eqs(; Ca, ROS, binding_To_PCaMK)
    sys = System(eqs_camkii, t; name)
-   if simplify
-       sys = mtkcompile(sys)
-   end
-   return sys
+   return simplify ? mtkcompile(sys) : sys
 end
 
 """
@@ -181,7 +178,8 @@ function get_camkii_simp_eqs(;
     Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,
-    binding_To_OCaMK=0,)
+    binding_To_OCaMK=0
+)
 
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
@@ -205,7 +203,7 @@ function get_camkii_simp_eqs(;
         CaMKP(t) = 0.003916     ## Bound to CaMCa, autophosphorylated
         CaMKPOX(t) = 0          ## Bound to CaMCa, autophosphorylated, oxidized
         CaMKA(t) = 0.007833     ## Unbound, autophosphorylated
-        CaMKA2(t) = 0.001958    ## Unbound, doubly phosphorylated
+        CaMKA2(t) = 0           ## Unbound, doubly phosphorylated
         CaMKAOX(t) = 0          ## Unbound, autophosphorylated, oxidized
         CaMKOX(t) = 0           ## Unbound, oxidized
     end
@@ -269,8 +267,5 @@ function get_camkii_simp_sys(;
 )
     @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
     sys = System(eqs_camkii, t; name)
-    if simplify
-        sys = mtkcompile(sys)
-    end
-    return sys
+    return simplify ? mtkcompile(sys) : sys
 end

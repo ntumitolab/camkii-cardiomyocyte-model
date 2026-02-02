@@ -12,7 +12,6 @@ function get_ica_eqs(nai, cai, nao, cao, vm;  LCCb_PKAp=0)
         gCaT = 0.2mSμF
         gCab = 0.0008mSμF
     end
-
     @variables begin
         ICa_scale(t)
         JCa_SL(t)

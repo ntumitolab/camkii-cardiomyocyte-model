@@ -251,12 +251,8 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
     add_raw_rate!(rates, vf - vr, [RyRn], [RyRp]) # RyRn <=> RyRp
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
-
     sys = System([rateeqs; conservedeqs; obseqs], t; name)
-    if simplify
-        sys = structural_simplify(sys)
-    end
-    return sys
+    return simplify ? mtkcompile(sys) : sys
 end
 
 function get_bar_eqs_reduced(ISO=0μM)
@@ -322,7 +318,6 @@ function get_bar_eqs_reduced(ISO=0μM)
         IKUR_PKAp ~ KURp_basal + KURp_activated * hil(ISO, KURp_KM),
         RyR_PKAp ~ RyRp_basal + RyRp_activated * hil(ISO, RyRp_KM),
     ]
-
     return (; eqs_bar, fracPKACI, fracPKACII, fracPP1, fracPLBp, fracPLMp, TnI_PKAp, LCCa_PKAp, LCCb_PKAp, IKUR_PKAp, RyR_PKAp)
 end
 

@@ -63,7 +63,8 @@ expit(x, a=one(x), b=one(x)) = a / (b + exp(-x))
 """
     exprel(x, em1 = expm1(x))
 """
-exprel(x, em1=expm1(x)) = x / em1
+exprel(x) = x / expm1(x)
+exprel(x::Real) = ifelse(iszero(x), one(x), x / expm1(x))
 
 """Nernst potential"""
 nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
