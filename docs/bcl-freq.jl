@@ -29,9 +29,12 @@ savefig("pacing-frequency-exp.pdf")
 tend = 205.0second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 
+@unpack Istim = sys
 stimstart = 30.0second
 stimend = 120.0second
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
+
+alg = KenCarp47()
 @time "Solve problem" sol1 = solve(prob, alg; callback)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5second, starttime=stimstart)
