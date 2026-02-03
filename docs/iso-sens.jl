@@ -1,5 +1,5 @@
 #===
-# Simplifying b1AR system
+# b1AR system simplification
 
 Fitting sensitivity to ISO.
 ===#
