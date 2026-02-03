@@ -1,4 +1,4 @@
-# # CaMKII system simplification and sensitivity analysis
+# # CaMKII system simplification
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
