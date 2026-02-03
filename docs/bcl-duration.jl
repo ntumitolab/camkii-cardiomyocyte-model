@@ -173,6 +173,7 @@ plot!(pacing_durations, tau_simulations, label="Simulations", marker=:square, co
 plot!(pacing_durations, tau_simulations_noa2, label="Simulations no A2", marker=:diamond, color=:green)
 plot!(title="Pacing Duration vs Decay Time Scale", xlabel="Pacing Duration (s)", ylabel="Decay Time Scale (s)")
 
+#---
 savefig("pacing-decay-exp-sim.pdf")
 
 # ## Phosphorylated fraction
