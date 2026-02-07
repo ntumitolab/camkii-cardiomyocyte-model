@@ -250,8 +250,8 @@ function get_camkii_simp_eqs(;
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
-        CaMKAct ~ 1 - CaMK,
-        1 ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
+        CaMKAct ~ CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
+        1 ~ CaMK + CaMKAct,
     ]
     eqs_camkii = [rateeqs; eqs]
     return (; eqs_camkii, CaMKAct)
@@ -264,7 +264,7 @@ function get_camkii_simp_sys(;
     binding_To_OCaMK=0,
     name=:camkii_sys,
     simplify=false
-)
+    )
     @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
     sys = System(eqs_camkii, t; name)
     return simplify ? mtkcompile(sys) : sys

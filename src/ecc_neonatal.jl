@@ -4,7 +4,7 @@
 #
 # PLEASE MENTION THE FOLLOWING REFERENCE WHEN USING THIS CODE OR PART OF IT: Korhonen et al. "Model of excitation-contraction coupling of rat neonatal ventricular myocytes" Biophys J. 2009, Feb; 96(3):1189-1209
 # https://pmc.ncbi.nlm.nih.gov/articles/PMC2716686/
-function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
+function get_nak_eqs(na_i, na_o, k_o, vm)
     @parameters begin
         INaKmax = 2.7μAμF
         KmNaiNaK = 18.6mM
@@ -15,7 +15,12 @@ function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
     sigma = 1 / 7 * expm1(na_o / 67.3mM)
     fNaK = inv(1 + 0.1245 * exp(-0.1vm * iVT) + 0.0365 * sigma * exp(-vm * iVT))
     inak = INaKmax * fNaK * hil(k_o, KmKoNaK) * hil(na_i, KmNaiNaK, nNaK)
-    return System([INaK ~ inak], t; name)
+    return [INaK ~ inak]
+end
+
+function get_nak_sys(na_i, na_o, k_o, vm; name=:naksys)
+    eqs_inak = get_nak_eqs(na_i, na_o, k_o, vm)
+    return System(eqs_inak, t; name)
 end
 
 function build_neonatal_ecc_sys(;

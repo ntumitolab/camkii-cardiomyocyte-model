@@ -7,7 +7,7 @@ function get_ca_pde_eqs(;
     TnI_PKAp=0,
     JCa_SR=0,
     JCa_SL=0,
-)
+    )
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
@@ -44,7 +44,7 @@ function get_ca_pde_eqs(;
     for i in 2:m-1
         push!(eqs_cai, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
     end
-    return eqs_cai
+    return (; eqs_cai, Cai_mean)
 end
 
 function get_ca_pde_sys(;
@@ -56,7 +56,7 @@ function get_ca_pde_sys(;
     JCa_SR=0,
     JCa_SL=0,
     name=:capdesys
-)
-    eqs_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
+    )
+    @unpack eqs_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
     return System(eqs_cai, t; name)
 end
