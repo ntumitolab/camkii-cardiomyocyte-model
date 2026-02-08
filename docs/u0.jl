@@ -7,7 +7,7 @@ using CaMKIIModel
 Plots.default(lw=2)
 
 #---
-@time "Build system" sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
+@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
 @time "Build problem" prob = SteadyStateProblem(sys, [])
 @time "Solve problem" sol = solve(prob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
 for (k, v) in zip(unknowns(sys), sol.u)

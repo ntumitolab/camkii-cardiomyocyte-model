@@ -44,7 +44,7 @@ function get_ca_pde_eqs(;
     for i in 2:m-1
         push!(eqs_cai, D(Cai[i]) ~ (Dca / (j[i] * dx^2) * ((1 + j[i]) * Cai[i+1] - 2 * j[i] * Cai[i] + (j[i] - 1) * Cai[i-1])) * beta_cai(Cai[i]))
     end
-    return (; eqs_cai, Cai_mean)
+    return (; eqs_cai, Cai_mean, Cai_sub_SR, Cai_sub_SL)
 end
 
 function get_ca_pde_sys(;
