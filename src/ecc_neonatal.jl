@@ -61,8 +61,8 @@ function build_neonatal_ecc_sys(;
     @unpack Cai_sub_SL, Cai_sub_SR, Cai_mean, eqs_cai = get_ca_pde_eqs(; JCa_SR, JCa_SL, TnI_PKAp, rSR_true, rSL_true, dx)
     @unpack eqs_camkii = get_camkii_simp_eqs(;Ca=Cai_mean, ROS)
     @unpack INaCa, ICaL, ICaT, ICab, eqs_ica = get_ica_eqs(na_i, Cai_sub_SL, na_o, ca_o, vm; LCCb_PKAp)
-    @unpack eqs_ina, INa, INab = get_ina_eqs(na_i, na_o, vm)
-    @unpack eqs_ik, IK1, Ito, IKs, IKr, IfNa, IfK, If = get_ik_eqs(na_i, k_i, na_o, k_o, vm; IKUR_PKAp)
+    @unpack eqs_ina, INa, INab, E_Na = get_ina_eqs(; na_i, na_o, vm)
+    @unpack eqs_ik, IK1, Ito, IKs, IKr, IfNa, IfK, If = get_ik_eqs(; na_i, k_i, na_o, k_o, vm, IKUR_PKAp, E_Na)
     @unpack eqs_sr, Jrel, Jup, Jleak, Jtr, JCa_SR = get_ser_eqs(Cai_sub_SR; fracPLB_CKp=0, fracPLBp, RyR_CKp=0.2, V_sub_SR)
     @unpack eqs_inak, INaK = get_nak_eqs(na_i, na_o, k_o, vm)
 

@@ -1,4 +1,4 @@
-function get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0)
+function get_ik_eqs(; k_i, k_o, na_i, na_o, vm, IKUR_PKAp=0, E_Na=40mV)
     @parameters begin
         # IK1: time-independent
         GK1 = 0.0515mSμF
@@ -18,7 +18,6 @@ function get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0)
     end
 
     @variables begin
-        E_Na(t)
         E_K(t)
         IK1(t)
         Ito(t)
@@ -76,7 +75,6 @@ function get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0)
     fK = 1 - fNa
 
     eqs_ik = [
-        E_Na ~ nernst(na_o, na_i),
         E_K ~ nernst(k_o, k_i),
         IK1 ~ GK1 * hil(k_o, 210μM) * expit(-0.0319 * vk1, vk1, 0.1653),
         sinf ~ expit((V + 31.97156) / -4.64291),
