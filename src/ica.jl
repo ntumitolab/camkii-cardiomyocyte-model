@@ -1,4 +1,4 @@
-function get_ica_eqs(nai, cai, nao, cao, vm;  LCCb_PKAp=0)
+function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0)
     @parameters begin
         ICa_scale0 = 0.95 # or 5.25
         fracLCCbp0 = 0.250657   # Derived quantity - (LCCbp(baseline)/LCCbtot)
