@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "f77b4bfd61f801e521d92eba7dcace87cef9fec9"
+project_hash = "3b2ce1e33b5c34fc71c9364db6599de39e5d3e8e"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -183,7 +183,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.15"
 
 [[deps.CaMKIIModel]]
-deps = ["CSV", "CurveFit", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "Latexify", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "StatsBase", "SteadyStateDiffEq"]
+deps = ["CSV", "CurveFit", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "Latexify", "LsqFit", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "StaticArrayInterface", "StatsBase", "SteadyStateDiffEq"]
 path = "."
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
 version = "0.7.0"
@@ -2285,10 +2285,10 @@ uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
 version = "1.3.1"
 
 [[deps.StaticArrayInterface]]
-deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "PrecompileTools", "SciMLPublic", "Static"]
-git-tree-sha1 = "aa1ea41b3d45ac449d10477f65e2b40e3197a0d2"
+deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "PrecompileTools", "Static"]
+git-tree-sha1 = "96381d50f1ce85f2663584c8e886a6ca97e60554"
 uuid = "0d7ed370-da01-4f52-bd93-41d350b8b718"
-version = "1.9.0"
+version = "1.8.0"
 weakdeps = ["OffsetArrays", "StaticArrays"]
 
     [deps.StaticArrayInterface.extensions]
