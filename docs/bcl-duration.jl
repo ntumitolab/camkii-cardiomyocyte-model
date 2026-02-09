@@ -10,9 +10,8 @@ using CaMKIIModel
 using CaMKIIModel: second
 Plots.default(lw=1.5)
 
-# ### Experiments
+# ## Experiments
 # 30 seconds resting + N seconds 1Hz pacing + resting.
-
 durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)
 ts = durationdf[!, "Time(sec)"]
 fifteen = durationdf[!, "1Hz 15sec (Mean)"]
