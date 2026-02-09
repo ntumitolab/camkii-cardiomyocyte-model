@@ -35,7 +35,7 @@ plot!(title="Experiment", xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 savefig("pacing-duration-exp.pdf")
 
 # ## Simulation
-@time "Build system" sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
+@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
 tend = 500second
 @time "Build problem" prob = ODEProblem(sys, [sys.kdeph_CaMK => inv(10second)], tend)
 @time "Remake problem" prob_n0a2 = remake(prob, p=[sys.k_P1_P2=>0, sys.kdeph_CaMK => inv(12second)])

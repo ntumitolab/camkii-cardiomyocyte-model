@@ -9,7 +9,7 @@ function get_camkii_eqs(;
     Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
-)
+    )
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
@@ -153,7 +153,7 @@ function get_camkii_eqs(;
     eqs = [
         CAMKII_T ~ CaMK + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX + CaMKP + CaMKP2 + CaMKPOX + CaMKOX,
         CAM_T ~ CaM0 + Ca2CaM_C + Ca2CaM_N + Ca4CaM + CaM0_CaMK + Ca2CaM_C_CaMK + Ca2CaM_N_CaMK + Ca4CaM_CaMK + CaM0_CaMKP + Ca2CaM_C_CaMKP + Ca2CaM_N_CaMKP + Ca4CaM_CaMKP + Ca4CaM_CaMKOX + Ca4CaM_CaMKPOX,
-        CaMKAct ~ (1 - (CaMK + CaM0_CaMK)  / CAMKII_T)
+        CaMKAct ~ (1 - CaMK / CAMKII_T)
     ]
     eqs_camkii = [rateeqs; eqs]
     return (; eqs_camkii, CaMKAct)
@@ -165,10 +165,10 @@ function get_camkii_sys(;
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
     name=:camkii_sys,
     simplify=false
-)
-   @unpack eqs_camkii = get_camkii_eqs(; Ca, ROS, binding_To_PCaMK)
-   sys = System(eqs_camkii, t; name)
-   return simplify ? mtkcompile(sys) : sys
+    )
+    @unpack eqs_camkii = get_camkii_eqs(; Ca, ROS, binding_To_PCaMK)
+    sys = System(eqs_camkii, t; name)
+    return simplify ? mtkcompile(sys) : sys
 end
 
 """
@@ -177,9 +177,9 @@ Simplified CaMKII system with one-step activation of CaMK
 function get_camkii_simp_eqs(;
     Ca=0μM,
     ROS=0μM,
-    binding_To_PCaMK=0,
+    binding_To_PCaMK=0, ## 0.1 for T287D mutation
     binding_To_OCaMK=0
-)
+    )
 
     @parameters begin
         r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
@@ -250,8 +250,8 @@ function get_camkii_simp_eqs(;
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
-        CaMKAct ~ 1 - CaMK,
-        1 ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
+        CaMKAct ~ CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
+        1 ~ CaMK + CaMKAct,
     ]
     eqs_camkii = [rateeqs; eqs]
     return (; eqs_camkii, CaMKAct)
@@ -264,7 +264,7 @@ function get_camkii_simp_sys(;
     binding_To_OCaMK=0,
     name=:camkii_sys,
     simplify=false
-)
+    )
     @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
     sys = System(eqs_camkii, t; name)
     return simplify ? mtkcompile(sys) : sys

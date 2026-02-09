@@ -25,7 +25,7 @@ plot!(title="Experiment", xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 savefig("pacing-frequency-exp.pdf")
 
 # ## Simulations
-@time "Build system" sys = build_neonatal_ecc_sys(simplify=true, reduce_iso=true, reduce_camk=true)
+@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
 tend = 205.0second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 
