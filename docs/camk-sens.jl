@@ -17,7 +17,7 @@ Modeling CaM-Cax binding to CaMKII only. No phosphorylation or oxidation reactio
 @time "Build problem" prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 
 # Physiological cytosolic calcium concentrations ranges from 30nM to 10μM.
-ca = logrange(0.03μM, 10μM, length=1001)
+ca = exp10.(range(log10(0.03μM), log10(10μM), length=1001))
 prob_func = (prob, i, repeat) -> (prob.ps[Ca] = ca[i]; prob)
 alg = DynamicSS(KenCarp47())
 sol0 = solve(prob, alg) ## warmup
