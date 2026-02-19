@@ -32,7 +32,7 @@ function build_neonatal_ecc_sys(;
     name=:neonataleccsys,
     )
     @parameters begin
-        Istim(t) = 0μAμF
+        Istim = 0μAμF
         ca_o = 1.796mM
         na_o = 154.578mM
         k_o = 5.366mM
