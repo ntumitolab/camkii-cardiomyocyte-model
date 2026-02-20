@@ -12,7 +12,7 @@ end
 #---
 p = [1.5, 1.0, 3.0, 1.0];
 u0 = [1.0; 1.0];
-prob = SMS.ODEForwardSensitivityProblem(lotka_volterra!, u0, (0.0, 10.0), p)
+prob = ODEProblem(lotka_volterra!, u0, (0.0, 10.0), p)
 sol = solve(prob, Vern7(), reltol = 1e-6, abstol = 1e-6)
 
 #---
@@ -23,4 +23,4 @@ end
 
 #---
 x = [u0; p]
-dx = FD.jacobian(f, x)
+@time dx = FD.jacobian(f, x)
