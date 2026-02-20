@@ -1,7 +1,7 @@
 # # Initial conditions
 # Load packages
 using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
+using OrdinaryDiffEq, SteadyStateDiffEq
 using Plots
 using CaMKIIModel
 Plots.default(lw=2)

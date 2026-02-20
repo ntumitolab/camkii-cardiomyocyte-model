@@ -18,7 +18,7 @@ Plots.default(lw=1.5)
 
 # Log scale for ISO concentration
 alg = DynamicSS(KenCarp47())
-iso = logrange(1e-4μM, 1μM, length=1001)
+iso = exp10.(range(log10(1e-4μM), log10(1μM), length=1001))
 prob_func = (prob, i, repeat) -> (prob.ps[ISO] = iso[i]; prob)
 sol = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
 @time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(iso), abstol=1e-10, reltol=1e-10);

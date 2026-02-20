@@ -32,7 +32,7 @@ function build_neonatal_ecc_sys(;
     name=:neonataleccsys,
     )
     @parameters begin
-        Istim(t) = 0μAμF
+        Istim = 0μAμF
         ca_o = 1.796mM
         na_o = 154.578mM
         k_o = 5.366mM
@@ -44,7 +44,6 @@ function build_neonatal_ecc_sys(;
         Cm = 1μF / cm^2
         Acap = 4π * rSL_true^2
         Vmyo = 4π / 3 * (rSL_true^3 - rSR_true^3) # 3.944 pL
-        ACAP_F = Acap * Cm / Faraday
         V_sub_SR = 4π / 3 * ((rSR_true + dx)^3 - (rSR_true)^3) # 0.046 pL
         V_sub_SL = 4π / 3 * (rSL_true^3 - (rSL_true - dx)^3)   # 0.137 pL
     end
@@ -68,9 +67,9 @@ function build_neonatal_ecc_sys(;
 
     eqs = [
         D(vm) ~ -(INab + INaCa + ICaL + ICaT + If + Ito + IK1 + IKs + IKr + INa + INaK + ICab + Istim), ## Currents are normalized by capacitance
-        D(na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * ACAP_F / Vmyo,
-        D(k_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * ACAP_F / Vmyo,
-        JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * ACAP_F / 2 / V_sub_SL,
+        D(na_i) ~ -(IfNa + INab + INa + 3 * INaCa + 3 * INaK) * Acap * Cm / Faraday / Vmyo,
+        D(k_i) ~ -(IfK + Ito + IK1 + IKs + IKr + Istim - 2 * INaK) * Acap * Cm / Faraday / Vmyo,
+        JCa_SL ~ (2 * INaCa - ICaL - ICaT - ICab) * Acap * Cm / Faraday / 2 / V_sub_SL,
     ]
 
     eqs = vcat(eqs, eqs_bar, eqs_cai, eqs_camkii, eqs_ica, eqs_ina, eqs_ik, eqs_sr, eqs_inak)
