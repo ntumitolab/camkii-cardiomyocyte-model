@@ -68,7 +68,7 @@ exprel(x::Real) = ifelse(iszero(x), one(x), x / expm1(x))
 
 """Nernst potential"""
 nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
-nernst(x_out, x_in, z) = nernst(x_out, x_in) / z
+nernst(x_out, x_in, z::Int) = nernst(x_out, x_in) / z
 
 """
 GHK flux equation
@@ -83,7 +83,7 @@ https://en.wikipedia.org/wiki/Goldman%E2%80%93Hodgkin%E2%80%93Katz_flux_equation
 - x_o: the extracellular concentration of ion (mM)
 - z: the valence of ion x
 """
-function ghk(px, vm, x_i, x_o, z=1)
+function ghk(px, vm, x_i, x_o, z::Int=1)
     zvfrt = z * vm * iVT
     return px * z * Faraday * exprel(zvfrt) * (exp(zvfrt) * x_i - x_o)
 end
