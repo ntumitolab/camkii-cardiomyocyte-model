@@ -1514,9 +1514,9 @@ version = "1.11.0"
 
 [[deps.ModelingToolkit]]
 deps = ["ADTypes", "BipartiteGraphs", "BlockArrays", "Combinatorics", "CommonSolve", "DataStructures", "DiffEqBase", "DifferentiationInterface", "DocStringExtensions", "FillArrays", "FindFirstFunctions", "ForwardDiff", "Graphs", "InteractiveUtils", "Libdl", "LinearAlgebra", "ModelingToolkitBase", "ModelingToolkitTearing", "Moshi", "OffsetArrays", "OrderedCollections", "PreallocationTools", "PrecompileTools", "REPL", "Reexport", "RuntimeGeneratedFunctions", "SCCNonlinearSolve", "SciMLBase", "SciMLPublic", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "StateSelection", "StaticArrays", "SymbolicCompilerPasses", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "UnPack"]
-git-tree-sha1 = "63d2d581402890b9e67244efa221ebe46f43765f"
+git-tree-sha1 = "6db5096b32606902884cbaba7f91f4990a8a51e0"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "11.11.0"
+version = "11.11.1"
 
     [deps.ModelingToolkit.extensions]
     MTKFMIExt = "FMIImport"
@@ -1526,9 +1526,9 @@ version = "11.11.0"
 
 [[deps.ModelingToolkitBase]]
 deps = ["ADTypes", "AbstractTrees", "ArrayInterface", "BipartiteGraphs", "BlockArrays", "Combinatorics", "CommonSolve", "Compat", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffRules", "DifferentiationInterface", "DocStringExtensions", "DomainSets", "EnumX", "EnzymeCore", "ExprTools", "FillArrays", "FindFirstFunctions", "ForwardDiff", "FunctionWrappers", "FunctionWrappersWrappers", "Graphs", "ImplicitDiscreteSolve", "InteractiveUtils", "JumpProcesses", "Libdl", "LinearAlgebra", "Moshi", "NaNMath", "OffsetArrays", "OrderedCollections", "PreallocationTools", "PrecompileTools", "REPL", "Random", "ReadOnlyDicts", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLBase", "SciMLPublic", "SciMLStructures", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "UnPack"]
-git-tree-sha1 = "26152d5c346d8fa4b99c44496a4f321bb3934e11"
+git-tree-sha1 = "e03c8b8feb402f8a02698cea0ccf4cd51e1c1cda"
 uuid = "7771a370-6774-4173-bd38-47e70ca0b839"
-version = "1.16.0"
+version = "1.16.1"
 
     [deps.ModelingToolkitBase.extensions]
     MTKBifurcationKitExt = "BifurcationKit"
@@ -1536,7 +1536,6 @@ version = "1.16.0"
     MTKChainRulesCoreExt = "ChainRulesCore"
     MTKDiffEqNoiseProcessExt = "DiffEqNoiseProcess"
     MTKDynamicQuantitiesExt = "DynamicQuantities"
-    MTKEnzymeCoreExt = "EnzymeCore"
     MTKInfiniteOptExt = "InfiniteOpt"
     MTKJuliaFormatterExt = "JuliaFormatter"
     MTKLabelledArraysExt = "LabelledArrays"
@@ -1550,7 +1549,6 @@ version = "1.16.0"
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
     DiffEqNoiseProcess = "77a26b50-5914-5dd7-bc55-306e6241c503"
     DynamicQuantities = "06fc5a27-2a28-4c7c-a15d-362465fb6821"
-    EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
     InfiniteOpt = "20393b10-9daf-11e9-18c9-8db751c92c57"
     JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
     LabelledArrays = "2ee39098-c373-598a-b85f-a56591580800"
