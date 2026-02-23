@@ -1,26 +1,37 @@
 # # Sensitiviy analysis of the CaMKII system
-using OrdinaryDiffEq
+# Load packages
+using ModelingToolkit
+using OrdinaryDiffEq, SteadyStateDiffEq
+using CaMKIIModel
+using CaMKIIModel: ms, Hz, second
 import SciMLSensitivity as SMS
 import ForwardDiff as FD
+using Plots
+Plots.default(lw=2)
 
-#---
-function lotka_volterra!(du, u, p, t)
-    du[1] = dx = p[1] * u[1] - p[2] * u[1] * u[2]
-    du[2] = dy = -p[3] * u[2] + p[4] * u[1] * u[2]
+# ## Setup the ODE system
+# Electrical stimulation starts at `t`=100 sec and ends at `t`=300 sec.
+@time @mtkcompile sys = build_neonatal_ecc_sys()
+tend = 500.0*1000ms
+@time prob = ODEProblem(sys, [], tend)
+stimstart = 100.0*1000ms
+stimend = 300.0*1000ms
+@unpack Istim = sys
+
+# ## 1Hz pacing
+callback = build_stim_callbacks(Istim, stimend; period=1*1000ms, starttime=stimstart)
+@time sol = solve(prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8);
+# Sensitivity analysis of the solution at `t`=300 sec against all parameters.
+@unpack r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1 = sys
+
+function sens(x; t=300.0*1000ms)
+    _prob = remake(prob, p=[sys.r_CaMK => x[1], sys.kb_CaMKP => x[2], sys.kphos_CaMK => x[3], sys.kdeph_CaMK => x[4], sys.k_P1_P2 => x[5], sys.k_P2_P1 => x[6]])
+    sol = solve(_prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8, saveat = [t])
+    sol(t, idxs = sys.CaMKAct)
 end
 
 #---
-p = [1.5, 1.0, 3.0, 1.0];
-u0 = [1.0; 1.0];
-prob = ODEProblem(lotka_volterra!, u0, (0.0, 10.0), p)
-sol = solve(prob, Vern7(), reltol = 1e-6, abstol = 1e-6)
+x = [3Hz, inv(3second), 5Hz, inv(6second), inv(60second), inv(15second)];
+@time dx = FD.gradient(sens, x)
 
 #---
-function f(x)
-    _prob = remake(prob, u0 = x[1:2], p = x[3:end])
-    solve(_prob, Tsit5(), reltol = 1e-6, abstol = 1e-6, saveat = 1)[1, :]
-end
-
-#---
-x = [u0; p]
-@time dx = FD.jacobian(f, x)
