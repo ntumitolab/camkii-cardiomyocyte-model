@@ -35,3 +35,7 @@ x = [3Hz, inv(3second), 5Hz, inv(6second), inv(60second), inv(15second)];
 @time dx = FD.gradient(sens, x)
 
 #---
+println("Relative sensitivity of CaMKII activity at 1Hz pacing for 300 sec to parameters:")
+for (i, k) in enumerate([r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1])
+     println("$k : ", dx[i] * x[i] / sol(300.0*1000ms, idxs=sys.CaMKAct))
+end
