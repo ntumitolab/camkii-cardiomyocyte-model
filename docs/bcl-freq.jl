@@ -34,7 +34,7 @@ stimstart = 30.0second
 stimend = 120.0second
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 
-alg = KenCarp47()
+alg = FBDF()
 @time "Solve problem" sol1 = solve(prob, alg; callback)
 
 callback2 = build_stim_callbacks(Istim, stimend; period=0.5second, starttime=stimstart)
@@ -68,8 +68,8 @@ ydata_1hz = onehz[24:34]
 ydata_2hz = twohz[24:34]
 
 # Simulation points
-ysim_1hz = sol1(stimend:5*1000ms:stimend+50*1000ms ; idxs=sys.CaMKAct * 100).u
-ysim_2hz = sol2(stimend:5*1000ms:stimend+50*1000ms ; idxs=sys.CaMKAct * 100).u
+ysim_1hz = sol1(stimend:5second:stimend+50second ; idxs=sys.CaMKAct * 100).u
+ysim_2hz = sol2(stimend:5second:stimend+50second ; idxs=sys.CaMKAct * 100).u
 
 # Fit data to an exponential decay model
 fit_1hz = solve(CurveFitProblem(ts, ydata_1hz), ExpSumFitAlgorithm(n=1, withconst=true))
