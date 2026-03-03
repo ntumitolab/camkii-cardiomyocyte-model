@@ -38,7 +38,9 @@ format:
   html:
     respect-user-color-scheme: true
     toc: true
-    theme: simplex
+    theme: cosmo
+    fontsize: 1.1em
+    linestretch: 1.7
     code-copy: true
     code-overflow: wrap
     grid:
