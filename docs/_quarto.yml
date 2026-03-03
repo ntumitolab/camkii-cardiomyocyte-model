@@ -23,7 +23,7 @@ website:
         href: https://github.com/ntumitolab/camkii-cardiomyocyte-model/
   sidebar:
     title: false
-    style: floating
+    style: docked
     collapse-level: 2
     align: left
     contents:
