@@ -91,18 +91,32 @@ xdata = collect(range(0.0, step=5.0, length=18))
 ydata_ctl = ctl[25:end]
 ydata_50 = ros50[25:end]
 ydata_200 = ros200[25:end]
+ydata_ctl_sim = sol(stimend:5second:tend, idxs=sys.CaMKAct * 100).u
+ydata_01_sim = sol2(stimend:5second:tend, idxs=sys.CaMKAct * 100).u
+ydata_05_sim = sol3(stimend:5second:tend, idxs=sys.CaMKAct * 100).u
 
 # Fit data to an exponential decay model
 fit_ctl = solve(CurveFitProblem(xdata, ydata_ctl), ExpSumFitAlgorithm(n=1, withconst=true))
 fit_50 = solve(CurveFitProblem(xdata, ydata_50), ExpSumFitAlgorithm(n=1, withconst=true))
 fit_200 = solve(CurveFitProblem(xdata, ydata_200), ExpSumFitAlgorithm(n=1, withconst=true))
+fit_ctl_sim = solve(CurveFitProblem(xdata, ydata_ctl_sim), ExpSumFitAlgorithm(n=1, withconst=true))
+fit_01_sim = solve(CurveFitProblem(xdata, ydata_01_sim), ExpSumFitAlgorithm(n=1, withconst=true))
+fit_05_sim = solve(CurveFitProblem(xdata, ydata_05_sim), ExpSumFitAlgorithm(n=1, withconst=true))
 
 # Calculate time scales (tau) from fit parameters
 tau_exp_ctl = inv(-fit_ctl.u.λ[])
 tau_exp_50 = inv(-fit_50.u.λ[])
 tau_exp_200 = inv(-fit_200.u.λ[])
+tau_sim_ctl = inv(-fit_ctl_sim.u.λ[])
+tau_sim_01 = inv(-fit_01_sim.u.λ[])
+tau_sim_05 = inv(-fit_05_sim.u.λ[])
 
 println("The time scales for experiments: ")
 for (tau, freq) in zip((tau_exp_ctl, tau_exp_50, tau_exp_200), (0, 50, 200))
+    println("$freq uM ROS is $(round(tau; digits=2)) seconds.")
+end
+
+println("\nThe time scales for simulations: ")
+for (tau, freq) in zip((tau_sim_ctl, tau_sim_01, tau_sim_05), (0, 0.1, 0.5))
     println("$freq uM ROS is $(round(tau; digits=2)) seconds.")
 end
