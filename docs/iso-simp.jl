@@ -36,11 +36,11 @@ plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII")
 plot!(iso, extract(sim, sys.PP1 / sys.PP1totBA), lab="PP1", legend=:topleft; xopts...)
 
 # ## PKACI activity
-model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
+pkaci_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PKACI / sys.RItot)
 p0 = [0.3, 0.01μM, 0.08]
-prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(pkaci_model, p0, xdata, ydata)
 @time "Fit PKACI" fit_pkac1 = solve(prob)
 
 #---
@@ -60,10 +60,11 @@ savefig("pkaci_fit.pdf")
 p2 = plot(xdata, residuals(fit_pkac1) ./ ydata .* 100; title="PKACI error (%)", lab=false, xopts...)
 
 # ## PKACII activity
+pkacii_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PKACII / sys.RIItot)
 p0 = [0.4, 0.01μM, 0.2]
-prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(pkacii_model, p0, xdata, ydata)
 @time fit_pkac2 = solve(prob)
 
 #---
@@ -83,11 +84,11 @@ savefig("pkacii_fit.pdf")
 p2 = plot(xdata, residuals(fit_pkac2) ./ ydata .* 100; title="PKACII error (%)", lab=false, xopts...)
 
 # ## PP1 activity
-model_pp1(p, x) = @. p[1] * hil(p[2], x) + p[3]
+pp1_model(p, x) = @. p[1] * hil(p[2], x) + p[3]
 xdata = iso
 ydata = extract(sim, sys.PP1 / sys.PP1totBA)
 p0 = [0.1, 3e-3μM, 0.8]
-prob = NonlinearCurveFitProblem(model_pp1, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(pp1_model, p0, xdata, ydata)
 @time fit_pp1 = solve(prob)
 
 #---
@@ -112,9 +113,9 @@ ydata = extract(sim, sys.PLBp / sys.PLBtotBA)
 plot(xdata, ydata, title="PLBp fraction", lab=false; xopts...)
 
 #---
-model_plb(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
+plb_model(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-2μM, 1.0, 0.1]
-prob = NonlinearCurveFitProblem(model_plb, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(plb_model, p0, xdata, ydata)
 @time fit_plb = solve(prob)
 
 #---
@@ -140,9 +141,9 @@ ydata = extract(sim, sys.PLMp / sys.PLMtotBA)
 plot(xdata, ydata, title="PLMp fraction", lab=false; xopts...)
 
 #---
-model_plm(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
+plm_model(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-2μM, 1.0, 0.1]
-prob = NonlinearCurveFitProblem(model_plm, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(plm_model, p0, xdata, ydata)
 @time fit_plm = solve(prob)
 
 #---
@@ -168,10 +169,10 @@ ydata = extract(sim, sys.TnIp / sys.TnItotBA)
 plot(xdata, ydata, title="TnIp fraction", lab=false; xopts...)
 
 #---
-model_tni(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
+tni_model(p, x) = @. p[1] * hil(x, p[2], p[3]) + p[4]
 p0 = [0.8, 1e-2μM, 1.0, 0.1]
 lb = [0.1, 1e-9μM, 1.0, 0.0]
-prob = NonlinearCurveFitProblem(model_tni, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(tni_model, p0, xdata, ydata)
 @time fit_tni = solve(prob)
 #---
 println("TnIp")
@@ -196,9 +197,9 @@ ydata = extract(sim, sys.LCCap / sys.LCCtotBA)
 plot(xdata, ydata, title="LCCap fraction", lab=false; xopts...)
 
 #---
-model_lcc(p, x) = @. p[1] * hil(x, p[2]) + p[3]
+lcc_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 p0 = [0.8, 1e-2μM, 0.1]
-prob = NonlinearCurveFitProblem(model_lcc, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(lcc_model, p0, xdata, ydata)
 @time fit_lcca = solve(prob)
 
 #---
@@ -225,7 +226,7 @@ plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
 #---
 p0 = [0.8, 1e-2μM, 0.1]
 lb = [0.1, 1e-9μM, 0.0]
-prob = NonlinearCurveFitProblem(model_lcc, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(lcc_model, p0, xdata, ydata)
 @time fit_lccb = solve(prob)
 
 #---
@@ -250,10 +251,10 @@ ydata = extract(sim, sys.KURp / sys.IKurtotBA)
 plot(xdata, ydata, title="KURp fraction", lab=false; xopts...)
 
 #---
-model_kur(p, x) = @. p[1] * hil(x, p[2]) + p[3]
+kur_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 p0 = [0.8, 1e-2μM, 0.1]
 lb = [0.1, 1e-9μM, 0.0]
-prob = NonlinearCurveFitProblem(model_kur, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(kur_model, p0, xdata, ydata)
 @time fit_kur = solve(prob)
 #---
 println("KURp")
@@ -277,10 +278,10 @@ ydata = extract(sim, sys.RyR_PKAp)
 plot(xdata, ydata, title="RyRp fraction", lab=false; xopts...)
 
 #---
-model(p, x) = @. p[1] * x / (x + p[2]) + p[3]
+ryr_model(p, x) = @. p[1] * x / (x + p[2]) + p[3]
 p0 = [0.3, 1e-2μM, 0.1]
 lb = [0.0, 1e-9μM, 0.0]
-prob = NonlinearCurveFitProblem(model, p0, xdata, ydata)
+prob = NonlinearCurveFitProblem(ryr_model, p0, xdata, ydata)
 @time fit_ryr = solve(prob)
 #---
 println("RyRp")
