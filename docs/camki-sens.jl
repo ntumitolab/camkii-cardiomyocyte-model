@@ -1,12 +1,13 @@
 # # Sensitiviy analysis of the CaMKII system
-# Influence of CaMKII parameters on activity decay rate at 1Hz pacing for 300 sec.
+# Influence of parameters on CaMKII activity decay specific time at 1Hz pacing for 300 sec.
 # Load packages
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq
-using CaMKIIModel
-using CaMKIIModel: ms, Hz, second
+using CurveFit
 import SciMLSensitivity as SMS
 import ForwardDiff as FD
+using CaMKIIModel
+using CaMKIIModel: Hz, second
 using Plots
 Plots.default(lw=2)
 
