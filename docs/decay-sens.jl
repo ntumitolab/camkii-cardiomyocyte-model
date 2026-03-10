@@ -4,8 +4,6 @@
 using ModelingToolkit
 using OrdinaryDiffEq
 using CurveFit
-import SciMLSensitivity as SMS
-import ForwardDiff as FD
 using Plots
 Plots.default(lw=2)
 using CaMKIIModel
@@ -39,18 +37,20 @@ println("The default decay time of CaMKII activity at 1Hz pacing for 300 sec is:
 
 # Sensitivity analysis of the solution at `t`=300 sec against parameters.
 @unpack r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1 = sys
-function sens(x; t=300.0second)
-    _prob = remake(prob, p=[sys.r_CaMK => x[1], sys.kb_CaMKP => x[2], sys.kphos_CaMK => x[3], sys.kdeph_CaMK => x[4], sys.k_P1_P2 => x[5], sys.k_P2_P1 => x[6]])
+sensitivities = Dict()
+
+for k in (r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1)
+    println("Calculating sensitivity for parameter: ", k)
+    original_value = prob.ps[k]
+    _prob = remake(prob, p=[k => original_value * 1.01]) ## Increase 1% of the parameter value
     sol = solve(_prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8)
-    get_decay_time(sol; stimend)
+    sensitivities[k] = (get_decay_time(sol; stimend) / tau0 - 1) * 100
 end
 
-#---
-x = [3Hz, inv(3second), 5Hz, inv(6second), inv(60second), inv(15second)];
-@time dx = FD.gradient(sens, x)
+sensitivities
 
 #---
 println("Relative sensitivity of CaMKII activity at 1Hz pacing for 300 sec to parameters:")
-for (i, k) in enumerate([r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1])
-     println("$k : ", dx[i] * x[i] / tau0)
+for (k, v) in sensitivities
+     println("$k : ", v)
 end
