@@ -36,11 +36,9 @@ savefig("pacing-duration-exp.pdf")
 
 # ## Simulation
 @time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
-tend = 500second
+tend = 210second
 @time "Build problem" prob = ODEProblem(sys, [sys.kdeph_CaMK => inv(10second)], tend)
 @time "Remake problem" prob_n0a2 = remake(prob, p=[sys.k_P1_P2=>0, sys.kdeph_CaMK => inv(12second)])
-stimstart = 100second
-stimend = 300second
 @unpack Istim = sys
 alg = FBDF()
 
