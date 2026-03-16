@@ -5,7 +5,7 @@ using SymbolicIndexingInterface
 using OrdinaryDiffEq
 using CurveFit
 using Optimization
-using OptimizationOptimJL
+using OptimizationBBO
 using CaMKIIModel
 using CaMKIIModel: second
 
