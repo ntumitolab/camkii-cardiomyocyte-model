@@ -7,12 +7,11 @@ using CSV
 using DataFrames
 using CurveFit
 using CaMKIIModel
-using CaMKIIModel: second
+using CaMKIIModel: second, Hz
 Plots.default(lw=1.5)
 
 # ## Experiments
 # 30 sec resting + N sec 1Hz pacing + resting.
-
 durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)
 ts = durationdf[!, "Time(sec)"]
 fifteen = durationdf[!, "1Hz 15sec (Mean)"]
@@ -37,25 +36,19 @@ savefig("pacing-duration-exp.pdf")
 # ## Simulation
 @time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
 tend = 210second
-@time "Build problem" prob = ODEProblem(sys, [sys.kdeph_CaMK => inv(10second)], tend)
-@time "Remake problem" prob_n0a2 = remake(prob, p=[sys.k_P1_P2=>0, sys.kdeph_CaMK => inv(12second)])
-@unpack Istim = sys
+@time "Build problem" prob = ODEProblem(sys, [sys.k_P1_P2=>0Hz, sys.kdeph_CaMK => inv(13.944second), sys.kphos_CaMK => 2.15Hz, sys.kb_CaMKP => inv(0.3second)], tend)
 alg = FBDF()
 
 #---
 stimstart = 30second
 callback15 = build_stim_callbacks(Istim, stimstart + 15second; period=1second, starttime=stimstart)
 sol15 = solve(prob, alg; callback=callback15)
-sol15_n0a2 = solve(prob_n0a2, alg; callback=callback15)
 callback30 = build_stim_callbacks(Istim, stimstart + 30second; period=1second, starttime=stimstart)
 sol30 = solve(prob, alg; callback=callback30)
-sol30_n0a2 = solve(prob_n0a2, alg; callback=callback30)
 callback60 = build_stim_callbacks(Istim, stimstart + 60second; period=1second, starttime=stimstart)
 sol60 = solve(prob, alg; callback=callback60)
-sol60_n0a2 = solve(prob_n0a2, alg; callback=callback60)
 callback90 = build_stim_callbacks(Istim, stimstart + 90second; period=1second, starttime=stimstart)
 sol90 = solve(prob, alg; callback=callback90)
-sol90_n0a2 = solve(prob_n0a2, alg; callback=callback90)
 idxs = (sys.t / 1000, sys.CaMKAct * 100)
 tspan = (0second, 205second)
 plot(sol15, idxs=idxs, tspan=tspan, lab="15 sec", color=:blue)
@@ -70,8 +63,6 @@ savefig("pacing-duration-sim.pdf")
 # ##  Decay rates
 # Fit data from experiments against an exponential decay model.
 # Record 50 seconds after pacing ends
-decay_model(p, x) = @. p[1] * exp(-x / p[2]) + p[3]
-
 ts = collect(range(0.0, stop=50.0, step=5.0))
 
 ydata_15 = fifteen[10:20]
@@ -85,11 +76,6 @@ ysim_30 = sol30(stimstart+30second:5second:stimstart+30second+50second ; idxs=sy
 ysim_60 = sol60(stimstart+60second:5second:stimstart+60second+50second ; idxs=sys.CaMKAct * 100).u
 ysim_90 = sol90(stimstart+90second:5second:stimstart+90second+50second ; idxs=sys.CaMKAct * 100).u
 
-ysim_15_noa2 = sol15_n0a2(stimstart+15second:5second:stimstart+15second+50second ; idxs=sys.CaMKAct * 100).u
-ysim_30_noa2 = sol30_n0a2(stimstart+30second:5second:stimstart+30second+50second ; idxs=sys.CaMKAct * 100).u
-ysim_60_noa2 = sol60_n0a2(stimstart+60second:5second:stimstart+60second+50second ; idxs=sys.CaMKAct * 100).u
-ysim_90_noa2 = sol90_n0a2(stimstart+90second:5second:stimstart+90second+50second ; idxs=sys.CaMKAct * 100).u
-
 # Fit
 fit_15 = solve(CurveFitProblem(ts, ydata_15), ExpSumFitAlgorithm(n=1, withconst=true))
 fit_30 = solve(CurveFitProblem(ts, ydata_30), ExpSumFitAlgorithm(n=1, withconst=true))
@@ -101,11 +87,6 @@ fit_sim_30 = solve(CurveFitProblem(ts, ysim_30), ExpSumFitAlgorithm(n=1, withcon
 fit_sim_60 = solve(CurveFitProblem(ts, ysim_60), ExpSumFitAlgorithm(n=1, withconst=true))
 fit_sim_90 = solve(CurveFitProblem(ts, ysim_90), ExpSumFitAlgorithm(n=1, withconst=true))
 
-fit_sim_15_noa2 = solve(CurveFitProblem(ts, ysim_15_noa2), ExpSumFitAlgorithm(n=1, withconst=true))
-fit_sim_30_noa2 = solve(CurveFitProblem(ts, ysim_30_noa2), ExpSumFitAlgorithm(n=1, withconst=true))
-fit_sim_60_noa2 = solve(CurveFitProblem(ts, ysim_60_noa2), ExpSumFitAlgorithm(n=1, withconst=true))
-fit_sim_90_noa2 = solve(CurveFitProblem(ts, ysim_90_noa2), ExpSumFitAlgorithm(n=1, withconst=true))
-
 #---
 # Fitting results (experiments)
 p1 = plot(ts, ydata_15, label="Exp 15 sec")
@@ -116,7 +97,7 @@ p3 = plot(ts, ydata_60, label="Exp 60 sec")
 plot!(p3, ts, predict(fit_60), label="Fit", linestyle=:dash)
 p4 = plot(ts, ydata_90, label="Exp 90 sec")
 plot!(p4, ts, predict(fit_90), label="Fit", linestyle=:dash)
-plot(p1, p2, p3, p4, layout=(2,2), title="Experiment Fits", xlabel="Time (s)", ylabel="CaMKII activity (AU)")
+plot(p1, p2, p3, p4, layout=(2,2), xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 
 #---
 # Fitting results (simulations)
@@ -128,7 +109,7 @@ p3s = plot(ts, ysim_60, label="Sim 60 sec")
 plot!(p3s, ts, predict(fit_sim_60), label="Fit", linestyle=:dash)
 p4s = plot(ts, ysim_90, label="Sim 90 sec")
 plot!(p4s, ts, predict(fit_sim_90), label="Fit", linestyle=:dash)
-plot(p1s, p2s, p3s, p4s, layout=(2,2), title="Simulation Fits", xlabel="Time (s)", ylabel="CaMKII activity (%)")
+plot(p1s, p2s, p3s, p4s, layout=(2,2), xlabel="Time (s)", ylabel="CaMKII activity (%)")
 
 #---
 # Calculate time scales (tau) from fit parameters
@@ -140,10 +121,6 @@ tau_sim_15 = inv(-fit_sim_15.u.λ[])
 tau_sim_30 = inv(-fit_sim_30.u.λ[])
 tau_sim_60 = inv(-fit_sim_60.u.λ[])
 tau_sim_90 = inv(-fit_sim_90.u.λ[])
-tau_sim_15_noa2 = inv(-fit_sim_15_noa2.u.λ[])
-tau_sim_30_noa2 = inv(-fit_sim_30_noa2.u.λ[])
-tau_sim_60_noa2 = inv(-fit_sim_60_noa2.u.λ[])
-tau_sim_90_noa2 = inv(-fit_sim_90_noa2.u.λ[])
 
 println("The time scales for experiments: ")
 for (tau, dur) in zip((tau_exp_15, tau_exp_30, tau_exp_60, tau_exp_90), (15, 30, 60, 90))
@@ -155,20 +132,14 @@ for (tau, dur) in zip((tau_sim_15, tau_sim_30, tau_sim_60, tau_sim_90), (15, 30,
     println("$dur sec pacing is $(round(tau; digits=2)) seconds.")
 end
 
-println("The time scale for simulation without CaMKII A2: ")
-for (tau, dur) in zip((tau_sim_15_noa2, tau_sim_30_noa2, tau_sim_60_noa2, tau_sim_90_noa2), (15, 30, 60, 90))
-    println("$dur sec pacing is $(round(tau; digits=2)) seconds.")
-end
 
 #---
 # Plot pacing time vs decay time scale
 pacing_durations = [15.0, 30.0, 60.0, 90.0]
 tau_experiments = [tau_exp_15, tau_exp_30, tau_exp_60, tau_exp_90]
 tau_simulations = [tau_sim_15, tau_sim_30, tau_sim_60, tau_sim_90]
-tau_simulations_noa2 = [tau_sim_15_noa2, tau_sim_30_noa2, tau_sim_60_noa2, tau_sim_90_noa2]
 plot(pacing_durations, tau_experiments, label="Experiments", marker=:circle, color=:blue)
 plot!(pacing_durations, tau_simulations, label="Simulations", marker=:square, color=:red)
-plot!(pacing_durations, tau_simulations_noa2, label="Simulations no A2", marker=:diamond, color=:green)
 plot!(title="Pacing Duration vs Decay Time Scale", xlabel="Pacing Duration (s)", ylabel="Decay Time Scale (s)")
 
 #---
@@ -177,13 +148,6 @@ savefig("pacing-decay-exp-sim.pdf")
 # ## Phosphorylated fraction
 idxs = (sys.t / 1000, (sys.CaMKP + sys.CaMKA + sys.CaMKA2) * 100)
 tspan = (0second, 205second)
-plot(sol15, idxs=idxs, tspan=tspan, lab="15 sec", color=:blue)
-plot!(sol30, idxs=idxs, tspan=tspan, lab="30 sec", color=:red)
-plot!(sol60, idxs=idxs, tspan=tspan, lab="60 sec", color=:orange)
-plot!(sol90, idxs=idxs, tspan=tspan, lab="90 sec", color=:green)
-plot!(title="Simulation", xlabel="Time (s)", ylabel="Phosphorylated CaMKII (%)")
-
-#---
 plot(sol15, idxs=idxs, tspan=tspan, lab="15 sec", color=:blue)
 plot!(sol30, idxs=idxs, tspan=tspan, lab="30 sec", color=:red)
 plot!(sol60, idxs=idxs, tspan=tspan, lab="60 sec", color=:orange)
