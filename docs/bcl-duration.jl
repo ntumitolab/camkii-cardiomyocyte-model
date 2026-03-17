@@ -41,6 +41,7 @@ alg = FBDF()
 
 #---
 stimstart = 30second
+@unpack Istim = sys
 callback15 = build_stim_callbacks(Istim, stimstart + 15second; period=1second, starttime=stimstart)
 sol15 = solve(prob, alg; callback=callback15)
 callback30 = build_stim_callbacks(Istim, stimstart + 30second; period=1second, starttime=stimstart)
