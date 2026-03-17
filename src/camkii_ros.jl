@@ -189,9 +189,9 @@ function get_camkii_simp_eqs(;
         kfb_CaMK = 0.001            ## Basal binding by CaM (adjustable)
         kmCa2_CaMK = 0.7384μM       ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
         kmCa4_CaMK = 1.2513μM       ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
-        kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz)
-        kdeph_CaMK = inv(6second)   ## Dephosphorylation rate
-        k_P1_P2 = inv(60second)     ## Second autophosphorylation rate
+        kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz) ## 2Hz
+        kdeph_CaMK = inv(6second)   ## Dephosphorylation rate ## inv(14 second)
+        k_P1_P2 = inv(60second)     ## Second autophosphorylation rate ## 0Hz (ignore second phosphorylation)
         k_P2_P1 = inv(15second)     ## Second dephosphorylation rate
         kox_CaMK = 291Hz / mM       ## Oxidation rate
         krd_CaMK = inv(45second)    ## Reduction rate
