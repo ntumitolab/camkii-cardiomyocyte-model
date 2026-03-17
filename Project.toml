@@ -6,6 +6,7 @@ authors = ["Wen-Wei Tseng <sosiristseng@gmail.com>"]
 [deps]
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+ComponentArrays = "b0b7db55-cfe3-40fc-9ded-d10e2dbeff66"
 CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
@@ -27,4 +28,5 @@ SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 SymbolicIndexingInterface = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
 
 [compat]
+ComponentArrays = "0.15.32"
 SymbolicIndexingInterface = "0.3.46"
