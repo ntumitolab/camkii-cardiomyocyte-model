@@ -3,7 +3,7 @@
 using ModelingToolkit
 using OrdinaryDiffEq
 using Optimization
-using OptimizationOptimJL
+using OptimizationLBFGSB
 using ADTypes
 using ForwardDiff
 using CaMKIIModel
@@ -15,7 +15,7 @@ stimstart = 30second
 @time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
 @unpack r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1, Istim = sys
 @time "Build problem" prob = ODEProblem(sys, [k_P1_P2 => 0], tend; saveat=[stimstart])
-sol = solve(prob, FBDF()) ## Baseline simulation
+@time "Solve problem" sol = solve(prob, FBDF()) ## Baseline simulation
 
 # Hyperparameters
 function get_hyp(sol;
@@ -56,7 +56,7 @@ function loss(x, ps)
     end
 
     ensemble_prob = EnsembleProblem(prob; prob_func)
-    sim = solve(ensemble_prob, KenCarp47(); trajectories=length(durations), maxiters=100000, verbose=false)
+    sim = solve(ensemble_prob, FBDF(); trajectories=length(durations), maxiters=100000, verbose=false)
 
     for i in 1:4
         sol = sim[i]
@@ -75,9 +75,9 @@ x0 = [log10(prob.ps[kb_CaMKP]), log10(prob.ps[kdeph_CaMK])]
 @time loss(x0, ps)
 
 #---
-optf = OptimizationFunction(loss, ADTypes.AutoFiniteDifferences())
+optf = OptimizationFunction(loss, ADTypes.AutoForwardDiff())
 optprob = OptimizationProblem(optf, x0, ps, lb=[-0.5, -2] + x0, ub=[2, 2] + x0)
-@time sol = solve(optprob, Optim.LBFGS())
+@time sol = solve(optprob, OptimizationLBFGSB.LBFGSB())
 sol.objective
 sol.original
 
