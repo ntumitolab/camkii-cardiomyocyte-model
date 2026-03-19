@@ -2,7 +2,7 @@
 
 julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "0bfd117acefd00ff7d4525b9f05c70f8e2b14833"
+project_hash = "2544fac373567daf91af99bccbc7e45fc5db126f"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -212,7 +212,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.16"
 
 [[deps.CaMKIIModel]]
-deps = ["ADTypes", "CSV", "ComponentArrays", "CurveFit", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "Latexify", "ModelingToolkit", "ModelingToolkitBase", "NaNMath", "Optimization", "OptimizationLBFGSB", "OptimizationOptimJL", "OrdinaryDiffEq", "Plots", "SimpleUnPack", "StaticArrayInterface", "StatsBase", "SteadyStateDiffEq", "SymbolicIndexingInterface"]
+deps = ["ADTypes", "CSV", "ComponentArrays", "CurveFit", "DataFrames", "DiffEqCallbacks", "ForwardDiff", "Latexify", "ModelingToolkit", "ModelingToolkitBase", "NaNMath", "Optimization", "OptimizationLBFGSB", "OptimizationOptimJL", "OptimizationPolyalgorithms", "OrdinaryDiffEq", "Plots", "SimpleUnPack", "StaticArrayInterface", "StatsBase", "SteadyStateDiffEq", "SymbolicIndexingInterface"]
 path = "."
 uuid = "268d5184-1524-48b5-bbe3-a3af95dac460"
 version = "0.7.0"
@@ -1630,6 +1630,22 @@ version = "2.0.1"
     [deps.Optim.weakdeps]
     MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
+[[deps.Optimisers]]
+deps = ["ChainRulesCore", "ConstructionBase", "Functors", "LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "36b5d2b9dd06290cd65fcf5bdbc3a551ed133af5"
+uuid = "3bd65402-5787-11e9-1adc-39752487f4e2"
+version = "0.4.7"
+
+    [deps.Optimisers.extensions]
+    OptimisersAdaptExt = ["Adapt"]
+    OptimisersEnzymeCoreExt = "EnzymeCore"
+    OptimisersReactantExt = "Reactant"
+
+    [deps.Optimisers.weakdeps]
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+    EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
+    Reactant = "3c362404-f566-11ee-1572-e11a4b42c853"
+
 [[deps.Optimization]]
 deps = ["ADTypes", "ArrayInterface", "ConsoleProgressMonitor", "DocStringExtensions", "LinearAlgebra", "Logging", "LoggingExtras", "OptimizationBase", "Printf", "Reexport", "SciMLBase", "SparseArrays", "TerminalLoggers"]
 git-tree-sha1 = "2c409c814c2d745620fdd55391a66ee514561146"
@@ -1677,6 +1693,18 @@ deps = ["Optim", "OptimizationBase", "Reexport", "SciMLBase", "SparseArrays"]
 git-tree-sha1 = "eb89577770d4a956010745f182ebea9d8ea714f8"
 uuid = "36348300-93cb-4f02-beb5-3c3902f8871e"
 version = "0.4.11"
+
+[[deps.OptimizationOptimisers]]
+deps = ["Logging", "Optimisers", "OptimizationBase", "Reexport", "SciMLBase"]
+git-tree-sha1 = "7caf4c41e3ee6d348381228b6517decea28867e3"
+uuid = "42dfb2eb-d2b4-4451-abcd-913932933ac1"
+version = "0.3.16"
+
+[[deps.OptimizationPolyalgorithms]]
+deps = ["OptimizationBase", "OptimizationOptimJL", "OptimizationOptimisers", "Reexport", "SciMLBase"]
+git-tree-sha1 = "f21a28f3e4968f3b2c72329b69955622f57fb498"
+uuid = "500b13db-7e66-49ce-bda4-eed966be6282"
+version = "0.3.5"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
