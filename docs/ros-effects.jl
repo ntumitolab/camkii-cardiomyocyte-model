@@ -11,25 +11,25 @@ using CaMKIIModel: second, μM
 Plots.default(lw=1.5)
 
 # ## Setup model
-@time @mtkcompile sys = build_neonatal_ecc_sys()
+@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
+@unpack Istim = sys
 tend = 205second
-@time prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
-@unpack Istim = sys
+@time "Build problem" prob = ODEProblem(sys, [], tend)
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 alg = FBDF()
 
 # ## Comparisons
-@time sol = solve(prob, alg; callback)
+@time "Solve problem" sol = solve(prob, alg; callback)
 
 ## ROS (H2O2) 0.1uM
 prob2 = remake(prob, p=[sys.ROS => 0.1μM])
-@time sol2 = solve(prob2, alg; callback)
+@time "Solve problem" sol2 = solve(prob2, alg; callback)
 
 ## ROS (H2O2) 0.5uM
 prob3 = remake(prob, p=[sys.ROS => 0.5μM])
-@time sol3 = solve(prob3, alg; callback);
+@time "Solve problem" sol3 = solve(prob3, alg; callback);
 
 # ## Comparisons
 i = (sys.t / 1000, sys.CaMKAct * 100)
