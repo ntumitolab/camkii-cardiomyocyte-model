@@ -1,4 +1,4 @@
-# # Parameter fitting
+# # CaMK parameter fitting
 # Fitting CaMKII parameters to experimental decay rates
 using ModelingToolkit
 using OrdinaryDiffEq
@@ -7,7 +7,7 @@ using OptimizationLBFGSB
 using ADTypes
 using ForwardDiff
 using CaMKIIModel
-using CaMKIIModel: second
+using CaMKIIModel: second, get_camkii_simp_eqs
 
 # Setup simulation without CaMKII A2 state
 tend = 210second

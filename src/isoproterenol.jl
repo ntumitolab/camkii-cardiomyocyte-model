@@ -180,6 +180,9 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         TnI_PKAp(t)
         IKUR_PKAp(t)
         RyR_PKAp(t)
+        fracPKACI(t)
+        fracPKACII(t)
+        fracPP1(t)
     end
 
     obseqs = [
@@ -189,7 +192,10 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
         fracPLMp ~ PLMp / PLMtotBA,
         TnI_PKAp ~ TnIp / TnItotBA,
         IKUR_PKAp ~ KURp / IKurtotBA,
-        RyR_PKAp ~ RyRp / RyRtotBA
+        RyR_PKAp ~ RyRp / RyRtotBA,
+        fracPKACI ~ PKACI / RItot,
+        fracPKACII ~ PKACII / RIItot,
+        fracPP1 ~ PP1 / PP1totBA
     ]
 
     # G-protein receptor

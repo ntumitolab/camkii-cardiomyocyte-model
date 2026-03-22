@@ -18,12 +18,18 @@ callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimst
 
 #---
 cai = sol(range(99second, stop=100second, length=101), idxs=sys.Cai_mean).u
-ts = collect(0:0.01:1)
-plot(ts, cai)
+ts = collect(0:0.01second:1second)
+plot(ts./second, cai)
 
 # Fit
 prob = CurveFitProblem(ts, cai)
 @time sol = solve(prob, RationalPolynomialFitAlgorithm(4, 4))
 
+plot(ts, [cai sol.(ts)], label=["Data" "Fit"], xlabel="Time (s)", ylabel="Ca (μM)", title="Calcium transient fitting")
 
-plot(ts,[cai fitted(sol)], label=["Data" "Fit"], xlabel="Time (s)", ylabel="Ca (μM)", title="Calcium transient fitting")
+mse(sol) |> sqrt
+
+#---
+println("Numerator coefficients: ", sol.u[1:5])
+println("Denominator coefficients: ", vcat(1.0, sol.u[6:end]))
+println("RMSE: ", mse(sol) |> sqrt)
