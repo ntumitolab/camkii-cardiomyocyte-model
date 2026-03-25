@@ -16,7 +16,10 @@ project:
   # https://mystmd.org/guide/table-of-contents
   toc:
     - file: index.md
-    - FILE: modeldesc.md
+    - file: modeldesc.md
+      children:
+        - file: fits/fit-cat.ipynb
+        - file: fits/fit-camkii.ipynb
     - pattern: "*.ipynb"
 
 site:

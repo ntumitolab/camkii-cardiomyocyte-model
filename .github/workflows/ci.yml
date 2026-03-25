@@ -12,9 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LITERATE_PROC: '8'
+  LITERATE_PROC: '6'
   JULIA_CI: 'true'
-  JULIA_CONDAPKG_ENV: '@mpl'
   JULIA_NUM_THREADS: '2'
   OPENBLAS_NUM_THREADS: '1'
   NBCACHE: '.cache'
@@ -26,10 +25,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v6
     - name: Read Julia version
+      uses: SebRollen/toml-action@v1.2.0
       id: julia-version
-      uses: julia-actions/julia-version@main
       with:
-        versions: manifest
+        file: 'Manifest.toml'
+        field: 'julia_version'
     - name: Get hashes
       id: hash
       run: |
@@ -49,31 +49,19 @@ jobs:
       uses: julia-actions/setup-julia@v2
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' }}
       with:
-        version: ${{ steps.julia-version.outputs.resolved }}
+        version: ${{ steps.julia-version.outputs.value }}
     - name: Restore Julia packages
       uses: actions/cache/restore@v5
-      if: ${{ steps.cache-nb.outputs.cache-hit != 'true' && runner.environment == 'github-hosted'}}
+      if: ${{ steps.cache-nb.outputs.cache-hit != 'true' && runner.environment == 'github-hosted' }}
       id: cache-julia
       with:
         path: ~/.julia
-        key: ${{ runner.os }}-julia-${{ steps.julia-version.outputs.resolved }}-${{ steps.hash.outputs.resolved }}
+        key: ${{ runner.os }}-julia-${{ steps.julia-version.outputs.value }}-${{ steps.hash.outputs.value }}
         restore-keys: |
-          ${{ runner.os }}-julia-${{ steps.julia-version.outputs.resolved }}
+          ${{ runner.os }}-julia-${{ steps.julia-version.outputs.value }}-
     - name: Install Julia packages
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' && (runner.environment == 'self-hosted' || steps.cache-julia.outputs.cache-hit != 'true') }}
-      shell: julia --color=yes --project=@. {0}
-      run: |
-        using Pkg, Dates
-        Pkg.Registry.update()
-        Pkg.instantiate()
-        Pkg.resolve()
-        Pkg.precompile()
-        Pkg.activate()
-        Pkg.add(["JSON", "Literate", "MarkdownTables", "SHA", "Tables"])
-        if ENV["RUNNER_ENVIRONMENT"] == "github-hosted"
-            Pkg.gc(;collect_delay=Day(0))
-        end
-        using Literate
+      run: julia --color=yes .github/setup.jl
     - name: Save Julia packages
       uses: actions/cache/save@v5
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' && runner.environment == 'github-hosted' && steps.cache-julia.outputs.cache-hit != 'true' }}
@@ -82,8 +70,6 @@ jobs:
         key: ${{ steps.cache-julia.outputs.cache-primary-key }}
     - name: Run notebooks
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' }}
-      env:
-        JULIA_CONDAPKG_OFFLINE: 'true'
       run: julia --project=@. --color=yes -p ${{ env.LITERATE_PROC }} .github/ci.jl
     - name: Copy back built notebooks
       run: cp --verbose -rf ${{ env.NBCACHE }}/docs/* docs/

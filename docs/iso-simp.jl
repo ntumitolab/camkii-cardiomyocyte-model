@@ -31,14 +31,14 @@ xopts = (xlims=(iso[begin], iso[end]), minorgrid=true, xscale=:log10, xlabel="IS
 plot(iso, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
 
 #---
-plot(iso, extract(sim, sys.PKACI / sys.RItot); lab="PKACI", ylabel="Activation fraction")
-plot!(iso, extract(sim, sys.PKACII / sys.RIItot), lab="PKACII")
-plot!(iso, extract(sim, sys.PP1 / sys.PP1totBA), lab="PP1", legend=:topleft; xopts...)
+plot(iso, extract(sim, sys.fracPKACI); lab="PKACI", ylabel="Activation fraction")
+plot!(iso, extract(sim, sys.fracPKACII), lab="PKACII")
+plot!(iso, extract(sim, sys.fracPP1), lab="PP1", legend=:topleft; xopts...)
 
 # ## PKACI activity
 pkaci_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
-ydata = extract(sim, sys.PKACI / sys.RItot)
+ydata = extract(sim, sys.fracPKACI)
 p0 = [0.3, 0.01μM, 0.08]
 prob = NonlinearCurveFitProblem(pkaci_model, p0, xdata, ydata)
 @time "Fit PKACI" fit_pkac1 = solve(prob)
@@ -62,7 +62,7 @@ p2 = plot(xdata, residuals(fit_pkac1) ./ ydata .* 100; title="PKACI error (%)", 
 # ## PKACII activity
 pkacii_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
-ydata = extract(sim, sys.PKACII / sys.RIItot)
+ydata = extract(sim, sys.fracPKACII)
 p0 = [0.4, 0.01μM, 0.2]
 prob = NonlinearCurveFitProblem(pkacii_model, p0, xdata, ydata)
 @time fit_pkac2 = solve(prob)
@@ -86,7 +86,7 @@ p2 = plot(xdata, residuals(fit_pkac2) ./ ydata .* 100; title="PKACII error (%)",
 # ## PP1 activity
 pp1_model(p, x) = @. p[1] * hil(p[2], x) + p[3]
 xdata = iso
-ydata = extract(sim, sys.PP1 / sys.PP1totBA)
+ydata = extract(sim, sys.fracPP1)
 p0 = [0.1, 3e-3μM, 0.8]
 prob = NonlinearCurveFitProblem(pp1_model, p0, xdata, ydata)
 @time fit_pp1 = solve(prob)
@@ -109,7 +109,7 @@ p2 = plot(xdata, residuals(fit_pp1) ./ ydata .* 100; title="PP1 error (%)", lab=
 
 # ## PLBp
 xdata = iso
-ydata = extract(sim, sys.PLBp / sys.PLBtotBA)
+ydata = extract(sim, sys.fracPLBp)
 plot(xdata, ydata, title="PLBp fraction", lab=false; xopts...)
 
 #---
@@ -137,7 +137,7 @@ p2 = plot(xdata, residuals(fit_plb) ./ ydata .* 100; title="PLBp error (%)", lab
 
 # ## PLMp
 xdata = iso
-ydata = extract(sim, sys.PLMp / sys.PLMtotBA)
+ydata = extract(sim, sys.fracPLMp)
 plot(xdata, ydata, title="PLMp fraction", lab=false; xopts...)
 
 #---
@@ -165,7 +165,7 @@ p2 = plot(xdata, residuals(fit_plm) ./ ydata .* 100; title="PLMp error (%)", lab
 
 ## TnIp
 xdata = iso
-ydata = extract(sim, sys.TnIp / sys.TnItotBA)
+ydata = extract(sim, sys.TnI_PKAp)
 plot(xdata, ydata, title="TnIp fraction", lab=false; xopts...)
 
 #---
@@ -193,7 +193,7 @@ p2 = plot(xdata, residuals(fit_tni) ./ ydata .* 100; title="TnIp error (%)", lab
 
 # ## LCCap
 xdata = iso
-ydata = extract(sim, sys.LCCap / sys.LCCtotBA)
+ydata = extract(sim, sys.LCCa_PKAp)
 plot(xdata, ydata, title="LCCap fraction", lab=false; xopts...)
 
 #---
@@ -220,7 +220,7 @@ plot(xdata, residuals(fit_lcca) ./ ydata .* 100; title="LCCap error (%)", lab=fa
 
 # ## LCCbp
 xdata = iso
-ydata = extract(sim, sys.LCCbp / sys.LCCtotBA)
+ydata = extract(sim, sys.LCCb_PKAp)
 plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
 
 #---
@@ -247,7 +247,7 @@ plot(xdata, residuals(fit_lccb) ./ ydata .* 100; title="LCCbp error (%)", lab=fa
 
 # ## KURp
 xdata = iso
-ydata = extract(sim, sys.KURp / sys.IKurtotBA)
+ydata = extract(sim, sys.IKUR_PKAp)
 plot(xdata, ydata, title="KURp fraction", lab=false; xopts...)
 
 #---
