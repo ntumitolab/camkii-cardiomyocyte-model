@@ -182,19 +182,19 @@ function get_camkii_simp_eqs(;
     )
 
     @parameters begin
-        r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
-        kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa2_CaMK = 0.2650          ## Maximal binding ratio by CaM-Ca2 (adjustable)
-        kfa4_CaMK = 0.1636          ## Maximal binding ratio by CaM-Ca4 (adjustable)
-        kfb_CaMK = 0.001            ## Basal binding by CaM (adjustable)
-        kmCa2_CaMK = 0.7384μM       ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
-        kmCa4_CaMK = 1.2513μM       ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
-        kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz) ## 2Hz
-        kdeph_CaMK = inv(6second)   ## Dephosphorylation rate ## inv(14 second)
-        k_P1_P2 = inv(60second)     ## Second autophosphorylation rate ## 0Hz (ignore second phosphorylation)
-        k_P2_P1 = inv(15second)     ## Second dephosphorylation rate
-        kox_CaMK = 291Hz / mM       ## Oxidation rate
-        krd_CaMK = inv(45second)    ## Reduction rate
+        r_CaMK = 3Hz                 ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
+        kb_CaMKP = inv(6second)      ## Fitted dissociation rate of CaMKP --> CaMKA and CaMKP --> CaMKB (adjustable)
+        kfa2_CaMK = 0.2650           ## Maximal binding ratio by CaM-Ca2 (adjustable)
+        kfa4_CaMK = 0.1636           ## Maximal binding ratio by CaM-Ca4 (adjustable)
+        kfb_CaMK = 0.001             ## Basal binding by CaM (adjustable)
+        kmCa2_CaMK = 0.7384μM        ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
+        kmCa4_CaMK = 1.2513μM        ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
+        kphos_CaMK = 1.90532Hz       ## Fitted autophosphorylation rate (originally 30Hz)
+        kdeph_CaMK = inv(15.7454second)   ## Fitted Dephosphorylation rate ## inv(6 second)
+        k_P1_P2 = 0Hz                ## Second autophosphorylation rate ## inv(60second) (ignore second phosphorylation)
+        k_P2_P1 = inv(15second)      ## Second dephosphorylation rate
+        kox_CaMK = 291Hz / mM        ## Oxidation rate ## FIXME: too high for ROS in the μM range
+        krd_CaMK = inv(45second)     ## Reduction rate
     end
 
     sts = @variables begin

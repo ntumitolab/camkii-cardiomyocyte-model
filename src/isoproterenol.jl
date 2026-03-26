@@ -328,7 +328,8 @@ function get_bar_eqs_reduced(ISO=0μM)
 end
 
 "Algebraic fitted beta-adrenergic system"
-function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
+function get_bar_sys_reduced(ISO=0μM; name=:bar_sys_reduced, simplify=false)
     @unpack eqs_bar = get_bar_eqs_reduced(ISO)
-    return ODESystem(eqs_bar, t; name)
+    sys = System(eqs_bar, t; name)
+    return simplify ? mtkcompile(sys) : sys
 end

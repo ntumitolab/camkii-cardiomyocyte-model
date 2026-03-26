@@ -110,6 +110,6 @@ end
 
 "Potassium currents"
 function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
-    @unpack eqs_ik = get_ik_eqs(k_i, k_o, na_i, na_o, vm; IKUR_PKAp)
+    @unpack eqs_ik = get_ik_eqs(; k_i, k_o, na_i, na_o, vm, IKUR_PKAp)
     return System(eqs_ik, t; name)
 end
