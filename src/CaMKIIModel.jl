@@ -20,6 +20,5 @@ include("er.jl")
 include("ecc_neonatal.jl")
 
 const DEFAULT_SYS = build_neonatal_ecc_sys() |> mtkcompile
-const DEFAULT_PROB = ODEProblem(DEFAULT_SYS, [], (0.0, 1000.0))
 
 end # module
