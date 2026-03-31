@@ -10,6 +10,10 @@ function get_camkii_eqs(;
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
     )
+
+    @independent_variables t
+    D = Differential(t)
+
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
@@ -163,12 +167,10 @@ function get_camkii_sys(;
     Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
-    name=:camkii_sys,
-    simplify=false
-    )
+    name=:camkii_sys)
+    @independent_variables t
     @unpack eqs_camkii = get_camkii_eqs(; Ca, ROS, binding_To_PCaMK)
-    sys = System(eqs_camkii, t; name)
-    return simplify ? mtkcompile(sys) : sys
+    return System(eqs_camkii, t; name)
 end
 
 """
@@ -180,6 +182,9 @@ function get_camkii_simp_eqs(;
     binding_To_PCaMK=0, ## 0.1 for T287D mutation
     binding_To_OCaMK=0
     )
+
+    @independent_variables t
+    D = Differential(t)
 
     @parameters begin
         r_CaMK = 3Hz                 ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
@@ -267,10 +272,9 @@ function get_camkii_simp_sys(;
     ROS=0μM,
     binding_To_PCaMK=0,
     binding_To_OCaMK=0,
-    name=:camkii_sys,
-    simplify=false
-    )
+    name=:camkii_sys)
+
+    @independent_variables t
     @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
-    sys = System(eqs_camkii, t; name)
-    return simplify ? mtkcompile(sys) : sys
+    return System(eqs_camkii, t; name)
 end
