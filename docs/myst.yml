@@ -18,8 +18,7 @@ project:
     - file: index.md
     - file: modeldesc.md
       children:
-        - file: fits/u0.ipynb
-        - file: fits/fit-camkii.ipynb
+        - pattern: "fits/*.ipynb"
     - pattern: "*.ipynb"
 
 site:
