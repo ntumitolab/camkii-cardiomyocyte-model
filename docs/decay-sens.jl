@@ -6,8 +6,8 @@ using OrdinaryDiffEq
 using CurveFit
 using Plots
 Plots.default(lw=2)
-using CaMKIIModel
-using CaMKIIModel: Hz, second
+using Model
+using Model: Hz, second
 
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 sec and ends at `t`=300 sec.

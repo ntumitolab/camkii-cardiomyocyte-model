@@ -4,8 +4,8 @@ using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CurveFit
-using CaMKIIModel
-using CaMKIIModel: μM, hil, Hz, hilr, second
+using Model
+using Model: μM, hil, Hz, hilr, second
 Plots.default(lw=1.5)
 
 # ## Setup b1AR system

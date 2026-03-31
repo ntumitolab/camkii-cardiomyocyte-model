@@ -5,8 +5,8 @@ using Plots
 using CSV
 using DataFrames
 import Dates
-using CaMKIIModel
-using CaMKIIModel: second, μM
+using Model
+using Model: second, μM
 Plots.default(lw=1.5)
 
 # ## Setup model

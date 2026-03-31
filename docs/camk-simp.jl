@@ -3,8 +3,8 @@ using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CurveFit
-using CaMKIIModel
-using CaMKIIModel: μM, hil, second, Hz
+using Model
+using Model: μM, hil, second, Hz
 Plots.default(lw=1.5)
 
 #===

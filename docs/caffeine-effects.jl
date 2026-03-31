@@ -8,8 +8,8 @@ using Plots
 using CSV
 using DataFrames
 import Dates
-using CaMKIIModel
-using CaMKIIModel: second
+using Model
+using Model: second
 Plots.default(lw=1.5)
 
 #---
