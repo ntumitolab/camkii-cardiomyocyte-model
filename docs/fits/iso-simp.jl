@@ -172,7 +172,7 @@ p2 = plot(xdata, residuals(fit_plm) ./ ydata .* 100; title="PLMp error (%)", lab
 
 ## TnIp
 xdata = iso
-ydata = yymat[:, stimap[fracTnIp]]
+ydata = yymat[:, stimap[TnI_PKAp]]
 plot(xdata, ydata, title="TnIp fraction", lab=false; xopts...)
 
 #---
@@ -200,7 +200,7 @@ p2 = plot(xdata, residuals(fit_tni) ./ ydata .* 100; title="TnIp error (%)", lab
 
 # ## LCCap
 xdata = iso
-ydata = yymat[:, stimap[fracLCCap]]
+ydata = yymat[:, stimap[LCCa_PKAp]]
 plot(xdata, ydata, title="LCCap fraction", lab=false; xopts...)
 
 #---
@@ -227,7 +227,7 @@ plot(xdata, residuals(fit_lcca) ./ ydata .* 100; title="LCCap error (%)", lab=fa
 
 # ## LCCbp
 xdata = iso
-ydata = yymat[:, stimap[fracLCCbp]]
+ydata = yymat[:, stimap[LCCb_PKAp]]
 plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
 
 #---
@@ -254,7 +254,7 @@ plot(xdata, residuals(fit_lccb) ./ ydata .* 100; title="LCCbp error (%)", lab=fa
 
 # ## KURp
 xdata = iso
-ydata = yymat[:, stimap[fracKURp]]
+ydata = yymat[:, stimap[IKUR_PKAp]]
 plot(xdata, ydata, title="KURp fraction", lab=false; xopts...)
 
 #---
@@ -281,7 +281,7 @@ p2 = plot(xdata, residuals(fit_kur) ./ ydata .* 100; title="KURp error (%)", lab
 
 # ## RyRp
 xdata = iso
-ydata = yymat[:, stimap[fracRyRp]]
+ydata = yymat[:, stimap[RyR_PKAp]]
 plot(xdata, ydata, title="RyRp fraction", lab=false; xopts...)
 
 #---
