@@ -10,7 +10,7 @@ Plots.default(lw=1.5)
 
 # ## Setup b1AR system
 @parameters ATP = 5000μM ISO = 0μM
-@time "Build system" sys = Model.get_bar_sys(ATP, ISO; simplify=true)
+@time "Build system" @mtkcompile sys = Model.get_bar_sys(ATP, ISO)
 @time "Build problem" prob = SteadyStateProblem(sys, [])
 
 #---
