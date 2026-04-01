@@ -13,32 +13,39 @@ Plots.default(lw=1.5)
 @time "Build system" @mtkcompile sys = Model.get_bar_sys(ATP, ISO)
 @time "Build problem" prob = SteadyStateProblem(sys, [])
 
-#---
-## Log scale for ISO concentration
 alg = DynamicSS(KenCarp47())
-iso = exp10.(range(log10(1e-4μM), log10(1μM), length=1001))
-prob_func = (prob, i, repeat) -> (prob.ps[ISO] = iso[i]; prob)
-sol = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
+@time "Solve problem" sol = solve(prob, alg; abstol=1e-10, reltol=1e-10) ## warmup
 
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(iso), abstol=1e-10, reltol=1e-10);
+#---
+@unpack cAMP, fracPKACI, fracPKACII, fracPP1, fracPLBp, fracPLMp, TnI_PKAp, LCCa_PKAp, LCCb_PKAp, IKUR_PKAp, RyR_PKAp = sys
+tracked_states = [cAMP, fracPKACI, fracPKACII, fracPP1, fracPLBp, fracPLMp, TnI_PKAp, LCCa_PKAp, LCCb_PKAp, IKUR_PKAp, RyR_PKAp]
+stimap = Dict(k=>i for (i, k) in enumerate(tracked_states))
 
-# Convienience functions
-"""Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k], sim)
+@time "Extract tracked states" sol[tracked_states]
+# ## Ensemble simulations
+# Log scale for ISO concentration.
+iso = exp10.(range(log10(1e-4μM), log10(1μM), length=501))
+
+@time "Solve problems" sim = map(iso) do i
+    newprob = remake(prob, p=[ISO => i])
+    solve(newprob, alg; abstol=1e-10, reltol=1e-10)[tracked_states]
+end
+
+yymat = reduce(hcat, sim)'
 
 #---
 xopts = (xlims=(iso[begin], iso[end]), minorgrid=true, xscale=:log10, xlabel="ISO (μM)",)
-plot(iso, extract(sim, sys.cAMP); lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
+plot(iso, yymat[:, stimap[cAMP]]; lab="cAMP", ylabel="Conc. (μM)", legend=:topleft, xopts...)
 
 #---
-plot(iso, extract(sim, sys.fracPKACI); lab="PKACI", ylabel="Activation fraction")
-plot!(iso, extract(sim, sys.fracPKACII), lab="PKACII")
-plot!(iso, extract(sim, sys.fracPP1), lab="PP1", legend=:topleft; xopts...)
+plot(iso, yymat[:, stimap[fracPKACI]]; lab="PKACI", ylabel="Activation fraction")
+plot!(iso, yymat[:, stimap[fracPKACII]], lab="PKACII")
+plot!(iso, yymat[:, stimap[fracPP1]], lab="PP1", legend=:topleft; xopts...)
 
 # ## PKACI activity
 pkaci_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
-ydata = extract(sim, sys.fracPKACI)
+ydata = yymat[:, stimap[fracPKACI]]
 p0 = [0.3, 0.01μM, 0.08]
 prob = NonlinearCurveFitProblem(pkaci_model, p0, xdata, ydata)
 @time "Fit PKACI" fit_pkac1 = solve(prob)
@@ -62,7 +69,7 @@ p2 = plot(xdata, residuals(fit_pkac1) ./ ydata .* 100; title="PKACI error (%)", 
 # ## PKACII activity
 pkacii_model(p, x) = @. p[1] * hil(x, p[2]) + p[3]
 xdata = iso
-ydata = extract(sim, sys.fracPKACII)
+ydata = yymat[:, stimap[fracPKACII]]
 p0 = [0.4, 0.01μM, 0.2]
 prob = NonlinearCurveFitProblem(pkacii_model, p0, xdata, ydata)
 @time fit_pkac2 = solve(prob)
@@ -86,7 +93,7 @@ p2 = plot(xdata, residuals(fit_pkac2) ./ ydata .* 100; title="PKACII error (%)",
 # ## PP1 activity
 pp1_model(p, x) = @. p[1] * hil(p[2], x) + p[3]
 xdata = iso
-ydata = extract(sim, sys.fracPP1)
+ydata = yymat[:, stimap[fracPP1]]
 p0 = [0.1, 3e-3μM, 0.8]
 prob = NonlinearCurveFitProblem(pp1_model, p0, xdata, ydata)
 @time fit_pp1 = solve(prob)
@@ -109,7 +116,7 @@ p2 = plot(xdata, residuals(fit_pp1) ./ ydata .* 100; title="PP1 error (%)", lab=
 
 # ## PLBp
 xdata = iso
-ydata = extract(sim, sys.fracPLBp)
+ydata = yymat[:, stimap[fracPLBp]]
 plot(xdata, ydata, title="PLBp fraction", lab=false; xopts...)
 
 #---
@@ -137,7 +144,7 @@ p2 = plot(xdata, residuals(fit_plb) ./ ydata .* 100; title="PLBp error (%)", lab
 
 # ## PLMp
 xdata = iso
-ydata = extract(sim, sys.fracPLMp)
+ydata = yymat[:, stimap[fracPLMp]]
 plot(xdata, ydata, title="PLMp fraction", lab=false; xopts...)
 
 #---
@@ -165,7 +172,7 @@ p2 = plot(xdata, residuals(fit_plm) ./ ydata .* 100; title="PLMp error (%)", lab
 
 ## TnIp
 xdata = iso
-ydata = extract(sim, sys.TnI_PKAp)
+ydata = yymat[:, stimap[fracTnIp]]
 plot(xdata, ydata, title="TnIp fraction", lab=false; xopts...)
 
 #---
@@ -193,7 +200,7 @@ p2 = plot(xdata, residuals(fit_tni) ./ ydata .* 100; title="TnIp error (%)", lab
 
 # ## LCCap
 xdata = iso
-ydata = extract(sim, sys.LCCa_PKAp)
+ydata = yymat[:, stimap[fracLCCap]]
 plot(xdata, ydata, title="LCCap fraction", lab=false; xopts...)
 
 #---
@@ -220,7 +227,7 @@ plot(xdata, residuals(fit_lcca) ./ ydata .* 100; title="LCCap error (%)", lab=fa
 
 # ## LCCbp
 xdata = iso
-ydata = extract(sim, sys.LCCb_PKAp)
+ydata = yymat[:, stimap[fracLCCbp]]
 plot(xdata, ydata, title="LCCbp fraction", lab=false; xopts...)
 
 #---
@@ -247,7 +254,7 @@ plot(xdata, residuals(fit_lccb) ./ ydata .* 100; title="LCCbp error (%)", lab=fa
 
 # ## KURp
 xdata = iso
-ydata = extract(sim, sys.IKUR_PKAp)
+ydata = yymat[:, stimap[fracKURp]]
 plot(xdata, ydata, title="KURp fraction", lab=false; xopts...)
 
 #---
@@ -274,7 +281,7 @@ p2 = plot(xdata, residuals(fit_kur) ./ ydata .* 100; title="KURp error (%)", lab
 
 # ## RyRp
 xdata = iso
-ydata = extract(sim, sys.RyR_PKAp)
+ydata = yymat[:, stimap[fracRyRp]]
 plot(xdata, ydata, title="RyRp fraction", lab=false; xopts...)
 
 #---
