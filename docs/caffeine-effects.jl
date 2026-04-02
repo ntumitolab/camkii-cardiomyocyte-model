@@ -8,17 +8,17 @@ using Plots
 using CSV
 using DataFrames
 import Dates
-using CaMKIIModel
-using CaMKIIModel: second
+using Model
+using Model: second
 Plots.default(lw=1.5)
 
 #---
-@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
+@time "Build system" sys = Model.DEFAULT_SYS
 tend = 500second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 stimstart = 100second
 stimend = 300second
-alg = FBDF()
+alg = KenCarp47()
 function add_coffee_affect!(integrator)
     integrator.ps[sys.RyRsensitivity] = 10
 end
@@ -70,12 +70,11 @@ plot!(sol_caf, idxs=i, lab="Caf", ylabel="CaMKII activity (%)", xlabel="Time (s)
 # ## Caffeine and electrophysiology
 # - Add caffeine in the beginning of the simulation.
 # - Add caffeine and nifedipine in the beginning of the simulation (nifedipine blocks 90% of L-type calcium channel).
-
-@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
+@time "Build system" sys = Model.DEFAULT_SYS
 tend = 205second
 stimstart = 30second
 stimend = 120second
-alg = FBDF()
+alg = KenCarp47()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time prob = ODEProblem(sys, [], tend)

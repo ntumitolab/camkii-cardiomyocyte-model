@@ -1,5 +1,5 @@
 "Beta-adrenergic system activated by isoproterenol"
-function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
+function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys)
     @parameters begin
         b1ARtot = 5.28nM
         Gstot = 3.83μM
@@ -258,7 +258,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys, simplify=false)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     sys = System([rateeqs; conservedeqs; obseqs], t; name)
-    return simplify ? mtkcompile(sys) : sys
+    return sys
 end
 
 function get_bar_eqs_reduced(ISO=0μM)
@@ -328,7 +328,8 @@ function get_bar_eqs_reduced(ISO=0μM)
 end
 
 "Algebraic fitted beta-adrenergic system"
-function get_bar_sys_reduced(ISO=0μM; name=:bar_sys)
+function get_bar_sys_reduced(ISO=0μM; name=:bar_sys_reduced, simplify=false)
     @unpack eqs_bar = get_bar_eqs_reduced(ISO)
-    return ODESystem(eqs_bar, t; name)
+    sys = System(eqs_bar, t; name)
+    return simplify ? mtkcompile(sys) : sys
 end

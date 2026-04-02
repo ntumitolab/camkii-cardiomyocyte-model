@@ -10,6 +10,10 @@ function get_camkii_eqs(;
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
     )
+
+    @independent_variables t
+    D = Differential(t)
+
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
@@ -163,16 +167,20 @@ function get_camkii_sys(;
     Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
-    name=:camkii_sys,
-    simplify=false
-    )
+    name=:camkii_sys)
+    @independent_variables t
     @unpack eqs_camkii = get_camkii_eqs(; Ca, ROS, binding_To_PCaMK)
-    sys = System(eqs_camkii, t; name)
-    return simplify ? mtkcompile(sys) : sys
+    return System(eqs_camkii, t; name)
 end
 
 """
 Simplified CaMKII system with one-step activation of CaMK
+
+Parameters fitted by simulated annealing to match the CaMKII activation curve in the full model with 1 Hz pacing (see `docs/fits/fit-camkii.ipynb` for details).
+- Dephosphorylation time of CaMKA: 12.340255743007939 seconds.
+- Phosphorylation rate of CaMKB: 2.4310936843426734 Hz
+- 2nd phosphorylation time of CaMKA: 105.70812097414269 seconds.
+- 2nd dephosphorylation time of CaMKA: 26.427030243535672 seconds.
 """
 function get_camkii_simp_eqs(;
     Ca=0μM,
@@ -181,20 +189,23 @@ function get_camkii_simp_eqs(;
     binding_To_OCaMK=0
     )
 
+    @independent_variables t
+    D = Differential(t)
+
     @parameters begin
-        r_CaMK = 3Hz                ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
-        kb_CaMKP = inv(3second)     ## Dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa2_CaMK = 0.2650          ## Maximal binding ratio by CaM-Ca2 (adjustable)
-        kfa4_CaMK = 0.1636          ## Maximal binding ratio by CaM-Ca4 (adjustable)
-        kfb_CaMK = 0.001            ## Basal binding by CaM (adjustable)
-        kmCa2_CaMK = 0.7384μM       ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
-        kmCa4_CaMK = 1.2513μM       ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
-        kphos_CaMK = 5Hz            ## Phosphorylation rate (originally 30Hz) ## 2Hz
-        kdeph_CaMK = inv(6second)   ## Dephosphorylation rate ## inv(14 second)
-        k_P1_P2 = inv(60second)     ## Second autophosphorylation rate ## 0Hz (ignore second phosphorylation)
-        k_P2_P1 = inv(15second)     ## Second dephosphorylation rate
-        kox_CaMK = 291Hz / mM       ## Oxidation rate
-        krd_CaMK = inv(45second)    ## Reduction rate
+        r_CaMK = 3Hz                 ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
+        kb_CaMKP = inv(6second)      ## CaMCa dissociation rate of CaMKP --> CaMKA (adjustable)
+        kfa2_CaMK = 0.2651           ## Maximal binding ratio by CaM-Ca2 (adjustable)
+        kfa4_CaMK = 0.1636           ## Maximal binding ratio by CaM-Ca4 (adjustable)
+        kfb_CaMK = 0.001             ## Basal binding by CaM (adjustable)
+        kmCa2_CaMK = 0.7385μM        ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
+        kmCa4_CaMK = 1.2515μM        ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
+        kphos_CaMK = 2.4311Hz        ## Autophosphorylation rate ## 30Hz
+        kdeph_CaMK = inv(12.3403second)   ## Dephosphorylation rate ## inv(6 second)
+        k_P1_P2 = inv(105.71second)   ## Second autophosphorylation rate ## inv(60second) (ignore second phosphorylation)
+        k_P2_P1 = inv(26.43second)   ## Second dephosphorylation rate
+        kox_CaMK = 291Hz / mM        ## Oxidation rate ## FIXME: too high for ROS in the μM range
+        krd_CaMK = inv(45second)     ## Reduction rate
     end
 
     sts = @variables begin
@@ -211,28 +222,25 @@ function get_camkii_simp_eqs(;
     @variables begin
         CaMK(t)             ## Inactive CaMKII
         CaMKAct(t)          ## Active CaMKII fraction
+        CaMKBInf(t)         ## Steady-state CaMKB fraction
+        fracCaMKPhos(t)     ## Total phosphorylated CaMKII fraction
+        fracCaMKOx(t)       ## Total oxidized CaMKII fraction
     end
 
     rates = Dict()
+
     ## CaMK(OX) <--CaM,Ca--> CaMKB(OX)
-    ## Calc the steady-state bound fraction (binf)
-    ## And then the binding/unbinding rates
-    binf = kfb_CaMK + kfa2_CaMK * hil(Ca, kmCa2_CaMK, 2) + kfa4_CaMK * hil(Ca, kmCa4_CaMK, 4)
-    kf = r_CaMK * binf
-    kb = r_CaMK * (1 - binf)
+    kf = r_CaMK * CaMKBInf
+    kb = r_CaMK * (1 - CaMKBInf)
     add_rate!(rates, kf, CaMK, kb, CaMKB)
     add_rate!(rates, kf * binding_To_OCaMK, CaMKOX, kb, CaMKBOX)
-
-    ## CaMKA(OX) <-CaM,Ca-> CaMKP(OX)
-    add_rate!(rates, kf * binding_To_PCaMK, CaMKA, kb_CaMKP, CaMKP)
-    add_rate!(rates, kf * binding_To_PCaMK, CaMKAOX, kb_CaMKP, CaMKPOX)
-
-    ## Auto-phosphorylation of CaMKII
-    ## B(OX) <--> P(OX)
+    ## Auto-phosphorylation of CaMKII: B(OX) <--> P(OX)
     kphos = kphos_CaMK * CaMKAct
     add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
     add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
-
+    ## CaMKA(OX) <-CaM,Ca-> CaMKP(OX)
+    add_rate!(rates, kf * binding_To_PCaMK, CaMKA, kb_CaMKP, CaMKP)
+    add_rate!(rates, kf * binding_To_PCaMK, CaMKAOX, kb_CaMKP, CaMKPOX)
     ## Second phosphorylation of Apo CaMKII-P
     # CaMKA <--> CaMKA2
     add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
@@ -243,6 +251,7 @@ function get_camkii_simp_eqs(;
     add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
 
     ## Redox reactions by ROS and reductases
+    ## CaMKX <--> CaMKOX
     add_rate!(rates, kox_CaMK * ROS, CaMKB, krd_CaMK, CaMKBOX)
     add_rate!(rates, kox_CaMK * ROS, CaMKP, krd_CaMK, CaMKPOX)
     add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
@@ -250,6 +259,9 @@ function get_camkii_simp_eqs(;
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
+        CaMKBInf ~ kfb_CaMK + kfa2_CaMK * hil(Ca, kmCa2_CaMK, 2) + kfa4_CaMK * hil(Ca, kmCa4_CaMK, 4),
+        fracCaMKPhos ~ CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX,
+        fracCaMKOx ~ CaMKBOX + CaMKPOX + CaMKAOX + CaMKOX,
         CaMKAct ~ CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
         1 ~ CaMK + CaMKAct,
     ]
@@ -262,10 +274,9 @@ function get_camkii_simp_sys(;
     ROS=0μM,
     binding_To_PCaMK=0,
     binding_To_OCaMK=0,
-    name=:camkii_sys,
-    simplify=false
-    )
+    name=:camkii_sys)
+
+    @independent_variables t
     @unpack eqs_camkii = get_camkii_simp_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
-    sys = System(eqs_camkii, t; name)
-    return simplify ? mtkcompile(sys) : sys
+    return System(eqs_camkii, t; name)
 end
