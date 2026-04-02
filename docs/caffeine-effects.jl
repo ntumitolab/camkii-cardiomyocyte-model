@@ -70,7 +70,6 @@ plot!(sol_caf, idxs=i, lab="Caf", ylabel="CaMKII activity (%)", xlabel="Time (s)
 # ## Caffeine and electrophysiology
 # - Add caffeine in the beginning of the simulation.
 # - Add caffeine and nifedipine in the beginning of the simulation (nifedipine blocks 90% of L-type calcium channel).
-
 @time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
 tend = 205second
 stimstart = 30second
