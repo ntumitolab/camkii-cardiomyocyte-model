@@ -25,11 +25,12 @@ experimental_taus = [16.48, 16.73, 17.65, 18.08]
 stimstart = 0.0second
 stimend = 100.0second
 tend = stimend + 50.0second
+alg = TRBDF2()
 @time "Building ODE system" sys = Model.DEFAULT_SYS
 @time "Building ODE problem" prob = ODEProblem(sys, [], tend)
 @unpack Istim = sys
 cb = Model.build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-@time "Solving ODE problem" sol = solve(prob, KenCarp47(), callback=cb);
+@time "Solving ODE problem" sol = solve(prob, alg, callback=cb);
 
 # ### Fit the calcium transient curve
 # Using Rational polynomial fit to fit the calcium transient curve.
@@ -70,11 +71,11 @@ eqs_camkii, CaMKAct = Model.get_camkii_simp_eqs(;Ca = Ca)
 @time "Build system" @mtkcompile sys = ODESystem([eqs_camkii; eqs], t)
 
 #---
-@unpack tau, CaMKAct, k_P1_P2 = sys
-## Enable second autophosphorylation
-ups = [tau => 0.0, k_P1_P2 => inv(60second)]
+ups = [sys.tau => 0.0]
 tend = 150second
 @time "Build problem" prob = ODEProblem(sys, ups, (0.0, tend))
+
+prob.ps
 
 # Events to reset `tau` every second to simulate calcium transients.
 resettau! = (integrator) -> (integrator[tau] = 0.0)
@@ -153,7 +154,7 @@ theta = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[k_P1_P2])]
 optf = OptimizationFunction(loss)
 optprob = OptimizationProblem(optf, theta, data, lb=[-1, -1] + theta, ub=[1, 1] + theta)
 optalg = Optim.SAMIN()
-@time fitted_dephos = solve(optprob, optalg; maxiters=2000)
+@time fitted_dephos = solve(optprob, optalg; maxiters=1000)
 @show fitted_dephos.objective
 fitted_dephos.stats
 
@@ -161,8 +162,8 @@ fitted_dephos.stats
 params = Dict(kdeph_CaMK => exp10(fitted_dephos.u[1]), kphos_CaMK => data.kphos_dephos_ratio * exp10(fitted_dephos.u[1]), k_P1_P2 => exp10(fitted_dephos.u[2]), k_P2_P1 => data.p1p2_ratio * exp10(fitted_dephos.u[2]))
 
 println("Fitted parameters:")
-println("Dephosphorylation time of CaMKA: " , 1e-3 / params[kdeph_CaMK], " seconds.")
-println("Phosphorylation rate of CaMKB: " , params[kphos_CaMK] * 1000, " Hz")
+println("Dephosphorylation time: " , 1e-3 / params[kdeph_CaMK], " seconds.")
+println("Autophosphorylation rate of CaMKB: " , params[kphos_CaMK] * 1000, " Hz")
 println("2nd phosphorylation time of CaMKA: " , 1e-3 / params[k_P1_P2], " seconds.")
 println("2nd dephosphorylation time of CaMKA: " , 1e-3 / params[k_P2_P1], " seconds.")
 
