@@ -175,6 +175,12 @@ end
 
 """
 Simplified CaMKII system with one-step activation of CaMK
+
+Parameters fitted by simulated annealing to match the CaMKII activation curve in the full model with 1 Hz pacing (see `docs/fits/fit-camkii.ipynb` for details).
+- Dephosphorylation time of CaMKA: 12.340255743007939 seconds.
+- Phosphorylation rate of CaMKB: 2.4310936843426734 Hz
+- 2nd phosphorylation time of CaMKA: 105.70812097414269 seconds.
+- 2nd dephosphorylation time of CaMKA: 26.427030243535672 seconds.
 """
 function get_camkii_simp_eqs(;
     Ca=0μM,
@@ -189,15 +195,15 @@ function get_camkii_simp_eqs(;
     @parameters begin
         r_CaMK = 3Hz                 ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
         kb_CaMKP = inv(6second)      ## CaMCa dissociation rate of CaMKP --> CaMKA (adjustable)
-        kfa2_CaMK = 0.2650           ## Maximal binding ratio by CaM-Ca2 (adjustable)
-        kfa4_CaMK = 0.1636           ## Maximal binding ratio by CaM-Ca4 (adjustable)
-        kfb_CaMK = 0.001             ## Basal binding by CaM (adjustable)
-        kmCa2_CaMK = 0.7384μM        ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
-        kmCa4_CaMK = 1.2513μM        ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
-        kphos_CaMK = 2.3468Hz        ## Fitted autophosphorylation rate (originally 30Hz)
-        kdeph_CaMK = inv(12.7835second)   ## Fitted Dephosphorylation rate ## inv(6 second)
-        k_P1_P2 = 0Hz                ## Second autophosphorylation rate ## inv(60second) (ignore second phosphorylation)
-        k_P2_P1 = inv(15second)      ## Second dephosphorylation rate
+        kfa2_CaMK = 0.2550           ## Maximal binding ratio by CaM-Ca2 (adjustable)
+        kfa4_CaMK = 0.1602           ## Maximal binding ratio by CaM-Ca4 (adjustable)
+        kfb_CaMK = 0.0202            ## Basal binding by CaM (adjustable)
+        kmCa2_CaMK = 0.7880μM        ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
+        kmCa4_CaMK = 1.2430μM        ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
+        kphos_CaMK = 2.4311Hz        ## Autophosphorylation rate ## 30Hz
+        kdeph_CaMK = inv(12.3403second)   ## Dephosphorylation rate ## inv(6 second)
+        k_P1_P2 = inv(105.71second)   ## Second autophosphorylation rate ## inv(60second) (ignore second phosphorylation)
+        k_P2_P1 = inv(26.43second)   ## Second dephosphorylation rate
         kox_CaMK = 291Hz / mM        ## Oxidation rate ## FIXME: too high for ROS in the μM range
         krd_CaMK = inv(45second)     ## Reduction rate
     end
@@ -228,17 +234,13 @@ function get_camkii_simp_eqs(;
     kb = r_CaMK * (1 - CaMKBInf)
     add_rate!(rates, kf, CaMK, kb, CaMKB)
     add_rate!(rates, kf * binding_To_OCaMK, CaMKOX, kb, CaMKBOX)
-
-    ## CaMKA(OX) <-CaM,Ca-> CaMKP(OX)
-    add_rate!(rates, kf * binding_To_PCaMK, CaMKA, kb_CaMKP, CaMKP)
-    add_rate!(rates, kf * binding_To_PCaMK, CaMKAOX, kb_CaMKP, CaMKPOX)
-
-    ## Auto-phosphorylation of CaMKII
-    ## B(OX) <--> P(OX)
+    ## Auto-phosphorylation of CaMKII: B(OX) <--> P(OX)
     kphos = kphos_CaMK * CaMKAct
     add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
     add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
-
+    ## CaMKA(OX) <-CaM,Ca-> CaMKP(OX)
+    add_rate!(rates, kf * binding_To_PCaMK, CaMKA, kb_CaMKP, CaMKP)
+    add_rate!(rates, kf * binding_To_PCaMK, CaMKAOX, kb_CaMKP, CaMKPOX)
     ## Second phosphorylation of Apo CaMKII-P
     # CaMKA <--> CaMKA2
     add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
