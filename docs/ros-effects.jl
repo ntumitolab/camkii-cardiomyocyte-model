@@ -11,14 +11,14 @@ using Model: second, μM
 Plots.default(lw=1.5)
 
 # ## Setup model
-@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
+@time "Build system" sys = Model.DEFAULT_SYS
 @unpack Istim = sys
 tend = 205second
 stimstart = 30second
 stimend = 120second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-alg = FBDF()
+alg = KenCarp47()
 
 # ## Comparisons
 @time "Solve problem" sol = solve(prob, alg; callback)

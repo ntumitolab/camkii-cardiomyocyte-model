@@ -10,12 +10,12 @@ using Model: second, μM
 Plots.default(lw=1.5)
 
 # ## Setup model
-@time "Build system" @mtkcompile sys = build_neonatal_ecc_sys()
+@time "Build system" sys = Model.DEFAULT_SYS
 tend = 205second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
-alg = FBDF()
+alg = KenCarp47()
 
 # ## Without isoproterenol
 @unpack Istim = sys
