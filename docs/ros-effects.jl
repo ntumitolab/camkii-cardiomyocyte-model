@@ -52,7 +52,7 @@ plot!(xlabel="Time (s)", ylabel="Oxidized fraction (%)", title="Simulation")
 savefig("ros-camkiiox.pdf")
 
 # Autophosphorylated fraction
-i = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
+i = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2 + sys.CaMKPOX + sys.CaMKAOX))
 plot(sol, idxs=i, lab="ROS (-)")
 plot!(sol2, idxs=i, lab="ROS 0.1uM")
 plot!(sol3, idxs=i, lab="ROS 0.5uM")
