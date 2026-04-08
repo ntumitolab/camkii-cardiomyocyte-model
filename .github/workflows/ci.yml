@@ -117,6 +117,11 @@ jobs:
           name: notebook-${{ steps.art.outputs.name }}-${{ needs.setup.outputs.hash }}-${{ hashFiles(env.NB) }}
           path: ${{ env.NBCACHE }}
           include-hidden-files: true
+      - name: Upload PDF files
+        uses: actions/upload-artifact@v7
+        with:
+          name: pdf-${{ steps.art.outputs.name }}-${{ needs.setup.outputs.hash }}-${{ hashFiles(env.NB) }}
+          path: docs/**/*.pdf
 
   render:
     needs: execute
