@@ -1,7 +1,6 @@
 # CaMKII cardiomyocyte model
 
 - https://github.com/drgrandilab/Morotti-et-al-2014-Mouse-Ventricular-Model
-- https://github.com/ntumitolab/Hopkins-CaMKII (private repo)
 
 ---
 
