@@ -204,7 +204,7 @@ function get_camkii_simp_eqs(;
         kdeph_CaMK = inv(12.3403second)   ## Dephosphorylation rate ## inv(6 second)
         k_P1_P2 = inv(105.71second)   ## Second autophosphorylation rate ## inv(60second) (ignore second phosphorylation)
         k_P2_P1 = inv(26.43second)   ## Second dephosphorylation rate
-        kox_CaMK = 291Hz / mM        ## Oxidation rate ## FIXME: too high for ROS in the μM range
+        kox_CaMK = inv(45second) / 50μM ## 291Hz / mM   ## Oxidation by H2O2 (adjustable)
         krd_CaMK = inv(45second)     ## Reduction rate
     end
 

@@ -16,26 +16,27 @@ Plots.default(lw=1.5)
 tend = 205second
 stimstart = 30second
 stimend = 120second
-@time "Build problem" prob = ODEProblem(sys, [], tend)
+newkox_CaMK = inv(45second) / 50μM
+@time "Build problem" prob = ODEProblem(sys, [sys.kox_CaMK => inv(45second) / 50μM], tend)
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 alg = KenCarp47()
 
 # ## Comparisons
 @time "Solve problem" sol = solve(prob, alg; callback)
 
-## ROS (H2O2) 0.1uM
-prob2 = remake(prob, p=[sys.ROS => 0.1μM])
+## ROS (H2O2) 50uM
+prob2 = remake(prob, p=[sys.ROS => 50μM])
 @time "Solve problem" sol2 = solve(prob2, alg; callback)
 
-## ROS (H2O2) 0.5uM
-prob3 = remake(prob, p=[sys.ROS => 0.5μM])
+## ROS (H2O2) 200uM
+prob3 = remake(prob, p=[sys.ROS => 200μM])
 @time "Solve problem" sol3 = solve(prob3, alg; callback);
 
 # ## Comparisons
 i = (sys.t / 1000, sys.CaMKAct * 100)
 plot(sol, idxs=i, lab="ROS (-)")
-plot!(sol2, idxs=i, lab="ROS 0.1uM")
-plot!(sol3, idxs=i, lab="ROS 0.5uM")
+plot!(sol2, idxs=i, lab="ROS 50uM")
+plot!(sol3, idxs=i, lab="ROS 200uM")
 plot!(xlabel="Time (s)", ylabel="Active fraction (%)", title="Simulation")
 
 #---
@@ -44,8 +45,8 @@ savefig("ros-camkii.pdf")
 # Oxidized fraction
 i = (sys.t / 1000, 100 * (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX ))
 plot(sol, idxs=i, lab="ROS (-)")
-plot!(sol2, idxs=i, lab="ROS 0.1uM")
-plot!(sol3, idxs=i, lab="ROS 0.5uM")
+plot!(sol2, idxs=i, lab="ROS 50uM")
+plot!(sol3, idxs=i, lab="ROS 200uM")
 plot!(xlabel="Time (s)", ylabel="Oxidized fraction (%)", title="Simulation")
 
 #---
@@ -54,8 +55,8 @@ savefig("ros-camkiiox.pdf")
 # Autophosphorylated fraction
 i = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2 + sys.CaMKPOX + sys.CaMKAOX))
 plot(sol, idxs=i, lab="ROS (-)")
-plot!(sol2, idxs=i, lab="ROS 0.1uM")
-plot!(sol3, idxs=i, lab="ROS 0.5uM")
+plot!(sol2, idxs=i, lab="ROS 50uM")
+plot!(sol3, idxs=i, lab="ROS 200uM")
 plot!(xlabel="Time (s)", ylabel="Phosphorylated fraction (%)", title="Simulation")
 
 #---
@@ -82,7 +83,7 @@ plot!(xlabel="Time (s)", ylabel="CaMKII activity (A.U.)", title="Experiment")
 #---
 savefig("ros-exp.pdf")
 
-# ## Decay rates
+# ## Decay kinectics
 # Fit against an exponential decay model.
 decay_model(p, x) = @. p[1] * exp(-x / p[2]) + p[3]
 
@@ -117,6 +118,6 @@ for (tau, freq) in zip((tau_exp_ctl, tau_exp_50, tau_exp_200), (0, 50, 200))
 end
 
 println("\nThe time scales for simulations: ")
-for (tau, freq) in zip((tau_sim_ctl, tau_sim_01, tau_sim_05), (0, 0.1, 0.5))
+for (tau, freq) in zip((tau_sim_ctl, tau_sim_01, tau_sim_05), (0, 50, 200))
     println("$freq uM ROS is $(round(tau; digits=2)) seconds.")
 end
