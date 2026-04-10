@@ -1,6 +1,7 @@
-function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0)
+function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0, CaMKAct=0)
     @parameters begin
         ICa_scale0 = 0.95 # or 5.25
+        LCC_scale_CaMK = 0.1 # Max increase in ICaL due to CaMKII (x1.2)
         fracLCCbp0 = 0.250657   # Derived quantity - (LCCbp(baseline)/LCCbtot)
         fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
         fNaCa = 1
@@ -58,7 +59,7 @@ function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0)
         ICa_scale ~ ICa_scale0 * favail,
         E_Ca ~ nernst(cao, cai, 2),
         INaCa ~ inaca,
-        ICaL ~ ICa_scale * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
+        ICaL ~ ICa_scale * (1 + LCC_scale_CaMK * CaMKAct) * i_d * i_f * i_fca * ghkVm(GCaL, vm, cai, 0.341 * cao, 2),
         dinf ~ expit((V + 11.1) / 7.2),
         taud ~ (alphad * betad + gammad) * ms,
         finf ~ expit(-(V + 23.3) / 5.4),
@@ -80,7 +81,7 @@ function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0)
 end
 
 "Plama membrane calcium currents"
-function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, name=:icasys)
-    @unpack eqs_ica = get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp)
+function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, CaMKAct=0, name=:icasys)
+    @unpack eqs_ica = get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp, CaMKAct)
     return System(eqs_ica, t; name)
 end
