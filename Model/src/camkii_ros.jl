@@ -187,17 +187,17 @@ function get_camkii_simp_eqs(;
     D = Differential(t)
 
     @parameters begin
-        r_CaMK = 3Hz                 ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable)
-        kb_CaMKP = inv(6second)      ## CaMCa dissociation rate of CaMKP --> CaMKA (adjustable)
+        r_CaMK = 13.1186Hz          ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable) # 3Hz
+        kb_CaMKP = 1.2126Hz         ## CaMCa dissociation rate of CaMKP --> CaMKA (adjustable)
         kfa2_CaMK = 0.2651           ## Maximal binding ratio by CaM-Ca2 (adjustable)
         kfa4_CaMK = 0.1636           ## Maximal binding ratio by CaM-Ca4 (adjustable)
         kfb_CaMK = 0.001             ## Basal binding by CaM (adjustable)
         kmCa2_CaMK = 0.7385μM        ## Half-saturation calcium concentration for CaM-Ca2 binding (adjustable)
         kmCa4_CaMK = 1.2515μM        ## Half-saturation calcium concentration for CaM-Ca4 binding (adjustable)
-        kphos_CaMK = 2.2128Hz             ## Autophosphorylation rate ## 30Hz
+        kphos_CaMK = 1.98605Hz        ## Autophosphorylation rate ## 12.5Hz
         kdeph_CaMK = inv(11.1534second)   ## Dephosphorylation rate ## inv(6 second)
-        k_P1_P2 = inv(18.5115second)   ## Second autophosphorylation rate ## inv(60second)
-        k_P2_P1 = inv(4.6283second)   ## Second dephosphorylation rate
+        k_P1_P2 = inv(135.50second)   ## Second autophosphorylation rate ## inv(60second)
+        k_P2_P1 = inv(33.88second)   ## Second dephosphorylation rate
         kox_CaMK = inv(45second) / 50μM ## 291Hz / mM   ## Oxidation by H2O2 (adjustable)
         krd_CaMK = inv(45second)     ## Reduction rate
     end
@@ -208,7 +208,7 @@ function get_camkii_simp_eqs(;
         CaMKP(t) = 0.003916     ## Bound to CaMCa, autophosphorylated
         CaMKPOX(t) = 0          ## Bound to CaMCa, autophosphorylated, oxidized
         CaMKA(t) = 0.007833     ## Unbound, autophosphorylated
-        CaMKA2(t) = 0           ## Unbound, doubly phosphorylated
+        CaMKA2(t) = 0           ## Unbound, phosphorylated, slow component
         CaMKAOX(t) = 0          ## Unbound, autophosphorylated, oxidized
         CaMKOX(t) = 0           ## Unbound, oxidized
     end
