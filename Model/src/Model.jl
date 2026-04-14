@@ -22,5 +22,6 @@ include("ecc_neonatal.jl")
 include("precompile.jl")
 
 const DEFAULT_SYS = build_neonatal_ecc_sys() |> mtkcompile
+const DEFAULT_PROB = ODEProblem(DEFAULT_SYS, [], (0.0, 200.0second))
 
 end # module Model
