@@ -16,6 +16,7 @@ Autophosphorylation rate of CaMKB: 2.4311 Hz
 2nd dephosphorylation time of CaMKA: 26.43 seconds.
 
 The time scales for simulations:
+
 15 sec pacing is 16.3 seconds.
 30 sec pacing is 17.07 seconds.
 60 sec pacing is 17.6 seconds.
@@ -30,6 +31,7 @@ P1 to P2 time: 31.13115227809683 seconds. (rate 0.03212216467501517 Hz.)
 P2 to P1 time: 7.7835028003519735 seconds. (rate  0.12847686005262046 Hz.)
 
 The time scales for simulations:
+
 15 sec pacing is 16.13 seconds.
 30 sec pacing is 17.41 seconds.
 60 sec pacing is 17.65 seconds.
@@ -42,12 +44,13 @@ Dephosphorylation time: 12.700662012052323 seconds. (rate 0.07873605321132454 Hz
 Autophosphorylation rate of CaMKB: 1.943224967059168 Hz
 
 The time scales for simulations:
+
 15 sec pacing is 15.71 seconds.
 30 sec pacing is 17.33 seconds.
 60 sec pacing is 17.79 seconds.
 90 sec pacing is 17.83 seconds.
 
-## With the A2 state, also fit CaMKII-CaMCa binding rate (r_CaMK)
+## 2026-04-13
 
 Fitted parameters:
 
@@ -67,3 +70,25 @@ The time scales for simulations:
 30 sec pacing is 16.99 seconds.
 60 sec pacing is 17.5 seconds.
 90 sec pacing is 17.99 seconds.
+
+## 2026-04-14
+
+Fitted parameters:
+
+Dephosphorylation time: 12.013773104680928 seconds.
+Dephosphorylation rate: 0.0832377964263675 Hz.
+Autophosphorylation rate of CaMKB: 1.8438179144043618 Hz
+CaM dissociation time of CaMKP: 0.4318690242353381 seconds.
+CaM dissociation rate of CaMKP: 2.315516843956539 Hz.
+P1 to P2 time: 112.76354483204734 seconds.
+P1 to P2 rate: 0.008868114260592138 Hz.
+P2 to P1 time: 28.195047224426304 seconds.
+P2 to P1 rate: 0.03546722202804707 Hz.
+CaMK binding rate: 151.13713512510694 Hz.
+
+The time scales for simulations:
+
+15 sec pacing is 16.27 seconds.
+30 sec pacing is 16.94 seconds.
+60 sec pacing is 17.6 seconds.
+90 sec pacing is 18.08 seconds.
