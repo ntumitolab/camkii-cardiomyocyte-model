@@ -187,8 +187,8 @@ function get_camkii_simp_eqs(;
     D = Differential(t)
 
     @parameters begin
-        r_CaMK = 151.1371Hz          ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable) # 3Hz
-        kb_CaMKP = 2.3155Hz         ## CaMCa dissociation rate of CaMKP --> CaMKA (adjustable)
+        r_CaMK = 79.5360Hz          ## Inverse of time scale of CaMK <--> CaMKB reaction (adjustable) # 3Hz
+        kb_CaMKP = 3.0667Hz          ## CaMCa dissociation rate of CaMKP --> CaMKA (adjustable)       # 0.3Hz
         kfa2_CaMK = 0.2651           ## Maximal binding ratio by CaM-Ca2 (adjustable)
         kfa4_CaMK = 0.1636           ## Maximal binding ratio by CaM-Ca4 (adjustable)
         kfb_CaMK = 0.001             ## Basal binding by CaM (adjustable)
