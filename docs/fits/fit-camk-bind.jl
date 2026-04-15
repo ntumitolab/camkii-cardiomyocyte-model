@@ -15,10 +15,10 @@ Plots.default(lw=1.5)
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
 ca = exp10.(range(log10(0.03μM), log10(10μM), length=1001))
-prob_func = (prob, i, repeat) -> (prob.ps[Ca] = ca[i]; prob)
-alg = DynamicSS(TRBDF2())
+prob_func = (prob, i, repeat) -> remake(prob, p=[Ca => ca[i]])
+alg = DynamicSS(KenCarp47())
 sol0 = solve(prob, alg) ## warmup
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(ca), abstol=1e-8, reltol=1e-8);
+@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories=length(ca), abstol=1e-8, reltol=1e-8);
 
 #---
 """Extract values from ensemble simulations by a symbol"""
@@ -27,8 +27,7 @@ extract(sim, k) = map(s -> s[k], sim)
 # Status of the CaMKII system across a range of calcium concentrations.
 xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1], ca[end]))
 let
-    plot(ca, extract(sim, sys.CaM0), lab="CaM0", ylabel="Conc. (μM)"; xopts...)
-    plot!(ca, extract(sim, sys.Ca2CaM_C), lab="Ca2CaM_C")
+    plot(ca, extract(sim, sys.Ca2CaM_C), lab="Ca2CaM_C", ylabel="Conc. (μM)"; xopts...)
     plot!(ca, extract(sim, sys.Ca2CaM_N), lab="Ca2CaM_N")
     plot!(ca, extract(sim, sys.Ca4CaM), lab="Ca4CaM")
     plot!(ca, extract(sim, sys.CaMK), lab="CaMK")
@@ -40,13 +39,14 @@ end
 
 #---
 savefig("camkii_cam_binding.pdf")
+savefig("camkii_cam_binding.png")
 
-#---
+# We exclude CaMK bound with ApoCaM (CaM0_CaMK) from the active fraction.
 CaMKAct = 1 - (sys.CaMK + sys.CaM0_CaMK) / sys.CAMKII_T
 println("Basal activity with 30nM Ca is ", sim[1][CaMKAct])
 xdata = ca
 ydata = extract(sim, CaMKAct)
-plot(xdata, ydata, label=false, title="Active CaMKII", ylims=(0, 0.5); xopts...)
+plot(xdata, ydata, label=false, title="Bound CaMKII fraction", ylims=(0, 0.5); xopts...)
 
 #===
 ## Old model fitting
@@ -73,7 +73,7 @@ println("Hill coefficient: ", fit.u[4])
 println("RMSE: ", mse(fit) |> sqrt)
 
 #---
-plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="Single Hill function fit", legend=:topleft, ylabel="Bound CaMKII"; xopts...)
+plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="Single Hill function fit", legend=:topleft, ylabel="Bound CaMKII fraction"; xopts...)
 
 #===
 ## New model
@@ -97,13 +97,14 @@ println("Half saturation Ca concentration for CaM-Ca4 binding: ", fit.u[4], " μ
 println("RMSE: ", mse(fit) |> sqrt)
 
 #---
-plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="Dual Hill function fit", legend=:topleft, ylabel="Bound CaMKII"; xopts...)
+plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="", legend=:topleft, ylabel="Bound CaMKII fraction"; xopts...)
 
 #---
 savefig("camkii_act_fit.pdf")
+savefig("camkii_act_fit.png")
 
 # ### Polynomial fitting
-# Using `RationalPolynomialFitAlgorithm` in `CurveFit` to fit the data with a rational polynomial function.
+# Using `RationalPolynomialFitAlgorithm` to fit the data with a rational polynomial function.
 prob = CurveFitProblem(xdata, ydata)
 alg = RationalPolynomialFitAlgorithm(num_degree=4, den_degree=4)
 @time sol = solve(prob, alg)

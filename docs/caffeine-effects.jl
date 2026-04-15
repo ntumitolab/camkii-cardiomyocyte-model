@@ -1,7 +1,6 @@
 # # Caffeine Effects
 # Caffeine increase RyR opening sensitivity to luminal and subspace calcium.
 # In this model, we decrease the mid saturation sub-SR calcium concentration for the opening rate.
-
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
@@ -63,9 +62,9 @@ plot(sol, idxs=sys.Jrel, title="Ca flux", lab="Ctl  (Jrel)", tspan=(198second, 2
 plot!(sol_caf, idxs=sys.Jrel, lab="Caf (Jrel)", tspan=(198second, 205second), ylabel="μM/ms", xlabel="Time (s)")
 
 #---
-i = (sys.t / 1000, sys.CaMKAct * 100)
+i = (sys.t / 1000, sys.CaMKAct)
 plot(sol, idxs=i, title="Active CaMKII", lab="Ctl")
-plot!(sol_caf, idxs=i, lab="Caf", ylabel="CaMKII activity (%)", xlabel="Time (s)")
+plot!(sol_caf, idxs=i, lab="Caf", ylabel="Active CaMKII fraction", xlabel="Time (s)")
 
 # ## Caffeine and electrophysiology
 # - Add caffeine in the beginning of the simulation.
@@ -97,6 +96,7 @@ plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", tspan=tspan, ylabel="Voltage (mV)", 
 
 #---
 savefig("caf-ap.pdf")
+savefig("caf-ap.png")
 
 #---
 i = (sys.t / 1000, sys.Cai_sub_SR * 1000)
@@ -107,6 +107,7 @@ plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylabel="Subspace calcium (nM)", xlab
 
 #---
 savefig("caf-cat.pdf")
+savefig("caf-cat.png")
 
 #---
 i = (sys.t / 1000, sys.CaJSR)
@@ -118,13 +119,14 @@ plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylims=(0, 850), xlabel="Time (s)"; t
 # ## CaMKII activities
 # ### Simulations
 
-i = (sys.t / 1000, sys.CaMKAct * 100)
+i = (sys.t / 1000, sys.CaMKAct)
 plot(sol, idxs=i, title="Simulation", lab="Ctl")
 plot!(sol_caf, idxs=i, lab="Caf")
-plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylabel="CaMKII active fraction (%)", xlabel="Time (s)")
+plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylabel="Active CaMKII fraction", xlabel="Time (s)")
 
 #---
 savefig("caf-camkact.pdf")
+savefig("caf-camkact.png")
 
 # ### Experiments
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
@@ -141,3 +143,4 @@ plot!(xlabel="Time (s)", ylabel="CaMKII activity (A.U.)", title= "Experiment")
 
 #---
 savefig("caf-exp.pdf")
+savefig("caf-exp.png")

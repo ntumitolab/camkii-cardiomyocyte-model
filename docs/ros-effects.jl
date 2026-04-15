@@ -22,45 +22,40 @@ callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimst
 alg = KenCarp47()
 
 # ## Comparisons
+# ROS (H2O2) 0uM vs 50uM vs 200uM
 @time "Solve problem" sol = solve(prob, alg; callback)
 
-## ROS (H2O2) 50uM
 prob2 = remake(prob, p=[sys.ROS => 50μM])
 @time "Solve problem" sol2 = solve(prob2, alg; callback)
 
-## ROS (H2O2) 200uM
 prob3 = remake(prob, p=[sys.ROS => 200μM])
 @time "Solve problem" sol3 = solve(prob3, alg; callback);
 
 # ## Comparisons
-i = (sys.t / 1000, sys.CaMKAct * 100)
-plot(sol, idxs=i, lab="ROS (-)")
-plot!(sol2, idxs=i, lab="ROS 50uM")
-plot!(sol3, idxs=i, lab="ROS 200uM")
-plot!(xlabel="Time (s)", ylabel="Active fraction (%)", title="Simulation")
+i = (sys.t / 1000, sys.CaMKAct)
+plot(sol, idxs=i, lab="ROS (-)", color=:blue)
+plot!(sol2, idxs=i, lab="ROS 50uM", color=:red)
+plot!(sol3, idxs=i, lab="ROS 200uM", color=:green)
+plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Simulation")
 
 #---
 savefig("ros-camkii.pdf")
-
-# Oxidized fraction
-i = (sys.t / 1000, 100 * (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX ))
-plot(sol, idxs=i, lab="ROS (-)")
-plot!(sol2, idxs=i, lab="ROS 50uM")
-plot!(sol3, idxs=i, lab="ROS 200uM")
-plot!(xlabel="Time (s)", ylabel="Oxidized fraction (%)", title="Simulation")
-
-#---
-savefig("ros-camkiiox.pdf")
-
-# Autophosphorylated fraction
-i = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2 + sys.CaMKPOX + sys.CaMKAOX))
-plot(sol, idxs=i, lab="ROS (-)")
-plot!(sol2, idxs=i, lab="ROS 50uM")
-plot!(sol3, idxs=i, lab="ROS 200uM")
-plot!(xlabel="Time (s)", ylabel="Phosphorylated fraction (%)", title="Simulation")
+savefig("ros-camkii.png")
+# Oxidized and autophosphorylated fraction
+iox = (sys.t / 1000, 100 * (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX))
+plot(sol, idxs=iox, lab="ROS (-), OX", color=:blue)
+plot!(sol2, idxs=iox, lab="ROS 50uM, OX", color=:red)
+plot!(sol3, idxs=iox, lab="ROS 200uM, OX", color=:green)
+iphos = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
+plot!(sol, idxs=iphos, lab="ROS (-), phos", color=:blue, linestyle=:dash)
+plot!(sol2, idxs=iphos, lab="ROS 50uM, phos", color=:red, linestyle=:dash)
+plot!(sol3, idxs=iphos, lab="ROS 200uM, phos", color=:green, linestyle=:dash)
+plot!(xlabel="Time (s)", ylabel="CaMKII fraction", title="Simulation")
 
 #---
-savefig("ros-camkiip.pdf")
+savefig("ros-camkiiox-pox.pdf")
+savefig("ros-camkiiox-pox.png")
+
 
 # ## Experimental data
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
@@ -82,10 +77,11 @@ plot!(xlabel="Time (s)", ylabel="CaMKII activity (A.U.)", title="Experiment")
 
 #---
 savefig("ros-exp.pdf")
+savefig("ros-exp.png")
 
 # ## Decay kinectics
 # Fit against an exponential decay model.
-decay_model(p, x) = @. p[1] * exp(-x / p[2]) + p[3]
+# `decay_model(p, x) = @. p[1] * exp(-x / p[2]) + p[3]`
 
 # Data from experiments (starts from 120 seconds till the end of the experiment).
 xdata = collect(range(0.0, step=5.0, length=18))
