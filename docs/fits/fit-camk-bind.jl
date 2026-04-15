@@ -18,7 +18,7 @@ ca = exp10.(range(log10(0.03μM), log10(10μM), length=1001))
 prob_func = (prob, i, repeat) -> remake(prob, p=[Ca => ca[i]])
 alg = DynamicSS(KenCarp47())
 sol0 = solve(prob, alg) ## warmup
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func, safetycopy=false), alg; trajectories=length(ca), abstol=1e-8, reltol=1e-8);
+@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(ca), abstol=1e-8, reltol=1e-8);
 
 #---
 """Extract values from ensemble simulations by a symbol"""
