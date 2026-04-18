@@ -1,14 +1,14 @@
 # # Caffeine Effects
 # Caffeine increase RyR opening sensitivity to luminal and subspace calcium.
 # In this model, we decrease the mid saturation sub-SR calcium concentration for the opening rate.
+using Model
+using Model: second
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using DataFrames
 import Dates
-using Model
-using Model: second
 Plots.default(lw=1.5)
 
 #---

@@ -1,12 +1,12 @@
 # # Effects of isoproterenol
+using Model
+using Model: second, μM
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using DataFrames
 import Dates
-using Model
-using Model: second, μM
 Plots.default(lw=1.5)
 
 # ## Setup model
