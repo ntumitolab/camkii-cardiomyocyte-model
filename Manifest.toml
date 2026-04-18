@@ -1375,7 +1375,7 @@ version = "1.2.0"
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.Model]]
-deps = ["CSV", "DataFrames", "DiffEqCallbacks", "ModelingToolkit", "NaNMath", "OrdinaryDiffEq", "Plots", "PrecompileTools", "SteadyStateDiffEq"]
+deps = ["CSV", "DataFrames", "DiffEqCallbacks", "ModelingToolkit", "NaNMath", "Optimization", "OptimizationOptimJL", "OrdinaryDiffEq", "Plots", "PrecompileTools", "SteadyStateDiffEq"]
 path = "Model"
 uuid = "c61cb6fc-a4aa-49b2-8e1f-749d0e1a896d"
 version = "0.1.0"
