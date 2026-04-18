@@ -1,4 +1,4 @@
-# # CaMKII system simplification
+# # CaMKII binding simplification
 using Model
 using Model: μM, hil, second, Hz
 using ModelingToolkit
@@ -15,10 +15,10 @@ Plots.default(lw=1.5)
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
 ca = exp10.(range(log10(0.03μM), log10(10μM), length=1001))
-prob_func = (prob, i, repeat) -> remake(prob, p=[Ca => ca[i]])
-alg = DynamicSS(KenCarp47())
-sol0 = solve(prob, alg) ## warmup
-@time "Solve problem" sim = solve(EnsembleProblem(prob; prob_func), alg; trajectories=length(ca), abstol=1e-8, reltol=1e-8);
+@time "Solve problem" sim = map(ca) do c
+    newprob = remake(prob, p=[Ca => c])
+    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
+end;
 
 #---
 """Extract values from ensemble simulations by a symbol"""
