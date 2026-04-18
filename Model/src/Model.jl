@@ -4,8 +4,12 @@ using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
 using OrdinaryDiffEq
+using SteadyStateDiffEq
 using DiffEqCallbacks
-using PrecompileTools
+using Plots
+using DataFrames
+using CSV
+using PrecompileTools: @compile_workload
 
 export build_neonatal_ecc_sys, build_stim_callbacks
 

@@ -1,10 +1,10 @@
 # # CaMKII system simplification
+using Model
+using Model: μM, hil, second, Hz
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CurveFit
-using Model
-using Model: μM, hil, second, Hz
 Plots.default(lw=1.5)
 
 # ## CaMKII sensitivity to calcium

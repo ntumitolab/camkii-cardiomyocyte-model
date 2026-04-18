@@ -1,13 +1,13 @@
 # # Electrophysiology
 # Basic CMC model checks
+using Model
+using Model: second
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using StatsBase: mean
 using DataFrames
-using Model
-using Model: second
 Plots.default(lw=1.5)
 
 # ## Setup the ODE system

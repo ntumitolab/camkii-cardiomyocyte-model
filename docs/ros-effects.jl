@@ -1,4 +1,6 @@
 # # ROS effects
+using Model
+using Model: second, μM
 using ModelingToolkit
 using OrdinaryDiffEq, DiffEqCallbacks
 using Plots
@@ -6,8 +8,6 @@ using CSV
 using DataFrames
 import Dates
 using CurveFit
-using Model
-using Model: second, μM
 Plots.default(lw=1.5)
 
 # ## Setup model

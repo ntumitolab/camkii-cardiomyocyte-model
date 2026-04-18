@@ -1,14 +1,14 @@
 # # Caffeine Effects
 # Caffeine increase RyR opening sensitivity to luminal and subspace calcium.
 # In this model, we decrease the mid saturation sub-SR calcium concentration for the opening rate.
+using Model
+using Model: second
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using Plots
 using CSV
 using DataFrames
 import Dates
-using Model
-using Model: second
 Plots.default(lw=1.5)
 
 #---
@@ -67,8 +67,8 @@ plot(sol, idxs=i, title="Active CaMKII", lab="Ctl")
 plot!(sol_caf, idxs=i, lab="Caf", ylabel="Active CaMKII fraction", xlabel="Time (s)")
 
 # ## Caffeine and electrophysiology
-# - Add caffeine in the beginning of the simulation.
-# - Add caffeine and nifedipine in the beginning of the simulation (nifedipine blocks 90% of L-type calcium channel).
+# - Adding caffeine in the beginning of the simulation.
+# - Adding caffeine and nifedipine in the beginning of the simulation (nifedipine blocks 90% of LCCs).
 @time "Build system" sys = Model.DEFAULT_SYS
 tend = 205second
 stimstart = 30second
@@ -90,9 +90,9 @@ sssol = solve(sprob_caf, ssalg; abstol=1e-10, reltol=1e-10)
 
 i = (sys.t / 1000, sys.vm)
 tspan = (100second, 102second)
-plot(sol, idxs=i, title="Action potential", lab="Ctl"; tspan)
-plot!(sol_caf, idxs=i, lab="Caf"; tspan)
-plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", tspan=tspan, ylabel="Voltage (mV)", xlabel="Time (s)")
+plot(sol, idxs=i, title="Action potential", lab="Ctl", color=:blue; tspan)
+plot!(sol_caf, idxs=i, lab="Caf", color=:green; tspan)
+plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", color=:red, tspan=tspan, ylabel="Voltage (mV)", xlabel="Time (s)")
 
 #---
 savefig("caf-ap.pdf")
@@ -101,9 +101,9 @@ savefig("caf-ap.png")
 #---
 i = (sys.t / 1000, sys.Cai_sub_SR * 1000)
 tspan = (100second, 102second)
-plot(sol, idxs=i, title="Calcium transient", lab="Ctl"; tspan)
-plot!(sol_caf, idxs=i, lab="Caf"; tspan)
-plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylabel="Subspace calcium (nM)", xlabel="Time (s)"; tspan)
+plot(sol, idxs=i, title="Calcium transient", lab="Ctl", color=:blue; tspan)
+plot!(sol_caf, idxs=i, lab="Caf", color=:green; tspan)
+plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", color=:red, ylabel="Subspace calcium (nM)", xlabel="Time (s)"; tspan)
 
 #---
 savefig("caf-cat.pdf")
@@ -112,17 +112,17 @@ savefig("caf-cat.png")
 #---
 i = (sys.t / 1000, sys.CaJSR)
 tspan = (100second, 102second)
-plot(sol, idxs=i, title="SR Calcium", lab="Ctl", ylabel="SR calcium (μM)"; tspan)
-plot!(sol_caf, idxs=i, lab="Caf"; tspan)
-plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylims=(0, 850), xlabel="Time (s)"; tspan)
+plot(sol, idxs=i, title="SR Calcium", lab="Ctl", ylabel="SR calcium (μM)", color=:blue; tspan)
+plot!(sol_caf, idxs=i, lab="Caf", color=:green; tspan)
+plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", color=:red, ylims=(0, 850), xlabel="Time (s)"; tspan)
 
 # ## CaMKII activities
 # ### Simulations
 
 i = (sys.t / 1000, sys.CaMKAct)
-plot(sol, idxs=i, title="Simulation", lab="Ctl")
-plot!(sol_caf, idxs=i, lab="Caf")
-plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", ylabel="Active CaMKII fraction", xlabel="Time (s)")
+plot(sol, idxs=i, title="Simulation", lab="Ctl", color=:blue)
+plot!(sol_caf, idxs=i, lab="Caf", color=:green)
+plot!(sol_nif_caf, idxs=i, lab="Caf + Nif", color=:red, ylabel="Active CaMKII fraction", xlabel="Time (s)")
 
 #---
 savefig("caf-camkact.pdf")
