@@ -4,6 +4,7 @@ using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
 using OrdinaryDiffEq
+using SteadyStateDiffEq
 using DiffEqCallbacks
 using Plots
 using DataFrames
