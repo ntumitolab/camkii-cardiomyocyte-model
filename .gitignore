@@ -33,6 +33,7 @@ LocalPreferences.toml
 # Generated files
 *.pdf
 *.html
+*.docx
 
 # MyST build outputs
 _build/

@@ -18,6 +18,7 @@ project:
     - file: index.md
     - file: modeldesc.md
       children:
+        - pattern: "desc/*.md"
         - pattern: "fits/*.ipynb"
     - pattern: "*.ipynb"
 
