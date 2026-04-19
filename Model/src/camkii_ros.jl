@@ -40,7 +40,7 @@ function get_camkii_eqs(;
         k_K2N_off = 20Hz ## 6-60Hz
 
         ## CaM binding to CaMKII
-        kCaM0_on = 3.8e-3Hz / μM
+        kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value (Chang: 3.8)
         kCaM0_off = 5.5Hz
         kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1Hz
         kCaM2C_off = 6.8Hz
