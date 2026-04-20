@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "acc3dcd7af59e2fd3c789bca532076a27eea7e75"
+project_hash = "5ada94cf35d971034fc4958763ae3b95a61cce6b"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -77,11 +77,6 @@ deps = ["PtrArrays", "Random"]
 git-tree-sha1 = "9876e1e164b144ca45e9e3198d0b689cadfed9ff"
 uuid = "66dad0bd-aa9a-41b7-9441-69ab47430ed8"
 version = "1.1.3"
-
-[[deps.ArgCheck]]
-git-tree-sha1 = "f9e9a66c9b7be1ad7372bbd9b062d9230c30c5ce"
-uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
-version = "2.5.0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -572,11 +567,6 @@ version = "0.7.16"
     Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
     Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
-
-[[deps.DisplayAs]]
-git-tree-sha1 = "43c017d5dd3a48d56486055973f443f8a39bb6d9"
-uuid = "0b91fe84-8a4c-11e9-3e1d-67c38462b6d6"
-version = "0.1.6"
 
 [[deps.Distances]]
 deps = ["LinearAlgebra", "Statistics", "StatsAPI"]
@@ -1417,12 +1407,6 @@ version = "0.1.8"
 deps = ["Base64", "JuliaSyntaxHighlighting", "StyledStrings"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 version = "1.11.0"
-
-[[deps.MarkdownTables]]
-deps = ["ArgCheck", "DisplayAs", "DocStringExtensions", "Tables"]
-git-tree-sha1 = "65dff26519116033543e644fb8cf2e5869469c0b"
-uuid = "1862ce21-31c7-451e-824c-f20fa3f90fa2"
-version = "1.1.0"
 
 [[deps.MaybeInplace]]
 deps = ["ArrayInterface", "LinearAlgebra", "MacroTools"]
