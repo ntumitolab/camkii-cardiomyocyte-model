@@ -12,6 +12,7 @@ using Optimization
 using OptimizationOptimJL
 using OrdinaryDiffEq
 using Plots
+using StatsPlots
 using SteadyStateDiffEq
 
 export build_neonatal_ecc_sys, build_stim_callbacks
