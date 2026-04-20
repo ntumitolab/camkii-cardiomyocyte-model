@@ -223,7 +223,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys)
     # cAMP disinhibition of PKA
     add_rate!(rates, kf_RC_cAMP, [RC_I, cAMP], kr_RC_cAMP, [RCcAMP_I]) # RC_I + cAMP <--> RCcAMP_I
     add_rate!(rates, kf_RC_cAMP, [RC_II, cAMP], kr_RC_cAMP, [RCcAMP_II]) # RC_II + cAMP <--> RCcAMP_II
-    add_rate!(rates, kf_RCcAMP_cAMP, [RCcAMP_I, cAMP], kr_RCcAMP_cAMP, [RCcAMPcAMP_I]) # CcAMP_I + cAMP <--> RCcAMPcAMP_I
+    add_rate!(rates, kf_RCcAMP_cAMP, [RCcAMP_I, cAMP], kr_RCcAMP_cAMP, [RCcAMPcAMP_I]) # RCcAMP_I + cAMP <--> RCcAMPcAMP_I
     add_rate!(rates, kf_RCcAMP_cAMP, [RCcAMP_II, cAMP], kr_RCcAMP_cAMP, [RCcAMPcAMP_II]) # RCcAMP_II + cAMP <--> RCcAMPcAMP_II
     add_rate!(rates, kf_RcAMPcAMP_C, [RCcAMPcAMP_I], kr_RcAMPcAMP_C, [RcAMPcAMP_I, PKACI]) # RCcAMPcAMP_I <--> RcAMPcAMP_I + PKACI
     add_rate!(rates, kf_RcAMPcAMP_C, [RCcAMPcAMP_II], kr_RcAMPcAMP_C, [RcAMPcAMP_II, PKACII]) # RCcAMPcAMP_II <--> RcAMPcAMP_II + PKACII

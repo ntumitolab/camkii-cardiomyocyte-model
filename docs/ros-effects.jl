@@ -2,8 +2,10 @@
 using Model
 using Model: second, μM
 using ModelingToolkit
-using OrdinaryDiffEq, DiffEqCallbacks
+using OrdinaryDiffEq
+using DiffEqCallbacks
 using Plots
+using StatsPlots
 using CSV
 using DataFrames
 import Dates
@@ -42,20 +44,31 @@ plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Simulation")
 savefig("ros-camkii.pdf")
 savefig("ros-camkii.png")
 # Oxidized and autophosphorylated fraction
-iox = (sys.t / 1000, 100 * (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX))
+iox = (sys.t / 1000, (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX))
 plot(sol, idxs=iox, lab="ROS (-), OX", color=:blue)
 plot!(sol2, idxs=iox, lab="ROS 50uM, OX", color=:red)
 plot!(sol3, idxs=iox, lab="ROS 200uM, OX", color=:green)
-iphos = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
+iphos = (sys.t / 1000, (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
 plot!(sol, idxs=iphos, lab="ROS (-), phos", color=:blue, linestyle=:dash)
 plot!(sol2, idxs=iphos, lab="ROS 50uM, phos", color=:red, linestyle=:dash)
 plot!(sol3, idxs=iphos, lab="ROS 200uM, phos", color=:green, linestyle=:dash)
-plot!(xlabel="Time (s)", ylabel="CaMKII fraction", title="Simulation")
+plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Simulation")
 
 #---
 savefig("ros-camkiiox-pox.pdf")
 savefig("ros-camkiiox-pox.png")
 
+# Proportions for oxidized and autophosphorylated fractions in active CaMKII
+# Using StatsPlots for grouped bar plot at the end of the stimulation period (120 seconds)
+timepoint = 120second
+pidx = (sys.CaMKP + sys.CaMKA + sys.CaMKA2) / sys.CaMKAct
+oidx = (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX) / sys.CaMKAct
+pvals = [s(timepoint, idxs=pidx) for s in (sol, sol2, sol3)]
+ovals = [s(timepoint, idxs=oidx) for s in (sol, sol2, sol3)]
+groupedbar(["0uM", "50uM", "200uM"], [pvals ovals], bar_position=:stack, label=["Phosphorylated" "Oxidized"], color=[:blue :red :green], title="Simulations", ylabel="Fraction of active CaMKII", xlabel="ROS concentration", legend=:topleft)
+#---
+savefig("ros-camkii-groupbar.pdf")
+savefig("ros-camkii-groupbar.png")
 
 # ## Experimental data
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
