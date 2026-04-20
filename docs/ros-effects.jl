@@ -44,15 +44,15 @@ plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Simulation")
 savefig("ros-camkii.pdf")
 savefig("ros-camkii.png")
 # Oxidized and autophosphorylated fraction
-iox = (sys.t / 1000, 100 * (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX))
+iox = (sys.t / 1000, (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX))
 plot(sol, idxs=iox, lab="ROS (-), OX", color=:blue)
 plot!(sol2, idxs=iox, lab="ROS 50uM, OX", color=:red)
 plot!(sol3, idxs=iox, lab="ROS 200uM, OX", color=:green)
-iphos = (sys.t / 1000, 100 * (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
+iphos = (sys.t / 1000, (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
 plot!(sol, idxs=iphos, lab="ROS (-), phos", color=:blue, linestyle=:dash)
 plot!(sol2, idxs=iphos, lab="ROS 50uM, phos", color=:red, linestyle=:dash)
 plot!(sol3, idxs=iphos, lab="ROS 200uM, phos", color=:green, linestyle=:dash)
-plot!(xlabel="Time (s)", ylabel="CaMKII fraction", title="Simulation")
+plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Simulation")
 
 #---
 savefig("ros-camkiiox-pox.pdf")
