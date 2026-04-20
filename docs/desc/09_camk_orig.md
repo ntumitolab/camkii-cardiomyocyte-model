@@ -25,7 +25,7 @@ v_9 &= k_9 \cdot ca^2 \cdot KCaM_{Apo} \\
 k_9 &= \frac{KCaM1C_{on} KCaM2C_{on}}{KCaM1C_{off} + KCaM2C_{on} \cdot ca} \\
 v_{10} &= k_{10} \cdot KCa2CaM_C \\
 k_{10} &= \frac{KCaM1C_{off} KCaM2C_{off}}{KCaM1C_{off} + KCaM2C_{on} \cdot ca} \\
-v_{11} &= k_{11} \cdot ca^2 \cdot CaM_{Apo} \\
+v_{11} &= k_{11} \cdot ca^2 \cdot KCaM_{Apo} \\
 k_{11} &= \frac{KCaM1N_{on} KCaM2N_{on}}{KCaM1N_{off} + KCaM2N_{on} \cdot ca} \\
 v_{12} &= k_{12} \cdot KCa2CaM_N \\
 k_{12} &= \frac{KCaM1N_{off} KCaM2N_{off}}{KCaM1N_{off} + KCaM2N_{on} \cdot ca} \\
@@ -45,6 +45,25 @@ v_{21} &= k_{21} \cdot CaMK \cdot Ca2CaM_N \\
 v_{22} &= k_{22} KCa2CaM_N \\
 v_{23} &= k_{23} \cdot CaMK \cdot Ca4CaM \\
 v_{24} &= k_{24} KCa4CaM \\
+\end{align}
+$$
+
+$$
+\begin{align}
+\frac{d}{dt} Ca2CaM_C &= v_1 - v_2 - v_5 + v_6 - v_{19} + v_{20} \\
+\frac{d}{dt} Ca2CaM_N &= v_3 - v_4 - v_7 + v_8 - v_{21} + v_{22} \\
+\frac{d}{dt} Ca4CaM &= v_5 - v_6 + v_7 - v_8 - v_{23} + v_{24} \\
+\frac{d}{dt} KCaM_{Apo} &= -v_9 + v_{10} - v_{11} + v_{12} + v_{17} - v_{18} \\
+\frac{d}{dt} KCa2CaM_C &= v_9 - v_{10} - v_{13} + v_{14} + v_{19} - v_{20} \\
+\frac{d}{dt} KCa2CaM_N &= v_{11} - v_{12} - v_{15} + v_{16} + v_{21} - v_{22} \\
+\frac{d}{dt} KCa4CaM &= v_{13} - v_{14} + v_{15} - v_{16} + v_{23} - v_{24}\\
+\end{align}
+$$
+
+$$
+\begin{align}
+CaM_T &= CaM_{Apo} + Ca2CaM_C + Ca2CaM_N + Ca4CaM + KCaM_{Apo} + KCa2CaM_C + KCa2CaM_N + KCa4CaM \\
+CaMK_T &= CaMK + KCaM_{Apo} + KCa2CaM_C + KCa2CaM_N + KCa4CaM
 \end{align}
 $$
 
