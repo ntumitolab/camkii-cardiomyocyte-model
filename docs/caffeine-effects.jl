@@ -5,6 +5,7 @@ using Model
 using Model: second
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
+using OrdinaryDiffEqSDIRK
 using Plots
 using CSV
 using DataFrames

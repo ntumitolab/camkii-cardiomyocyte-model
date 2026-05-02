@@ -3,6 +3,7 @@ using Model
 using Model: μM, hil, second, Hz
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
+using OrdinaryDiffEqSDIRK
 using Plots
 using CurveFit
 Plots.default(lw=1.5)
