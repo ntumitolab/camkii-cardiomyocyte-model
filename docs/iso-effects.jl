@@ -3,6 +3,7 @@ using Model
 using Model: second, μM
 using ModelingToolkit
 using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
+using OrdinaryDiffEqSDIRK
 using Plots
 using CSV
 using DataFrames

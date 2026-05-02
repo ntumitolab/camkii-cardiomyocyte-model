@@ -1,15 +1,16 @@
 # # ROS effects
 using Model
 using Model: second, μM
+import Dates
+using CSV
+using CurveFit
+using DataFrames
+using DiffEqCallbacks
 using ModelingToolkit
 using OrdinaryDiffEq
-using DiffEqCallbacks
+using OrdinaryDiffEqSDIRK
 using Plots
 using StatsPlots
-using CSV
-using DataFrames
-import Dates
-using CurveFit
 Plots.default(lw=1.5)
 
 # ## Setup model

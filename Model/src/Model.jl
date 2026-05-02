@@ -4,13 +4,13 @@ using PrecompileTools: @compile_workload, @recompile_invalidations
 using CSV
 using DataFrames
 using DiffEqCallbacks
-using DiffEqCallbacks
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
 using Optimization
 using OptimizationOptimJL
 using OrdinaryDiffEq
+using OrdinaryDiffEqSDIRK
 using Plots
 using StatsPlots
 using SteadyStateDiffEq
