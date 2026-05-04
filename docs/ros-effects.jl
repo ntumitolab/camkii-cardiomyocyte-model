@@ -6,8 +6,8 @@ using CSV
 using CurveFit
 using DataFrames
 using DiffEqCallbacks
+using DifferentialEquations
 using ModelingToolkit
-using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using StatsPlots
@@ -22,7 +22,7 @@ stimend = 120second
 newkox_CaMK = inv(45second) / 50μM
 @time "Build problem" prob = ODEProblem(sys, [sys.kox_CaMK => inv(45second) / 50μM], tend)
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-alg = KenCarp47()
+alg = KenCarp4()
 
 # ## Comparisons
 # ROS (H2O2) 0uM vs 50uM vs 200uM

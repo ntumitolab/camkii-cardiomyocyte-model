@@ -5,13 +5,13 @@ using Model: second, Hz
 using ADTypes
 using CurveFit
 using DiffEqCallbacks
+using DifferentialEquations
 using ForwardDiff
 using LinearAlgebra
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using Optimization
 using OptimizationOptimJL
-using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 
@@ -24,7 +24,7 @@ experimental_taus = [16.48, 16.73, 17.65, 18.08]
 stimstart = 30.0second
 stimend = 130.0second
 tend = 205.0second
-alg = KenCarp47()
+alg = KenCarp4()
 @time "Building ODE system" sys = Model.DEFAULT_SYS
 @time "Building ODE problem" prob = ODEProblem(sys, [sys.r_CaMK=>10/second], tend)
 

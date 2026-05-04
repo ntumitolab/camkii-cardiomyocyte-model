@@ -1,12 +1,14 @@
 # # Effects of isoproterenol
 using Model
 using Model: second, μM
-using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
-using OrdinaryDiffEqSDIRK
-using Plots
 using CSV
 using DataFrames
+using DiffEqCallbacks
+using DifferentialEquations
+using ModelingToolkit
+using OrdinaryDiffEqSDIRK
+using Plots
+using SteadyStateDiffEq
 import Dates
 Plots.default(lw=1.5)
 
@@ -16,7 +18,7 @@ tend = 205second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 stimstart = 30second
 stimend = 120second
-alg = KenCarp47()
+alg = KenCarp4()
 
 # ## Without isoproterenol
 @unpack Istim = sys

@@ -2,7 +2,8 @@
 # Influence of parameters on CaMKII activity decay specific time at 1Hz pacing for 300 sec.
 # Load packages
 using ModelingToolkit
-using OrdinaryDiffEq
+using DifferentialEquations
+using OrdinaryDiffEqSDIRK
 using CurveFit
 using Plots
 Plots.default(lw=2)
@@ -20,7 +21,7 @@ stimend = 300.0second
 
 # ## Simulations
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-@time sol = solve(prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8)
+@time sol = solve(prob, KenCarp4(); callback, reltol = 1e-8, abstol = 1e-8)
 
 # Default decay time
 decay_model(p, x) = @. p[1] * exp(-x / p[2]) + p[3]
@@ -43,7 +44,7 @@ for k in (r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1)
     println("Calculating sensitivity for parameter: ", k)
     original_value = prob.ps[k]
     _prob = remake(prob, p=[k => original_value * 1.01]) ## Increase 1% of the parameter value
-    sol = solve(_prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8)
+    sol = solve(_prob, KenCarp4(); callback, reltol = 1e-8, abstol = 1e-8)
     sensitivities[k] = (get_decay_time(sol; stimend) / tau0 - 1) * 100
 end
 

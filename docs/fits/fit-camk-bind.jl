@@ -1,11 +1,13 @@
 # # CaMKII binding simplification
 using Model
 using Model: μM, hil, second, Hz
+using CurveFit
+using DiffEqCallbacks
+using DifferentialEquations
 using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using OrdinaryDiffEqSDIRK
 using Plots
-using CurveFit
+using SteadyStateDiffEq
 Plots.default(lw=1.5)
 
 # ## CaMKII sensitivity to calcium
@@ -18,7 +20,7 @@ Plots.default(lw=1.5)
 ca = exp10.(range(log10(0.03μM), log10(10μM), length=1001))
 @time "Solve problem" sim = map(ca) do c
     newprob = remake(prob, p=[Ca => c])
-    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
+    solve(newprob, DynamicSS(KenCarp4()); abstol=1e-8, reltol=1e-8)
 end;
 
 #---
