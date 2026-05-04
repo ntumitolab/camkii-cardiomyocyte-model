@@ -2,6 +2,7 @@
 using Model
 using ModelingToolkit
 using DifferentialEquations
+using OrdinaryDiffEqSDIRK
 using SteadyStateDiffEq
 using Plots
 Plots.default(lw=2)
