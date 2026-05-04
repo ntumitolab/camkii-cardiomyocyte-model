@@ -1,6 +1,10 @@
-@compile_workload begin
-    sys = build_neonatal_ecc_sys() |> mtkcompile
-    prob = ODEProblem(sys, [], (0.0, 200.0second))
-    sol = solve(prob, TRBDF2())
-    plot(sol, idxs=sys.CaMKAct)
+@recompile_invalidations begin
+    using CSV
+    using DataFrames
+    using DiffEqCallbacks
+    using DifferentialEquations
+    using ModelingToolkit
+    using ModelingToolkit: t_nounits as t, D_nounits as D
+    using NaNMath
+    using Plots
 end

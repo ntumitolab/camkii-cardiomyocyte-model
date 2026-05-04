@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "aec69e05b342d703a259186f41200d2231040617"
+project_hash = "1654bb8d59f90c07c276f53a4b56cccd6474941d"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -498,6 +498,12 @@ deps = ["IrrationalConstants", "LogExpFunctions", "NaNMath", "Random", "SpecialF
 git-tree-sha1 = "23163d55f885173722d1e4cf0f6110cdbaf7e272"
 uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
 version = "1.15.1"
+
+[[deps.DifferentialEquations]]
+deps = ["OrdinaryDiffEq", "Reexport", "SciMLBase"]
+git-tree-sha1 = "076a5e999d38ffbba860d4c1ba49828855b65c14"
+uuid = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+version = "8.0.0"
 
 [[deps.DifferentiationInterface]]
 deps = ["ADTypes", "LinearAlgebra"]
@@ -1404,7 +1410,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 version = "1.11.0"
 
 [[deps.Model]]
-deps = ["CSV", "DataFrames", "DiffEqCallbacks", "ModelingToolkit", "NaNMath", "Optimization", "OptimizationOptimJL", "OrdinaryDiffEq", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools", "StatsPlots", "SteadyStateDiffEq"]
+deps = ["CSV", "DataFrames", "DiffEqCallbacks", "DifferentialEquations", "ModelingToolkit", "NaNMath", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools"]
 path = "Model"
 uuid = "c61cb6fc-a4aa-49b2-8e1f-749d0e1a896d"
 version = "0.1.0"
@@ -2486,9 +2492,9 @@ version = "1.1.0"
 
 [[deps.SymbolicUtils]]
 deps = ["AbstractTrees", "ArrayInterface", "Combinatorics", "ConstructionBase", "DataStructures", "Dictionaries", "DocStringExtensions", "DynamicPolynomials", "EnumX", "ExproniconLite", "Graphs", "LinearAlgebra", "MacroTools", "Moshi", "MultivariatePolynomials", "MutableArithmetics", "NaNMath", "PrecompileTools", "ReadOnlyArrays", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArraysCore", "SymbolicIndexingInterface", "TaskLocalValues", "TermInterface", "WeakCacheSets"]
-git-tree-sha1 = "94289f54ee5eb8feccaad382b80c4fd43d99b7ab"
+git-tree-sha1 = "eda3976d610de0b1d4091c76368b5d05f9d3d4a6"
 uuid = "d1185830-fcd6-423d-90d6-eec64667417b"
-version = "4.25.2"
+version = "4.26.1"
 
     [deps.SymbolicUtils.extensions]
     SymbolicUtilsChainRulesCoreExt = "ChainRulesCore"

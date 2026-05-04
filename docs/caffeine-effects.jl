@@ -3,12 +3,14 @@
 # In this model, we decrease the mid saturation sub-SR calcium concentration for the opening rate.
 using Model
 using Model: second
-using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
-using OrdinaryDiffEqSDIRK
-using Plots
 using CSV
 using DataFrames
+using DiffEqCallbacks
+using DifferentialEquations
+using ModelingToolkit
+using OrdinaryDiffEqSDIRK
+using Plots
+using SteadyStateDiffEq
 import Dates
 Plots.default(lw=1.5)
 
@@ -18,7 +20,7 @@ tend = 500second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 stimstart = 100second
 stimend = 300second
-alg = KenCarp47()
+alg = KenCarp4()
 function add_coffee_affect!(integrator)
     integrator.ps[sys.RyRsensitivity] = 10
 end
@@ -74,7 +76,7 @@ plot!(sol_caf, idxs=i, lab="Caf", ylabel="Active CaMKII fraction", xlabel="Time 
 tend = 205second
 stimstart = 30second
 stimend = 120second
-alg = KenCarp47()
+alg = KenCarp4()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time prob = ODEProblem(sys, [], tend)

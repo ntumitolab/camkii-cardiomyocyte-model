@@ -1,14 +1,16 @@
 # # Electrophysiology
 # Basic CMC model checks
+using CSV
+using DataFrames
+using DiffEqCallbacks
+using DifferentialEquations
 using Model
 using Model: second
 using ModelingToolkit
-using OrdinaryDiffEq, SteadyStateDiffEq, DiffEqCallbacks
 using OrdinaryDiffEqSDIRK
 using Plots
-using CSV
 using StatsBase: mean
-using DataFrames
+using SteadyStateDiffEq
 Plots.default(lw=1.5)
 
 # ## Setup the ODE system
@@ -16,7 +18,7 @@ Plots.default(lw=1.5)
 @time sys = Model.DEFAULT_SYS
 tend = 500.0second
 @time "Build problem" prob = ODEProblem(sys, [], (0.0, tend))
-alg = KenCarp47()
+alg = KenCarp4()
 
 @unpack Istim = sys
 stimstart = 100.0second
