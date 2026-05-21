@@ -35,7 +35,7 @@ plot(sol, idxs=(sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean]), t
 #---
 plot(sol, idxs=(sys.t / 1000, sys.CaMKAct), title="Active CaMKII", label=false, ylabel="Active CaMKII fraction", xlabel="Time (s)")
 
-# ## 0.1uM isoproterenol
+# ## 100 nM isoproterenol
 prob2 = remake(prob, p=[sys.ISO => 0.1μM])
 @time sol2 = solve(prob2, alg; callback)
 
@@ -45,7 +45,18 @@ plot(sol2, idxs=(sys.t / 1000, sys.vm), tspan=(100second, 101second), title="Act
 #---
 plot(sol2, idxs=(sys.t / 1000, [sys.Cai_sub_SR, sys.Cai_sub_SL, sys.Cai_mean]), tspan=(100second, 101second), title="Calcium transcient", xlabel="Time (s)", ylabel="Conc. (μM)", label=["Ca (SR)" "Ca (SL)" "Ca (avg)"])
 
-# ## Comparison
+# ## ComparisonS
+# ### Action potential
+i = (sys.t / 1000, sys.vm)
+tspan = (100second, 101second)
+plot(sol, idxs=i, title="Action potential", lab="ISO (-)"; tspan)
+plot!(sol2, idxs=i, lab="ISO (0.1uM)", xlabel="Time (s)", ylabel="Voltage (mV)"; tspan)
+
+#---
+savefig("iso-ap.pdf")
+savefig("iso-ap.png")
+
+# ### Calcium transient
 i = (sys.t / 1000, sys.Cai_mean)
 tspan = (100second, 101second)
 plot(sol, idxs=i, title="Calcium transcient", lab="ISO (-)"; tspan)
@@ -62,7 +73,7 @@ println(extrema(ca_ctl))
 ca_iso = sol2(tspan[1]:1:tspan[2], idxs=sys.Cai_mean)
 println(extrema(ca_iso))
 
-#---
+# ### Active CaMKII
 i = (sys.t / 1000, sys.CaMKAct)
 plot(sol, idxs=i, title="", lab="ISO (-)")
 plot!(sol2, idxs=i, lab="ISO (0.1uM)", ylabel="Active CaMKII fraction", xlabel="Time (s)")
@@ -71,14 +82,6 @@ plot!(sol2, idxs=i, lab="ISO (0.1uM)", ylabel="Active CaMKII fraction", xlabel="
 savefig("iso-camkact.pdf")
 savefig("iso-camkact.png")
 
-#---
-i = (sys.t / 1000, sys.vm)
-tspan = (100second, 101second)
-plot(sol, idxs=i, title="Action potential", lab="ISO (-)"; tspan)
-plot!(sol2, idxs=i, lab="ISO (0.1uM)", xlabel="Time (s)", ylabel="Voltage (mV)"; tspan)
-#---
-savefig("iso-ap.pdf")
-savefig("iso-ap.png")
 
 # ## Experimental data
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical.csv"), DataFrame)
