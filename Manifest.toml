@@ -1412,16 +1412,16 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 version = "1.11.0"
 
 [[deps.Model]]
-deps = ["CSV", "DataFrames", "DiffEqCallbacks", "DifferentialEquations", "ModelingToolkit", "NaNMath", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools"]
+deps = ["CSV", "DataFrames", "DiffEqCallbacks", "DifferentialEquations", "ModelingToolkit", "NaNMath", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools", "SteadyStateDiffEq"]
 path = "Model"
 uuid = "c61cb6fc-a4aa-49b2-8e1f-749d0e1a896d"
 version = "0.1.0"
 
 [[deps.ModelingToolkit]]
 deps = ["ADTypes", "BipartiteGraphs", "BlockArrays", "Combinatorics", "CommonSolve", "ConstructionBase", "DataStructures", "DiffEqBase", "DifferentiationInterface", "DocStringExtensions", "FillArrays", "ForwardDiff", "Graphs", "InteractiveUtils", "Libdl", "LinearAlgebra", "ModelingToolkitBase", "ModelingToolkitTearing", "Moshi", "OffsetArrays", "OrderedCollections", "PreallocationTools", "PrecompileTools", "REPL", "Reexport", "RuntimeGeneratedFunctions", "SCCNonlinearSolve", "SciMLBase", "SciMLPublic", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "StateSelection", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "UnPack"]
-git-tree-sha1 = "0bfaf25f0fc5941a70866cbb637ff9f7305fdb63"
+git-tree-sha1 = "848e5f3a5ab2ede0d291dde3365c7b5da664052d"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "11.26.4"
+version = "11.26.5"
 
     [deps.ModelingToolkit.extensions]
     MTKFMIExt = "FMIImport"
