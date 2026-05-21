@@ -2,6 +2,7 @@ module Model
 
 using PrecompileTools: @compile_workload, @recompile_invalidations
 using DiffEqCallbacks
+using NaNMath
 using DifferentialEquations
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
