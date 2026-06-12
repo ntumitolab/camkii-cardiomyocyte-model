@@ -19,8 +19,7 @@ Plots.default(lw=1.5)
 tend = 205second
 stimstart = 30second
 stimend = 120second
-newkox_CaMK = inv(45second) / 50μM
-@time "Build problem" prob = ODEProblem(sys, [sys.kox_CaMK => inv(45second) / 50μM], tend)
+@time "Build problem" prob = ODEProblem(sys, [], tend)
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 alg = KenCarp4()
 

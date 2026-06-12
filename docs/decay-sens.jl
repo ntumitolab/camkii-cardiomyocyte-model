@@ -7,13 +7,13 @@ using CurveFit
 using Plots
 Plots.default(lw=2)
 using Model
-using Model: Hz, second
+using Model: Hz, second, μM
 
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 sec and ends at `t`=300 sec.
 @time sys = Model.DEFAULT_SYS
 tend = 400.0second
-@time prob = ODEProblem(sys, [], tend)
+@time prob = ODEProblem(sys, [sys.ROS => 10μM], tend)
 stimstart = 100.0second
 stimend = 300.0second
 @unpack Istim = sys
@@ -34,8 +34,8 @@ end
 println("The default decay time of CaMKII activity at 1Hz pacing for 200 sec is: ", tau0, " seconds")
 
 # Sensitivity analysis of the solution at `t`=300 sec against parameters.
-@unpack r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1 = sys
-params = [r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1]
+@unpack r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1, kfa2_CaMK, kfa4_CaMK, kfb_CaMK, kmCa2_CaMK, kmCa4_CaMK, kox_CaMK, krd_CaMK = sys
+params = [r_CaMK, kb_CaMKP, kphos_CaMK, kdeph_CaMK, k_P1_P2, k_P2_P1, kfa2_CaMK, kfa4_CaMK, kfb_CaMK, kmCa2_CaMK, kmCa4_CaMK, kox_CaMK, krd_CaMK]
 sensitivities = Dict()
 
 @time for k in params
