@@ -1428,9 +1428,9 @@ version = "0.1.0"
 
 [[deps.ModelingToolkit]]
 deps = ["ADTypes", "BipartiteGraphs", "BlockArrays", "Combinatorics", "CommonSolve", "ConstructionBase", "DataStructures", "DiffEqBase", "DifferentiationInterface", "DocStringExtensions", "FillArrays", "ForwardDiff", "Graphs", "InteractiveUtils", "Libdl", "LinearAlgebra", "ModelingToolkitBase", "ModelingToolkitTearing", "Moshi", "OffsetArrays", "OrderedCollections", "PreallocationTools", "PrecompileTools", "REPL", "Reexport", "RuntimeGeneratedFunctions", "SCCNonlinearSolve", "SciMLBase", "SciMLPublic", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "StateSelection", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "UnPack"]
-git-tree-sha1 = "fad7b32c5a6431764b4a6afec6fc51bb58529145"
+git-tree-sha1 = "7c05e3693fd07aeece14ab8e0cb8103751bc3595"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "11.26.8"
+version = "11.27.0"
 
     [deps.ModelingToolkit.extensions]
     MTKFMIExt = "FMIImport"
@@ -1480,9 +1480,9 @@ version = "1.43.0"
 
 [[deps.ModelingToolkitTearing]]
 deps = ["BipartiteGraphs", "CommonSolve", "DocStringExtensions", "Graphs", "LinearAlgebra", "ModelingToolkitBase", "Moshi", "OffsetArrays", "OrderedCollections", "SciMLBase", "Setfield", "SparseArrays", "StateSelection", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "UUIDs"]
-git-tree-sha1 = "30a7a3259e3866a9bb03c6a4f51e5446553cedc1"
+git-tree-sha1 = "ef2390092d9857a07b8042884cdb266da1ba42d2"
 uuid = "6bb917b9-1269-42b9-9f7c-b0dca72083ab"
-version = "1.14.2"
+version = "1.15.0"
 
 [[deps.Moshi]]
 deps = ["ExproniconLite", "Jieko"]
