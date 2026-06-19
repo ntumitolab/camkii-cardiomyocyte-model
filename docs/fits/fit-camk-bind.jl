@@ -5,7 +5,6 @@ using CurveFit
 using DiffEqCallbacks
 using DifferentialEquations
 using ModelingToolkit
-using OrdinaryDiffEqSDIRK
 using Plots
 using SteadyStateDiffEq
 Plots.default(lw=1.5)
@@ -17,10 +16,10 @@ Plots.default(lw=1.5)
 @time "Build problem" prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
-ca = exp10.(range(log10(0.03μM), log10(10μM), length=1001))
+ca = logrange(0.03μM, 10μM, 1001)
 @time "Solve problem" sim = map(ca) do c
     newprob = remake(prob, p=[Ca => c])
-    solve(newprob, DynamicSS(KenCarp4()); abstol=1e-8, reltol=1e-8)
+    solve(newprob, DynamicSS(FBDF()); abstol=1e-8, reltol=1e-8)
 end;
 
 #---
@@ -29,7 +28,7 @@ extract(sim, k) = map(s -> s[k], sim)
 
 # Status of the CaMKII system across a range of calcium concentrations.
 xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1], ca[end]))
-let
+figs1a = let
     plot(ca, extract(sim, sys.Ca2CaM_C), lab="Ca2CaM_C", ylabel="Conc. (μM)"; xopts...)
     plot!(ca, extract(sim, sys.Ca2CaM_N), lab="Ca2CaM_N")
     plot!(ca, extract(sim, sys.Ca4CaM), lab="Ca4CaM")
@@ -37,12 +36,9 @@ let
     plot!(ca, extract(sim, sys.CaM0_CaMK), lab="CaM0_CaMK")
     plot!(ca, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
     plot!(ca, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
-    plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:topleft)
+    plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:left)
+    plot!(title="A", titlelocation=:left)
 end
-
-#---
-savefig("camkii_cam_binding.pdf")
-savefig("camkii_cam_binding.png")
 
 # We exclude CaMK bound with ApoCaM (CaM0_CaMK) from the active fraction.
 CaMKAct = 1 - (sys.CaMK + sys.CaM0_CaMK) / sys.CAMKII_T
@@ -100,11 +96,14 @@ println("Half saturation Ca concentration for CaM-Ca4 binding: ", fit.u[4], " μ
 println("RMSE: ", mse(fit) |> sqrt)
 
 #---
-plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="", legend=:topleft, ylabel="Bound CaMKII fraction"; xopts...)
+figs1b = plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="B", legend=:topleft, ylabel="Bound CaMKII fraction", titlelocation=:left; xopts...)
 
 #---
-savefig("camkii_act_fit.pdf")
-savefig("camkii_act_fit.png")
+plot(figs1a, figs1b, layout=(2, 1), size=(600, 800))
+
+#---
+savefig("figS1.png")
+savefig("figS1.pdf")
 
 # ### Polynomial fitting
 # Using `RationalPolynomialFitAlgorithm` to fit the data with a rational polynomial function.

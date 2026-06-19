@@ -2,7 +2,6 @@
 # Fitting CaMKII parameters to experimental decay rates.
 using Model
 using Model: second, Hz
-using ADTypes
 using CurveFit
 using DiffEqCallbacks
 using DifferentialEquations
