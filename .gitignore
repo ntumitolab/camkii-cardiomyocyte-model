@@ -34,6 +34,8 @@ LocalPreferences.toml
 *.pdf
 *.html
 *.docx
+*.png
+!docs/CaMKII_kinetics.png
 
 # MyST build outputs
 _build/
