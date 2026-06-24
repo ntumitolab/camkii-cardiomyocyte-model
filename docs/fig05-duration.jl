@@ -17,7 +17,7 @@ Plots.default(lw=1.5)
 
 # ## Experiment
 # 30 sec resting + N sec 1Hz pacing + resting.
-durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration.csv"), DataFrame)
+durationdf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-duration-normalized.csv"), DataFrame)
 ts = durationdf[!, "Time(sec)"]
 fifteen = durationdf[!, "1Hz 15sec (Mean)"]
 fifteen_error = durationdf[!, "1Hz 15sec (SD)"] ./ sqrt.(durationdf[!, "1Hz 15sec (N)"])
@@ -33,7 +33,7 @@ fig5a = plot(ts, fifteen, yerr=fifteen_error, lab="15 sec", color=:blue, markers
 plot!(fig5a, ts, thirty, yerr=thirty_error, lab="30 sec", color=:red, markerstrokecolor=:red)
 plot!(fig5a, ts, sixty, yerr=sixty_error, lab="60 sec", color=:orange, markerstrokecolor=:orange)
 plot!(fig5a, ts, ninety, yerr=ninety_error, lab="90 sec", color=:green, markerstrokecolor=:green)
-plot!(fig5a, title="A", xlabel="Time (s)", ylabel="CaMKAR ratio (488/405)", titlelocation = :left)
+plot!(fig5a, title="A", xlabel="Time (s)", ylabel="CaMKAR (R/R0)", titlelocation = :left)
 
 # ## Simulation
 # Following the experimental protocol, we simulate 30 sec resting + N sec 1Hz pacing + resting.
