@@ -22,7 +22,7 @@ iso_error = chemicaldf[!, "isoproterenol 100nM SD"] ./ sqrt.(chemicaldf[!, "isop
 
 fig6a = plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blue)
 plot!(fig6a, ts, iso, yerr=iso_error, lab="ISO 100nM", color=:red, markerstrokecolor=:red)
-plot!(fig6a, xlabel="Time (s)", ylabel="CaMKAR measurement (AU)", title="A", titlelocation=:left)
+plot!(fig6a, xlabel="Time (s)", ylabel="CaMKAR ratio (488/405)", title="A", titlelocation=:left)
 
 # ## Simulation
 @time "Build system" sys = Model.DEFAULT_SYS

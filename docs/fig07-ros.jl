@@ -28,7 +28,7 @@ ros200_error = chemicaldf[!, "H2O2 200uM SD"] ./ sqrt.(chemicaldf[!, "H2O2 200uM
 fig7a = plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blue)
 plot!(fig7a, ts, ros50, yerr=ros50_error, lab="50μM H2O2", color=:red, markerstrokecolor=:red)
 plot!(fig7a, ts, ros200, yerr=ros200_error, lab="200μM H2O2", color=:green, markerstrokecolor=:green)
-plot!(fig7a, xlabel="Time (s)", ylabel="CaMKAR measurement (AU)", title="A", titlelocation=:left)
+plot!(fig7a, xlabel="Time (s)", ylabel="CaMKAR ratio (488/405)", title="A", titlelocation=:left)
 
 # ## Simulation
 @time "Build system" sys = Model.DEFAULT_SYS

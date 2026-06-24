@@ -24,7 +24,7 @@ twohz_error = freqdf[!, "2Hz (SD)"] ./ sqrt.(freqdf[!, "2Hz (N)"])
 
 fig4a = plot(ts, onehz, yerr=onehz_error, lab="1 Hz", color=:blue, markerstrokecolor=:blue)
 plot!(fig4a, ts, twohz, yerr=twohz_error, lab="2 Hz", color=:red, markerstrokecolor=:red)
-plot!(fig4a, title="A", xlabel="Time (s)", ylabel="CaMKAR measurements (AU)", titlelocation = :left)
+plot!(fig4a, title="A", xlabel="Time (s)", ylabel="CaMKAR ratio (488/405)", titlelocation = :left)
 
 # ## Simulation
 @time "Build system" sys = Model.DEFAULT_SYS

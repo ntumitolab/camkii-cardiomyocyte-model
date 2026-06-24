@@ -24,7 +24,7 @@ caf_error = chemicaldf[!, "caffeine 20mM SD"] ./ sqrt.(chemicaldf[!, "caffeine 2
 
 fig8a = plot(ts, ctl, yerr=ctl_error, lab="Ctl", color=:blue, markerstrokecolor=:blue)
 plot!(fig8a, ts, caf, yerr=caf_error, lab="Caf 20mM", color=:red, markerstrokecolor=:red)
-plot!(fig8a, xlabel="Time (s)", ylabel="CaMKAR measurement (AU)", title= "A", titlelocation=:left)
+plot!(fig8a, xlabel="Time (s)", ylabel="CaMKAR ratio (488/405)", title= "A", titlelocation=:left)
 
 # ## Caffeine and electrophysiology
 # - Adding caffeine in the beginning of the simulation.
