@@ -74,8 +74,8 @@ fig7d = groupedbar(["0uM", "50uM", "200uM"], [pvals ovals], bar_position=:stack,
 
 # ## Save figure
 plot(fig7a, fig7b, fig7c, fig7d, layout=(2, 2), size=(1000, 800))
-savefig("fig07.png")
-savefig("fig07.pdf")
+savefig("fig7.png")
+savefig("fig7.pdf")
 
 # ## Decay kinectics
 # Fit against an exponential decay model.
