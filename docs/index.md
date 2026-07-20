@@ -1,6 +1,6 @@
 # CaMKII cardiomyocyte model
 
-- https://github.com/drgrandilab/Morotti-et-al-2014-Mouse-Ventricular-Model
+Improved version from [Wu's integrative NRVM CaMKII model](https://github.com/ntumitolab/Hopkins-CaMKII).
 
 ---
 
@@ -33,3 +33,18 @@ The activities of PKACI, PKACII, PP1, and their downstream targets (SERCA, LCC, 
 - Caffeine activation of RyR: increasing sensitivity to Sub-SR Ca instead of constant opening.
 - Compartment corrections for SR Ca and Sub-SR Ca ODEs.
 - Fast sodium channel gating variable recovery rates increased by 3 times to accommodate 2Hz and 3Hz pacing.
+
+## Benchmark
+
+Conditions:
+
+- 1Hz pacing from t=100 to 300 seconds
+- TRBDF2 solver
+- Relative and absolute tolerances: 1e-9
+- CPU: i9-14900k
+---
+
+Results:
+
+[Previous model](https://github.com/ntumitolab/Hopkins-CaMKII/blob/main/Neonatal%20Rat/Main%20CaMKII%20System/neonatal_camkii.jl): 160.5 sec
+This model: 5.777 sec

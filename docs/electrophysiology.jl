@@ -16,9 +16,9 @@ Plots.default(lw=1.5)
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 sec and ends at `t`=300 sec.
 @time sys = Model.DEFAULT_SYS
-tend = 500.0second
+tend = 300.0second
 @time "Build problem" prob = ODEProblem(sys, [], (0.0, tend))
-alg = KenCarp4()
+alg = TRBDF2()
 
 @unpack Istim = sys
 stimstart = 100.0second
@@ -26,7 +26,7 @@ stimend = 300.0second
 
 # ## Single pulse
 callback = build_stim_callbacks(Istim, stimstart + 1second; period=10second, starttime=stimstart)
-@time sol = solve(prob, alg; callback)
+@time sol = solve(prob, alg; callback, abstol=1e-9, reltol=1e-9)
 
 plot(sol, idxs=(sys.t / 1000 - 100, sys.vm), title="Action potential (single pulse)", ylabel="mV", xlabel="Time (s)", label=false, tspan=(100second, 103second))
 
