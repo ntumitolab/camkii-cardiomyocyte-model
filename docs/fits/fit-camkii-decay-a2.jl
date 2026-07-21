@@ -2,15 +2,16 @@
 # Fitting CaMKII parameters to experimental decay rates.
 using Model
 using Model: second, Hz
+using ADTypes
 using CurveFit
 using DiffEqCallbacks
-using DifferentialEquations
 using ForwardDiff
 using LinearAlgebra
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using Optimization
 using OptimizationOptimJL
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 
@@ -21,14 +22,14 @@ experimental_taus = [16.48, 16.73, 17.65, 18.08]
 
 # ## Setup problem
 stimstart = 30.0second
-stimend = 130.0second
+stimend = 120.0second
 tend = 205.0second
-alg = KenCarp4()
+alg = KenCarp47()
 @time "Building ODE system" sys = Model.DEFAULT_SYS
-@time "Building ODE problem" prob = ODEProblem(sys, [sys.r_CaMK=>10/second], tend)
+@time "Building ODE problem" prob = ODEProblem(sys, [sys.r_CaMK=>10Hz], tend)
 
 #---
-@unpack Istim, CaMKAct = sys
+@unpack Istim, fracCaMKPhos = sys
 pace15 = Model.build_stim_callbacks(Istim, stimstart + 15 * second; period=1second, starttime=stimstart)
 pace30 = Model.build_stim_callbacks(Istim, stimstart + 30 * second; period=1second, starttime=stimstart)
 pace60 = Model.build_stim_callbacks(Istim, stimstart + 60 * second; period=1second, starttime=stimstart)
@@ -41,13 +42,14 @@ end
 
 plot()
 for (sol, dur) in zip(sols, pacing_durations)
-    plot!(sol, idxs=(t/1000, CaMKAct), label="$(dur) seconds")
+    plot!(sol, idxs=(t/1000, fracCaMKPhos), label="$(dur) seconds")
 end
-plot!(xlabel="Time (s)", ylabel="CaMKII Activity", title="", legend=:topright)
+plot!(xlabel="Time (s)", ylabel="Phosphorylated fraction", title="", legend=:topright)
 
 # ## Loss function
-# Changing CaMKII parameters to fit decay rate in the experiments.
-@unpack kphos_CaMK, kdeph_CaMK, kb_CaMKP, k_P1_P2, k_P2_P1, CaMKAct, r_CaMK = sys
+# Changing CaMKII parameters to fit decay rate in the experiments
+# Fixed ratios between phosphorylation and dephosphorylation rates, and between A1 to A2 and A2 to A1 rates.
+@unpack kphos_CaMK, kdeph_CaMK, kb_CaMKP, k_P1_P2, k_P2_P1, fracCaMKPhos, r_CaMK = sys
 kphos_dephos_ratio = prob.ps[kphos_CaMK] / prob.ps[kdeph_CaMK]
 p1p2_ratio = prob.ps[k_P2_P1] / prob.ps[k_P1_P2]
 
@@ -64,7 +66,7 @@ data = (
 
 function loss(theta, data)
     @unpack prob, cbs, experimental_taus, pacing_durations, kphos_dephos_ratio, p1p2_ratio, stimstart, tend = data
-    @unpack kdeph_CaMK, kphos_CaMK, kb_CaMKP, k_P1_P2, k_P2_P1, CaMKAct, r_CaMK = prob.f.sys
+    @unpack kdeph_CaMK, kphos_CaMK, kb_CaMKP, k_P1_P2, k_P2_P1, fracCaMKPhos, r_CaMK = prob.f.sys
     dephos_rate = exp10(theta[1])
     kb2_rate = exp10(theta[2])
     k_P1_P2_rate = exp10(theta[3])
@@ -92,12 +94,11 @@ function loss(theta, data)
         i = ctx.sim_id
         stimend = stimstart + pacing_durations[i] * second
         ts = collect(range(0.0, stop=50.0, step=5.0))
-        ysim = sol(stimend .+ ts .* second, idxs=CaMKAct).u
+        ysim = sol(stimend .+ ts .* second, idxs=fracCaMKPhos).u
         fit = solve(CurveFitProblem(ts, ysim), ExpSumFitAlgorithm(n=1, withconst=true))
         tau = inv(-fit.u.λ[])
         tauexpected = experimental_taus[i]
-        l2 = (tau - tauexpected)^2
-        return (l2, false)
+        return ((tau - tauexpected)^2, false)
     end
 
     ensemble_prob = EnsembleProblem(prob; prob_func, output_func)
@@ -110,9 +111,10 @@ theta = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[kb_CaMKP]), log10(prob.ps[k_P
 @time loss(theta, data)
 
 # ## Optimization
-optf = OptimizationFunction(loss)
-optprob = OptimizationProblem(optf, theta, data, lb=[-1, -1, -1, 0] + theta, ub=[1, 1, 1, 1] + theta)
-optalg = Optim.SAMIN()
+optf = OptimizationFunction(loss, ADTypes.AutoFiniteDiff())
+optprob = OptimizationProblem(optf, theta, data, lb=[-1, -1, -1, -1] + theta, ub=[1, 1, 1, 1] + theta)
+# optalg = Optim.SAMIN()
+optalg = Optim.LBFGS()
 maxtime = haskey(ENV, "JULIA_CI") ? 60 : 2000
 @time fitted_dephos = solve(optprob, optalg; maxiters=5000, maxtime=maxtime)
 @show fitted_dephos.objective
@@ -142,7 +144,7 @@ end;
 
 plot()
 for (sol, dur) in zip(sols, [15.0, 30.0, 60.0, 90.0])
-    plot!(sol, idxs=(t/1000, CaMKAct), label="$(dur) seconds")
+    plot!(sol, idxs=(t/1000, fracCaMKPhos), label="$(dur) seconds")
 end
 plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Pacing durations", legend=:topright)
 
@@ -151,10 +153,10 @@ plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Pacing duration
 # Record 50 seconds after pacing ends.
 ts = collect(range(0.0, stop=50.0, step=5.0)) ## in seconds
 stimstart = 30.0second
-ysim_15 = sols[1](stimstart+15second:5second:stimstart+15second+50second ; idxs=sys.CaMKAct).u
-ysim_30 = sols[2](stimstart+30second:5second:stimstart+30second+50second ; idxs=sys.CaMKAct).u
-ysim_60 = sols[3](stimstart+60second:5second:stimstart+60second+50second ; idxs=sys.CaMKAct).u
-ysim_90 = sols[4](stimstart+90second:5second:stimstart+90second+50second ; idxs=sys.CaMKAct).u
+ysim_15 = sols[1](stimstart+15second:5second:stimstart+15second+50second ; idxs=sys.fracCaMKPhos).u
+ysim_30 = sols[2](stimstart+30second:5second:stimstart+30second+50second ; idxs=sys.fracCaMKPhos).u
+ysim_60 = sols[3](stimstart+60second:5second:stimstart+60second+50second ; idxs=sys.fracCaMKPhos).u
+ysim_90 = sols[4](stimstart+90second:5second:stimstart+90second+50second ; idxs=sys.fracCaMKPhos).u
 
 fit_sim_15 = solve(CurveFitProblem(ts, ysim_15), ExpSumFitAlgorithm(n=1, withconst=true))
 fit_sim_30 = solve(CurveFitProblem(ts, ysim_30), ExpSumFitAlgorithm(n=1, withconst=true))
@@ -182,3 +184,60 @@ println("The time scales for simulations: ")
 for (tau, dur) in zip((tau_sim_15, tau_sim_30, tau_sim_60, tau_sim_90), (15, 30, 60, 90))
     println("$dur sec pacing is $(round(tau; digits=2)) seconds.")
 end
+
+# ## Fitting without A2
+# Fix A1 to A2 rate to zero, and fit the decay rates again.
+function loss_no_a2(theta, data)
+    @unpack prob, cbs, experimental_taus, pacing_durations, kphos_dephos_ratio, p1p2_ratio, stimstart, tend = data
+    @unpack kdeph_CaMK, kphos_CaMK, kb_CaMKP, k_P1_P2, k_P2_P1, fracCaMKPhos, r_CaMK = prob.f.sys
+    dephos_rate = exp10(theta[1])
+    kb2_rate = exp10(theta[2])
+    k_P1_P2_rate = 0
+    k_P2_P1_rate = 0
+    r_CaMK_rate = exp10(theta[3])
+    ## Parallel ensemble simulation
+    function prob_func(prob, ctx)
+        i = ctx.sim_id
+        remake(prob, p=[
+            kdeph_CaMK => dephos_rate,
+            kphos_CaMK => kphos_dephos_ratio * dephos_rate,
+            kb_CaMKP => kb2_rate,
+            k_P1_P2 => k_P1_P2_rate,
+            k_P2_P1 => k_P2_P1_rate,
+            r_CaMK => r_CaMK_rate
+            ],
+            callback=cbs[i],
+            saveat=(stimstart + pacing_durations[i] * second):1second:tend
+        )
+    end
+
+    ## Calculate loss in the output function
+    function output_func(sol, ctx)
+        SciMLBase.successful_retcode(sol) || return (Inf, false)
+        i = ctx.sim_id
+        stimend = stimstart + pacing_durations[i] * second
+        ts = collect(range(0.0, stop=50.0, step=5.0))
+        ysim = sol(stimend .+ ts .* second, idxs=fracCaMKPhos).u
+        fit = solve(CurveFitProblem(ts, ysim), ExpSumFitAlgorithm(n=1, withconst=true))
+        tau = inv(-fit.u.λ[])
+        tauexpected = experimental_taus[i]
+        return ((tau - tauexpected)^2, false)
+    end
+
+    ensemble_prob = EnsembleProblem(prob; prob_func, output_func)
+    sim = solve(ensemble_prob, alg, EnsembleThreads(); trajectories=length(pacing_durations), maxiters=10000)
+    return sum(sim)
+end
+
+# Test the loss function
+theta_noa2 = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[kb_CaMKP]), log10(prob.ps[r_CaMK])]
+@time loss_no_a2(theta_noa2, data)
+
+# ## Optimization
+optf_noa2 = OptimizationFunction(loss_no_a2, ADTypes.AutoFiniteDiff())
+optprob_noa2 = OptimizationProblem(optf_noa2, theta_noa2, data, lb=[-1, -1, -1] + theta_noa2, ub=[1, 1, 1] + theta_noa2)
+# optalg = Optim.SAMIN()
+optalg = Optim.LBFGS()
+maxtime = haskey(ENV, "JULIA_CI") ? 60 : 2000
+@time fitted_dephos_noa2 = solve(optprob_noa2, optalg; maxiters=5000, maxtime=maxtime)
+@show fitted_dephos_noa2.objective
