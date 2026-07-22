@@ -24,7 +24,7 @@ experimental_taus = [16.48, 16.73, 17.65, 18.08]
 stimstart = 30.0second
 stimend = 120.0second
 tend = 205.0second
-alg = KenCarp47()
+alg = FBDF()
 @time "Building ODE system" sys = Model.DEFAULT_SYS
 @time "Building ODE problem" prob = ODEProblem(sys, [sys.r_CaMK=>10Hz], tend)
 
@@ -102,7 +102,7 @@ function loss(theta, data)
     end
 
     ensemble_prob = EnsembleProblem(prob; prob_func, output_func)
-    sim = solve(ensemble_prob, alg, EnsembleThreads(); trajectories=length(pacing_durations), maxiters=10000)
+    sim = solve(ensemble_prob, alg, EnsembleThreads(); trajectories=length(pacing_durations), maxiters=100000)
     return sum(sim)
 end
 
@@ -111,14 +111,25 @@ theta = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[kb_CaMKP]), log10(prob.ps[k_P
 @time loss(theta, data)
 
 # ## Optimization
-optf = OptimizationFunction(loss, ADTypes.AutoFiniteDiff())
+optf = OptimizationFunction(loss)
 optprob = OptimizationProblem(optf, theta, data, lb=[-1, -1, -1, -1] + theta, ub=[1, 1, 1, 1] + theta)
-# optalg = Optim.SAMIN()
-optalg = Optim.LBFGS()
+optalg = Optim.SAMIN()
 maxtime = haskey(ENV, "JULIA_CI") ? 60 : 2000
 @time fitted_dephos = solve(optprob, optalg; maxiters=5000, maxtime=maxtime)
 @show fitted_dephos.objective
-fitted_dephos.stats
+
+#===
+Results on my computer:
+
+retcode: Failure
+u: 4-element Vector{Float64}:
+ -4.009376689036301
+ -1.801662022051433
+ -4.915085330868624
+ -1.448217024230308
+
+fitted_dephos.objective = 1.5209224659377645
+===#
 
 #---
 params = Dict(kdeph_CaMK => exp10(fitted_dephos.u[1]), kphos_CaMK => data.kphos_dephos_ratio * exp10(fitted_dephos.u[1]), kb_CaMKP => exp10(fitted_dephos.u[2]), k_P1_P2 => exp10(fitted_dephos.u[3]), k_P2_P1 => exp10(fitted_dephos.u[3]) * p1p2_ratio, r_CaMK => exp10(fitted_dephos.u[4]))
@@ -134,6 +145,22 @@ println("P1 to P2 rate: " , params[k_P1_P2] * 1000, " Hz.")
 println("P2 to P1 time: " , 1e-3 / params[k_P2_P1], " seconds.")
 println("P2 to P1 rate: " , params[k_P2_P1] * 1000, " Hz.")
 println("CaMK binding rate: " , params[r_CaMK] * 1000, " Hz.")
+
+#===
+Results on my computer:
+
+Fitted parameters:
+Dephosphorylation time: 10.218253884507824 seconds.
+Dephosphorylation rate: 0.09786407847197137 Hz.
+Autophosphorylation rate of CaMKB: 2.1677915513122854 Hz
+CaM dissociation time of CaMKP: 0.06333766111732107 seconds.
+CaM dissociation rate of CaMKP: 15.78839480901716 Hz.
+P1 to P2 time: 82.24042213594484 seconds.
+P1 to P2 rate: 0.012159470659659099 Hz.
+P2 to P1 time: 20.563113969706198 seconds.
+P2 to P1 rate: 0.04863076679306504 Hz.
+CaMK binding rate: 35.627305332014444 Hz.
+===#
 
 # ## Test fitted parameters
 newprob = remake(prob, p=[kdeph_CaMK => params[kdeph_CaMK], kphos_CaMK => params[kphos_CaMK], kb_CaMKP => params[kb_CaMKP], k_P1_P2 => params[k_P1_P2], k_P2_P1 => params[k_P2_P1], r_CaMK => params[r_CaMK]])
@@ -225,7 +252,7 @@ function loss_no_a2(theta, data)
     end
 
     ensemble_prob = EnsembleProblem(prob; prob_func, output_func)
-    sim = solve(ensemble_prob, alg, EnsembleThreads(); trajectories=length(pacing_durations), maxiters=10000)
+    sim = solve(ensemble_prob, alg, EnsembleThreads(); trajectories=length(pacing_durations), maxiters=100000)
     return sum(sim)
 end
 
@@ -234,10 +261,21 @@ theta_noa2 = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[kb_CaMKP]), log10(prob.p
 @time loss_no_a2(theta_noa2, data)
 
 # ## Optimization
-optf_noa2 = OptimizationFunction(loss_no_a2, ADTypes.AutoFiniteDiff())
+optf_noa2 = OptimizationFunction(loss_no_a2)
 optprob_noa2 = OptimizationProblem(optf_noa2, theta_noa2, data, lb=[-1, -1, -1] + theta_noa2, ub=[1, 1, 1] + theta_noa2)
-# optalg = Optim.SAMIN()
-optalg = Optim.LBFGS()
+optalg = Optim.SAMIN()
 maxtime = haskey(ENV, "JULIA_CI") ? 60 : 2000
 @time fitted_dephos_noa2 = solve(optprob_noa2, optalg; maxiters=5000, maxtime=maxtime)
 @show fitted_dephos_noa2.objective
+
+#===
+Results on my computer:
+
+retcode: Failure
+u: 3-element Vector{Float64}:
+ -4.0927808862998205
+ -2.7252321649562594
+ -1.3527233057526868
+
+fitted_dephos_noa2.objective = 8.41420029766036
+===#
