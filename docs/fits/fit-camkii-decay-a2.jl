@@ -24,7 +24,7 @@ experimental_taus = [16.48, 16.73, 17.65, 18.08]
 stimstart = 30.0second
 stimend = 120.0second
 tend = 205.0second
-alg = FBDF()
+alg = KenCarp47()
 @time "Building ODE system" sys = Model.DEFAULT_SYS
 @time "Building ODE problem" prob = ODEProblem(sys, [sys.r_CaMK=>10Hz], tend)
 
@@ -114,7 +114,7 @@ theta = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[kb_CaMKP]), log10(prob.ps[k_P
 optf = OptimizationFunction(loss)
 optprob = OptimizationProblem(optf, theta, data, lb=[-1, -1, -1, -1] + theta, ub=[1, 1, 1, 1] + theta)
 optalg = Optim.SAMIN()
-maxtime = haskey(ENV, "JULIA_CI") ? 60 : 2000
+maxtime = haskey(ENV, "JULIA_CI") ? 30 : 2000
 @time fitted_dephos = solve(optprob, optalg; maxiters=5000, maxtime=maxtime)
 @show fitted_dephos.objective
 
@@ -264,7 +264,6 @@ theta_noa2 = [log10(prob.ps[kdeph_CaMK]), log10(prob.ps[kb_CaMKP]), log10(prob.p
 optf_noa2 = OptimizationFunction(loss_no_a2)
 optprob_noa2 = OptimizationProblem(optf_noa2, theta_noa2, data, lb=[-1, -1, -1] + theta_noa2, ub=[1, 1, 1] + theta_noa2)
 optalg = Optim.SAMIN()
-maxtime = haskey(ENV, "JULIA_CI") ? 60 : 2000
 @time fitted_dephos_noa2 = solve(optprob_noa2, optalg; maxiters=5000, maxtime=maxtime)
 @show fitted_dephos_noa2.objective
 
