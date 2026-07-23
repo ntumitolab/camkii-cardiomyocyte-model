@@ -1,5 +1,5 @@
 # # Chemical Effects
-# AS 10093: CaMKII competitive inhibitor at the catalytic site
+# AS 100397: CaMKII competitive inhibitor at the catalytic site
 # CalA: PP1 inhibitor, prolonging phosphorylated CaMKII activity
 using CSV
 using DataFrames
@@ -29,12 +29,12 @@ cala = chemicaldf[!, "CalA Mean"] ./ cala_initial
 cala_error = chemicaldf[!, "CalA SD"] ./ sqrt.(chemicaldf[!, "CalA N"]) ./ cala_initial
 
 fig9a = plot(ts, ctl, yerr=ctl_error, lab="Control", color=:blue, markerstrokecolor=:blue)
-plot!(fig9a, ts, as10093, yerr=as10093_error, lab="AS 10093", color=:green, markerstrokecolor=:green)
+plot!(fig9a, ts, as10093, yerr=as10093_error, lab="AS 100397", color=:green, markerstrokecolor=:green)
 plot!(fig9a, ts, cala, yerr=cala_error, lab="CalA", color=:red, markerstrokecolor=:red)
 plot!(fig9a, xlabel="Time (s)", ylabel="CaMKAR (R/R0)", title= "A", titlelocation=:left)
 
 # ## Simulation results
-# AS 10093: suppressing CaMKII activity by 90%
+# AS 100397: suppressing CaMKII activity by 90%
 # CalA: prolonging CaMKII dephosphorylation time by 2-fold
 @time "Build system" sys = Model.DEFAULT_SYS
 tend = 205second
@@ -53,11 +53,11 @@ callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimst
 
 idxs = (sys.t / 1000, sys.CaMKAct)
 fig9b = plot(sol_ctl, idxs=idxs, lab="Control", color=:blue)
-plot!(fig9b, sol_as, idxs=idxs, lab="AS 10093", color=:green)
+plot!(fig9b, sol_as, idxs=idxs, lab="AS 100397", color=:green)
 plot!(fig9b, sol_cala, idxs=idxs, lab="CalA", color=:red)
 plot!(fig9b, title="B", titlelocation=:left, xlabel="Time (s)", ylabel="Active CaMKII fraction")
 
 # ## Save figure
-plot(fig9a, fig9b, layout=(1, 2), size=(1200, 600), bottom_margin = 5mm, left_margin = 8mm)
+plot(fig9a, fig9b, layout=(1, 2), size=(900, 400), bottom_margin = 5mm, left_margin = 8mm)
 savefig("fig9.png")
 savefig("fig9.pdf")
