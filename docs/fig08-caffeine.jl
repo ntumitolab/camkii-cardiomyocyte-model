@@ -13,7 +13,7 @@ using Model
 using Model: second
 Plots.default(lw=1.5)
 
-# ## Experimental data of CaMKII activity with caffeine treatment.
+# ## Experimental data of CaMKII activity with caffeine treatment
 chemicaldf = CSV.read(joinpath(@__DIR__, "data/CaMKAR-chemical-normalized.csv"), DataFrame)
 ts = 0:5:205
 ctl = chemicaldf[!, "Ctrl Mean"]
