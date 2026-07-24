@@ -1,12 +1,12 @@
 # # Electrophysiology
-# Basic CMC model checks
+# Basic model checks
+using Model
+using Model: second
 using CSV
 using DataFrames
 using DiffEqCallbacks
-using DifferentialEquations
-using Model
-using Model: second
 using ModelingToolkit
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using StatsBase: mean
@@ -18,7 +18,7 @@ Plots.default(lw=1.5)
 @time sys = Model.DEFAULT_SYS
 tend = 300.0second
 @time "Build problem" prob = ODEProblem(sys, [], (0.0, tend))
-alg = TRBDF2()
+alg = KenCarp47()
 
 @unpack Istim = sys
 stimstart = 100.0second

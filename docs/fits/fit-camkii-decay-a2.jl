@@ -8,7 +8,6 @@ using DiffEqCallbacks
 using ForwardDiff
 using LinearAlgebra
 using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
 using Optimization
 using OptimizationOptimJL
 using OrdinaryDiffEq

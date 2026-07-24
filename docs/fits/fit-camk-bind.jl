@@ -3,7 +3,8 @@ using Model
 using Model: μM, hil, second, Hz
 using CurveFit
 using DiffEqCallbacks
-using DifferentialEquations
+using OrdinaryDiffEq
+using OrdinaryDiffEqSDIRK
 using ModelingToolkit
 using Plots
 using SteadyStateDiffEq
@@ -19,7 +20,7 @@ Plots.default(lw=1.5)
 ca = logrange(0.03μM, 10μM, 1001)
 @time "Solve problem" sim = map(ca) do c
     newprob = remake(prob, p=[Ca => c])
-    solve(newprob, DynamicSS(FBDF()); abstol=1e-8, reltol=1e-8)
+    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
 end;
 
 #---

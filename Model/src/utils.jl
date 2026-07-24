@@ -71,6 +71,13 @@ nernst(x_out, x_in) = VT * NaNMath.log(x_out / x_in)
 nernst(x_out, x_in, z::Int) = nernst(x_out, x_in) / z
 
 """
+Linear interpolation of a function f at x, given the points (x₁, f₁) and (x₂, f₂)
+"""
+function lerp(x, x1, f1, x2, f2)
+    return f1 + (f2 - f1) * (x - x1) / (x2 - x1)
+end
+
+"""
 GHK flux equation
 
     ghk(px, vm, x_i, x_o, z = 1)

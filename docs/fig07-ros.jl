@@ -3,8 +3,8 @@ using CSV
 using CurveFit
 using DataFrames
 using DiffEqCallbacks
-using DifferentialEquations
 using ModelingToolkit
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using StatsPlots
@@ -38,7 +38,7 @@ stimstart = 30second
 stimend = 120second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-alg = FBDF()
+alg = KenCarp47()
 
 prob2 = remake(prob, p=[sys.ROS => 50μM])
 prob3 = remake(prob, p=[sys.ROS => 200μM])

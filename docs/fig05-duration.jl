@@ -9,7 +9,7 @@ using DataFrames
 using DiffEqCallbacks
 using DifferentialEquations
 using ModelingToolkit
-using ModelingToolkit: t_nounits as t
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using SteadyStateDiffEq
@@ -40,7 +40,7 @@ plot!(fig5a, title="A", xlabel="Time (s)", ylabel="CaMKAR (R/R0)", titlelocation
 @time "Build system" sys = Model.DEFAULT_SYS
 tend = 210second
 @time "Build problem" prob = ODEProblem(sys, [], (0second, tend))
-alg = FBDF()
+alg = KenCarp47()
 
 stimstart = 30second
 @unpack Istim, CaMKAct = sys

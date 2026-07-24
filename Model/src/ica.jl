@@ -1,9 +1,10 @@
-function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0, CaMKAct=0)
+function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0.25, CaMKAct=0)
     @parameters begin
         ICa_scale0 = 0.95 # or 5.25
-        LCC_scale_CaMK = 0.1 # Max increase in ICaL due to CaMKII (x1.2)
-        fracLCCbp0 = 0.250657   # Derived quantity - (LCCbp(baseline)/LCCbtot)
-        fracLCCbpISO = 0.525870 # Derived quantity - (LCCbp(ISO)/LCCbtot)
+        LCC_scale_CaMK = 0.1    # Max increase in ICaL due to CaMKII (x1.1)
+        fracLCCbp0 = 0.250657   # LCCb phosphorylation fraction without ISO
+        fracLCCbpISO = 0.525870 # LCCb phosphorylation fraction with ISO (100nM)
+        ICa_scale_ISO = 1.56    # Scaling factor due to ISO (x1.56)
         fNaCa = 1
         kNaCa = 2.268e-16μAμF / μM^4
         dNaCa = 1e-16 / μM^4
@@ -38,9 +39,7 @@ function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0, CaMKAct=0)
     end
 
     # Calcium flux scaled by LCC (phosphorylated beta subunit)
-    a_favail = (1.56 - 1) / (fracLCCbpISO / fracLCCbp0 - 1)         # fracLCCbp ISO (x1.56 0.1um ISO)
-    favail = (1 - a_favail) + a_favail * (LCCb_PKAp / fracLCCbp0)   # Test (max x2.52 100# phosph)
-
+    favail = lerp(LCCb_PKAp, fracLCCbp0, 1.0, fracLCCbpISO, ICa_scale_ISO)
     # Na-Ca exchanger (NCX)
     a = nai^3 * cao
     b = nao^3 * cai * fNaCa
