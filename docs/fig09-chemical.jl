@@ -2,16 +2,16 @@
 # Validating and predicting the model
 # AS 100397: CaMKII competitive inhibitor at the catalytic site
 # CalA: PP1 inhibitor, prolonging phosphorylated CaMKII activity
+using Model
+using Model: second, Hz
 using CSV
 using DataFrames
 using DiffEqCallbacks
+using ModelingToolkit
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
-using ModelingToolkit
 using Plots
 using Plots.Measures
-using Model
-using Model: second, Hz
 Plots.default(lw=1.5)
 
 # ## Experimental data

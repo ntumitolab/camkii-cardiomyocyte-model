@@ -1,10 +1,10 @@
 using CurveFit
 using DiffEqCallbacks
-using DifferentialEquations
 using ModelingToolkit
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
-using Measures
+using Plots.Measures
 using SteadyStateDiffEq
 using Model
 using Model: Hz, hil, hilr, second, μM

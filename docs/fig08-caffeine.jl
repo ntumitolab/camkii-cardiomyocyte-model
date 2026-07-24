@@ -1,16 +1,16 @@
 # # Caffeine Effects
 # Caffeine increase RyR opening sensitivity to luminal and subspace calcium.
 # In this model, we decrease the mid saturation sub-SR calcium concentration for the opening rate.
+using Model
+using Model: second
 using CSV
 using DataFrames
 using DiffEqCallbacks
-using DifferentialEquations
 using ModelingToolkit
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using SteadyStateDiffEq
-using Model
-using Model: second
 Plots.default(lw=1.5)
 
 # ## Experimental data of CaMKII activity with caffeine treatment
@@ -33,7 +33,7 @@ plot!(fig8a, xlabel="Time (s)", ylabel="CaMKAR (R/R0)", title= "A", titlelocatio
 tend = 205second
 stimstart = 30second
 stimend = 120second
-alg = FBDF()
+alg = KenCarp47()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time prob = ODEProblem(sys, [], tend)

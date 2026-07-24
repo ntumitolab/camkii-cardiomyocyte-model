@@ -1,14 +1,13 @@
 # # Fig4: Pacing frequency
 # CaMKII activation with 1Hz vs 2Hz pacing
-
 using Model
 using Model: second
 using CSV
 using CurveFit
 using DataFrames
 using DiffEqCallbacks
-using DifferentialEquations
 using ModelingToolkit
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using SteadyStateDiffEq
@@ -34,7 +33,7 @@ tend = 205.0second
 @unpack Istim = sys
 stimstart = 30.0second
 stimend = 120.0second
-alg = FBDF()
+alg = KenCarp47()
 
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time "Solve problem" sol1 = solve(prob, alg; callback)

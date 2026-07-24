@@ -5,8 +5,8 @@ using CSV
 using CurveFit
 using DataFrames
 using DiffEqCallbacks
-using DifferentialEquations
 using ModelingToolkit
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using SteadyStateDiffEq
@@ -28,10 +28,11 @@ plot!(fig6a, xlabel="Time (s)", ylabel="CaMKAR (R/R0)", title="A", titlelocation
 @time "Build system" sys = Model.DEFAULT_SYS
 tend = 205second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
-prob2 = remake(prob, p=[sys.ISO => 0.1μM])
+## Bump up the ICaL scaling factor to simulate ISO effect (previously 1.56x, now 2.5x)
+prob2 = remake(prob, p=[sys.ISO => 0.1μM, sys.ICa_scale_ISO => 2.5])
 stimstart = 30second
 stimend = 120second
-alg = FBDF()
+alg = KenCarp47()
 
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)

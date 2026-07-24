@@ -1,13 +1,13 @@
 # # Sensitiviy analysis of the CaMKII system
 # Influence of parameters on CaMKII activity decay specific time at 1Hz pacing for 300 sec.
+using Model
+using Model: Hz, second, μM
 using ModelingToolkit
-using DifferentialEquations
+using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using CurveFit
 using Plots
 Plots.default(lw=2)
-using Model
-using Model: Hz, second, μM
 
 # ## Setup the ODE system
 # Electrical stimulation starts at `t`=100 sec and ends at `t`=300 sec.
@@ -20,7 +20,7 @@ stimend = 300.0second
 
 # ## Simulations
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
-@time sol = solve(prob, KenCarp4(); callback, reltol = 1e-8, abstol = 1e-8)
+@time sol = solve(prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8)
 
 # Get the decay time of CaMKII activity from `t`=300 sec to `t`=350 sec by fitting the solution to an exponential function. The decay time is the inverse of the exponent coefficient.
 function get_decay_time(sol; stimend=300.0second)
@@ -42,7 +42,7 @@ sensitivities = Dict()
     println("Calculating sensitivity for parameter: ", k)
     original_value = prob.ps[k]
     _prob = remake(prob, p=[k => original_value * 1.01]) ## Increase 1% of the parameter value
-    sol = solve(_prob, KenCarp4(); callback, reltol = 1e-8, abstol = 1e-8)
+    sol = solve(_prob, KenCarp47(); callback, reltol = 1e-8, abstol = 1e-8)
     sensitivities[k] = (get_decay_time(sol; stimend) / tau0 - 1) * 100
 end
 
