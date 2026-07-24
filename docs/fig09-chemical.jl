@@ -1,4 +1,5 @@
 # # Chemical Effects
+# Validating and predicting the model
 # AS 100397: CaMKII competitive inhibitor at the catalytic site
 # CalA: PP1 inhibitor, prolonging phosphorylated CaMKII activity
 using CSV
@@ -34,27 +35,35 @@ plot!(fig9a, ts, cala, yerr=cala_error, lab="CalA", color=:red, markerstrokecolo
 plot!(fig9a, xlabel="Time (s)", ylabel="CaMKAR (R/R0)", title= "A", titlelocation=:left)
 
 # ## Simulation results
-# AS 100397: suppressing CaMKII activity by 90%
+# AS 100397: suppressing CaMKII activation by 90%
+# AS 100397 (0.5x): suppressing CaMKII activation by 50%
 # CalA: prolonging CaMKII dephosphorylation time by 2-fold
+# CalA (2x): prolonging CaMKII dephosphorylation time by 4-fold
 @time "Build system" sys = Model.DEFAULT_SYS
 tend = 205second
 stimstart = 30second
 stimend = 120second
 @time "Build ctl problem" prob_ctl = ODEProblem(sys, [], tend)
 @time "Build AS problem" prob_as = remake(prob_ctl, p=[sys.kfa2_CaMK => 0.01, sys.kfa4_CaMK => 0.01, sys.kphos_CaMK => 0.1Hz])
+@time "Build AS (0.5x) problem" prob_as05 = remake(prob_ctl, p=[sys.kfa2_CaMK => 0.13, sys.kfa4_CaMK => 0.08, sys.kphos_CaMK => 0.9Hz])
 @time "Build calA problem" prob_cala = remake(prob_ctl, p=[sys.kdeph_CaMK => inv(24second)])
+@time "Build calA (2x) problem" prob_cala2 = remake(prob_ctl, p=[sys.kdeph_CaMK => inv(100second)])
 
 alg = FBDF()
 @unpack Istim = sys
 callback = build_stim_callbacks(Istim, stimend; period=1second, starttime=stimstart)
 @time "Solve problem" sol_ctl = solve(prob_ctl, alg; callback)
 @time "Solve problem" sol_as = solve(prob_as, alg; callback)
+@time "Solve problem" sol_as05 = solve(prob_as05, alg; callback)
 @time "Solve problem" sol_cala = solve(prob_cala, alg; callback)
+@time "Solve problem" sol_cala2 = solve(prob_cala2, alg; callback)
 
 idxs = (sys.t / 1000, sys.CaMKAct)
 fig9b = plot(sol_ctl, idxs=idxs, lab="Control", color=:blue)
 plot!(fig9b, sol_as, idxs=idxs, lab="AS 100397", color=:green)
 plot!(fig9b, sol_cala, idxs=idxs, lab="CalA", color=:red)
+plot!(fig9b, sol_as05, idxs=idxs, lab="AS 100397 (partial)", color=:cyan)
+plot!(fig9b, sol_cala2, idxs=idxs, lab="CalA (++)", color=:orange)
 plot!(fig9b, title="B", titlelocation=:left, xlabel="Time (s)", ylabel="Active CaMKII fraction")
 
 # ## Save figure
