@@ -41,7 +41,7 @@ end
 
 plot()
 for (sol, dur) in zip(sols, pacing_durations)
-    plot!(sol, idxs=(t/1000, fracCaMKPhos), label="$(dur) seconds")
+    plot!(sol, idxs=(sys.t/1000, sys.fracCaMKPhos), label="$(dur) seconds")
 end
 plot!(xlabel="Time (s)", ylabel="Phosphorylated fraction", title="", legend=:topright)
 
@@ -170,7 +170,7 @@ end;
 
 plot()
 for (sol, dur) in zip(sols, [15.0, 30.0, 60.0, 90.0])
-    plot!(sol, idxs=(t/1000, fracCaMKPhos), label="$(dur) seconds")
+    plot!(sol, idxs=(sys.t/1000, sys.fracCaMKPhos), label="$(dur) seconds")
 end
 plot!(xlabel="Time (s)", ylabel="Active CaMKII fraction", title="Pacing durations", legend=:topright)
 
