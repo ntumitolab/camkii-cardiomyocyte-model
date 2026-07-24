@@ -44,7 +44,7 @@ alg = KenCarp47()
 
 stimstart = 30second
 @unpack Istim, CaMKAct = sys
-idxs = (t / 1000, CaMKAct)
+idxs = (sys.t / 1000, CaMKAct)
 
 @time "Solve problems" sols = map((15, 30, 60, 90)) do dur
     cb = build_stim_callbacks(Istim, stimstart + dur * second; period=1second, starttime=stimstart)
