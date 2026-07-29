@@ -1,5 +1,4 @@
 # I_Na: Colancy-Rudy Markov Model
-using Catalyst
 using ModelingToolkit
 
 function ina_markov_sys(CKIIOE=0)

@@ -1,6 +1,5 @@
 # I_to: Transient Outward K Current (slow and fast components)
 # Only the fast one (I_tof) is present on mouse
-
 using ModelingToolkit
 
 function get_itof_eqs(vm, ek, Kcoeff=1, CKIIflag=0)

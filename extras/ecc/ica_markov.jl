@@ -1,5 +1,4 @@
 # LCC Markov model based on Mahajan et al. (2008)
-using Catalyst
 using ModelingToolkit
 
 function lcc_markov_sys(;mode=1)

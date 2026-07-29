@@ -1,6 +1,4 @@
 # I_pca: Sarcolemmal Ca Pump Current
-
-
 function get_ipca_eqs(Cajunc, Casl, Fjunc, Fsl,)
     @parameters IbarSLCaP = 0.0673 # [uA/uF]
     @parameters Q10SLCaP = 2.35
