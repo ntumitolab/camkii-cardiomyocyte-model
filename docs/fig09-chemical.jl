@@ -67,7 +67,17 @@ plot!(fig9b, sol_as05, idxs=idxs, lab="KAct 0.5x", color=:cyan)
 plot!(fig9b, sol_cala2, idxs=idxs, lab="CalA (++)", color=:orange)
 plot!(fig9b, title="B", titlelocation=:left, xlabel="Time (s)", ylabel="Active CaMKII fraction")
 
+# calcium transient
+idxs_cai = (sys.t / 1000, sys.Cai_mean * 1000)
+tspan = (stimend - 1second, stimend)
+fig9c = plot(sol_ctl, idxs=idxs_cai, lab="Control", color=:blue, tspan=tspan)
+plot!(fig9c, sol_as, idxs=idxs_cai, lab="AS 100397", color=:green, tspan=tspan)
+plot!(fig9c, sol_cala, idxs=idxs_cai, lab="CalA", color=:red, tspan=tspan)
+plot!(fig9c, sol_as05, idxs=idxs_cai, lab="AS 100397 (0.5x)", color=:cyan, tspan=tspan)
+plot!(fig9c, sol_cala2, idxs=idxs_cai, lab="CalA (2x)", color=:orange, tspan=tspan)
+plot!(fig9c, title="C", titlelocation=:left, xlabel="Time (s)", ylabel="Intracellular Ca (nM)")
+
 # ## Save figure
-plot(fig9a, fig9b, layout=(1, 2), size=(900, 400), bottom_margin = 5mm, left_margin = 8mm)
-savefig("fig9.png")
-savefig("fig9.pdf")
+plot(fig9a, fig9b, fig9c, size=(800, 600))
+savefig("fig9-cat.png")
+savefig("fig9-cat.pdf")
