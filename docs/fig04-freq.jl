@@ -87,13 +87,13 @@ fit_2hz_sim = solve(CurveFitProblem(ts, ysim_2hz), ExpSumFitAlgorithm(n=1, withc
 
 # Fitting results (experiments)
 p1 = plot(ts, ydata_1hz, label="Exp 1 Hz")
-plot!(p1, ts, predict(fit_1hz), label="Fit", linestyle=:dash)
+plot!(p1, ts, fit_1hz.(ts), label="Fit", linestyle=:dash)
 p2 = plot(ts, ydata_2hz, label="Exp 2 Hz")
-plot!(p2, ts, predict(fit_2hz), label="Fit", linestyle=:dash)
+plot!(p2, ts, fit_2hz.(ts), label="Fit", linestyle=:dash)
 p3 = plot(ts, ysim_1hz, label="Sim 1 Hz")
-plot!(p3, ts, predict(fit_1hz_sim), label="Fit", linestyle=:dash)
+plot!(p3, ts, fit_1hz_sim.(ts), label="Fit", linestyle=:dash)
 p4 = plot(ts, ysim_2hz, label="Sim 2 Hz")
-plot!(p4, ts, predict(fit_2hz_sim), label="Fit", linestyle=:dash)
+plot!(p4, ts, fit_2hz_sim.(ts), label="Fit", linestyle=:dash)
 plot(p1, p2, p3, p4, layout=(2,2), xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 
 # Decay time scales (tau) from fit parameters

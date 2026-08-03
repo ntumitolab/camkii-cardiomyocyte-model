@@ -73,7 +73,7 @@ println("Hill coefficient: ", fit.u[4])
 println("RMSE: ", mse(fit) |> sqrt)
 
 #---
-plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="Single Hill function fit", legend=:topleft, ylabel="Bound CaMKII fraction"; xopts...)
+plot(xdata, [ydata fit.(xdata)], lab=["Full model" "Fitted"], line=[:dash :dot], title="Single Hill function fit", legend=:topleft, ylabel="Bound CaMKII fraction"; xopts...)
 
 #===
 ## New model
@@ -97,7 +97,7 @@ println("Half saturation Ca concentration for CaM-Ca4 binding: ", fit.u[4], " μ
 println("RMSE: ", mse(fit) |> sqrt)
 
 #---
-figs1b = plot(xdata, [ydata predict(fit)], lab=["Full model" "Fitted"], line=[:dash :dot], title="B", legend=:topleft, ylabel="Bound CaMKII fraction", titlelocation=:left; xopts...)
+figs1b = plot(xdata, [ydata fit.(xdata)], lab=["Full model" "Fitted"], line=[:dash :dot], title="B", legend=:topleft, ylabel="Bound CaMKII fraction", titlelocation=:left; xopts...)
 
 #---
 plot(figs1a, figs1b, layout=(2, 1), size=(600, 800))

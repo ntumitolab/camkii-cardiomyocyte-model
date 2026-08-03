@@ -1,3 +1,5 @@
+# # Fitting of ISO dose-response curves
+# For PKA and downstream targets
 using CurveFit
 using DiffEqCallbacks
 using ModelingToolkit
@@ -5,6 +7,7 @@ using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using Plots.Measures
+using StatsBase
 using SteadyStateDiffEq
 using Model
 using Model: Hz, hil, hilr, second, μM
@@ -52,7 +55,7 @@ println("Activated activity: ", fit_pkac1.u[1])
 println("Michaelis constant: ", fit_pkac1.u[2], " μM")
 println("RMSE: ", mse(fit_pkac1) |> sqrt)
 
-figs2A = plot(xdata, [ydata predict(fit_pkac1)], lab=["PKACI" "Fitted"], line=[:dash :dot], title="A", legend=:topleft, titlelocation=:left; xopts...)
+figs2A = plot(xdata, [ydata fit_pkac1.(xdata)], lab=["PKACI" "Fitted"], line=[:dash :dot], title="A", legend=:topleft, titlelocation=:left; xopts...)
 
 #---
 plot(xdata, residuals(fit_pkac1) ./ ydata .* 100; title="PKACI fitting error (%)", lab=false, xopts...)
@@ -70,7 +73,7 @@ println("Activated activity: ", fit_pkac2.u[1])
 println("Michaelis constant: ", fit_pkac2.u[2], " μM")
 println("RMSE: ", mse(fit_pkac2) |> sqrt)
 
-figs2B= plot(xdata, [ydata predict(fit_pkac2)], lab=["PKACII" "Fitted"], line=[:dash :dot], title="B", titlelocation=:left, legend=:topleft; xopts...)
+figs2B= plot(xdata, [ydata fit_pkac2.(xdata)], lab=["PKACII" "Fitted"], line=[:dash :dot], title="B", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_pkac2) ./ ydata .* 100; title="PKACII fitting error (%)", lab=false, xopts...)
@@ -88,7 +91,7 @@ println("Minimal activity: ", fit_pp1.u[3])
 println("Repressive Michaelis constant: ", fit_pp1.u[2], " μM")
 println("RMSE: ", mse(fit_pp1) |> sqrt)
 
-figs2C = plot(xdata, [ydata predict(fit_pp1)], lab=["PP1" "Fitted"], line=[:dash :dot], title="C", titlelocation=:left, legend=:topright; xopts...)
+figs2C = plot(xdata, [ydata fit_pp1.(xdata)], lab=["PP1" "Fitted"], line=[:dash :dot], title="C", titlelocation=:left, legend=:topright; xopts...)
 
 #---
 plot(xdata, residuals(fit_pp1) ./ ydata .* 100; title="PP1 fitting error (%)", lab=false, xopts...)
@@ -107,7 +110,7 @@ println("Michaelis constant: ", fit_plb.u[2], " μM")
 println("Hill coefficient: ", fit_plb.u[3])
 println("RMSE: ", mse(fit_plb) |> sqrt)
 
-figs2D = plot(xdata, [ydata predict(fit_plb)], lab=["PLBp" "Fitted"], line=[:dash :dot], title="D", titlelocation=:left, legend=:topleft; xopts...)
+figs2D = plot(xdata, [ydata fit_plb.(xdata)], lab=["PLBp" "Fitted"], line=[:dash :dot], title="D", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_plb) ./ ydata .* 100; title="PLBp fitting error (%)", lab=false, xopts...)
@@ -126,7 +129,7 @@ println("Michaelis constant: ", fit_plm.u[2], " μM")
 println("Hill coefficient: ", fit_plm.u[3])
 println("RMSE: ", mse(fit_plm) |> sqrt)
 
-figs2E = plot(xdata, [ydata predict(fit_plm)], lab=["PLMp" "Fitted"], line=[:dash :dot], title="E", titlelocation=:left, legend=:topleft; xopts...)
+figs2E = plot(xdata, [ydata fit_plm.(xdata)], lab=["PLMp" "Fitted"], line=[:dash :dot], title="E", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_plm) ./ ydata .* 100; title="PLMp fitting error (%)", lab=false, xopts...)
@@ -144,7 +147,7 @@ println("Activated activity: ", fit_lcca.u[1])
 println("Michaelis constant: ", fit_lcca.u[2], " μM")
 println("RMSE: ", mse(fit_lcca) |> sqrt)
 
-figs2F = plot(xdata, [ydata predict(fit_lcca)], lab=["LCCap" "Fitted"], line=[:dash :dot], title="F", titlelocation=:left, legend=:topleft; xopts...)
+figs2F = plot(xdata, [ydata fit_lcca.(xdata)], lab=["LCCap" "Fitted"], line=[:dash :dot], title="F", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_lcca) ./ ydata .* 100; title="LCCap fitting error (%)", lab=false, xopts...)
@@ -161,7 +164,7 @@ println("Activated activity: ", fit_lccb.u[1])
 println("Michaelis constant: ", fit_lccb.u[2], " μM")
 println("RMSE: ", mse(fit_lccb) |> sqrt)
 
-figs2G = plot(xdata, [ydata predict(fit_lccb)], lab=["LCCbp" "Fitted"], line=[:dash :dot], title="G", titlelocation=:left, legend=:topleft; xopts...)
+figs2G = plot(xdata, [ydata fit_lccb.(xdata)], lab=["LCCbp" "Fitted"], line=[:dash :dot], title="G", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_lccb) ./ ydata .* 100; title="LCCbp fitting error (%)", lab=false, xopts...)
@@ -181,7 +184,7 @@ println("Michaelis constant: ", fit_tni.u[2], " μM")
 println("Hill coefficient: ", fit_tni.u[3])
 println("RMSE: ", mse(fit_tni) |> sqrt)
 
-figs2H = plot(xdata, [ydata predict(fit_tni)], lab=["TnIp" "Fitted"], line=[:dash :dot], title="H", titlelocation=:left, legend=:topleft; xopts...)
+figs2H = plot(xdata, [ydata fit_tni.(xdata)], lab=["TnIp" "Fitted"], line=[:dash :dot], title="H", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_tni) ./ ydata .* 100; title="TnIp fitting error (%)", lab=false, xopts...)
@@ -199,7 +202,7 @@ println("Activated activity: ", fit_ryr.u[1])
 println("Michaelis constant: ", fit_ryr.u[2], " μM")
 println("RMSE: ", mse(fit_ryr) |> sqrt)
 
-figs2I = plot(xdata, [ydata predict(fit_ryr)], lab=["RyRp" "Fitted"], line=[:dash :dot], title="I", titlelocation=:left, legend=:topleft; xopts...)
+figs2I = plot(xdata, [ydata fit_ryr.(xdata)], lab=["RyRp" "Fitted"], line=[:dash :dot], title="I", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_ryr) ./ ydata .* 100; title="RyRp fitting error (%)", lab=false, xopts...)
@@ -217,7 +220,7 @@ println("Activated activity: ", fit_kur.u[1])
 println("Michaelis constant: ", fit_kur.u[2], " μM")
 println("RMSE: ", mse(fit_kur) |> sqrt)
 
-figs2J = plot(xdata, [ydata predict(fit_kur)], lab=["KURp" "Fitted"], line=[:dash :dot], title="J", titlelocation=:left, legend=:topleft; xopts...)
+figs2J = plot(xdata, [ydata fit_kur.(xdata)], lab=["KURp" "Fitted"], line=[:dash :dot], title="J", titlelocation=:left, legend=:topleft; xopts...)
 
 #---
 plot(xdata, residuals(fit_kur) ./ ydata .* 100; title="KURp fitting error (%)", lab=false, xopts...)
