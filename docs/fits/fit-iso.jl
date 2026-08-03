@@ -1,3 +1,5 @@
+# # Fitting of ISO dose-response curves
+# For PKA and downstream targets
 using CurveFit
 using DiffEqCallbacks
 using ModelingToolkit
@@ -5,6 +7,7 @@ using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using Plots.Measures
+using StatsBase
 using SteadyStateDiffEq
 using Model
 using Model: Hz, hil, hilr, second, μM
