@@ -64,6 +64,14 @@ for (sol, dur, color) in zip(sols, (15, 30, 60, 90), (:blue, :red, :orange, :gre
 end
 plot!(fig5c, title="C", xlabel="Time (s)", ylabel="Phosphorylated CaMKII fraction", titlelocation = :left)
 
+# Calcium transient
+# Plot the last pacing cycle for each pacing duration.
+fig5cai = plot()
+for (sol, dur, color) in zip(sols, (15, 30, 60, 90), (:blue, :red, :orange, :green))
+    plot!(fig5cai, sol, idxs=((sys.t - stimstart) / 1000 - dur + 1, sys.Cai_mean * 1000), tspan=(stimstart + (dur-1) * second, stimstart + dur * second), lab="$dur sec", color=color)
+end
+plot!(fig5cai, title="D", xlabel="Time (s)", ylabel="Intracellular Ca (nM)", titlelocation = :left)
+
 # ## Decay rates
 # Fit data from experiments and simulations against an exponential decay model.
 # Record for 50 seconds after pacing ends.
@@ -137,13 +145,17 @@ end
 pacing_durations = [15.0, 30.0, 60.0, 90.0]
 tau_experiments = [tau_exp_15, tau_exp_30, tau_exp_60, tau_exp_90]
 tau_simulations = [tau_sim_15, tau_sim_30, tau_sim_60, tau_sim_90]
-fig5d = plot(pacing_durations, tau_experiments, label="Experiments", marker=:circle, color=:blue)
-plot!(fig5d, pacing_durations, tau_simulations, label="Simulations", marker=:square, color=:red)
-plot!(fig5d, title="D", xlabel="Pacing Duration (s)", ylabel="Decay Time Scale (s)", titlelocation = :left)
-
-# ## Combine all panels
-fig5 = plot(fig5a, fig5b, fig5c, fig5d, layout=(2, 2), size=(800, 600))
+fig5tau = plot(pacing_durations, tau_experiments, label="Experiments", marker=:circle, color=:blue)
+plot!(fig5tau, pacing_durations, tau_simulations, label="Simulations", marker=:square, color=:red)
+plot!(fig5tau, title="D", xlabel="Pacing Duration (s)", ylabel="Decay Time Scale (s)", titlelocation = :left)
 
 #---
-savefig(fig5, "fig5.png")
-savefig(fig5, "fig5.pdf")
+savefig(fig5tau, "fig5-tau.png")
+savefig(fig5tau, "fig5-tau.pdf")
+
+# ## Combine all panels
+fig5 = plot(fig5a, fig5b, fig5c, fig5cai, layout=(2, 2), size=(800, 600))
+
+#---
+savefig(fig5, "fig5-cat.png")
+savefig(fig5, "fig5-cat.pdf")

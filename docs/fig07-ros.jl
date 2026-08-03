@@ -54,14 +54,22 @@ plot!(fig7b, title="B", titlelocation=:left, xlabel="Time (s)", ylabel="Active C
 
 # ### Oxidized and autophosphorylated fraction
 iox = (sys.t / 1000, (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX))
-fig7c = plot(sol, idxs=iox, lab="Control, OX", color=:blue)
-plot!(fig7c, sol2, idxs=iox, lab="50μM H2O2, OX", color=:red)
-plot!(fig7c, sol3, idxs=iox, lab="200μM H2O2, OX", color=:green)
+fig7c = plot(sol, idxs=iox, lab="Control,OX", color=:blue)
+plot!(fig7c, sol2, idxs=iox, lab="50μM H2O2,OX", color=:red)
+plot!(fig7c, sol3, idxs=iox, lab="200μM H2O2,OX", color=:green)
 iphos = (sys.t / 1000, (sys.CaMKP + sys.CaMKA + sys.CaMKA2))
-plot!(fig7c, sol, idxs=iphos, lab="Control, phos", color=:blue, linestyle=:dash)
-plot!(fig7c, sol2, idxs=iphos, lab="50μM H2O2, phos", color=:red, linestyle=:dash)
-plot!(fig7c, sol3, idxs=iphos, lab="200μM H2O2, phos", color=:green, linestyle=:dash)
-plot!(fig7c, xlabel="Time (s)", ylabel="Active CaMKII fraction", title="C", titlelocation=:left, legend=:topright)
+plot!(fig7c, sol, idxs=iphos, lab="Control,P", color=:blue, linestyle=:dash)
+plot!(fig7c, sol2, idxs=iphos, lab="50μM H2O2,P", color=:red, linestyle=:dash)
+plot!(fig7c, sol3, idxs=iphos, lab="200μM H2O2,P", color=:green, linestyle=:dash)
+plot!(fig7c, xlabel="Time (s)", ylabel="Active CaMKII fraction", title="C", titlelocation=:left, legend=:topleft)
+
+# ### Calcium transient
+idxs_cai = (sys.t / 1000, sys.Cai_mean * 1000)
+tspan = (stimend - 1second, stimend)
+fig7d = plot(sol, idxs=idxs_cai, lab="Control", color=:blue, tspan=tspan)
+plot!(fig7d, sol2, idxs=idxs_cai, lab="50μM H2O2", color=:red, tspan=tspan)
+plot!(fig7d, sol3, idxs=idxs_cai, lab="200μM H2O2", color=:green, tspan=tspan)
+plot!(fig7d, title="D", xlabel="Time (s)", ylabel="Intracellular Ca (nM)", titlelocation=:left)
 
 # Proportions for oxidized and autophosphorylated fractions in active CaMKII
 # Using StatsPlots for grouped bar plot at the end of the stimulation period (120 seconds)
@@ -70,12 +78,12 @@ pidx = (sys.CaMKP + sys.CaMKA + sys.CaMKA2) / sys.CaMKAct
 oidx = (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX) / sys.CaMKAct
 pvals = [s(timepoint, idxs=pidx) for s in (sol, sol2, sol3)]
 ovals = [s(timepoint, idxs=oidx) for s in (sol, sol2, sol3)]
-fig7d = groupedbar(["0uM", "50uM", "200uM"], [pvals ovals], bar_position=:stack, label=["Phosphorylated" "Oxidized"], color=[:blue :red :green], title="D", ylabel="Fraction of active CaMKII", xlabel="H2O2 concentration", legend=:topleft, titlelocation=:left)
+fig7bar = groupedbar(["0uM", "50uM", "200uM"], [pvals ovals], bar_position=:stack, label=["Phosphorylated" "Oxidized"], color=[:blue :red :green], title="D", ylabel="Fraction of active CaMKII", xlabel="H2O2 concentration", legend=:topleft, titlelocation=:left)
 
 # ## Save figure
-plot(fig7a, fig7b, fig7c, fig7d, layout=(2, 2), size=(1000, 800))
-savefig("fig7.png")
-savefig("fig7.pdf")
+plot(fig7a, fig7b, fig7c, fig7d, layout=(2, 2), size=(800, 600))
+savefig("fig7-cat.png")
+savefig("fig7-cat.pdf")
 
 # ## Decay kinectics
 # Fit against an exponential decay model.
