@@ -191,13 +191,13 @@ fit_sim_90 = solve(CurveFitProblem(ts, ysim_90), ExpSumFitAlgorithm(n=1, withcon
 
 # ### Fitting results (simulations)
 p1s = plot(ts, ysim_15, label="Sim 15 sec")
-plot!(p1s, ts, predict(fit_sim_15), label="Fit", linestyle=:dash)
+plot!(p1s, ts, fit_sim_15.(ts), label="Fit", linestyle=:dash)
 p2s = plot(ts, ysim_30, label="Sim 30 sec")
-plot!(p2s, ts, predict(fit_sim_30), label="Fit", linestyle=:dash)
+plot!(p2s, ts, fit_sim_30.(ts), label="Fit", linestyle=:dash)
 p3s = plot(ts, ysim_60, label="Sim 60 sec")
-plot!(p3s, ts, predict(fit_sim_60), label="Fit", linestyle=:dash)
+plot!(p3s, ts, fit_sim_60.(ts), label="Fit", linestyle=:dash)
 p4s = plot(ts, ysim_90, label="Sim 90 sec")
-plot!(p4s, ts, predict(fit_sim_90), label="Fit", linestyle=:dash)
+plot!(p4s, ts, fit_sim_90.(ts), label="Fit", linestyle=:dash)
 plot(p1s, p2s, p3s, p4s, layout=(2,2), xlabel="Time (s)", ylabel="Active CaMKII fraction")
 
 # ### Decay time scales (tau)

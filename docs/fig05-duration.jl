@@ -1,6 +1,5 @@
 # # Fig5: Pacing durations
 # Experiments vs simulations in a range of pacing durations
-
 using Model
 using Model: second, Hz
 using CSV
@@ -94,24 +93,24 @@ fit_sim_90 = solve(CurveFitProblem(ts, ysim_90), ExpSumFitAlgorithm(n=1, withcon
 
 # ### Fitting results (experiments)
 p1 = plot(ts, ydata_15, label="Exp 15 sec")
-plot!(p1, ts, predict(fit_15), label="Fit", linestyle=:dash)
+plot!(p1, ts, fit_15.(ts), label="Fit", linestyle=:dash)
 p2 = plot(ts, ydata_30, label="Exp 30 sec")
-plot!(p2, ts, predict(fit_30), label="Fit", linestyle=:dash)
+plot!(p2, ts, fit_30.(ts), label="Fit", linestyle=:dash)
 p3 = plot(ts, ydata_60, label="Exp 60 sec")
-plot!(p3, ts, predict(fit_60), label="Fit", linestyle=:dash)
+plot!(p3, ts, fit_60.(ts), label="Fit", linestyle=:dash)
 p4 = plot(ts, ydata_90, label="Exp 90 sec")
-plot!(p4, ts, predict(fit_90), label="Fit", linestyle=:dash)
+plot!(p4, ts, fit_90.(ts), label="Fit", linestyle=:dash)
 plot(p1, p2, p3, p4, layout=(2,2), xlabel="Time (s)", ylabel="CaMKII activity (AU)")
 
 # ### Fitting results (simulations)
 p1s = plot(ts, ysim_15, label="Sim 15 sec")
-plot!(p1s, ts, predict(fit_sim_15), label="Fit", linestyle=:dash)
+plot!(p1s, ts, fit_sim_15.(ts), label="Fit", linestyle=:dash)
 p2s = plot(ts, ysim_30, label="Sim 30 sec")
-plot!(p2s, ts, predict(fit_sim_30), label="Fit", linestyle=:dash)
+plot!(p2s, ts, fit_sim_30.(ts), label="Fit", linestyle=:dash)
 p3s = plot(ts, ysim_60, label="Sim 60 sec")
-plot!(p3s, ts, predict(fit_sim_60), label="Fit", linestyle=:dash)
+plot!(p3s, ts, fit_sim_60.(ts), label="Fit", linestyle=:dash)
 p4s = plot(ts, ysim_90, label="Sim 90 sec")
-plot!(p4s, ts, predict(fit_sim_90), label="Fit", linestyle=:dash)
+plot!(p4s, ts, fit_sim_90.(ts), label="Fit", linestyle=:dash)
 plot(p1s, p2s, p3s, p4s, layout=(2,2), xlabel="Time (s)", ylabel="CaMKII activity (%)")
 
 # ### Decay time scales (tau)
