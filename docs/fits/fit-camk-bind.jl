@@ -1,4 +1,4 @@
-# # CaMKII binding simplification
+# # CaMKII binding simplifications
 using Model
 using Model: μM, hil, second, Hz
 using CurveFit
@@ -14,12 +14,12 @@ Plots.default(lw=1.5)
 # Modeling CaM-Cax binding to CaMKII only. No phosphorylation or oxidation reactions.
 @parameters Ca = 0μM ROS = 0μM
 @time "Build system" sys = Model.get_camkii_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
-@time "Build problem" prob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
+@time "Build problem" camprob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
 ca = logrange(0.03μM, 10μM, 1001)
 @time "Solve problem" sim = map(ca) do c
-    newprob = remake(prob, p=[Ca => c])
+    newprob = remake(camprob, p=[Ca => c])
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
 end;
 
@@ -118,3 +118,54 @@ println("RMSE: ", mse(sol) |> sqrt)
 
 #---
 plot(xdata, [ydata sol.(xdata)], lab=["Full model" "Fitted"], line=[:dash :dot], title="Rational polynomial fit", legend=:topleft, ylabel="Bound CaMKII"; xopts...)
+
+# ## Mutant CaMKII with increased CaM-Ca binding affinity
+# Increase the forard binding rate 100%
+@time "Build problem" probmut = remake(camprob, p=[sys.kCaM2C_on => 1Hz / μM, sys.kCaM2N_on => 0.24Hz / μM, sys.kCaM2N_on => 30Hz / μM])
+
+# Physiological cytosolic calcium levels ranges from 30nM to 10μM.
+ca = logrange(0.03μM, 10μM, 1001)
+@time "Solve problem" sim = map(ca) do c
+    newprob = remake(probmut, p=[Ca => c])
+    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
+end;
+
+"""Extract values from ensemble simulations by a symbol"""
+extract(sim, k) = map(s -> s[k], sim)
+
+# Status of the CaMKII system across a range of calcium concentrations.
+xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1], ca[end]))
+figs1a = let
+    plot(ca, extract(sim, sys.Ca2CaM_C), lab="Ca2CaM_C", ylabel="Conc. (μM)"; xopts...)
+    plot!(ca, extract(sim, sys.Ca2CaM_N), lab="Ca2CaM_N")
+    plot!(ca, extract(sim, sys.Ca4CaM), lab="Ca4CaM")
+    plot!(ca, extract(sim, sys.CaMK), lab="CaMK")
+    plot!(ca, extract(sim, sys.CaM0_CaMK), lab="CaM0_CaMK")
+    plot!(ca, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
+    plot!(ca, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
+    plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:left)
+    plot!(title="A", titlelocation=:left)
+end
+
+# We exclude CaMK bound with ApoCaM (CaM0_CaMK) from the active fraction.
+CaMKAct = 1 - (sys.CaMK + sys.CaM0_CaMK) / sys.CAMKII_T
+println("Basal activity with 30nM Ca is ", sim[1][CaMKAct])
+xdata = ca
+ydata = extract(sim, CaMKAct)
+plot(xdata, ydata, label=false, title="Bound CaMKII fraction", ylims=(0, 0.5); xopts...)
+
+# Dual Hill function fitting
+model_camk(p, x) = @. p[1] * hil(x, p[2], 2) + p[3] * hil(x, p[4], 4) + p[5]
+p0 = [0.4, 1μM, 0.2, 1μM, 0.0]
+prob = NonlinearCurveFitProblem(model_camk, p0, xdata, ydata, lb=zeros(5))
+@time fit = solve(prob)
+
+println("Basal activity: ", fit.u[5])
+println("Maximal activity by CaM-Ca2 binding: ", fit.u[1])
+println("Half saturation Ca concentration for CaM-Ca2 binding: ", fit.u[2], " μM")
+println("Maximal activity by CaM-Ca4 binding: ", fit.u[3])
+println("Half saturation Ca concentration for CaM-Ca4 binding: ", fit.u[4], " μM")
+println("RMSE: ", mse(fit) |> sqrt)
+
+#---
+figs1mut = plot(xdata, [ydata fit.(xdata)], lab=["Full model" "Fitted"], line=[:dash :dot], title="C", legend=:topleft, ylabel="Bound CaMKII fraction", titlelocation=:left; xopts...)
