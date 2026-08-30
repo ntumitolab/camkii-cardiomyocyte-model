@@ -426,15 +426,15 @@ function get_camkii_dia_eqs(;
     vf = kCaM0P_off * CaMKPOX0 + kCaM2CP_off * CaMKPOX2C + kCaM2NP_off * CaMKPOX2N + kCaM4P_off * CaMKPOX4
     vb = binding_To_PCaMK * k0b * CaMKAOX
     add_raw_rate!(rates, vf - vb, CaMKPOX, CaMKAOX)
-    ## CaMKAOX --> CaMKOX
-    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
-    ## CaMKOX --> CaMK
-    add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
     ## CaMKB <--> CaMKBOX
     kox = kox_CaMK * ROS
     add_rate!(rates, kox, CaMKB, krd_CaMK, CaMKBOX)
     ## CaMKP <--> CaMKPOX
     add_rate!(rates, kox, CaMKP, krd_CaMK, CaMKPOX)
+    ## CaMKAOX --> CaMKOX
+    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
+    ## CaMKOX --> CaMK
+    add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
@@ -462,5 +462,18 @@ function get_camkii_dia_eqs(;
         CaMKPOX2N ~ fKCaM2N * CaMKPOX,
         CaMKPOX4 ~ fKCaM4 * CaMKPOX,
     ]
-    return (; [eqs; rateeqs], CaMKAct)
+    eqs_camkii = [eqs; rateeqs; eqs]
+    return (; eqs_camkii, CaMKAct)
+end
+
+function get_camkii_dia_sys(;
+    Ca=0μM,
+    ROS=0μM,
+    binding_To_PCaMK=0,
+    binding_To_OCaMK=0,
+    name=:camkii_sys)
+
+    @independent_variables t
+    @unpack eqs_camkii = get_camkii_dia_eqs(; Ca, ROS, binding_To_PCaMK, binding_To_OCaMK)
+    return System(eqs_camkii, t; name)
 end
