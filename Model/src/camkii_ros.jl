@@ -62,6 +62,7 @@ function get_camkii_eqs(;
         k_OXP_P = inv(45second)
     end
 
+    ## State variables
     sts = @variables begin
         Ca2CaM_C(t) = 84.33nM
         Ca2CaM_N(t) = 8.578nM
@@ -80,9 +81,13 @@ function get_camkii_eqs(;
         CaMKP2(t) = 0mM
         CaMKPOX(t) = 0mM
         CaMKOX(t) = 0mM
-        CaM0(t)
-        CaMK(t)
-        CaMKAct(t)
+    end
+
+    ## Dependent variables
+    @variables begin
+        CaMKAct(t)          ## Active CaMKII fraction
+        CaM0(t)             ## Apo CaM
+        CaMK(t)             ## Apo (inactive) CaMKII
     end
 
     ## Ca binding/unbinding reaction rates
@@ -347,11 +352,12 @@ function get_camkii_dia_eqs(;
         CaMKOX(t) = 0μM
     end
 
-    ## dDependent variables
+    ## Dependent variables
     @variables begin
         CaMKAct(t)
         CaMK(t)
         ## calmodulin species
+        CaM(t)
         CaM0(t)
         CaM2C(t)
         CaM2N(t)
@@ -374,12 +380,21 @@ function get_camkii_dia_eqs(;
         CaMKPOX2C(t)
         CaMKPOX2N(t)
         CaMKPOX4(t)
+        ## CaM fractions
+        fKCaM0(t)
+        fKCaM2C(t)
+        fKCaM2N(t)
+        fKCaM4(t)
+        fCaM0(t)
+        fCaM2C(t)
+        fCaM2N(t)
+        fCaM4(t)
     end
 
     ## Ca binding/unbinding reaction rates
     function _ca_cam(ca, k1on, k1off, k2on, k2off)
         fcaon = ca * k2on / (ca * k2on + k1off)
-        fcaoff = 1 - fcaon
+        fcaoff = k1off / (ca * k2on + k1off)
         return (ca * k1on * fcaon, k2off * fcaoff)
     end
 
@@ -395,8 +410,8 @@ function get_camkii_dia_eqs(;
     end
 
     ## CaM fractions of CaM0, CaM2C, CaM2N, and CaM4
-    fKCaM0, fKCaM2C, fKCaM2N, fKCaM4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
-    fCaM0, fCaM2C, fCaM2N, fCaM4 = _cam_fractions(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
+    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
+    f0, f2C, f2N, f4 = _cam_fractions(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
 
     rates = Dict()
 
@@ -441,6 +456,14 @@ function get_camkii_dia_eqs(;
         CAMKII_T ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
         CaMKAct ~ (CAMKII_T - CaMK - CaMKB0) / CAMKII_T,
         CAM_T ~ CaM + CaMKB + CaMKBOX + CaMKP + CaMKPOX,
+        fCaM0 ~ f0,
+        fCaM2C ~ f2C,
+        fCaM2N ~ f2N,
+        fCaM4 ~ f4,
+        fKCaM0 ~ fK0,
+        fKCaM2C ~ fK2C,
+        fKCaM2N ~ fK2N,
+        fKCaM4 ~ fK4,
         CaM0 ~ fCaM0 * CaM,
         CaM2C ~ fCaM2C * CaM,
         CaM2N ~ fCaM2N * CaM,
@@ -462,7 +485,7 @@ function get_camkii_dia_eqs(;
         CaMKPOX2N ~ fKCaM2N * CaMKPOX,
         CaMKPOX4 ~ fKCaM4 * CaMKPOX,
     ]
-    eqs_camkii = [eqs; rateeqs; eqs]
+    eqs_camkii = [eqs; rateeqs]
     return (; eqs_camkii, CaMKAct)
 end
 
