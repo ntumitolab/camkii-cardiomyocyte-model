@@ -4,7 +4,7 @@ function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0.25, CaMKAct=0)
         LCC_scale_CaMK = 0.1    # Max increase in ICaL due to CaMKII (x1.1)
         fracLCCbp0 = 0.250657   # LCCb phosphorylation fraction without ISO
         fracLCCbpISO = 0.525870 # LCCb phosphorylation fraction with ISO (100nM)
-        ICa_scale_ISO = 1.56    # Scaling factor due to ISO (x1.56)
+        ICa_scale_ISO = 2.5     # Scaling factor due to ISO (x1.56)
         fNaCa = 1
         kNaCa = 2.268e-16μAμF / μM^4
         dNaCa = 1e-16 / μM^4

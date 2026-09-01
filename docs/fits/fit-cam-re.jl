@@ -1,4 +1,5 @@
 # # CaM rapid binding
+# Simplify the CaM binding to CaMKII by assuming that the binding of CaM to Ca is rapid and at equilibrium. This allows us to reduce the number of states in the model and focus on the steady-state behavior of CaMKII activation as a function of calcium concentration.
 using Model
 using Model: μM, hil, second, Hz
 using CurveFit
