@@ -92,9 +92,8 @@ function get_camkii_eqs(;
 
     ## Ca binding/unbinding reaction rates
     function _ca_cam(ca, k1on, k1off, k2on, k2off)
-        fcaon = ca * k2on / (ca * k2on + k1off)
-        fcaoff = 1 - fcaon
-        return (ca * k1on * fcaon, k2off * fcaoff)
+        den = ca * k2on + k1off
+        return (ca * ca * k1on * k2on / den, k1off * k2off / den)
     end
 
     ## Rates counter
@@ -292,17 +291,19 @@ function get_camkii_dia_eqs(;
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
-        ## Ca2+ binding to CaMC
+        ## Ca2+ binding to CaM
         ## C-lobe
         k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1Hz
         k_1C_off = 50Hz         ## 10-70 Hz
-        k_2C_on = 10Hz / μM     ## 5-25uM-1Hz.
-        k_2C_off = 10Hz         ## 8.5-10Hz.
+        k_2C_on = 10Hz / μM     ## 5-25uM-1Hz
+        k_2C_off = 10Hz         ## 8.5-10Hz
+        Keq_CamC = k_1C_on * k_2C_on / (k_1C_off * k_2C_off) ## 0.1/uM^2
         ## N-lobe
         k_1N_on = 100Hz / μM    ## 25-260uM-1Hz
         k_1N_off = 2000Hz       ## 1000-4000 Hz
-        k_2N_on = 200Hz / μM    ## 50-300uM-1Hz.
-        k_2N_off = 500Hz        ## 500-1000.Hz
+        k_2N_on = 200Hz / μM    ## 50-300uM-1Hz
+        k_2N_off = 500Hz        ## 500-1000Hz
+        Keq_CamN = k_1N_on * k_2N_on / (k_1N_off * k_2N_off) ## 0.02/uM^2
 
         ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
@@ -310,14 +311,15 @@ function get_camkii_dia_eqs(;
         k_K1C_off = 33Hz
         k_K2C_on = 44Hz / μM
         k_K2C_off = 0.8Hz ## 0.49-4.9Hz
+        Keq_KCamC = k_K1C_on * k_K2C_on / (k_K1C_off * k_K2C_off) ##  73/uM^2
         ## N-lobe
         k_K1N_on = 76Hz / μM
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
         k_K2N_off = 20Hz ## 6-60Hz
-
+        Keq_KCamN = k_K1N_on * k_K2N_on / (k_K1N_off  * k_K2N_off) ## 0.96/uM^2
         ## CaM binding to CaMKII
-        kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value (Chang: 3.8)
+        kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value from Chang's 3.8
         kCaM0_off = 5.5Hz
         kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1Hz
         kCaM2C_off = 6.8Hz
@@ -391,21 +393,17 @@ function get_camkii_dia_eqs(;
         fCaM4(t)
     end
 
-    ## Ca binding/unbinding reaction rates
-    function _ca_cam(ca, k1on, k1off, k2on, k2off)
-        fcaon = ca * k2on / (ca * k2on + k1off)
-        fcaoff = k1off / (ca * k2on + k1off)
-        return (ca * k1on * fcaon, k2off * fcaoff)
-    end
-
-    ## CaM fractions under rapid equilibrium ca binding
+    ## CaM fractions under rapid ca binding
     function _cam_fractions(ca, k1C_on, k1C_off, k2C_on, k2C_off, k1N_on, k1N_off, k2N_on, k2N_off)
-        kon_C, koff_C = _ca_cam(ca, k1C_on, k1C_off, k2C_on, k2C_off)
-        kon_N, koff_N = _ca_cam(ca, k1N_on, k1N_off, k2N_on, k2N_off)
-        f0 = 1 / (1 + kon_C / koff_C + kon_N / koff_N + (kon_C * kon_N) / (koff_C * koff_N))
-        f2C = (kon_C / koff_C) * f0
-        f2N = (kon_N / koff_N) * f0
-        f4 = (kon_C * kon_N) / (koff_C * koff_N) * f0
+        w0 = 1
+        w2c = ca * ca * k1C_on * k2C_on / (k1C_off * k2C_off)
+        w2n = ca * ca * k1N_on * k2N_on / (k1N_off * k2N_off)
+        w4 = w2c * w2n
+        wsum = w0 + w2c + w2n + w4
+        f0 = w0 / wsum
+        f2C = w2c / wsum
+        f2N = w2n / wsum
+        f4 = w4 / wsum
         return (f0, f2C, f2N, f4)
     end
 
