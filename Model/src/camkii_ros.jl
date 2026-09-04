@@ -408,46 +408,38 @@ function get_camkii_dia_eqs(;
     end
 
     ## CaM fractions of CaM0, CaM2C, CaM2N, and CaM4
-    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
     f0, f2C, f2N, f4 = _cam_fractions(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
+    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
 
     rates = Dict()
 
-    ## CaMK <--> CaMKB
-    k0b = kCaM0_on * CaM0 + kCaM2C_on * CaM2C + kCaM2N_on * CaM2N + kCaM4_on * CaM4
-    vf = k0b * CaMK
-    vb = kCaM0_off * CaMKB0 + kCaM2C_off * CaMKB2C + kCaM2N_off * CaMKB2N + kCaM4_off * CaMKB4
-    add_raw_rate!(rates, vf - vb, CaMK, CaMKB)
-    ## CaMKB <--> CaMKP
+    ## CaMK (OX) <--> CaMKB (OX)
+    k0b = kCaM0_on * f0 + kCaM2C_on * f2C + kCaM2N_on * f2N + kCaM4_on * f4
+    kb0 = kCaM0_off * fK0 + kCaM2C_off * fK2C + kCaM2N_off * fK2N + kCaM4_off * fK4
+    add_rate!(rates, k0b, [CaM, CaMK], kb0, [CaMKB])
+    add_rate!(rates, binding_To_OCaMK * k0b, [CaMKOX], kb0, [CaMKBOX])
+    ## CaMKB (OX) <--> CaMKP (OX)
     kphos = kphos_CaMK * CaMKAct * KActScale
-    add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
-    ## CaMKP <--> CaMKA
-    vf =  kCaM0P_off * CaMKP0 + kCaM2CP_off * CaMKP2C + kCaM2NP_off * CaMKP2N + kCaM4P_off * CaMKP4
-    vb = binding_To_PCaMK * k0b * CaMKA
-    add_raw_rate!(rates, vf - vb, CaMKP, CaMKA)
+    add_rate!(rates, kphos, [CaMKB], kdeph_CaMK, [CaMKP])
+    add_rate!(rates, kphos, [CaMKBOX], kdeph_CaMK, [CaMKPOX])
+    ## CaMKP (OX) <--> CaMKA (OX)
+    kfa =  kCaM0P_off * fK0 + kCaM2CP_off * fK2C + kCaM2NP_off * fK2N + kCaM4P_off * fK4
+    kaf = binding_To_PCaMK * k0b
+    add_rate!(rates, kfa, [CaMKP], kaf, [CaMKA])
+    add_rate!(rates, kfa, [CaMKPOX], kaf, [CaMKAOX])
     ## CaMKA <--> CaMKA2
-    add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
+    add_rate!(rates, k_P1_P2, [CaMKA], k_P2_P1, [CaMKA2])
     ## CaMKA --> CaMK
-    add_rate!(rates, kdeph_CaMK, CaMKA, 0, CaMK)
-    ## CaMKOX <--> CaMKBOX
-    vf = binding_To_OCaMK * k0b * CaMKOX
-    vb = kCaM0_off * CaMKBOX0 + kCaM2C_off * CaMKBOX2C + kCaM2N_off * CaMKBOX2N + kCaM4_off * CaMKBOX4
-    add_raw_rate!(rates, vf - vb, CaMKOX, CaMKBOX)
-    ## CaMKBOX <--> CaMKPOX
-    add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
-    ## CaMKPOX <--> CaMKAOX
-    vf = kCaM0P_off * CaMKPOX0 + kCaM2CP_off * CaMKPOX2C + kCaM2NP_off * CaMKPOX2N + kCaM4P_off * CaMKPOX4
-    vb = binding_To_PCaMK * k0b * CaMKAOX
-    add_raw_rate!(rates, vf - vb, CaMKPOX, CaMKAOX)
+    add_rate!(rates, kdeph_CaMK, [CaMKA], 0, [CaMK])
     ## CaMKB <--> CaMKBOX
     kox = kox_CaMK * ROS
-    add_rate!(rates, kox, CaMKB, krd_CaMK, CaMKBOX)
+    add_rate!(rates, kox, [CaMKB], krd_CaMK, [CaMKBOX])
     ## CaMKP <--> CaMKPOX
-    add_rate!(rates, kox, CaMKP, krd_CaMK, CaMKPOX)
+    add_rate!(rates, kox, [CaMKP], krd_CaMK, [CaMKPOX])
     ## CaMKAOX --> CaMKOX
-    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
+    add_rate!(rates, kdeph_CaMK, [CaMKAOX], 0, [CaMKOX])
     ## CaMKOX --> CaMK
-    add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
+    add_rate!(rates, krd_CaMK, [CaMKOX], 0, [CaMK])
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
