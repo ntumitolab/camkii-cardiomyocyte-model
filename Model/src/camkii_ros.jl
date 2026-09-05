@@ -7,7 +7,7 @@ function get_camkii_eqs(;
     Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
-    )
+)
 
     @independent_variables t
     D = Differential(t)
@@ -175,11 +175,11 @@ end
 Simplified CaMKII system with one-step activation of CaMK
 """
 function get_camkii_simp_eqs(;
-        Ca=0μM,
-        ROS=0μM,
-        binding_To_PCaMK=0, ## 0.1 for T287D mutation
-        binding_To_OCaMK=0
-    )
+    Ca=0μM,
+    ROS=0μM,
+    binding_To_PCaMK=0, ## 0.1 for T287D mutation
+    binding_To_OCaMK=0
+)
 
     @independent_variables t
     D = Differential(t)
@@ -317,7 +317,7 @@ function get_camkii_dia_eqs(;
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
         k_K2N_off = 20Hz ## 6-60Hz
-        Keq_KCamN = k_K1N_on * k_K2N_on / (k_K1N_off  * k_K2N_off) ## 0.96/uM^2
+        Keq_KCamN = k_K1N_on * k_K2N_on / (k_K1N_off * k_K2N_off) ## 0.96/uM^2
         ## CaM binding to CaMKII
         kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value from Chang's 3.8
         kCaM0_off = 5.5Hz
@@ -415,31 +415,32 @@ function get_camkii_dia_eqs(;
 
     ## CaMK (OX) <--> CaMKB (OX)
     k0b = kCaM0_on * fCaM0 + kCaM2C_on * fCaM2C + kCaM2N_on * fCaM2N + kCaM4_on * fCaM4
-    kb0 = kCaM0_off * fKCaM0 + kCaM2C_off * fKCaM2C + kCaM2N_off * fKCaM2N + kCaM4_off * fK4
+    kb0 = kCaM0_off * fKCaM0 + kCaM2C_off * fKCaM2C + kCaM2N_off * fKCaM2N + kCaM4_off * fKCaM4
     add_rate!(rates, k0b, [CaM, CaMK], kb0, CaMKB)
-    add_rate!(rates, binding_To_OCaMK * k0b, CaMKOX, kb0, CaMKBOX)
+    add_rate!(rates, binding_To_OCaMK * k0b, [CaM, CaMKOX], kb0, CaMKBOX)
     ## CaMKB (OX) <--> CaMKP (OX)
     kphos = kphos_CaMK * CaMKAct * KActScale
     add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
     add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
     ## CaMKP (OX) <--> CaMKA (OX)
-    kfa =  kCaM0P_off * fK0 + kCaM2CP_off * fK2C + kCaM2NP_off * fK2N + kCaM4P_off * fK4
+    kfa = kCaM0P_off * fKCaM0 + kCaM2CP_off * fKCaM2C + kCaM2NP_off * fKCaM2N + kCaM4P_off * fKCaM4
     kaf = binding_To_PCaMK * k0b
-    add_rate!(rates, kfa, CaMKP, kaf, CaMKA)
-    add_rate!(rates, kfa, CaMKPOX, kaf, CaMKAOX)
+    add_rate!(rates, kfa, CaMKP, kaf, [CaMKA, CaM])
+    add_rate!(rates, kfa, CaMKPOX, kaf, [CaMKAOX, CaM])
     ## CaMKA <--> CaMKA2
     add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
-    ## CaMKA --> CaMK
+    ## CaMKA (OX) --> CaMK (OX)
     add_rate!(rates, kdeph_CaMK, CaMKA, 0, CaMK)
+    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
     ## CaMKB <--> CaMKBOX
     kox = kox_CaMK * ROS
     add_rate!(rates, kox, CaMKB, krd_CaMK, CaMKBOX)
     ## CaMKP <--> CaMKPOX
     add_rate!(rates, kox, CaMKP, krd_CaMK, CaMKPOX)
-    ## CaMKAOX --> CaMKOX
-    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
-    ## CaMKOX --> CaMK
-    add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
+    ## CaMKAOX <--> CaMKA
+    add_rate!(rates, 0, CaMKA, krd_CaMK, CaMKAOX)
+    ## CaMK -->  CaMKOX
+    add_rate!(rates, 0, CaMK, krd_CaMK, CaMKOX)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
