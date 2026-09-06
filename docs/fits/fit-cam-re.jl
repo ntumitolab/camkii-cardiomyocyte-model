@@ -46,6 +46,7 @@ end
 
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
 
+ca = logrange(0.03μM, 10μM, 1001)
 @time "Solve problem" sim_re = map(ca) do c
     newprob = remake(camprob_re, p=[Ca => c])
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
