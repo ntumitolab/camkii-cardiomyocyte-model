@@ -1,5 +1,3 @@
-using ModelingToolkit
-
 """
 CaMKII system with ROS activation (full model)
 """
@@ -7,7 +5,7 @@ function get_camkii_eqs(;
     Ca=0μM,
     ROS=0μM,
     binding_To_PCaMK=0,   ## 0.1 for T287D mutation
-    )
+)
 
     @independent_variables t
     D = Differential(t)
@@ -15,6 +13,8 @@ function get_camkii_eqs(;
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
+        ## Ca2+ binding to CaM
+        ## C-lobe
         k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1Hz
         k_1C_off = 50Hz         ## 10-70 Hz
         k_2C_on = 10Hz / μM     ## 5-25uM-1Hz.
@@ -64,23 +64,23 @@ function get_camkii_eqs(;
 
     ## State variables
     sts = @variables begin
-        Ca2CaM_C(t) = 84.33nM
-        Ca2CaM_N(t) = 8.578nM
-        Ca4CaM(t) = 0.02nM
-        CaM0_CaMK(t) = 1μM
-        Ca2CaM_C_CaMK(t) = 398.68nM
-        Ca2CaM_N_CaMK(t) = 16.6nM
-        Ca4CaM_CaMK(t) = 6.66nM
-        CaM0_CaMKP(t) = 623.72nM
-        Ca2CaM_C_CaMKP(t) = 1.01μM
-        Ca2CaM_N_CaMKP(t) = 10.75nM
-        Ca4CaM_CaMKP(t) = 15.81nM
-        Ca4CaM_CaMKOX(t) = 0mM
-        Ca4CaM_CaMKPOX(t) = 0mM
-        CaMKP(t) = 3.3μM
-        CaMKP2(t) = 0mM
-        CaMKPOX(t) = 0mM
-        CaMKOX(t) = 0mM
+        Ca2CaM_C(t) = 0
+        Ca2CaM_N(t) = 0
+        Ca4CaM(t) = 0
+        CaM0_CaMK(t) = 0
+        Ca2CaM_C_CaMK(t) = 0
+        Ca2CaM_N_CaMK(t) = 0
+        Ca4CaM_CaMK(t) = 0
+        CaM0_CaMKP(t) = 0
+        Ca2CaM_C_CaMKP(t) = 0
+        Ca2CaM_N_CaMKP(t) = 0
+        Ca4CaM_CaMKP(t) = 0
+        Ca4CaM_CaMKOX(t) = 0
+        Ca4CaM_CaMKPOX(t) = 0
+        CaMKP(t) = 0
+        CaMKP2(t) = 0
+        CaMKPOX(t) = 0
+        CaMKOX(t) = 0
     end
 
     ## Dependent variables
@@ -92,9 +92,8 @@ function get_camkii_eqs(;
 
     ## Ca binding/unbinding reaction rates
     function _ca_cam(ca, k1on, k1off, k2on, k2off)
-        fcaon = ca * k2on / (ca * k2on + k1off)
-        fcaoff = 1 - fcaon
-        return (ca * k1on * fcaon, k2off * fcaoff)
+        den = ca * k2on + k1off
+        return (ca * ca * k1on * k2on / den, k1off * k2off / den)
     end
 
     ## Rates counter
@@ -176,11 +175,11 @@ end
 Simplified CaMKII system with one-step activation of CaMK
 """
 function get_camkii_simp_eqs(;
-        Ca=0μM,
-        ROS=0μM,
-        binding_To_PCaMK=0, ## 0.1 for T287D mutation
-        binding_To_OCaMK=0
-    )
+    Ca=0μM,
+    ROS=0μM,
+    binding_To_PCaMK=0, ## 0.1 for T287D mutation
+    binding_To_OCaMK=0
+)
 
     @independent_variables t
     D = Differential(t)
@@ -292,17 +291,17 @@ function get_camkii_dia_eqs(;
     @parameters begin
         CAM_T = 30μM            ## Total calmodulin Concentration
         CAMKII_T = 70μM         ## Total CaMKII Concentration
-        ## Ca2+ binding to CaMC
+        ## Ca2+ binding to CaM
         ## C-lobe
         k_1C_on = 5Hz / μM      ## 1.2-9.6uM-1Hz
         k_1C_off = 50Hz         ## 10-70 Hz
-        k_2C_on = 10Hz / μM     ## 5-25uM-1Hz.
-        k_2C_off = 10Hz         ## 8.5-10Hz.
+        k_2C_on = 10Hz / μM     ## 5-25uM-1Hz
+        k_2C_off = 10Hz         ## 8.5-10Hz
         ## N-lobe
         k_1N_on = 100Hz / μM    ## 25-260uM-1Hz
         k_1N_off = 2000Hz       ## 1000-4000 Hz
-        k_2N_on = 200Hz / μM    ## 50-300uM-1Hz.
-        k_2N_off = 500Hz        ## 500-1000.Hz
+        k_2N_on = 200Hz / μM    ## 50-300uM-1Hz
+        k_2N_off = 500Hz        ## 500-1000Hz
 
         ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
@@ -315,9 +314,8 @@ function get_camkii_dia_eqs(;
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
         k_K2N_off = 20Hz ## 6-60Hz
-
         ## CaM binding to CaMKII
-        kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value (Chang: 3.8)
+        kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value from Chang's 3.8
         kCaM0_off = 5.5Hz
         kCaM2C_on = 0.5Hz / μM  # 0.92 μM-1Hz
         kCaM2C_off = 6.8Hz
@@ -336,8 +334,8 @@ function get_camkii_dia_eqs(;
         k_P2_P1 = inv(15second)
 
         ## Oxidation / reduction of Met
-        kox_CaMK = inv(45second) / 50μM ## 291Hz / mM   ## Oxidation by H2O2 (adjustable)
         krd_CaMK = inv(45second)        ## Reduction rate
+        kox_CaMK = krd_CaMK / 50μM      ## 291Hz / mM   ## Oxidation by H2O2 (adjustable)
         KActScale = 1.0                 ## CaMKII activation scaling
     end
 
@@ -380,90 +378,73 @@ function get_camkii_dia_eqs(;
         CaMKPOX2C(t)
         CaMKPOX2N(t)
         CaMKPOX4(t)
-        ## CaM fractions
-        fKCaM0(t)
-        fKCaM2C(t)
-        fKCaM2N(t)
-        fKCaM4(t)
+        ## Fractions
         fCaM0(t)
         fCaM2C(t)
         fCaM2N(t)
         fCaM4(t)
+        fKCaM0(t)
+        fKCaM2C(t)
+        fKCaM2N(t)
+        fKCaM4(t)
     end
 
-    ## Ca binding/unbinding reaction rates
-    function _ca_cam(ca, k1on, k1off, k2on, k2off)
-        fcaon = ca * k2on / (ca * k2on + k1off)
-        fcaoff = k1off / (ca * k2on + k1off)
-        return (ca * k1on * fcaon, k2off * fcaoff)
-    end
-
-    ## CaM fractions under rapid equilibrium ca binding
-    function _cam_fractions(ca, k1C_on, k1C_off, k2C_on, k2C_off, k1N_on, k1N_off, k2N_on, k2N_off)
-        kon_C, koff_C = _ca_cam(ca, k1C_on, k1C_off, k2C_on, k2C_off)
-        kon_N, koff_N = _ca_cam(ca, k1N_on, k1N_off, k2N_on, k2N_off)
-        f0 = 1 / (1 + kon_C / koff_C + kon_N / koff_N + (kon_C * kon_N) / (koff_C * koff_N))
-        f2C = (kon_C / koff_C) * f0
-        f2N = (kon_N / koff_N) * f0
-        f4 = (kon_C * kon_N) / (koff_C * koff_N) * f0
+    ## CaM fractions under rapid ca binding
+    function _cam_fractions(ca, k1c_on, k1c_off, k2c_on, k2c_off, k1n_on, k1n_off, k2n_on, k2n_off)
+        w0 = 1
+        w2c = ca * ca * k1c_on * k2c_on / (k1c_off * k2c_off)
+        w2n = ca * ca * k1n_on * k2n_on / (k1n_off * k2n_off)
+        w4 = w2c * w2n
+        wsum = w0 + w2c + w2n + w4
+        f0 = w0 / wsum
+        f2C = w2c / wsum
+        f2N = w2n / wsum
+        f4 = w4 / wsum
         return (f0, f2C, f2N, f4)
     end
 
     ## CaM fractions of CaM0, CaM2C, CaM2N, and CaM4
-    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
     f0, f2C, f2N, f4 = _cam_fractions(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
+    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
 
     rates = Dict()
 
-    ## CaMK <--> CaMKB
+    ## CaMK (OX) <--> CaMKB (OX)
     k0b = kCaM0_on * CaM0 + kCaM2C_on * CaM2C + kCaM2N_on * CaM2N + kCaM4_on * CaM4
-    vf = k0b * CaMK
-    vb = kCaM0_off * CaMKB0 + kCaM2C_off * CaMKB2C + kCaM2N_off * CaMKB2N + kCaM4_off * CaMKB4
-    add_raw_rate!(rates, vf - vb, CaMK, CaMKB)
-    ## CaMKB <--> CaMKP
+    vb0 = kCaM0_off * CaMKB0 + kCaM2C_off * CaMKB2C + kCaM2N_off * CaMKB2N + kCaM4_off * CaMKB4
+    vbox0 = kCaM0_off * CaMKBOX0 + kCaM2C_off * CaMKBOX2C + kCaM2N_off * CaMKBOX2N + kCaM4_off * CaMKBOX4
+    add_raw_rate!(rates, k0b * CaMK - vb0, CaMK, CaMKB)
+    add_raw_rate!(rates, binding_To_OCaMK * k0b * CaMKOX - vbox0, CaMKOX, CaMKBOX)
+    ## CaMKB (OX) <--> CaMKP (OX)
     kphos = kphos_CaMK * CaMKAct * KActScale
     add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
-    ## CaMKP <--> CaMKA
-    vf =  kCaM0P_off * CaMKP0 + kCaM2CP_off * CaMKP2C + kCaM2NP_off * CaMKP2N + kCaM4P_off * CaMKP4
-    vb = binding_To_PCaMK * k0b * CaMKA
-    add_raw_rate!(rates, vf - vb, CaMKP, CaMKA)
+    add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
+    ## CaMKP (OX) <--> CaMKA (OX)
+    vpa = kCaM0P_off * CaMKP0 + kCaM2CP_off * CaMKP2C + kCaM2NP_off * CaMKP2N + kCaM4P_off * CaMKP4
+    vpoxaox = kCaM0P_off * CaMKPOX0 + kCaM2CP_off * CaMKPOX2C + kCaM2NP_off * CaMKPOX2N + kCaM4P_off * CaMKPOX4
+    kaf = binding_To_PCaMK * k0b
+    add_raw_rate!(rates, vpa - kaf * CaMKA, CaMKP, CaMKA)
+    add_raw_rate!(rates, vpoxaox - kaf * CaMKAOX, CaMKPOX, CaMKAOX)
     ## CaMKA <--> CaMKA2
     add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
-    ## CaMKA --> CaMK
+    ## CaMKA (OX) --> CaMK (OX)
     add_rate!(rates, kdeph_CaMK, CaMKA, 0, CaMK)
-    ## CaMKOX <--> CaMKBOX
-    vf = binding_To_OCaMK * k0b * CaMKOX
-    vb = kCaM0_off * CaMKBOX0 + kCaM2C_off * CaMKBOX2C + kCaM2N_off * CaMKBOX2N + kCaM4_off * CaMKBOX4
-    add_raw_rate!(rates, vf - vb, CaMKOX, CaMKBOX)
-    ## CaMKBOX <--> CaMKPOX
-    add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
-    ## CaMKPOX <--> CaMKAOX
-    vf = kCaM0P_off * CaMKPOX0 + kCaM2CP_off * CaMKPOX2C + kCaM2NP_off * CaMKPOX2N + kCaM4P_off * CaMKPOX4
-    vb = binding_To_PCaMK * k0b * CaMKAOX
-    add_raw_rate!(rates, vf - vb, CaMKPOX, CaMKAOX)
+    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
     ## CaMKB <--> CaMKBOX
     kox = kox_CaMK * ROS
     add_rate!(rates, kox, CaMKB, krd_CaMK, CaMKBOX)
     ## CaMKP <--> CaMKPOX
     add_rate!(rates, kox, CaMKP, krd_CaMK, CaMKPOX)
-    ## CaMKAOX --> CaMKOX
-    add_rate!(rates, kdeph_CaMK, CaMKAOX, 0, CaMKOX)
-    ## CaMKOX --> CaMK
-    add_rate!(rates, krd_CaMK, CaMKOX, 0, CaMK)
+    ## CaMKAOX <--> CaMKA
+    add_rate!(rates, 0, CaMKA, krd_CaMK, CaMKAOX)
+    ## CaMK -->  CaMKOX
+    add_rate!(rates, 0, CaMK, krd_CaMK, CaMKOX)
 
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
         CAMKII_T ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
         CaMKAct ~ (CAMKII_T - CaMK - CaMKB0) / CAMKII_T,
         CAM_T ~ CaM + CaMKB + CaMKBOX + CaMKP + CaMKPOX,
-        fCaM0 ~ f0,
-        fCaM2C ~ f2C,
-        fCaM2N ~ f2N,
-        fCaM4 ~ f4,
-        fKCaM0 ~ fK0,
-        fKCaM2C ~ fK2C,
-        fKCaM2N ~ fK2N,
-        fKCaM4 ~ fK4,
         CaM0 ~ fCaM0 * CaM,
         CaM2C ~ fCaM2C * CaM,
         CaM2N ~ fCaM2N * CaM,
@@ -484,6 +465,14 @@ function get_camkii_dia_eqs(;
         CaMKPOX2C ~ fKCaM2C * CaMKPOX,
         CaMKPOX2N ~ fKCaM2N * CaMKPOX,
         CaMKPOX4 ~ fKCaM4 * CaMKPOX,
+        fCaM0 ~ f0,
+        fCaM2C ~ f2C,
+        fCaM2N ~ f2N,
+        fCaM4 ~ f4,
+        fKCaM0 ~ fK0,
+        fKCaM2C ~ fK2C,
+        fKCaM2N ~ fK2N,
+        fKCaM4 ~ fK4,
     ]
     eqs_camkii = [eqs; rateeqs]
     return (; eqs_camkii, CaMKAct)

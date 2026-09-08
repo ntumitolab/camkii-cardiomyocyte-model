@@ -21,7 +21,7 @@ Plots.default(lw=1.5)
 ca = logrange(0.03μM, 10μM, 1001)
 @time "Solve problem" sim = map(ca) do c
     newprob = remake(camprob, p=[Ca => c])
-    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
+    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
 end;
 
 """Extract values from ensemble simulations by a symbol"""
@@ -38,7 +38,7 @@ figs1a = let
     plot!(ca, extract(sim, sys.Ca2CaM_C_CaMK), lab="Ca2CaM_C_CaMK")
     plot!(ca, extract(sim, sys.Ca2CaM_N_CaMK), lab="Ca2CaM_N_CaMK")
     plot!(ca, extract(sim, sys.Ca4CaM_CaMK), lab="Ca4CaM_CaMK", legend=:left)
-    plot!(title="A", titlelocation=:left)
+    plot!(title="A", titlelocation=:left, ylims = (0, 70))
 end
 
 # ## Rapid CaM binding to Ca
@@ -48,9 +48,10 @@ observed(sys_re)
 
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
 
+ca = logrange(0.03μM, 10μM, 1001)
 @time "Solve problem" sim_re = map(ca) do c
     newprob = remake(camprob_re, p=[Ca => c])
-    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-8, reltol=1e-8)
+    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
 end;
 
 figs1b = let

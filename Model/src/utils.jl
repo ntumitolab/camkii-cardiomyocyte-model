@@ -107,8 +107,27 @@ function add_raw_rate!(lut, rate, substrates, products)
     return lut
 end
 
+function add_raw_rate!(lut, vf, substrates, vr, products)
+    return add_raw_rate!(lut, vf - vr, substrates, products)
+end
+
+function add_raw_rate(rate, substrates, products)
+    lut = Dict()
+    return add_raw_rate!(lut, rate, substrates, products)
+end
+
+function add_raw_rate(vf, substrates, vr, products)
+    lut = Dict()
+    return add_raw_rate!(lut, vf, substrates, vr, products)
+end
+
 "Accumulate chemical reaction rates with law of mass action into a look-up table"
 function add_rate!(lut, kf, substrates, kb, products)
     rate = prod(substrates; init=kf) - prod(products; init=kb)
     return add_raw_rate!(lut, rate, substrates, products)
+end
+
+function add_rate(kf, substrates, kb, products)
+    lut = Dict()
+    return add_rate!(lut, kf, substrates, kb, products)
 end
