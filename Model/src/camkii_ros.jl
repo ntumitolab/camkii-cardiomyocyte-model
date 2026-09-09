@@ -314,6 +314,7 @@ function get_camkii_dia_eqs(;
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
         k_K2N_off = 20Hz ## 6-60Hz
+
         ## CaM binding to CaMKII
         kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value from Chang's 3.8
         kCaM0_off = 5.5Hz
@@ -391,15 +392,12 @@ function get_camkii_dia_eqs(;
 
     ## CaM fractions under rapid ca binding
     function _cam_fractions(ca, k1c_on, k1c_off, k2c_on, k2c_off, k1n_on, k1n_off, k2n_on, k2n_off)
-        w0 = 1
-        w2c = ca * ca * k1c_on * k2c_on / (k1c_off * k2c_off)
-        w2n = ca * ca * k1n_on * k2n_on / (k1n_off * k2n_off)
-        w4 = w2c * w2n
-        wsum = w0 + w2c + w2n + w4
-        f0 = w0 / wsum
-        f2C = w2c / wsum
-        f2N = w2n / wsum
-        f4 = w4 / wsum
+        keqc = ca * ca * k1c_on * k2c_on / (k1c_off * k2c_off)
+        keqn = ca * ca * k1n_on * k2n_on / (k1n_off * k2n_off)
+        f0 = 1 / (1 + keqc) / (1 + keqn)
+        f2C = f0 * keqc
+        f2N = f0 * keqn
+        f4 = f0 * keqc * keqn
         return (f0, f2C, f2N, f4)
     end
 
@@ -410,6 +408,7 @@ function get_camkii_dia_eqs(;
     rates = Dict()
 
     ## CaMK (OX) <--> CaMKB (OX)
+    ## FIXME: Might have bugs
     k0b = kCaM0_on * CaM0 + kCaM2C_on * CaM2C + kCaM2N_on * CaM2N + kCaM4_on * CaM4
     vb0 = kCaM0_off * CaMKB0 + kCaM2C_off * CaMKB2C + kCaM2N_off * CaMKB2N + kCaM4_off * CaMKB4
     vbox0 = kCaM0_off * CaMKBOX0 + kCaM2C_off * CaMKBOX2C + kCaM2N_off * CaMKBOX2N + kCaM4_off * CaMKBOX4
