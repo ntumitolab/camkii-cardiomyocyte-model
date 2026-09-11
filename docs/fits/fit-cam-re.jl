@@ -44,6 +44,7 @@ end
 # ## Rapid CaM binding to Ca
 @time "Build system" sys_re = Model.get_camkii_dia_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
 
+equations(sys_re)
 observed(sys_re)
 
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
@@ -62,6 +63,19 @@ figs1b = let
     plot!(ca, extract(sim_re, sys_re.CaMKB0), lab="CaMKB0")
     plot!(ca, extract(sim_re, sys_re.CaMKB2C), lab="CaMKB2C")
     plot!(ca, extract(sim_re, sys_re.CaMKB2N), lab="CaMKB2N")
-    plot!(ca, extract(sim_re, sys_re.CaMKB4), lab="CaMKB4", legend=:left)
-    plot!(title="A", titlelocation=:left)
+    plot!(ca, extract(sim_re, sys_re.CaMKB4), lab="CaMKB4")
+    plot!(ca, extract(sim_re, sys_re.CaM), lab="CaM", linestyle=:dash, color=:black)
+    plot!(title="B", titlelocation=:left, legend=:left)
+end
+
+figs1c = let
+    plot(ca, extract(sim_re, sys_re.fCaM0), lab="fCaM0", ylabel="Conc. (μM)"; xopts...)
+    plot!(ca, extract(sim_re, sys_re.fCaM2C), lab="fCaM2C")
+    plot!(ca, extract(sim_re, sys_re.fCaM2N), lab="fCaM2N")
+    plot!(ca, extract(sim_re, sys_re.fCaM4), lab="fCaM4")
+    plot!(ca, extract(sim_re, sys_re.fKCaM0), lab="fKCaM0", linestyle=:dash)
+    plot!(ca, extract(sim_re, sys_re.fKCaM2C), lab="fKCaM2C", linestyle=:dash)
+    plot!(ca, extract(sim_re, sys_re.fKCaM2N), lab="fKCaM2N", linestyle=:dash)
+    plot!(ca, extract(sim_re, sys_re.fKCaM4), lab="fKCaM4", linestyle=:dash)
+    plot!(title="C", titlelocation=:left, legend=:left)
 end
