@@ -298,23 +298,26 @@ function get_camkii_dia_eqs(;
         k_1C_off = 50Hz         ## 10-70 Hz
         k_2C_on = 10Hz / μM     ## 5-25uM-1Hz
         k_2C_off = 10Hz         ## 8.5-10Hz
+        KEQ_CAMC = k_1C_on * k_2C_on / (k_1C_off * k_2C_off) ## 0.1/μM^2
         ## N-lobe
         k_1N_on = 100Hz / μM    ## 25-260uM-1Hz
         k_1N_off = 2000Hz       ## 1000-4000 Hz
         k_2N_on = 200Hz / μM    ## 50-300uM-1Hz
         k_2N_off = 500Hz        ## 500-1000Hz
-
+        KEQ_CAMN = k_1N_on * k_2N_on / (k_1N_off * k_2N_off) ## 0.02/μM^2
         ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
         k_K1C_on = 44Hz / μM
         k_K1C_off = 33Hz
         k_K2C_on = 44Hz / μM
         k_K2C_off = 0.8Hz ## 0.49-4.9Hz
+        KEQ_KCAMC = k_K1C_on * k_K2C_on / (k_K1C_off * k_K2C_off) ## 73.3/μM^2
         ## N-lobe
         k_K1N_on = 76Hz / μM
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
         k_K2N_off = 20Hz ## 6-60Hz
+        KEQ_KCAMN = k_K1N_on * k_K2N_on / (k_K1N_off * k_K2N_off) ## 0.96/μM^2
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value from Chang's 3.8
@@ -393,9 +396,9 @@ function get_camkii_dia_eqs(;
     end
 
     ## CaM fractions under rapid ca binding
-    function _cam_fractions(ca, k1c_on, k1c_off, k2c_on, k2c_off, k1n_on, k1n_off, k2n_on, k2n_off)
-        keqc = ca * ca * k1c_on * k2c_on / (k1c_off * k2c_off)
-        keqn = ca * ca * k1n_on * k2n_on / (k1n_off * k2n_off)
+    function _cam_fractions(ca, KEQC, KEQN)
+        keqc = ca * ca * KEQC
+        keqn = ca * ca * KEQN
         f0 = 1 / (1 + keqc) / (1 + keqn)
         f2C = f0 * keqc
         f2N = f0 * keqn
@@ -404,8 +407,8 @@ function get_camkii_dia_eqs(;
     end
 
     ## CaM fractions of CaM0, CaM2C, CaM2N, and CaM4
-    f0, f2C, f2N, f4 = _cam_fractions(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
-    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
+    f0, f2C, f2N, f4 = _cam_fractions(Ca, KEQ_CAMC, KEQ_CAMN)
+    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, KEQ_KCAMC, KEQ_KCAMN)
 
     rates = Dict()
 

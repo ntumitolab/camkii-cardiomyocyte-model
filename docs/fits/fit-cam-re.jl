@@ -18,7 +18,7 @@ Plots.default(lw=1.5)
 @time "Build problem" camprob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
-ca = logrange(0.03μM, 10μM, 1001)
+ca = logrange(0.03μM, 10μM, 101)
 @time "Solve problem" sim = map(ca) do c
     newprob = remake(camprob, p=[Ca => c])
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
@@ -46,10 +46,13 @@ end
 
 equations(sys_re)
 observed(sys_re)
-
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
 
-ca = logrange(0.03μM, 10μM, 1001)
+for p in parameters(sys_re)
+    println(p, " = ", camprob_re.ps[p])
+end
+
+ca = logrange(0.03μM, 10μM, 101)
 @time "Solve problem" sim_re = map(ca) do c
     newprob = remake(camprob_re, p=[Ca => c])
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
@@ -73,9 +76,13 @@ figs1c = let
     plot!(ca, extract(sim_re, sys_re.fCaM2C), lab="fCaM2C")
     plot!(ca, extract(sim_re, sys_re.fCaM2N), lab="fCaM2N")
     plot!(ca, extract(sim_re, sys_re.fCaM4), lab="fCaM4")
-    plot!(ca, extract(sim_re, sys_re.fKCaM0), lab="fKCaM0", linestyle=:dash)
-    plot!(ca, extract(sim_re, sys_re.fKCaM2C), lab="fKCaM2C", linestyle=:dash)
-    plot!(ca, extract(sim_re, sys_re.fKCaM2N), lab="fKCaM2N", linestyle=:dash)
-    plot!(ca, extract(sim_re, sys_re.fKCaM4), lab="fKCaM4", linestyle=:dash)
     plot!(title="C", titlelocation=:left, legend=:left)
+end
+
+figs1d = let
+    plot(ca, extract(sim_re, sys_re.fKCaM0), lab="fKCaM0", linestyle=:dot)
+    plot!(ca, extract(sim_re, sys_re.fKCaM2C), lab="fKCaM2C", linestyle=:dot)
+    plot!(ca, extract(sim_re, sys_re.fKCaM2N), lab="fKCaM2N", linestyle=:dot)
+    plot!(ca, extract(sim_re, sys_re.fKCaM4), lab="fKCaM4", linestyle=:dot)
+    plot!(title="D", titlelocation=:left, legend=:left; xopts...)
 end
