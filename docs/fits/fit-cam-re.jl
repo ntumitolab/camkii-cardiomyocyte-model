@@ -24,6 +24,8 @@ ca = logrange(0.03μM, 10μM, 101)
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
 end;
 
+sim[50].resid
+
 """Extract values from ensemble simulations by a symbol"""
 extract(sim, k) = map(s -> s[k], sim)
 
@@ -44,13 +46,11 @@ end
 # ## Rapid CaM binding to Ca
 @time "Build system" sys_re = Model.get_camkii_dia_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
 
-equations(sys_re)
-observed(sys_re)
+ModelingToolkit.unknowns(sys_re)
+ModelingToolkit.parameters(sys_re)
+ModelingToolkit.observed(sys_re)
+ModelingToolkit.bindings(sys_re)
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
-
-for p in parameters(sys_re)
-    println(p, " = ", camprob_re.ps[p])
-end
 
 ca = logrange(0.03μM, 10μM, 101)
 @time "Solve problem" sim_re = map(ca) do c
@@ -68,21 +68,18 @@ figs1b = let
     plot!(ca, extract(sim_re, sys_re.CaMKB2N), lab="CaMKB2N")
     plot!(ca, extract(sim_re, sys_re.CaMKB4), lab="CaMKB4")
     plot!(ca, extract(sim_re, sys_re.CaM), lab="CaM", linestyle=:dash, color=:black)
-    plot!(title="B", titlelocation=:left, legend=:left)
+    plot!(title="B", titlelocation=:left, legend=:left, ylims = (0, 70))
 end
 
+#---
 figs1c = let
-    plot(ca, extract(sim_re, sys_re.fCaM0), lab="fCaM0", ylabel="Conc. (μM)"; xopts...)
+    plot(ca, extract(sim_re, sys_re.fCaM0), lab="fCaM0", ylabel="Conc. (μM)")
     plot!(ca, extract(sim_re, sys_re.fCaM2C), lab="fCaM2C")
     plot!(ca, extract(sim_re, sys_re.fCaM2N), lab="fCaM2N")
     plot!(ca, extract(sim_re, sys_re.fCaM4), lab="fCaM4")
-    plot!(title="C", titlelocation=:left, legend=:left)
-end
-
-figs1d = let
-    plot(ca, extract(sim_re, sys_re.fKCaM0), lab="fKCaM0", linestyle=:dot)
+    plot!(ca, extract(sim_re, sys_re.fKCaM0), lab="fKCaM0", linestyle=:dot, ylabel="Conc. (μM)")
     plot!(ca, extract(sim_re, sys_re.fKCaM2C), lab="fKCaM2C", linestyle=:dot)
     plot!(ca, extract(sim_re, sys_re.fKCaM2N), lab="fKCaM2N", linestyle=:dot)
     plot!(ca, extract(sim_re, sys_re.fKCaM4), lab="fKCaM4", linestyle=:dot)
-    plot!(title="D", titlelocation=:left, legend=:left; xopts...)
+    plot!(title="C", titlelocation=:left, legend=:left; xopts...)
 end

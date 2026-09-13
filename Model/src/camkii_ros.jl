@@ -406,14 +406,14 @@ function get_camkii_dia_eqs(;
         return (f0, f2C, f2N, f4)
     end
 
-    ## CaM fractions of CaM0, CaM2C, CaM2N, and CaM4
-    f0, f2C, f2N, f4 = _cam_fractions(Ca, KEQ_CAMC, KEQ_CAMN)
-    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, KEQ_KCAMC, KEQ_KCAMN)
+    keqc = Ca * Ca * KEQ_CAMC
+    keqn = Ca * Ca * KEQ_CAMN
+    keqcK = Ca * Ca * KEQ_KCAMC
+    keqnK = Ca * Ca * KEQ_KCAMN
 
     rates = Dict()
 
     ## CaMK (OX) <--> CaMKB (OX)
-    ## FIXME: Might have bugs
     k0b = kCaM0_on * fCaM0 + kCaM2C_on * fCaM2C + kCaM2N_on * fCaM2N + kCaM4_on * fCaM4
     kb0 = kCaM0_off * fKCaM0 + kCaM2C_off * fKCaM2C + kCaM2N_off * fKCaM2N + kCaM4_off * fKCaM4
     add_rate!(rates, k0b, [CaMK, CaM], kb0, CaMKB)
@@ -447,14 +447,14 @@ function get_camkii_dia_eqs(;
         CAMKII_T ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
         CaMKAct ~ 1 - (CaMK + CaMKB0) / CAMKII_T,
         CAM_T ~ CaM + CaMKB + CaMKBOX + CaMKP + CaMKPOX,
-        fCaM0 ~ f0,
-        fCaM2C ~ f2C,
-        fCaM2N ~ f2N,
-        fCaM4 ~ f4,
-        fKCaM0 ~ fK0,
-        fKCaM2C ~ fK2C,
-        fKCaM2N ~ fK2N,
-        fKCaM4 ~ fK4,
+        fCaM0 ~ 1 / (1 + keqc) / (1 + keqn),
+        fCaM2C ~ fCaM0 * keqc,
+        fCaM2N ~ fCaM0 * keqn,
+        fCaM4 ~ fCaM0 * keqc * keqn,
+        fKCaM0 ~ 1 / (1 + keqcK) / (1 + keqnK),
+        fKCaM2C ~ fKCaM0 * keqcK,
+        fKCaM2N ~ fKCaM0 * keqnK,
+        fKCaM4 ~ fKCaM0 * keqcK * keqnK,
         CaM0 ~ fCaM0 * CaM,
         CaM2C ~ fCaM2C * CaM,
         CaM2N ~ fCaM2N * CaM,
