@@ -18,11 +18,13 @@ Plots.default(lw=1.5)
 @time "Build problem" camprob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
-ca = logrange(0.03μM, 10μM, 1001)
+ca = logrange(0.03μM, 10μM, 101)
 @time "Solve problem" sim = map(ca) do c
     newprob = remake(camprob, p=[Ca => c])
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
 end;
+
+sim[50].resid
 
 """Extract values from ensemble simulations by a symbol"""
 extract(sim, k) = map(s -> s[k], sim)
@@ -44,11 +46,13 @@ end
 # ## Rapid CaM binding to Ca
 @time "Build system" sys_re = Model.get_camkii_dia_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
 
-observed(sys_re)
-
+ModelingToolkit.unknowns(sys_re)
+ModelingToolkit.parameters(sys_re)
+ModelingToolkit.observed(sys_re)
+ModelingToolkit.bindings(sys_re)
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
 
-ca = logrange(0.03μM, 10μM, 1001)
+ca = logrange(0.03μM, 10μM, 101)
 @time "Solve problem" sim_re = map(ca) do c
     newprob = remake(camprob_re, p=[Ca => c])
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
@@ -62,6 +66,20 @@ figs1b = let
     plot!(ca, extract(sim_re, sys_re.CaMKB0), lab="CaMKB0")
     plot!(ca, extract(sim_re, sys_re.CaMKB2C), lab="CaMKB2C")
     plot!(ca, extract(sim_re, sys_re.CaMKB2N), lab="CaMKB2N")
-    plot!(ca, extract(sim_re, sys_re.CaMKB4), lab="CaMKB4", legend=:left)
-    plot!(title="A", titlelocation=:left)
+    plot!(ca, extract(sim_re, sys_re.CaMKB4), lab="CaMKB4")
+    plot!(ca, extract(sim_re, sys_re.CaM), lab="CaM", linestyle=:dash, color=:black)
+    plot!(title="B", titlelocation=:left, legend=:left, ylims = (0, 70))
+end
+
+#---
+figs1c = let
+    plot(ca, extract(sim_re, sys_re.fCaM0), lab="fCaM0", ylabel="Conc. (μM)")
+    plot!(ca, extract(sim_re, sys_re.fCaM2C), lab="fCaM2C")
+    plot!(ca, extract(sim_re, sys_re.fCaM2N), lab="fCaM2N")
+    plot!(ca, extract(sim_re, sys_re.fCaM4), lab="fCaM4")
+    plot!(ca, extract(sim_re, sys_re.fKCaM0), lab="fKCaM0", linestyle=:dot, ylabel="Conc. (μM)")
+    plot!(ca, extract(sim_re, sys_re.fKCaM2C), lab="fKCaM2C", linestyle=:dot)
+    plot!(ca, extract(sim_re, sys_re.fKCaM2N), lab="fKCaM2N", linestyle=:dot)
+    plot!(ca, extract(sim_re, sys_re.fKCaM4), lab="fKCaM4", linestyle=:dot)
+    plot!(title="C", titlelocation=:left, legend=:left; xopts...)
 end

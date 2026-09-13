@@ -46,12 +46,13 @@ function get_camkii_eqs(;
         kCaM2N_off = 1.7Hz
         kCaM4_on = 15Hz / μM  # 14-60 uM-1Hz
         kCaM4_off = 1.5Hz  # 1.1 - 2.3 Hz
+        ## CaMCa dissociation rate of CaMKP
         kCaM0P_off = inv(3second)
         kCaM2CP_off = inv(3second)
         kCaM2NP_off = inv(3second)
         kCaM4P_off = inv(3second)
-        k_phosCaM = 5Hz # 30Hz
-        k_dephospho = inv(6second)
+        k_phosCaM = 5Hz ## Autophosphorylation rate ## 12.5Hz
+        k_dephospho = inv(6second) ## Dephosphorylation rate
         k_P1_P2 = inv(60second)
         k_P2_P1 = inv(15second)
 
@@ -297,23 +298,26 @@ function get_camkii_dia_eqs(;
         k_1C_off = 50Hz         ## 10-70 Hz
         k_2C_on = 10Hz / μM     ## 5-25uM-1Hz
         k_2C_off = 10Hz         ## 8.5-10Hz
+        KEQ_CAMC = k_1C_on * k_2C_on / (k_1C_off * k_2C_off) ## 0.1/μM^2
         ## N-lobe
         k_1N_on = 100Hz / μM    ## 25-260uM-1Hz
         k_1N_off = 2000Hz       ## 1000-4000 Hz
         k_2N_on = 200Hz / μM    ## 50-300uM-1Hz
         k_2N_off = 500Hz        ## 500-1000Hz
-
+        KEQ_CAMN = k_1N_on * k_2N_on / (k_1N_off * k_2N_off) ## 0.02/μM^2
         ## Ca2+ binding to CaM-CAMKII (KCaM)
         ## C-lobe
         k_K1C_on = 44Hz / μM
         k_K1C_off = 33Hz
         k_K2C_on = 44Hz / μM
         k_K2C_off = 0.8Hz ## 0.49-4.9Hz
+        KEQ_KCAMC = k_K1C_on * k_K2C_on / (k_K1C_off * k_K2C_off) ## 73.3/μM^2
         ## N-lobe
         k_K1N_on = 76Hz / μM
         k_K1N_off = 300Hz
         k_K2N_on = 76Hz / μM
         k_K2N_off = 20Hz ## 6-60Hz
+        KEQ_KCAMN = k_K1N_on * k_K2N_on / (k_K1N_off * k_K2N_off) ## 0.96/μM^2
 
         ## CaM binding to CaMKII
         kCaM0_on = 3.8e-3Hz / μM ## Changed to Pepke's value from Chang's 3.8
@@ -329,6 +333,7 @@ function get_camkii_dia_eqs(;
         kCaM2CP_off = kb_CaMKP
         kCaM2NP_off = kb_CaMKP
         kCaM4P_off = kb_CaMKP
+        KActScale = 1.0            ## CaMKII activity scaling
         kphos_CaMK = 2Hz           ## Autophosphorylation rate ## 12.5Hz
         kdeph_CaMK = inv(12second) ## Dephosphorylation rate ## inv(6 second)
         k_P1_P2 = inv(60second)
@@ -337,25 +342,25 @@ function get_camkii_dia_eqs(;
         ## Oxidation / reduction of Met
         krd_CaMK = inv(45second)        ## Reduction rate
         kox_CaMK = krd_CaMK / 50μM      ## 291Hz / mM   ## Oxidation by H2O2 (adjustable)
-        KActScale = 1.0                 ## CaMKII activation scaling
+
     end
 
     sts = @variables begin
-        CaMKB(t) = 0μM
-        CaMKBOX(t) = 0μM
-        CaMKP(t) = 0μM
-        CaMKPOX(t) = 0μM
-        CaMKA(t) = 0μM
-        CaMKA2(t) = 0μM
-        CaMKAOX(t) = 0μM
-        CaMKOX(t) = 0μM
+        CaMKB(t) = 0
+        CaMKBOX(t) = 0
+        CaMKP(t) = 0
+        CaMKPOX(t) = 0
+        CaMKA(t) = 0
+        CaMKA2(t) = 0
+        CaMKAOX(t) = 0
+        CaMKOX(t) = 0
     end
 
     ## Dependent variables
     @variables begin
-        CaMKAct(t)
-        CaMK(t)
-        ## calmodulin species
+        CaMKAct(t) ## Active CaMKII fraction
+        CaMK(t)    ## Inactive CaMK
+        ## unbound calmodulin species
         CaM(t)
         CaM0(t)
         CaM2C(t)
@@ -391,9 +396,9 @@ function get_camkii_dia_eqs(;
     end
 
     ## CaM fractions under rapid ca binding
-    function _cam_fractions(ca, k1c_on, k1c_off, k2c_on, k2c_off, k1n_on, k1n_off, k2n_on, k2n_off)
-        keqc = ca * ca * k1c_on * k2c_on / (k1c_off * k2c_off)
-        keqn = ca * ca * k1n_on * k2n_on / (k1n_off * k2n_off)
+    function _cam_fractions(ca, KEQC, KEQN)
+        keqc = ca * ca * KEQC
+        keqn = ca * ca * KEQN
         f0 = 1 / (1 + keqc) / (1 + keqn)
         f2C = f0 * keqc
         f2N = f0 * keqn
@@ -401,29 +406,27 @@ function get_camkii_dia_eqs(;
         return (f0, f2C, f2N, f4)
     end
 
-    ## CaM fractions of CaM0, CaM2C, CaM2N, and CaM4
-    f0, f2C, f2N, f4 = _cam_fractions(Ca, k_1C_on, k_1C_off, k_2C_on, k_2C_off, k_1N_on, k_1N_off, k_2N_on, k_2N_off)
-    fK0, fK2C, fK2N, fK4 = _cam_fractions(Ca, k_K1C_on, k_K1C_off, k_K2C_on, k_K2C_off, k_K1N_on, k_K1N_off, k_K2N_on, k_K2N_off)
+    keqc = Ca * Ca * KEQ_CAMC
+    keqn = Ca * Ca * KEQ_CAMN
+    keqcK = Ca * Ca * KEQ_KCAMC
+    keqnK = Ca * Ca * KEQ_KCAMN
 
     rates = Dict()
 
     ## CaMK (OX) <--> CaMKB (OX)
-    ## FIXME: Might have bugs
-    k0b = kCaM0_on * CaM0 + kCaM2C_on * CaM2C + kCaM2N_on * CaM2N + kCaM4_on * CaM4
-    vb0 = kCaM0_off * CaMKB0 + kCaM2C_off * CaMKB2C + kCaM2N_off * CaMKB2N + kCaM4_off * CaMKB4
-    vbox0 = kCaM0_off * CaMKBOX0 + kCaM2C_off * CaMKBOX2C + kCaM2N_off * CaMKBOX2N + kCaM4_off * CaMKBOX4
-    add_raw_rate!(rates, k0b * CaMK - vb0, CaMK, CaMKB)
-    add_raw_rate!(rates, binding_To_OCaMK * k0b * CaMKOX - vbox0, CaMKOX, CaMKBOX)
+    k0b = kCaM0_on * fCaM0 + kCaM2C_on * fCaM2C + kCaM2N_on * fCaM2N + kCaM4_on * fCaM4
+    kb0 = kCaM0_off * fKCaM0 + kCaM2C_off * fKCaM2C + kCaM2N_off * fKCaM2N + kCaM4_off * fKCaM4
+    add_rate!(rates, k0b, [CaMK, CaM], kb0, CaMKB)
+    add_rate!(rates, k0b * binding_To_OCaMK, [CaMKOX, CaM], kb0, CaMKBOX)
     ## CaMKB (OX) <--> CaMKP (OX)
     kphos = kphos_CaMK * CaMKAct * KActScale
     add_rate!(rates, kphos, CaMKB, kdeph_CaMK, CaMKP)
     add_rate!(rates, kphos, CaMKBOX, kdeph_CaMK, CaMKPOX)
     ## CaMKP (OX) <--> CaMKA (OX)
-    vpa = kCaM0P_off * CaMKP0 + kCaM2CP_off * CaMKP2C + kCaM2NP_off * CaMKP2N + kCaM4P_off * CaMKP4
-    vpoxaox = kCaM0P_off * CaMKPOX0 + kCaM2CP_off * CaMKPOX2C + kCaM2NP_off * CaMKPOX2N + kCaM4P_off * CaMKPOX4
-    kaf = binding_To_PCaMK * k0b
-    add_raw_rate!(rates, vpa - kaf * CaMKA, CaMKP, CaMKA)
-    add_raw_rate!(rates, vpoxaox - kaf * CaMKAOX, CaMKPOX, CaMKAOX)
+    kpa = kCaM0P_off * fKCaM0 + kCaM2CP_off * fKCaM2C + kCaM2NP_off * fKCaM2N + kCaM4P_off * fKCaM4
+    kap = binding_To_PCaMK * k0b
+    add_rate!(rates, kpa, CaMKP, kap, [CaMKA, CaM])
+    add_rate!(rates, kpa, CaMKPOX, kap, [CaMKAOX, CaM])
     ## CaMKA <--> CaMKA2
     add_rate!(rates, k_P1_P2, CaMKA, k_P2_P1, CaMKA2)
     ## CaMKA (OX) --> CaMK (OX)
@@ -442,8 +445,16 @@ function get_camkii_dia_eqs(;
     rateeqs = [D(s) ~ rates[s] for s in sts]
     eqs = [
         CAMKII_T ~ CaMK + CaMKB + CaMKBOX + CaMKP + CaMKPOX + CaMKA + CaMKA2 + CaMKAOX + CaMKOX,
-        CaMKAct ~ (CAMKII_T - CaMK - CaMKB0) / CAMKII_T,
+        CaMKAct ~ 1 - (CaMK + CaMKB0) / CAMKII_T,
         CAM_T ~ CaM + CaMKB + CaMKBOX + CaMKP + CaMKPOX,
+        fCaM0 ~ 1 / (1 + keqc) / (1 + keqn),
+        fCaM2C ~ fCaM0 * keqc,
+        fCaM2N ~ fCaM0 * keqn,
+        fCaM4 ~ fCaM0 * keqc * keqn,
+        fKCaM0 ~ 1 / (1 + keqcK) / (1 + keqnK),
+        fKCaM2C ~ fKCaM0 * keqcK,
+        fKCaM2N ~ fKCaM0 * keqnK,
+        fKCaM4 ~ fKCaM0 * keqcK * keqnK,
         CaM0 ~ fCaM0 * CaM,
         CaM2C ~ fCaM2C * CaM,
         CaM2N ~ fCaM2N * CaM,
@@ -464,14 +475,6 @@ function get_camkii_dia_eqs(;
         CaMKPOX2C ~ fKCaM2C * CaMKPOX,
         CaMKPOX2N ~ fKCaM2N * CaMKPOX,
         CaMKPOX4 ~ fKCaM4 * CaMKPOX,
-        fCaM0 ~ f0,
-        fCaM2C ~ f2C,
-        fCaM2N ~ f2N,
-        fCaM4 ~ f4,
-        fKCaM0 ~ fK0,
-        fKCaM2C ~ fK2C,
-        fKCaM2N ~ fK2N,
-        fKCaM4 ~ fK4,
     ]
     eqs_camkii = [eqs; rateeqs]
     return (; eqs_camkii, CaMKAct)
