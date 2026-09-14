@@ -2,7 +2,7 @@
 
 julia_version = "1.13.0"
 manifest_format = "2.1"
-project_hash = "f5cb3271d28f3ff8fb06b58856f5ec60517f8cc1"
+project_hash = "c667c91f58baee9afc666103145a8f08affa8588"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -1580,10 +1580,10 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 version = "1.11.0"
 
 [[deps.Model]]
-deps = ["DiffEqCallbacks", "DifferentialEquations", "ModelingToolkit", "NaNMath"]
+deps = ["ADTypes", "CSV", "CurveFit", "DataFrames", "DiffEqCallbacks", "DifferentialEquations", "ForwardDiff", "ModelingToolkit", "NaNMath", "Optimization", "OptimizationOptimJL", "OrdinaryDiffEq", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools", "StatsBase", "StatsPlots", "SteadyStateDiffEq"]
 path = "Model"
 uuid = "c61cb6fc-a4aa-49b2-8e1f-749d0e1a896d"
-version = "0.1.0"
+version = "0.2.0"
 
 [[deps.ModelingToolkit]]
 deps = ["ADTypes", "BipartiteGraphs", "BlockArrays", "Combinatorics", "CommonSolve", "ConstructionBase", "DataStructures", "DiffEqBase", "DifferentiationInterface", "DocStringExtensions", "FillArrays", "ForwardDiff", "Graphs", "InteractiveUtils", "Libdl", "LinearAlgebra", "ModelingToolkitBase", "ModelingToolkitTearing", "Moshi", "OffsetArrays", "OrderedCollections", "PreallocationTools", "PrecompileTools", "REPL", "Reexport", "RuntimeGeneratedFunctions", "SCCNonlinearSolve", "SciMLBase", "SciMLPublic", "SciMLStructures", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "StateSelection", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "TermInterface", "UnPack"]
