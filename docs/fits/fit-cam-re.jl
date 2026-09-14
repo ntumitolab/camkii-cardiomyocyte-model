@@ -2,11 +2,16 @@
 # Simplify the CaM binding to CaMKII by assuming that the binding of CaM to Ca is rapid and at equilibrium. This allows us to reduce the number of states in the model and focus on the steady-state behavior of CaMKII activation as a function of calcium concentration.
 using Model
 using Model: μM, hil, second, Hz
+using ADTypes
 using CurveFit
 using DiffEqCallbacks
+using ForwardDiff
+using LinearAlgebra
+using ModelingToolkit
+using Optimization
+using OptimizationOptimJL
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
-using ModelingToolkit
 using Plots
 using SteadyStateDiffEq
 Plots.default(lw=1.5)
@@ -19,13 +24,12 @@ Plots.default(lw=1.5)
 
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
 ca = logrange(0.03μM, 10μM, 101)
-@time "Solve problem" sim = map(ca) do c
-    newprob = remake(camprob, p=[Ca => c])
-    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
-end;
+prob_func(prob, ctx) = remake(prob, p=[Ca => ca[ctx.sim_id]])
+ensemble_prob = EnsembleProblem(camprob; prob_func)
+@time "Solve problem" sim = solve(ensemble_prob, DynamicSS(KenCarp47()), EnsembleThreads(); trajectories=length(ca), abstol=1e-10, reltol=1e-10)
 
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k], sim)
+extract(sim, k) = map(s -> s[k], sim.u)
 
 # CaMKII system composition across physiological calcium levels.
 xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1], ca[end]))
@@ -43,14 +47,10 @@ end
 
 # ## Rapid CaM binding to Ca
 @time "Build system" sys_re = Model.get_camkii_dia_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
-
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
 
-ca = logrange(0.03μM, 10μM, 101)
-@time "Solve problem" sim_re = map(ca) do c
-    newprob = remake(camprob_re, p=[Ca => c])
-    solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
-end;
+ensemble_prob_re = EnsembleProblem(camprob_re; prob_func)
+@time "Solve problem" sim_re = solve(ensemble_prob_re, DynamicSS(KenCarp47()), EnsembleThreads(); trajectories=length(ca), abstol=1e-10, reltol=1e-10)
 
 figs1b = let
     plot(ca, extract(sim_re, sys_re.CaM2C), lab="CaM2C", ylabel="Conc. (μM)"; xopts...)
@@ -81,5 +81,31 @@ end
 figs1d = let
     plot(ca, extract(sim, sys.CaMKAct), lab="Full model", ylabel="Active CaMKII fraction")
     plot!(ca, extract(sim_re, sys_re.CaMKAct), lab="Rapid CaM binding", linestyle=:dash)
-    plot!(title="D", titlelocation=:left, legend=:left, ylims = (0, 1) ;xopts...)
+    plot!(title="D", titlelocation=:left, legend=:left, ylims = (0, 0.5) ;xopts...)
+end
+
+# ## Fitting the rapid CaM binding model
+function loss(theta, data)
+    @unpack KEQ_CAMC, KEQ_CAMN, KEQ_KCAMC, KEQ_KCAMN = camprob_re.f.sys
+    keq_camc = exp(theta[1])
+    keq_camn = exp(theta[2])
+    keq_kcamc = exp(theta[3])
+    keq_kcamn = exp(theta[4])
+
+    ## Parallel ensemble simulation
+    function prob_func(prob, ctx)
+        i = ctx.sim_id
+        remake(prob, p=[
+            KEQ_CAMC => keq_camc,
+            KEQ_CAMN => keq_camn,
+            KEQ_KCAMC => keq_kcamc,
+            KEQ_KCAMN => keq_kcamn,
+            Ca => ca[i]
+            ],
+        )
+    end
+
+    ensemble_prob_re = EnsembleProblem(camprob_re; prob_func)
+    sim_re = solve(ensemble_prob_re, DynamicSS(KenCarp47()), EnsembleThreads(); trajectories=length(ca), abstol=1e-10, reltol=1e-10)
+
 end
