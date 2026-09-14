@@ -24,8 +24,6 @@ ca = logrange(0.03μM, 10μM, 101)
     solve(newprob, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
 end;
 
-sim[50].resid
-
 """Extract values from ensemble simulations by a symbol"""
 extract(sim, k) = map(s -> s[k], sim)
 
@@ -46,10 +44,6 @@ end
 # ## Rapid CaM binding to Ca
 @time "Build system" sys_re = Model.get_camkii_dia_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
 
-ModelingToolkit.unknowns(sys_re)
-ModelingToolkit.parameters(sys_re)
-ModelingToolkit.observed(sys_re)
-ModelingToolkit.bindings(sys_re)
 @time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
 
 ca = logrange(0.03μM, 10μM, 101)
@@ -67,7 +61,6 @@ figs1b = let
     plot!(ca, extract(sim_re, sys_re.CaMKB2C), lab="CaMKB2C")
     plot!(ca, extract(sim_re, sys_re.CaMKB2N), lab="CaMKB2N")
     plot!(ca, extract(sim_re, sys_re.CaMKB4), lab="CaMKB4")
-    plot!(ca, extract(sim_re, sys_re.CaM), lab="CaM", linestyle=:dash, color=:black)
     plot!(title="B", titlelocation=:left, legend=:left, ylims = (0, 70))
 end
 
@@ -82,4 +75,11 @@ figs1c = let
     plot!(ca, extract(sim_re, sys_re.fKCaM2N), lab="fKCaM2N", linestyle=:dot)
     plot!(ca, extract(sim_re, sys_re.fKCaM4), lab="fKCaM4", linestyle=:dot)
     plot!(title="C", titlelocation=:left, legend=:left; xopts...)
+end
+
+#---
+figs1d = let
+    plot(ca, extract(sim, sys.CaMKAct), lab="Full model", ylabel="Active CaMKII fraction")
+    plot!(ca, extract(sim_re, sys_re.CaMKAct), lab="Rapid CaM binding", linestyle=:dash)
+    plot!(title="D", titlelocation=:left, legend=:left, ylims = (0, 1) ;xopts...)
 end
