@@ -1,6 +1,6 @@
 using PrecompileTools: @compile_workload, @recompile_invalidations
 
-# @recompile_invalidations begin
+@recompile_invalidations begin
 using ADTypes
 using CSV
 using CurveFit
@@ -17,4 +17,5 @@ using OrdinaryDiffEqSDIRK
 using Plots
 using StatsBase
 using StatsPlots
-#
+
+end
