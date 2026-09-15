@@ -110,6 +110,7 @@ data = (
 
 @unpack KEQ_CAMC, KEQ_CAMN, KEQ_KCAMC, KEQ_KCAMN = camprob_re.f.sys
 
+# TODO: Use SMAPE https://en.wikipedia.org/wiki/Symmetric_mean_absolute_percentage_error
 function loss(theta, data)
     keq_camc = exp10(theta[1])
     keq_camn = exp10(theta[2])
