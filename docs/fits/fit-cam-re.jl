@@ -6,6 +6,7 @@ using ADTypes
 using CurveFit
 using DiffEqCallbacks
 using ForwardDiff
+using Zygote
 using LinearAlgebra
 using ModelingToolkit
 using Optimization
@@ -18,20 +19,30 @@ using SteadyStateDiffEq
 Plots.default(lw=1.5)
 
 # ## Full model
-# with phospoprlation disabled
+# with phosphorylation disabled
+tend = 1000second
+alg = KenCarp47()
 @parameters Ca = 0μM ROS = 0μM
 @time "Build system" sys = Model.get_camkii_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
-@time "Build problem" camprob = SteadyStateProblem(sys, [sys.k_phosCaM => 0])
-
-# Physiological cytosolic calcium levels ranges from 30nM to 10μM.
-# FIXME: use a loop to make it faster
-ca = logrange(0.03μM, 10μM, 101)
-prob_func(prob, ctx) = remake(prob, p=[Ca => ca[ctx.sim_id]])
-ensemble_prob = EnsembleProblem(camprob; prob_func)
-@time "Solve problem" sim = solve(ensemble_prob, DynamicSS(KenCarp47()), EnsembleThreads(); trajectories=length(ca), abstol=1e-10, reltol=1e-10)
+@time "Build problem" camprob = ODEProblem(sys, [sys.k_phosCaM => 0], tend)
 
 """Extract values from ensemble simulations by a symbol"""
-extract(sim, k) = map(s -> s[k], sim.u)
+extract(sim, k) = map(s -> s[k][end], sim)
+
+"""Solve the problem for a range of calcium concentrations. Assuming smooth transitions."""
+function solve_range(prob, ca)
+    u0 = prob.u0
+    map(ca) do c
+        _prob = remake(prob; u0=u0, p=[Ca => c])
+        sol = solve(_prob, alg; abstol=1e-10, reltol=1e-10, save_everystep=false, save_start=false)
+        u0 = sol.u[end]
+        sol
+    end
+end
+
+# Physiological cytosolic calcium levels ranges from 30nM to 10μM.
+ca = logrange(0.03μM, 10μM, 101)
+@time "Solve problem" sim = solve_range(camprob, ca)
 
 # CaMKII system composition across physiological calcium levels.
 xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1], ca[end]))
@@ -49,13 +60,8 @@ end
 
 # ## Rapid CaM binding to Ca
 @time "Build system" sys_re = Model.get_camkii_dia_sys(; Ca=Ca, ROS=ROS) |> mtkcompile
-@time "Build problem" camprob_re = SteadyStateProblem(sys_re, [sys_re.kphos_CaMK => 0])
-@time "Solve a single problem" sol_re = solve(camprob_re, DynamicSS(KenCarp47()); abstol=1e-10, reltol=1e-10)
-
-sol_re[sys_re.CaM0]
-
-ensemble_prob_re = EnsembleProblem(camprob_re; prob_func)
-@time "Solve problem" sim_re = solve(ensemble_prob_re, DynamicSS(KenCarp47()), EnsembleThreads(); trajectories=length(ca), abstol=1e-10, reltol=1e-10)
+@time "Build problem" camprob_re = ODEProblem(sys_re, [sys_re.kphos_CaMK => 0], tend)
+@time "Solve problem" sim_re = solve_range(camprob_re, ca)
 
 figs1b = let
     plot(ca, extract(sim_re, sys_re.CaM2C), lab="CaM2C", ylabel="Conc. (μM)"; xopts...)
@@ -110,38 +116,25 @@ function loss(theta, data)
     keq_kcamc = exp10(theta[3])
     keq_kcamn = exp10(theta[4])
 
-    ## Parallel ensemble simulation
-    function prob_func(prob, ctx)
-        i = ctx.sim_id
-        remake(prob, p=[
+    _prob = remake(camprob_re; p=[
             KEQ_CAMC => keq_camc,
             KEQ_CAMN => keq_camn,
             KEQ_KCAMC => keq_kcamc,
             KEQ_KCAMN => keq_kcamn,
-            Ca => ca[i]
-            ],
-        )
-    end
+        ]
+    )
 
-    ## Calculate loss in the output function
-    function output_func(sol, ctx)
-        SciMLBase.successful_retcode(sol) || return (Inf, false)
-        i = ctx.sim_id
-        loss = (sol(sys_re.CaM0) - data.CaM0[i])^2 +
-                (sol(sys_re.CaM2C) - data.CaM2C[i])^2 +
-                (sol(sys_re.CaM2N) - data.CaM2N[i])^2 +
-                (sol(sys_re.CaM4) - data.CaM4[i])^2 +
-                (sol(sys_re.CaMK) - data.CaMK[i])^2 +
-                (sol(sys_re.CaMKB0) - data.CaMKB0[i])^2 +
-                (sol(sys_re.CaMKB2C) - data.CaMKB2C[i])^2 +
-                (sol(sys_re.CaMKB2N) - data.CaMKB2N[i])^2 +
-                (sol(sys_re.CaMKB4) - data.CaMKB4[i])^2
-        return (loss, false)
-    end
+    sim_re = solve_range(_prob, ca)
 
-    ensemble_prob_re = EnsembleProblem(camprob_re; prob_func, output_func)
-    sim_re = solve(ensemble_prob_re, DynamicSS(KenCarp47()), EnsembleThreads(); trajectories=length(ca), abstol=1e-10, reltol=1e-10)
-    loss = sum(sim_re)
+    loss = sum(abs2, extract(sim_re, sys_re.CaM0) .- data.CaM0) +
+           sum(abs2, extract(sim_re, sys_re.CaM2C) .- data.CaM2C) +
+           sum(abs2, extract(sim_re, sys_re.CaM2N) .- data.CaM2N) +
+           sum(abs2, extract(sim_re, sys_re.CaM4) .- data.CaM4) +
+           sum(abs2, extract(sim_re, sys_re.CaMK) .- data.CaMK) +
+           sum(abs2, extract(sim_re, sys_re.CaMKB0) .- data.CaMKB0) +
+           sum(abs2, extract(sim_re, sys_re.CaMKB2C) .- data.CaMKB2C) +
+           sum(abs2, extract(sim_re, sys_re.CaMKB2N) .- data.CaMKB2N) +
+           sum(abs2, extract(sim_re, sys_re.CaMKB4) .- data.CaMKB4)
 end
 
 # Test the loss function
@@ -152,4 +145,21 @@ g = ForwardDiff.gradient((theta) -> loss(theta, data), theta0)
 # ### Optimization
 optf = OptimizationFunction(loss, ADTypes.AutoForwardDiff())
 optprob = OptimizationProblem(optf, theta0, data, lb=[-1, -1, -1, -1] + theta0, ub=[1, 1, 1, 1] + theta0)
-sol = solve(optprob, LBFGSB())
+@time sol = solve(optprob, LBFGSB())
+
+prob_fit = remake(camprob_re; p=[
+        KEQ_CAMC => exp10(sol[1]),
+        KEQ_CAMN => exp10(sol[2]),
+        KEQ_KCAMC => exp10(sol[3]),
+        KEQ_KCAMN => exp10(sol[4]),
+    ]
+)
+
+sim_fit = solve_range(prob_fit, ca)
+
+figs1e = let
+    plot(ca, extract(sim, sys.CaMKAct), lab="Full model", ylabel="Active CaMKII fraction")
+    plot!(ca, extract(sim_re, sys_re.CaMKAct), lab="Rapid CaM binding", linestyle=:dash)
+    plot!(ca, extract(sim_fit, sys_re.CaMKAct), lab="Rapid CaM binding (fitted)", linestyle=:dash)
+    plot!(title="D", titlelocation=:left, legend=:left, ylims = (0, 0.5) ;xopts...)
+end
