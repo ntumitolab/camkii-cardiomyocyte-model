@@ -6,6 +6,7 @@ using DifferentialEquations
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
+using Statistics
 
 export build_neonatal_ecc_sys, build_stim_callbacks
 

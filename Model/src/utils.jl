@@ -131,3 +131,8 @@ function add_rate(kf, substrates, kb, products)
     lut = Dict()
     return add_rate!(lut, kf, substrates, kb, products)
 end
+
+"""Symmetric Mean Absolute Percentage Error (SMAPE)"""
+function smape(y_true, y_pred; epsilon=1e-8)
+    return 2 * Statistics.mean(abs.(y_true .- y_pred) ./ (abs.(y_true) .+ abs.(y_pred) .+ epsilon))
+end
