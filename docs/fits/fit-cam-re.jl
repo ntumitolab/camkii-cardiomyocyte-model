@@ -1,7 +1,7 @@
 # # CaM rapid binding
 # Simplify the CaM binding to CaMKII by assuming that the binding of CaM to Ca is rapid and at equilibrium. This allows us to reduce the number of states in the model and focus on the steady-state behavior of CaMKII activation as a function of calcium concentration.
 using Model
-using Model: μM, hil, second, Hz
+using Model: μM, hil, second, Hz, smape
 using ADTypes
 using CurveFit
 using DiffEqCallbacks
@@ -30,7 +30,7 @@ alg = KenCarp47()
 extract(sim, k) = map(s -> s[k][end], sim)
 
 """Solve the problem for a range of calcium concentrations. Assuming smooth transitions."""
-function solve_range(prob, ca)
+function solve_range(prob, ca; alg=FBDF())
     u0 = prob.u0
     map(ca) do c
         _prob = remake(prob; u0=u0, p=[Ca => c])
@@ -43,7 +43,6 @@ end
 # Physiological cytosolic calcium levels ranges from 30nM to 10μM.
 ca = logrange(0.03μM, 10μM, 101)
 @time "Solve problem" sim = solve_range(camprob, ca)
-
 # CaMKII system composition across physiological calcium levels.
 xopts = (xlabel="Ca (μM)", xscale=:log10, minorgrid=true, xlims=(ca[1], ca[end]))
 figs1a = let
@@ -110,7 +109,6 @@ data = (
 
 @unpack KEQ_CAMC, KEQ_CAMN, KEQ_KCAMC, KEQ_KCAMN = camprob_re.f.sys
 
-# TODO: Use SMAPE https://en.wikipedia.org/wiki/Symmetric_mean_absolute_percentage_error
 function loss(theta, data)
     keq_camc = exp10(theta[1])
     keq_camn = exp10(theta[2])
@@ -127,15 +125,15 @@ function loss(theta, data)
 
     sim_re = solve_range(_prob, ca)
 
-    loss = sum(abs2, extract(sim_re, sys_re.CaM0) .- data.CaM0) +
-           sum(abs2, extract(sim_re, sys_re.CaM2C) .- data.CaM2C) +
-           sum(abs2, extract(sim_re, sys_re.CaM2N) .- data.CaM2N) +
-           sum(abs2, extract(sim_re, sys_re.CaM4) .- data.CaM4) +
-           sum(abs2, extract(sim_re, sys_re.CaMK) .- data.CaMK) +
-           sum(abs2, extract(sim_re, sys_re.CaMKB0) .- data.CaMKB0) +
-           sum(abs2, extract(sim_re, sys_re.CaMKB2C) .- data.CaMKB2C) +
-           sum(abs2, extract(sim_re, sys_re.CaMKB2N) .- data.CaMKB2N) +
-           sum(abs2, extract(sim_re, sys_re.CaMKB4) .- data.CaMKB4)
+    loss = smape(data.CaM0, extract(sim_re, sys_re.CaM0)) +
+           smape(data.CaM2C, extract(sim_re, sys_re.CaM2C)) +
+           smape(data.CaM2N, extract(sim_re, sys_re.CaM2N)) +
+           smape(data.CaM4, extract(sim_re, sys_re.CaM4)) +
+           smape(data.CaMK, extract(sim_re, sys_re.CaMK)) +
+           smape(data.CaMKB0, extract(sim_re, sys_re.CaMKB0)) +
+           smape(data.CaMKB2C, extract(sim_re, sys_re.CaMKB2C)) +
+           smape(data.CaMKB2N, extract(sim_re, sys_re.CaMKB2N)) +
+           smape(data.CaMKB4, extract(sim_re, sys_re.CaMKB4))
 end
 
 # Test the loss function
@@ -147,6 +145,8 @@ g = ForwardDiff.gradient((theta) -> loss(theta, data), theta0)
 optf = OptimizationFunction(loss, ADTypes.AutoForwardDiff())
 optprob = OptimizationProblem(optf, theta0, data, lb=[-1, -1, -1, -1] + theta0, ub=[1, 1, 1, 1] + theta0)
 @time sol = solve(optprob, LBFGSB())
+
+exp10.(sol.u)
 
 prob_fit = remake(camprob_re; p=[
         KEQ_CAMC => exp10(sol[1]),
