@@ -8,7 +8,7 @@ using OrdinaryDiffEqSDIRK
 using Plots
 using Plots.Measures
 using SteadyStateDiffEq
-using Statistics
+using StatsBase: residuals
 using Model
 using Model: Hz, hil, hilr, second, μM
 Plots.default(lw=1.5)
