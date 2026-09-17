@@ -6,6 +6,7 @@ using DifferentialEquations
 using ModelingToolkit
 using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
+using Statistics
 
 export build_neonatal_ecc_sys, build_stim_callbacks
 
@@ -22,6 +23,6 @@ include("ecc_neonatal.jl")
 include("precompile.jl")
 
 const DEFAULT_SYS = build_neonatal_ecc_sys() |> mtkcompile
-# const DEFAULT_PROB = ODEProblem(DEFAULT_SYS, [], (0.0, 205.0second))
+const DEFAULT_PROB = ODEProblem(DEFAULT_SYS, [], (0.0, 100.0second))
 
 end # module Model

@@ -7,7 +7,6 @@ using ModelingToolkit
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
-using StatsPlots
 using Model
 using Model: second, μM
 Plots.default(lw=1.5)
@@ -70,15 +69,6 @@ fig7d = plot(sol, idxs=idxs_cai, lab="Control", color=:blue, tspan=tspan)
 plot!(fig7d, sol2, idxs=idxs_cai, lab="50μM H2O2", color=:red, tspan=tspan)
 plot!(fig7d, sol3, idxs=idxs_cai, lab="200μM H2O2", color=:green, tspan=tspan)
 plot!(fig7d, title="D", xlabel="Time (s)", ylabel="Intracellular Ca (nM)", titlelocation=:left)
-
-# Proportions for oxidized and autophosphorylated fractions in active CaMKII
-# Using StatsPlots for grouped bar plot at the end of the stimulation period (120 seconds)
-timepoint = 120second
-pidx = (sys.CaMKP + sys.CaMKA + sys.CaMKA2) / sys.CaMKAct
-oidx = (sys.CaMKBOX + sys.CaMKPOX + sys.CaMKAOX + sys.CaMKOX) / sys.CaMKAct
-pvals = [s(timepoint, idxs=pidx) for s in (sol, sol2, sol3)]
-ovals = [s(timepoint, idxs=oidx) for s in (sol, sol2, sol3)]
-fig7bar = groupedbar(["0uM", "50uM", "200uM"], [pvals ovals], bar_position=:stack, label=["Phosphorylated" "Oxidized"], color=[:blue :red :green], title="D", ylabel="Fraction of active CaMKII", xlabel="H2O2 concentration", legend=:topleft, titlelocation=:left)
 
 # ## Save figure
 plot(fig7a, fig7b, fig7c, fig7d, layout=(2, 2), size=(800, 600))
