@@ -2,7 +2,7 @@
 
 julia_version = "1.13.0"
 manifest_format = "2.1"
-project_hash = "160eace5f189e1488ad90acfb76a2c527d6871d5"
+project_hash = "2ced415704971ad68e67547af37bdbf113091736"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -1559,7 +1559,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 version = "1.11.0"
 
 [[deps.Model]]
-deps = ["ADTypes", "CSV", "CurveFit", "DataFrames", "DiffEqCallbacks", "DifferentialEquations", "ForwardDiff", "ModelingToolkit", "NaNMath", "Optimization", "OptimizationLBFGSB", "OptimizationOptimJL", "OrdinaryDiffEq", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools", "Statistics", "StatsBase", "SteadyStateDiffEq"]
+deps = ["ADTypes", "CSV", "CurveFit", "DataFrames", "DiffEqCallbacks", "DifferentialEquations", "ForwardDiff", "ModelingToolkit", "NaNMath", "Optimization", "OptimizationLBFGSB", "OptimizationOptimJL", "OrdinaryDiffEq", "OrdinaryDiffEqSDIRK", "Plots", "PrecompileTools", "Statistics", "SteadyStateDiffEq"]
 path = "Model"
 uuid = "c61cb6fc-a4aa-49b2-8e1f-749d0e1a896d"
 version = "0.2.0"

@@ -15,7 +15,6 @@ using OptimizationLBFGSB
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
-using SteadyStateDiffEq
 Plots.default(lw=1.5)
 
 # ## Full model

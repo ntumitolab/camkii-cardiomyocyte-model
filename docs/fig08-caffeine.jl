@@ -9,8 +9,8 @@ using DiffEqCallbacks
 using ModelingToolkit
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
-using Plots
 using SteadyStateDiffEq
+using Plots
 Plots.default(lw=1.5)
 
 # ## Experimental data of CaMKII activity with caffeine treatment
@@ -79,7 +79,7 @@ tend = 500second
 @time "Build problem" prob = ODEProblem(sys, [], tend)
 stimstart = 100second
 stimend = 300second
-alg = FBDF()
+alg = KenCarp47()
 function add_coffee_affect!(integrator)
     integrator.ps[sys.RyRsensitivity] = 10
 end

@@ -15,7 +15,6 @@ using OptimizationLBFGSB
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
-using StatsBase
 using Statistics
 
 end

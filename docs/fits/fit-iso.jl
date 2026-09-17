@@ -7,7 +7,6 @@ using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
 using Plots.Measures
-using StatsBase
 using SteadyStateDiffEq
 using Model
 using Model: Hz, hil, hilr, second, μM

@@ -9,8 +9,7 @@ using ModelingToolkit
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
 using Plots
-using StatsBase: mean
-using SteadyStateDiffEq
+using Statistics: mean
 Plots.default(lw=1.5)
 
 # ## Setup the ODE system
