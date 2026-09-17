@@ -1,4 +1,6 @@
 function get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp=0.25, CaMKAct=0)
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         ICa_scale0 = 0.95 # or 5.25
         LCC_scale_CaMK = 0.1    # Max increase in ICaL due to CaMKII (x1.1)
@@ -82,5 +84,6 @@ end
 "Plama membrane calcium currents"
 function get_ica_sys(nai, cai, nao, cao, vm; LCCb_PKAp=0, CaMKAct=0, name=:icasys)
     @unpack eqs_ica = get_ica_eqs(nai, cai, nao, cao, vm; LCCb_PKAp, CaMKAct)
+    @independent_variables t
     return System(eqs_ica, t; name)
 end

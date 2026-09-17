@@ -1,11 +1,19 @@
 module Model
 
-# using PrecompileTools: @compile_workload, @recompile_invalidations
+using ADTypes
+using CSV
+using CurveFit
+using DataFrames
 using DiffEqCallbacks
 using DifferentialEquations
 using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
 using NaNMath
+using Optimization
+using OptimizationLBFGSB
+using OptimizationOptimJL
+using OrdinaryDiffEq
+using OrdinaryDiffEqSDIRK
+using Plots
 using Statistics
 
 export build_neonatal_ecc_sys, build_stim_callbacks

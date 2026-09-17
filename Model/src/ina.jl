@@ -1,4 +1,6 @@
 function get_ina_eqs(; na_i, na_o, vm)
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         gNa = 12.8mSμF
         gNab = 0.0026mSμF
@@ -33,5 +35,6 @@ end
 "Fast sodium current (INa) and background sodium current"
 function get_ina_sys(; na_i, na_o, vm, name=:inasys)
     @unpack eqs_ina = get_ina_eqs(; na_i, na_o, vm)
+    @independent_variables t
     return System(eqs_ina, t; name)
 end

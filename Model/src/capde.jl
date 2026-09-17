@@ -8,6 +8,10 @@ function get_ca_pde_eqs(;
     JCa_SR=0,
     JCa_SL=0,
     )
+
+    @independent_variables t
+    D = Differential(t)
+
     rSR = rSR_true + 0.5 * dx
     rSL = rSL_true - 0.5 * dx
     j = round(rSR / dx):1:round(rSL / dx) # Spatial indices
@@ -57,6 +61,7 @@ function get_ca_pde_sys(;
     JCa_SL=0,
     name=:capdesys
     )
+    @independent_variables t
     @unpack eqs_cai = get_ca_pde_eqs(; Cai_default, dx, rSR_true, rSL_true, TnI_PKAp, JCa_SR, JCa_SL)
     return System(eqs_cai, t; name)
 end

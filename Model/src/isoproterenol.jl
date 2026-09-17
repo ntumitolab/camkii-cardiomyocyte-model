@@ -1,5 +1,7 @@
 "Beta-adrenergic system activated by isoproterenol"
 function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys)
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         b1ARtot = 5.28nM
         Gstot = 3.83μM
@@ -262,6 +264,7 @@ function get_bar_sys(ATP=5000μM, ISO=0μM; name=:bar_sys)
 end
 
 function get_bar_eqs_reduced(ISO=0μM)
+    @independent_variables t
     @parameters begin
         PKACI_basal = 0.0734  ## basal activity
         PKACI_activated = 0.1994
@@ -330,6 +333,7 @@ end
 "Algebraic fitted beta-adrenergic system"
 function get_bar_sys_reduced(ISO=0μM; name=:bar_sys_reduced, simplify=false)
     @unpack eqs_bar = get_bar_eqs_reduced(ISO)
+    @independent_variables t
     sys = System(eqs_bar, t; name)
     return simplify ? mtkcompile(sys) : sys
 end

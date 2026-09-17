@@ -1,4 +1,6 @@
 function get_ik_eqs(; k_i, k_o, na_i, na_o, vm, IKUR_PKAp=0, E_Na=40mV)
+    @independent_variables t
+    D = Differential(t)
     @parameters begin
         # IK1: time-independent
         GK1 = 0.0515mSμF
@@ -111,5 +113,6 @@ end
 "Potassium currents"
 function get_ik_sys(k_i, k_o, na_i, na_o, vm; IKUR_PKAp=0, name=:iksys)
     @unpack eqs_ik = get_ik_eqs(; k_i, k_o, na_i, na_o, vm, IKUR_PKAp)
+    @independent_variables t
     return System(eqs_ik, t; name)
 end
