@@ -106,19 +106,18 @@ data = (
     CaMKB4 = extract(sim, sys.Ca4CaM_CaMK),
 )
 
-@unpack KEQ_CAMC, KEQ_CAMN, KEQ_KCAMC, KEQ_KCAMN = camprob_re.f.sys
+@unpack KEQ_CAMC, KEQ_CAMN, KEQ_KCAMC, KEQ_KCAMN, kCaM0_on, kCaM2C_on,kCaM2N_on, kCaM4_on = camprob_re.f.sys
 
 function loss(theta, data)
-    keq_camc = exp10(theta[1])
-    keq_camn = exp10(theta[2])
-    keq_kcamc = exp10(theta[3])
-    keq_kcamn = exp10(theta[4])
-
     _prob = remake(camprob_re; p=[
-            KEQ_CAMC => keq_camc,
-            KEQ_CAMN => keq_camn,
-            KEQ_KCAMC => keq_kcamc,
-            KEQ_KCAMN => keq_kcamn,
+        KEQ_CAMC => exp10(theta[1]),
+        KEQ_CAMN => exp10(theta[2]),
+        KEQ_KCAMC => exp10(theta[3]),
+        KEQ_KCAMN => exp10(theta[4]),
+        kCaM0_on => exp10(theta[5]),
+        kCaM2C_on => exp10(theta[6]),
+        kCaM2N_on => exp10(theta[7]),
+        kCaM4_on => exp10(theta[8])
         ]
     )
 
@@ -136,22 +135,31 @@ function loss(theta, data)
 end
 
 # Test the loss function
-theta0 = log10.([camprob_re.ps[KEQ_CAMC], camprob_re.ps[KEQ_CAMN], camprob_re.ps[KEQ_KCAMC], camprob_re.ps[KEQ_KCAMN]])
+theta0 = log10.([camprob_re.ps[KEQ_CAMC], camprob_re.ps[KEQ_CAMN], camprob_re.ps[KEQ_KCAMC], camprob_re.ps[KEQ_KCAMN], camprob_re.ps[kCaM0_on], camprob_re.ps[kCaM2C_on], camprob_re.ps[kCaM2N_on], camprob_re.ps[kCaM4_on]])
 
 @time loss(theta0, data)
 g = ForwardDiff.gradient((theta) -> loss(theta, data), theta0)
 # ### Optimization
 optf = OptimizationFunction(loss, ADTypes.AutoForwardDiff())
-optprob = OptimizationProblem(optf, theta0, data, lb=[-1, -1, -1, -1] + theta0, ub=[1, 1, 1, 1] + theta0)
+optprob = OptimizationProblem(optf, theta0, data, lb=[-1, -1, -1, -1, -1, -1, -1, -1] + theta0, ub=[1, 1, 1, 1, 1, 1, 1, 1] + theta0)
 @time sol = solve(optprob, LBFGSB())
 
+#---
+sol.stats
+
+#---
 exp10.(sol.u)
 
+#---
 prob_fit = remake(camprob_re; p=[
         KEQ_CAMC => exp10(sol[1]),
         KEQ_CAMN => exp10(sol[2]),
         KEQ_KCAMC => exp10(sol[3]),
         KEQ_KCAMN => exp10(sol[4]),
+        kCaM0_on => exp10(sol[5]),
+        kCaM2C_on => exp10(sol[6]),
+        kCaM2N_on => exp10(sol[7]),
+        kCaM4_on => exp10(sol[8])
     ]
 )
 

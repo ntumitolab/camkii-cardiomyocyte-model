@@ -180,7 +180,7 @@ function get_camkii_simp_eqs(;
     ROS=0μM,
     binding_To_PCaMK=0, ## 0.1 for T287D mutation
     binding_To_OCaMK=0
-)
+    )
 
     @independent_variables t
     D = Differential(t)
@@ -283,7 +283,7 @@ function get_camkii_dia_eqs(;
     ROS=0μM,
     binding_To_PCaMK=0, ## 0.1 for T287D mutation
     binding_To_OCaMK=0,
-)
+    )
 
     @independent_variables t
     D = Differential(t)
