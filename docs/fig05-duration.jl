@@ -6,7 +6,6 @@ using CSV
 using CurveFit
 using DataFrames
 using DiffEqCallbacks
-using DifferentialEquations
 using ModelingToolkit
 using OrdinaryDiffEq
 using OrdinaryDiffEqSDIRK
