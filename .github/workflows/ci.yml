@@ -13,9 +13,9 @@ concurrency:
 
 env:
   CACHE_NUM: '1'
-  LITERATE_PROC: '8'
+  LITERATE_PROC: '6'
   JULIA_CI: 'true'
-  JULIA_NUM_THREADS: '1'
+  JULIA_NUM_THREADS: '2'
   JULIA_MAX_NUM_PRECOMPILE_FILES: '50'
   OPENBLAS_NUM_THREADS: '1'
   NBCACHE: '.cache'
@@ -78,12 +78,9 @@ jobs:
           ${{ steps.hash.outputs.jl }}-
     - name: Install Julia packages
       if: ${{ steps.cache-nb.outputs.cache-hit != 'true' && (runner.environment == 'self-hosted' || steps.cache-julia.outputs.cache-hit != 'true') }}
-      shell: julia --color=yes {0}
+      shell: julia --color=yes --project=@. {0}
       run: |
         using Pkg
-        Pkg.add(["JSON", "Literate", "MarkdownTables", "SHA", "Tables"])
-        Pkg.activate(".")
-        Pkg.resolve()
         Pkg.instantiate()
         Pkg.precompile()
         get(ENV, "RUNNER_ENVIRONMENT", "") == "github-hosted" && Pkg.gc()
