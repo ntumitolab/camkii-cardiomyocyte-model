@@ -30,11 +30,13 @@ LocalPreferences.toml
 # Local VSCode config
 # .vscode/
 
-# Generated files
+# Generated and cached files
+.cache/
 *.pdf
 *.html
 *.docx
 *.png
+*.ipynb
 !docs/CaMKII_kinetics.png
 
 # MyST build outputs
