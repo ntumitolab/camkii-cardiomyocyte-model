@@ -13,7 +13,7 @@ concurrency:
 
 env:
   CACHE_NUM: '1'
-  LITERATE_PROC: '6'
+  LITERATE_PROC: '8'
   JULIA_CI: 'true'
   JULIA_NUM_THREADS: '2'
   JULIA_MAX_NUM_PRECOMPILE_FILES: '50'
