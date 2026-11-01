@@ -8,7 +8,10 @@ notebooks in CI is the verification.
 ## Toolchain
 
 - Julia 1.13 (`compat` in both Project.tomls); CI pins the exact patch from `julia_version`
-  in `Manifest.toml` (currently 1.13.2).
+  in `Manifest.toml` (1.13.3 — re-read it, don't hardcode).
+- The **root** project owns the notebook toolchain deps (Literate, JSON, SHA, Tables,
+  MarkdownTables); `Model/Project.toml` does not have them. Run notebook tooling from the
+  root workspace, and don't add those deps to `Model/`.
 - Root is a Pkg **workspace** (`[workspace] projects = ["Model"]`, `[sources] Model = {path="Model"}`).
   Always run Julia with `--project=@.` from the repo root; the `Model` package in `Model/`
   resolves through the workspace.
@@ -20,11 +23,13 @@ notebooks in CI is the verification.
 ## Notebooks: the `docs/**/*.jl` files are the source of truth
 
 - `docs/**/*.jl` are Literate scripts. `docs/**/*.ipynb` are generated, untracked build
-  artifacts — never edit them. Worse, `.github/ci.jl` regenerates the `.jl` **from** any stale
-  `.ipynb` whose SHA misses the cache, so a leftover `.ipynb` in `docs/` overwrites the source script.
+  artifacts — never edit them and don't leave stray ones in `docs/` (the `myst.yml` TOC
+  embeds any `*.ipynb` present). `ci.jl` keeps a manual `to_literate` ipynb→jl converter,
+  but nothing calls it: CI only executes `.jl` sources.
 - Run everything the way CI does (parallel, results cached by SHA256 in `.cache/`):
-  `julia --project=@. -p 8 .github/ci.jl` — from repo root; env `NBCACHE` (default `.cache`),
-  `DOCDIR` (default `docs`). CI then syncs with `cp -rf .cache/docs/* docs/`.
+  `julia --project=@. -p auto .github/ci.jl` — from repo root (CI uses `-p 4` via
+  `LITERATE_PROC`); env `NBCACHE` (default `.cache`), `DOCDIR` (default `docs`).
+  CI then syncs with `cp -rf .cache/docs/* docs/`.
   `.cache/` and generated `docs/*.ipynb` are gitignored artifacts.
 - A notebook is skipped when `.cache/docs/<name>.sha` matches the script's SHA256 — delete
   that `.sha` (and cached `.ipynb`) to force a re-run after behavior-preserving edits.
@@ -49,8 +54,9 @@ notebooks in CI is the verification.
   e.g. `Model.get_camkii_sys(...)`.
 - Current/subsystem builders follow `get_*_eqs` / `get_*_sys` returning MTK equations/`System`s,
   composed into the full model in `ecc_neonatal.jl`.
-- Stiff ODEs: solve with `KenCarp47()` or `FBDF()`, tolerances 1e-8–1e-10 (match neighboring
-  notebooks); steady states via `SteadyStateDiffEq`'s `DynamicSS` — see `docs/u0.jl`, which
+- Stiff ODEs: solve with `KenCarp47()` (every notebook; `FBDF()` appears once in
+  `docs/fits/fit-cam-re.jl`), tolerances 1e-8–1e-10 (match neighboring notebooks);
+  steady states via `SteadyStateDiffEq`'s `DynamicSS` — see `docs/u0.jl`, which
   prints initial-condition literals.
 - Fit notebooks in `docs/fits/` produce parameters baked into `Model/src`; refitting there
   implies updating model constants.
