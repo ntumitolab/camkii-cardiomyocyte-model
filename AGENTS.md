@@ -36,7 +36,12 @@ Scientific artifact repo: there is **no test suite, linter, or formatter config*
   because `Literate.notebook` executes the regenerated *script*, which concatenates the fragments.
   `## comment` and `#comment` (no space) stay code; use `#---` to split cells deliberately.
   Some older notebooks use `# ` comments that survive only because they happen to sit at
-  statement boundaries — don't copy that style inside a block.
+  statement boundaries (verified clean) — don't copy that style inside a block.
+  To check an edit without running the heavy notebook: build cells with
+  `Literate.notebook(f, dir; mdstrings=true, execute=false)`, then require
+  `Base.parse_input_line(cell; filename="c").head === :toplevel` for every code cell
+  (`:incomplete`/`:error` = a split boundary). `Meta.parseall` reports `:toplevel` even for
+  broken cells, so it cannot detect this.
 - Run everything the way CI does (parallel, results cached by SHA256 in `.cache/`):
   `julia --project=@. -p auto .github/ci.jl` — from repo root (CI uses `-p 4` via
   `LITERATE_PROC`); env `NBCACHE` (default `.cache`), `DOCDIR` (default `docs`).
