@@ -2,64 +2,96 @@
 
 Julia ModelingToolkit (MTK) model of CaMKII signaling in neonatal rat ventricular myocytes
 (NRVM), plus Literate notebooks published as a Jupyter Book site (GitHub Pages).
-This is a scientific artifact repo: there is **no test suite**; executing the `docs/`
-notebooks in CI is the verification.
+Scientific artifact repo: there is **no test suite, linter, or formatter config** — executing the
+`docs/` notebooks via `.github/ci.jl` is the only verification.
 
 ## Toolchain
 
 - Julia 1.13 (`compat` in both Project.tomls); CI pins the exact patch from `julia_version`
-  in `Manifest.toml` (1.13.3 — re-read it, don't hardcode).
-- The **root** project owns the notebook toolchain deps (Literate, JSON, SHA, Tables,
-  MarkdownTables); `Model/Project.toml` does not have them. Run notebook tooling from the
-  root workspace, and don't add those deps to `Model/`.
+  in `Manifest.toml` (currently 1.13.3 — re-read it, don't hardcode).
 - Root is a Pkg **workspace** (`[workspace] projects = ["Model"]`, `[sources] Model = {path="Model"}`).
   Always run Julia with `--project=@.` from the repo root; the `Model` package in `Model/`
   resolves through the workspace.
+- The **root** project owns the notebook toolchain deps (Literate, JSON, SHA, Tables,
+  MarkdownTables); `Model/Project.toml` does not have them. Run notebook tooling from the
+  root workspace, and don't add those deps to `Model/`.
 - Setup: `julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'`
 - To manually update Julia packages: `julia --project=. -e 'using Pkg; Pkg.update()'`
-- `Manifest.toml` is committed; a weekly bot opens "Julia Dependency Update" PRs (automerge
-  label, squash-merged via Kodiak). Don't hand-edit dependency versions.
+- The root `Manifest.toml` is committed; `Model/Manifest.toml` is gitignored. A weekly bot opens
+  "Julia Dependency Update" PRs (automerge label, squash-merged via Kodiak). Don't hand-edit
+  dependency versions.
 
 ## Notebooks: the `docs/**/*.jl` files are the source of truth
 
-- `docs/**/*.jl` are Literate scripts. `docs/**/*.ipynb` are generated, untracked build
+- `docs/**/*.jl` are Literate scripts. `docs/**/*.ipynb` are generated, gitignored build
   artifacts — never edit them and don't leave stray ones in `docs/` (the `myst.yml` TOC
-  embeds any `*.ipynb` present). `ci.jl` keeps a manual `to_literate` ipynb→jl converter,
-  but nothing calls it: CI only executes `.jl` sources.
+  embeds any `*.ipynb` present, so an unrelated notebook gets published). `ci.jl` keeps a manual
+  `to_literate` ipynb→jl converter, but nothing calls it: CI only executes `.jl` sources.
+- Notebook prose must be Literate markdown: `# # Title` / `# ## Section` headings or
+  `#=== … ===#` blocks (scripts run with `mdstrings=true`).
+- **Comments inside notebook code must use a double hash: `## comment`.** Literate classifies any
+  line starting with `# ` (or a bare `#`) as markdown — indentation gives no protection — so a
+  single-`#` comment silently ends the code cell mid-expression, leaving broken cells such as
+  `p = plot(` then `    2:10,` that error when the notebook is run cell-by-cell. CI can still pass,
+  because `Literate.notebook` executes the regenerated *script*, which concatenates the fragments.
+  `## comment` and `#comment` (no space) stay code; use `#---` to split cells deliberately.
+  Some older notebooks use `# ` comments that survive only because they happen to sit at
+  statement boundaries — don't copy that style inside a block.
 - Run everything the way CI does (parallel, results cached by SHA256 in `.cache/`):
   `julia --project=@. -p auto .github/ci.jl` — from repo root (CI uses `-p 4` via
   `LITERATE_PROC`); env `NBCACHE` (default `.cache`), `DOCDIR` (default `docs`).
   CI then syncs with `cp -rf .cache/docs/* docs/`.
-  `.cache/` and generated `docs/*.ipynb` are gitignored artifacts.
 - A notebook is skipped when `.cache/docs/<name>.sha` matches the script's SHA256 — delete
   that `.sha` (and cached `.ipynb`) to force a re-run after behavior-preserving edits.
 - Run one notebook without the cache machinery:
   `julia --project=@. -e 'ENV["GKSwstype"]="100"; using Literate; Literate.notebook("docs/fig04-freq.jl", "docs"; mdstrings=true, execute=true)'`
   (`GKSwstype=100` for headless GR plots; the output-dir arg must match the file's dir so the
   `.ipynb` lands next to the `.jl`).
+- Notebooks call `savefig("fig4.png")` with **relative** paths, so figures land in the launch
+  CWD (repo root under CI), not beside the script. They are gitignored (`*.png`, `*.pdf`) — clean them up.
 - Site build (needs Node): `cd docs && jupyter-book build --html` → `docs/_build/html`.
-  `docs/myst.yml` TOC pulls in `*.ipynb` and `fits/*.ipynb`, so notebooks must be executed first.
+  `docs/myst.yml` TOC pulls in `index.md`, `modeldesc.md` (+ `fits/*.ipynb`) and `*.ipynb`, so
+  notebooks must be executed first and a new top-level notebook is picked up automatically.
   CI sets `BASE_URL=/<repo-name>` for Pages.
+- Only `docs/CaMKII_kinetics.png` is a committed image; `.gitignore` ignores all `*.png`/`*.ipynb`,
+  so a new committed asset needs an explicit `!` exception there.
 - Heavy notebooks: `using Model` builds and `mtkcompile`s the whole ECC system at load
-  (`Model.DEFAULT_SYS`, also warmed in `Model/src/precompile.jl`); notebooks reuse it rather
-  than rebuilding — do the same.
+  (`Model.DEFAULT_SYS`, also warmed in `Model/src/precompile.jl`) and is slow the first time;
+  notebooks reuse it rather than rebuilding — do the same, and only build a subsystem explicitly
+  when it genuinely differs (e.g. `docs/fits/*`).
 
 ## Model package conventions (Model/src)
 
 - Time base is milliseconds: `const second = 1000`; `μM`/`mM`/`mV` etc. are scaled constants
   (`Model/src/utils.jl`). Always write literals with unit constants (`100.0second`,
-  `1.796mM`, `0.1μM`); bare SI numbers are wrong.
+  `1.796mM`, `0.1μM`); bare SI numbers are wrong. Shared helpers live there too (`hil`, `hilr`,
+  `nernst`, `ghk`, `expit`, `smape`).
 - Only `build_neonatal_ecc_sys` and `build_stim_callbacks` are exported. Notebooks import
   internals explicitly, e.g. `using Model: second, Hz, μM, hil`, and call builders qualified,
   e.g. `Model.get_camkii_sys(...)`.
 - Current/subsystem builders follow `get_*_eqs` / `get_*_sys` returning MTK equations/`System`s,
-  composed into the full model in `ecc_neonatal.jl`.
+  composed into the full model in `ecc_neonatal.jl`; fitted parameter values are inline defaults
+  in those `@parameters` blocks.
 - Stiff ODEs: solve with `KenCarp47()` (every notebook; `FBDF()` appears once in
   `docs/fits/fit-cam-re.jl`), tolerances 1e-8–1e-10 (match neighboring notebooks);
   steady states via `SteadyStateDiffEq`'s `DynamicSS` — see `docs/u0.jl`, which
-  prints initial-condition literals.
-- Fit notebooks in `docs/fits/` produce parameters baked into `Model/src`; refitting there
-  implies updating model constants.
+  prints `variable => value` literals to paste back as initial conditions.
+- Fit notebooks in `docs/fits/` only *print* fitted values; nothing writes them back. Refitting
+  means manually updating model constants in `Model/src` and `docs/modeldesc.md`.
+
+## CI details that change the cost of a change
+
+- `.github/workflows/ci.yml` keys the notebook cache on `notebook-<env>-<nb>`, where `<env>`
+  hashes `Project.toml` + `Manifest.toml` + `Model/**` and `<nb>` hashes `docs/**/*.jl`.
+  Editing a notebook still restores the `notebook-<env>-` prefix cache, so unchanged notebooks
+  are skipped by their `.sha`; **any edit under `Model/` invalidates the whole cache and
+  re-executes every notebook** — budget for it and keep such edits deliberate.
+- CI runs single-threaded (`JULIA_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`) and sets
+  `JULIA_CONDAPKG_ENV=@mpl`; don't make notebooks depend on multithreading.
+- A scheduled lychee job files broken links found in `docs/**/*.md` and `docs/**/*.jl` as an
+  issue, so keep links valid in both. Model provenance (Chang 2019 CaMKII, Christensen ROS,
+  Moritti ISO, Korhonen NRVM) is documented in `docs/modeldesc.md` — `docs/index.md` is only the
+  landing title; put model documentation in `modeldesc.md`.
 
 ## extras/ and data (not run by CI, not in site TOC)
 
@@ -67,8 +99,4 @@ notebooks in CI is the verification.
   (I_tof, I_Kur, I_Kr, I_Kp, I_K1, I_Cl, I_PCA, Markov I_Na/I_Ca). Reference material only.
 - `extras/normalize-data.jl` regenerates `docs/data/*-normalized.csv` from the raw CSVs and
   must run from the repo root (it uses `pwd()`, not `@__DIR__`). Never hand-edit the
-  `-normalized.csv` files.
-- Model provenance (Chang 2019 CaMKII, Christensen ROS, Moritti ISO, Korhonen NRVM) is
-  documented in `docs/index.md` and `docs/modeldesc.md`; keep the two in sync when the model
-  changes. A scheduled lychee job files broken links found in `docs/**/*.md` and `docs/**/*.jl`
-  as an issue, so keep links valid in both.
+  `-normalized.csv` files; notebooks read them as `joinpath(@__DIR__, "data/…")`.
